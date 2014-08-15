@@ -1,9 +1,13 @@
 Package: vpc
-Type: Package
-Title: What the package does (short line)
-Version: 1.0
-Date: 2014-08-14
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Title: Create visual predictive checks in R
+Version: 0.1
+Authors@R: "Ron Keizer <ronkeizer@gmail.com> [aut, cre]"
+Description: Create visual predictive checks in R, a commonly used diagnostic
+    plot in pharmacometrics. Create it completely within the R environment, so
+    without the use of NONMEM, PsN, and Xpose. Compared to PsN + Xpose, this
+    approach is more flexible, more easily customizable, and faster, although
+    it requires the user to rewrite the model in R.
+Depends:
+    R (>= 3.1.0)
+License: MIT
+LazyData: true

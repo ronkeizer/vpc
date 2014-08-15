@@ -1,7 +1,7 @@
 vpc
 ===
 
-An implementation of visual predictive checks (as commonly used in pharmacometrics) in R that does not require the use of NONMEM, PsN, or Xpose. The reason for developing this R module is to be able to more easily create VPCs in other modeling platforms such as R::nlme, Stan, etc.
+Create visual predictive checks in R, a commonly used diagnostic plot in pharmacometrics. Create it completely within the R environment, so without the use of NONMEM, PsN, and Xpose. This approach is more flexible (allows also to use models written in Monolix, Stan, etc.), more easily customizable, and faster than the PsN+Xpose approach, although it requires the user to rewrite the model in R.
 
 To be supplied by user:
 -  structural model (written in R)
