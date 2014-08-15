@@ -125,8 +125,10 @@ vpc <- function(sim, obs,
                 log_y = FALSE,
                 xlab = NULL, 
                 ylab = NULL,
+                title = NULL,
                 theme = "default",
-                custom_theme = NULL) {
+                custom_theme = NULL,
+                return_what = "data") {
   sim <- format_vpc_input_data(sim, "sdv", idv, lloq, uloq, strat, bins)
   obs <- format_vpc_input_data(obs, dv, idv, lloq, uloq, strat, bins)
   if (is.null(strat)) { strat <- "strat" }
@@ -179,6 +181,9 @@ vpc <- function(sim, obs,
   if (!is.null(strat)) {
     pl <- pl + facet_wrap(~ strat)
   }
+  if (!is.null(title)) {
+    pl <- pl + ggtitle(title)  
+  }
   if (!is.null(custom_theme)) {  
     pl <- pl + custom_theme()    
   } else {
@@ -189,12 +194,19 @@ vpc <- function(sim, obs,
   if (plot) {
     print(pl)    
   }
-  return(list(vpc_dat = vpc_dat, obs = aggr_obs))
+  if(return_what == "data") {
+    return(list(vpc_dat = vpc_dat, obs = aggr_obs))    
+  } else {
+    return(pl)
+  }
 }
 
 theme_plain <-  function () {
   theme(
-    axis.text = element_text(size = 14),
+    text = element_text(family="mono"),
+    plot.title = element_text(family="sans", size = 16, vjust = 1.5),
+    axis.title.x = element_text(family="sans",vjust=-0.25),
+    axis.title.y = element_text(family="sans"),
     legend.background = element_rect(fill = "white"),
     legend.position = c(0.14, 0.80),
     panel.grid.major = element_line(colour = "#e5e5e5"),
