@@ -1,7 +1,7 @@
 vpc
 ===
 
-Create visual predictive checks in R, a commonly used diagnostic plot in pharmacometrics. Create it completely within the R environment, so without the use of NONMEM, PsN, and Xpose. This approach is more flexible (allows also to use models written in Monolix, Stan, etc.), more easily customizable, and faster than the PsN+Xpose approach, although it requires the user to rewrite the model in R.
+Create visual predictive checks in R, a commonly used diagnostic plot in pharmacometrics. Create it completely within the R environment, so without the use of NONMEM, PsN, and Xpose. This approach is more flexible (allows also to use models written in Monolix, Stan, etc.), more easily customizable, and faster than the PsN+Xpose approach.
 
 To be supplied by user:
 -  observed data
