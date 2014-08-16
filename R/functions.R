@@ -20,30 +20,30 @@
 #'                               0.02421, 0.02241,                  # note: assumed that every theta has iiv, set to 0 if no iiv. 
 #'                               0.008069, 0.008639, 0.02862),      
 #'                 par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
-#'                 n = n_sim)
+#'                 n = 500)
 #' 
 #' vpc_dat <- plot_vpc(sim, obs, 
 #'                     bins = c(0, 2, 4, 6, 8, 10, 25), 
 #'                     strat = "sex",
 #'                     ylab = "Concentration", xlab = "Time (hrs)", title="Visual predictive check")
 plot_vpc <- function(sim, obs, 
-                    bins = NULL, 
-                    n_bins = 8,
-                    dv = "dv", 
-                    idv = "time",
-                    strat = NULL,
-                    pi = c(0.05, 0.95), 
-                    ci = c(0.05, 0.95),
-                    uloq = NULL, 
-                    lloq = NULL, 
-                    plot = TRUE,
-                    log_y = FALSE,
-                    xlab = NULL, 
-                    ylab = NULL,
-                    title = NULL,
-                    theme = "default",
-                    custom_theme = NULL,
-                    return_what = "data") {
+                     bins = NULL, 
+                     n_bins = 8,
+                     dv = "dv", 
+                     idv = "time",
+                     strat = NULL,
+                     pi = c(0.05, 0.95), 
+                     ci = c(0.05, 0.95),
+                     uloq = NULL, 
+                     lloq = NULL, 
+                     plot = TRUE,
+                     log_y = FALSE,
+                     xlab = NULL, 
+                     ylab = NULL,
+                     title = NULL,
+                     theme = "default",
+                     custom_theme = NULL,
+                     return_what = "data") {
   sim <- format_vpc_input_data(sim, "sdv", idv, lloq, uloq, strat, bins)
   obs <- format_vpc_input_data(obs, dv, idv, lloq, uloq, strat, bins)
   if (is.null(strat)) { strat <- "strat" }
@@ -144,7 +144,7 @@ plot_vpc <- function(sim, obs,
 #'                               0.02421, 0.02241,                  # note: assumed that every theta has iiv, set to 0 if no iiv. 
 #'                               0.008069, 0.008639, 0.02862),      
 #'                 par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
-#'                 n = n_sim)
+#'                 n = 500)
 #' 
 #' vpc_dat <- plot_vpc(sim, obs, 
 #'                     bins = c(0, 2, 4, 6, 8, 10, 25), 
@@ -243,6 +243,17 @@ draw_params_mvr <- function(n_ids, n_sim, theta, omega_mat, par_names = NULL) {
   }
 }
 
+#' Simulate PK data from a 1-compartment oral model
+#' 
+#' @param t Time after dose
+#' @param tau Dosing interval
+#' @param dose Dose
+#' @param ka Absorption rate
+#' @param ke Elimination rate
+#' @param ruv Residual variability
+#' @param par_names A vector describing 
+#' @return A vector of predicted values, with or without added residual variability
+#' @export
 pk_oral_1cmt <- function (t, tau = 24, dose=120, ka = 1, ke = 1, cl = 10, ruv = NULL) {
   v = cl / ke
   tmp <- (dose/v) * (ka/(ka-ke)) * (exp(-ke*t) - exp(-ka*(t)))

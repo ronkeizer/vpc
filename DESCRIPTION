@@ -1,13 +1,18 @@
 Package: vpc
 Title: Create visual predictive checks in R
 Version: 0.1
-Authors@R: "Ron Keizer <ronkeizer@gmail.com> [aut, cre]"
+Author: Ron Keizer <ronkeizer@gmail.com>
+Maintainer: Ron Keizer <ronkeizer@gmail.com>
 Description: Create visual predictive checks in R, a commonly used diagnostic
     plot in pharmacometrics. Create it completely within the R environment, so
     without the use of NONMEM, PsN, and Xpose. Compared to PsN + Xpose, this
     approach is more flexible, more easily customizable, and faster, although
     it requires the user to rewrite the model in R.
 Depends:
-    R (>= 3.1.0)
+    R (>= 3.1.0),
+    dplyr,
+    ggplot2,
+    MASS
 License: MIT
 LazyData: true
+URL: https://github.com/ronkeizer/vpc
