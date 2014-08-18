@@ -46,7 +46,7 @@ vpc <- function(sim, obs,
                 smooth = TRUE,
                 theme = "default",
                 custom_theme = NULL,
-                return_what = "data") {
+                return_what = NULL) {
   if (is.null(stratify)) { 
     strat <- "strat" 
   } else {
@@ -129,10 +129,14 @@ vpc <- function(sim, obs,
   if (plot) {
     print(pl)    
   }
-  if(return_what == "data") {
-    return(list(vpc_dat = vpc_dat, obs = aggr_obs))    
+  if(is.null(return_what)) {
+    return()
   } else {
-    return(pl)
+    if(return_what == "data") {
+      return(list(vpc_dat = vpc_dat, obs = aggr_obs))    
+    } else {
+      return(pl)
+    }    
   }
 }
 
@@ -164,7 +168,7 @@ vpc_loq <- function(sim,
                     smooth = TRUE,
                     theme = "default",
                     custom_theme = NULL,
-                    return_what = "data",
+                    return_what = NULL,
                     type = "bloq") {
   if (is.null(stratify)) { 
     strat <- "strat" 
@@ -231,10 +235,14 @@ vpc_loq <- function(sim,
   if (plot) {
     print(pl)    
   }
-  if(return_what == "data") {
-    return(list(vpc_dat = vpc_dat, obs = aggr_obs))    
+  if(is.null(return_what)) {
+    return()
   } else {
-    return(pl)
+    if(return_what == "data") {
+      return(list(vpc_dat = vpc_dat, obs = aggr_obs))    
+    } else {
+      return(pl)
+    }    
   }
 }
 
