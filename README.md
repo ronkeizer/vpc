@@ -1,16 +1,19 @@
 vpc
 ===
 
-Create visual predictive checks in R, a commonly used diagnostic plot in pharmacometrics. Create it completely within the R environment, so without the use of NONMEM, PsN, and Xpose. This approach is more flexible (allows also to use models written in Monolix, Stan, etc.), more easily customizable, and faster than the PsN+Xpose approach, although it requires the user to rewrite the model in R.
+Create visual predictive checks, a commonly used diagnostic plot in pharmacometrics, in R, without the use of NONMEM, PsN, and Xpose. This approach is more flexible, more easily customizable, and faster than the NONMEM+PsN+Xpose approach.
 
-To be supplied by user:
--  structural model (written in R)
--  parameter distributions for fixed and random effect parameters, and random effects
+To be supplied to function:
+
 -  observed data
 -  binning strategy
+-  function to simulate data (i.e. a structural model with parameter estimates / distributions), **OR**
+-  a simulation data file, e.g. from NONMEM or any other simulation software
 
-The module will:
--  simulate data based on the model and parameter distributions, either from point estimates or from uncertainty / posterior distributions
--  stratify if necessary
--  compile aggregated data (binned)
--  create VPC plot using ggplot2
+## Installation and example
+
+    library("devtools")
+    install_github("ronkeizer/vpc")
+    library(vpc)
+    ?vpc
+
