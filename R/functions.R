@@ -5,15 +5,15 @@
 #' @param obs
 #' @return Either the data for plotting a VPC or a ggplot2 object
 #' @export
-#' @seealso sim_data
+#' @seealso \link{sim_data}
 #' @examples
 #' obs <- Theoph
 #' colnames(obs) <- c("id", "wt", "dose", "time", "dv")
 #' obs$sex <- round(runif(unique(obs$id))) # create a dummy covariate to show stratification
 #' 
 #' sim <- sim_data(obs, # the design of the dataset
-#'                 model = function(x, par) { # the model
-#'                   pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = par$ka, ke = par$ke, cl = par$cl * x$wt, ruv = list(additive = 0.1))
+#'                 model = function(x) { # the model
+#'                   pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka, ke = x$ke, cl = x$cl * x$wt, ruv = list(additive = 0.1))
 #'                 }, 
 #'                 theta = c(2.774, 0.0718, .0361),                 # parameter values
 #'                 omega_mat = c(0.08854,                           # specified as lower triangle by default; 
@@ -22,10 +22,10 @@
 #'                 par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
 #'                 n = 500)
 #' 
-#' vpc_dat <- plot_vpc(sim, obs, 
-#'                     bins = c(0, 2, 4, 6, 8, 10, 25), 
-#'                     strat = "sex",
-#'                     ylab = "Concentration", xlab = "Time (hrs)", title="Visual predictive check")
+#' vpc_dat <- vpc(sim, obs, 
+#'                bins = c(0, 2, 4, 6, 8, 10, 25), 
+#'                strat = "sex",
+#'                ylab = "Concentration", xlab = "Time (hrs)", title="Visual predictive check")
 vpc <- function(sim, obs, 
                 bins = NULL, 
                 n_bins = 8,
@@ -248,7 +248,7 @@ vpc_loq <- function(sim,
 #' @return A vector of simulated dependent variables (for us in the VPC plotting function)
 #' @export
 #' @family aggregate functions
-#' @seealso \code{\link{plot_vpc}}
+#' @seealso \code{\link{vpc}}
 #' @details
 #' This function generates the simulated dependent values for use in the VPC plotting function.
 #' @examples
@@ -257,8 +257,8 @@ vpc_loq <- function(sim,
 #' obs$sex <- round(runif(unique(obs$id))) # create a dummy covariate to show stratification
 #' 
 #' sim <- sim_data(obs, # the design of the dataset
-#'                 model = function(x, par) { # the model
-#'                   pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = par$ka, ke = par$ke, cl = par$cl * x$wt, ruv = list(additive = 0.1))
+#'                 model = function(x) { # the model
+#'                   pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka, ke = x$ke, cl = x$cl * x$wt, ruv = list(additive = 0.1))
 #'                 }, 
 #'                 theta = c(2.774, 0.0718, .0361),                 # parameter values
 #'                 omega_mat = c(0.08854,                           # specified as lower triangle by default; 
@@ -267,19 +267,21 @@ vpc_loq <- function(sim,
 #'                 par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
 #'                 n = 500)
 #' 
-#' vpc_dat <- plot_vpc(sim, obs, 
-#'                     bins = c(0, 2, 4, 6, 8, 10, 25), 
-#'                     strat = "sex",
-#'                     ylab = "Concentration", xlab = "Time (hrs)", title="Visual predictive check")
+#' vpc_dat <- vpc(sim, obs, 
+#'                bins = c(0, 2, 4, 6, 8, 10, 25), 
+#'                strat = "sex",
+#'                ylab = "Concentration", xlab = "Time (hrs)", title="Visual predictive check")
 sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)), 
-                      model, theta, omega_mat, 
+                      model = function(x) { return(x$alpha + x$beta) }, 
+                      theta, 
+                      omega_mat, 
                       par_names, par_values = NULL,
                       draw_iiv = "mvrnorm",
                       error = list(proportional = 0, additive = 0, exponential = 0),
                       n=100) {
   if (is.null(par_values)) {
     param <- draw_params_mvr( # draw parameter values. can also be just population values, or specified manually ()
-      n_ids = length(unique(obs$id)), 
+      ids = unique(as.numeric(as.character(obs$id))), 
       n_sim = 500, 
       theta, 
       omega_mat = triangle_to_full(omega_mat),
@@ -290,13 +292,14 @@ sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)),
   sim_des <- do.call("rbind", replicate(n, design, simplify = FALSE))
   sim_des$sim  <- rep(1:n, each=length(design[,1]))
   sim_des$join <- paste(sim_des$sim, sim_des$id, sep="_")
-  param$join   <- paste(par_values$sim, par_values$id, sep="_")
+  param$join   <- paste(param$sim, param$id, sep="_")
   tmp <- merge(sim_des, param,
-                by.x="join", by.y="join")
-  tmp$sdv <- add_noise( model(tmp), ruv = error)  
-  colnames(tmp) <- gsub(".x", "", colnames(tmp))
+               by.x="join", by.y="join")
+  tmp$sdv <- add_noise(model(tmp), ruv = error)  
+  colnames(tmp) <- gsub("\\.x", "", colnames(tmp))
   dplyr::arrange(tmp, sim, id, time)
 }
+
 
 triangle_to_full <- function (vect) {
   for (i in 1:100) { # find the size of the matrix
@@ -318,13 +321,13 @@ add_recurs <- function(x, n, max) {
   x
 }
 
-draw_params_mvr <- function(n_ids, n_sim, theta, omega_mat, par_names = NULL) {
+draw_params_mvr <- function(ids, n_sim, theta, omega_mat, par_names = NULL) {
+  n_ids <- length(ids)
   if (!is.null(par_names)) {
-    par <- data.frame(
-      cbind(
-        rep(theta, each=n_sim*n_ids) * exp (mvrnorm(n=n_sim*n_ids, c(0,0,0), omega_mat)),
-        ruv = 0.618))
-    colnames(par) <- par_names  
+    par <- data.frame(cbind(sim = rep(1:n_sim, each=n_ids), 
+                            id = rep(ids, n_sim),
+                            rep(theta, each=n_sim*n_ids) * exp (mvrnorm(n=n_sim*n_ids, c(0,0,0), omega_mat))))
+    colnames(par) <- c("sim", "id", par_names)  
     return(par)    
   } else {
     cat("Parameter names have to be supplied!")
