@@ -26,27 +26,34 @@
 #'                     bins = c(0, 2, 4, 6, 8, 10, 25), 
 #'                     strat = "sex",
 #'                     ylab = "Concentration", xlab = "Time (hrs)", title="Visual predictive check")
-plot_vpc <- function(sim, obs, 
-                     bins = NULL, 
-                     n_bins = 8,
-                     dv = "dv", 
-                     idv = "time",
-                     strat = NULL,
-                     pi = c(0.05, 0.95), 
-                     ci = c(0.05, 0.95),
-                     uloq = NULL, 
-                     lloq = NULL, 
-                     plot = TRUE,
-                     log_y = FALSE,
-                     xlab = NULL, 
-                     ylab = NULL,
-                     title = NULL,
-                     theme = "default",
-                     custom_theme = NULL,
-                     return_what = "data") {
-  sim <- format_vpc_input_data(sim, "sdv", idv, lloq, uloq, strat, bins)
-  obs <- format_vpc_input_data(obs, dv, idv, lloq, uloq, strat, bins)
-  if (is.null(strat)) { strat <- "strat" }
+vpc <- function(sim, obs, 
+                bins = NULL, 
+                n_bins = 8,
+                obs.dv = "dv",
+                sim.dv =  "sdv",
+                obs.idv = "time",
+                sim.idv = "time",
+                stratify = NULL,
+                pi = c(0.05, 0.95), 
+                ci = c(0.05, 0.95),
+                uloq = NULL, 
+                lloq = NULL, 
+                plot = TRUE,
+                log_y = FALSE,
+                xlab = NULL, 
+                ylab = NULL,
+                title = NULL,
+                smooth = TRUE,
+                theme = "default",
+                custom_theme = NULL,
+                return_what = "data") {
+  if (is.null(stratify)) { 
+    strat <- "strat" 
+  } else {
+    strat <- stratify
+  }
+  sim <- format_vpc_input_data(sim, sim.dv, sim.idv, lloq, uloq, strat, bins)
+  obs <- format_vpc_input_data(obs, obs.dv, obs.idv, lloq, uloq, strat, bins)
   aggr_sim <- data.frame(cbind(sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[1])),
                                sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, 0.5 )),
                                sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[2]))))
@@ -61,39 +68,52 @@ plot_vpc <- function(sim, obs,
                               tmp %>% summarise(quantile(q50, ci[2])),
                               tmp %>% summarise(quantile(q95, ci[1])),
                               tmp %>% summarise(quantile(q95, 0.5)),
-                              tmp %>% summarise(quantile(q95, ci[2]))))
+                              tmp %>% summarise(quantile(q95, ci[2])),
+                              obs %>% group_by(strat, bin) %>% summarise(mean(idv)) ))
   vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
-  colnames(vpc_dat) <- c("strat", "bin", "q5.5","q5.50","q5.95", "q50.5","q50.50","q50.95","q95.5","q95.50","q95.95")
+  colnames(vpc_dat) <- c("strat", "bin", 
+                         "q5.5","q5.50","q5.95", 
+                         "q50.5","q50.50","q50.95",
+                         "q95.5","q95.50","q95.95", 
+                         "bin_mid")
+  vpc_dat$bin_min <- bins[1:(length(bins)-1)]
+  vpc_dat$bin_max <- bins[2:length(bins)]
   aggr_obs <- data.frame(cbind(obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.05)),
                                obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.5 )),
-                               obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.95))))
+                               obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.95)),
+                               obs %>% group_by(strat,bin) %>% summarise(mean(idv)) ))
   aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
-  colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95")
+  colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95", "bin_mid")
+  aggr_obs$bin_min <- bins[1:(length(bins)-1)]
+  aggr_obs$bin_max <- bins[2:length(bins)]  
   if(is.null(xlab)) {
-    xlab <- idv
+    xlab <- obs.idv
   }
   if(is.null(ylab)) {
-    ylab <- dv
+    ylab <- obs.dv
   }
-  themes <- list(
-    "default" = list(
-      pi_area = "#3388cc", pi_area_alpha = 0.2,  
-      med_area = "#3388cc", med_area_alpha = 0.4  
-    )
-  )
-  pl <- ggplot(sim, aes(x=bin, y=dv)) + 
-    geom_line(aes(x=bin, y=q50.50), data=vpc_dat, linetype='dashed') + 
-    geom_ribbon(data=vpc_dat, aes(x=bin, y=q50.5, ymin=q50.5, ymax=q50.95), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
-    geom_ribbon(data=vpc_dat, aes(x=bin, y=q5.5, ymin=q5.5, ymax=q5.95), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
-    geom_ribbon(data=vpc_dat, aes(x=bin, y=q95.5, ymin=q95.5, ymax=q95.95), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
-    geom_line(data=aggr_obs, aes(x=bin, y=obs50), linetype='solid') +
-    geom_line(data=aggr_obs, aes(x=bin, y=obs5), linetype='dotted') +
-    geom_line(data=aggr_obs, aes(x=bin, y=obs95), linetype='dotted') +
+  pl <- ggplot(vpc_dat, aes(x=bin_mid, y=dv)) + 
+    geom_line(aes(y=q50.50), linetype='dashed') 
+  if (smooth) {
+    pl <- pl + 
+      geom_ribbon(aes(x=bin_mid, y=q50.5, ymin=q50.5, ymax=q50.95), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
+      geom_ribbon(aes(x=bin_mid, y=q5.5, ymin=q5.5, ymax=q5.95), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
+      geom_ribbon(aes(x=bin_mid, y=q95.5, ymin=q95.5, ymax=q95.95), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) 
+  } else {
+    pl <- pl + 
+      geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.5, ymin=q50.5, ymax=q50.95), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
+      geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q5.5, ymin=q5.5, ymax=q5.95), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
+      geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q95.5, ymin=q95.5, ymax=q95.95), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area)     
+  }
+  pl <- pl +
+    geom_line(data=aggr_obs, aes(x=bin_mid, y=obs50), linetype='solid') +
+    geom_line(data=aggr_obs, aes(x=bin_mid, y=obs5), linetype='dotted') +
+    geom_line(data=aggr_obs, aes(x=bin_mid, y=obs95), linetype='dotted') +
     xlab(xlab) + ylab(ylab)
   if (log_y) {
     pl <- pl + scale_y_log10() 
   }
-  if (!is.null(strat)) {
+  if (!is.null(stratify)) {
     pl <- pl + facet_wrap(~ strat)
   }
   if (!is.null(title)) {
@@ -116,11 +136,112 @@ plot_vpc <- function(sim, obs,
   }
 }
 
+#' VPC function for left- or right-censored data (e.g. BLOQ data)
+#' 
+#' Creates a VPC plot and/or plotting data from observed and simulation data
+#' @param sim 
+#' @param obs
+#' @return Either the data for plotting a VPC or a ggplot2 object
+#' @export
+vpc_loq <- function(sim, 
+                    obs, 
+                    bins = NULL, 
+                    n_bins = 8,
+                    obs.dv = "dv",
+                    sim.dv =  "sdv",
+                    obs.idv = "time",
+                    sim.idv = "time",
+                    stratify = NULL,
+                    pi = c(0.05, 0.95), 
+                    ci = c(0.05, 0.95),
+                    uloq = NULL, 
+                    lloq = NULL, 
+                    plot = TRUE,
+                    log_y = FALSE,
+                    xlab = NULL, 
+                    ylab = NULL,
+                    title = NULL,
+                    smooth = TRUE,
+                    theme = "default",
+                    custom_theme = NULL,
+                    return_what = "data",
+                    type = "bloq") {
+  if (is.null(stratify)) { 
+    strat <- "strat" 
+  } else {
+    strat <- stratify
+  }
+  sim <- format_vpc_input_data(sim, sim.dv, sim.idv, lloq, uloq, strat, bins)
+  obs <- format_vpc_input_data(obs, obs.dv, obs.idv, lloq, uloq, strat, bins)
+  loq_perc <- function(x) { sum(x <= lloq) / length(x) } # below lloq, default   
+  if (type == "uloq") {
+    loq_perc <- function(x) { sum(x >= uloq) / length(x) }
+  }  
+  aggr_sim <- data.frame(cbind(sim %>% group_by(strat, sim, bin) %>% summarise(loq_perc(dv))))    
+  colnames(aggr_sim)[grep("loq_perc", colnames(aggr_sim))] <- "ploq"
+  tmp <- aggr_sim %>% group_by(strat, bin)    
+  vpc_dat <- data.frame(cbind(tmp %>% summarise(quantile(ploq, ci[1])),
+                              tmp %>% summarise(quantile(ploq, 0.5)),
+                              tmp %>% summarise(quantile(ploq, ci[2])),
+                              obs %>% group_by(strat, bin) %>% summarise(mean(idv)) ))
+  vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
+  colnames(vpc_dat) <- c("strat", "bin", "ploq_low", "ploq_med", "ploq_up", "bin_mid")  
+  vpc_dat$bin_min <- bins[1:(length(bins)-1)]
+  vpc_dat$bin_max <- bins[2:length(bins)]
+  aggr_obs <- data.frame(cbind(obs %>% group_by(strat,bin) %>% summarise(loq_perc(dv)),
+                               obs %>% group_by(strat,bin) %>% summarise(loq_perc(dv)),
+                               obs %>% group_by(strat,bin) %>% summarise(loq_perc(dv)),
+                               obs %>% group_by(strat, bin) %>% summarise(mean(idv))))
+  aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
+  colnames(aggr_obs) <- c("strat", "bin", "ploq_low","ploq_med","ploq_up", "bin_mid")    
+  aggr_obs$bin_min <- bins[1:(length(bins)-1)]
+  aggr_obs$bin_max <- bins[2:length(bins)]
+  pl <- ggplot(vpc_dat, aes(x=bin_mid, y=dv)) + 
+    geom_line(aes(y=ploq_med), linetype='dashed') + 
+    geom_ribbon(aes(x=bin_mid, y=ploq_low, ymin=ploq_low, ymax=ploq_up), fill=themes[[theme]]$med_area, alpha=themes[[theme]]$med_area_alpha) +
+    geom_line(data=aggr_obs, aes(x=bin_mid, y=ploq_med), linetype='solid') +
+    geom_line(data=aggr_obs, aes(x=bin_mid, y=ploq_low), linetype='dotted') +
+    geom_line(data=aggr_obs, aes(x=bin_mid, y=ploq_up), linetype='dotted')  
+  if (log_y) {
+    pl <- pl + scale_y_log10() 
+  }
+  if (!is.null(stratify)) {
+    pl <- pl + facet_wrap(~ strat)
+  }
+  if (!is.null(title)) {
+    pl <- pl + ggtitle(title)  
+  }
+  if (!is.null(custom_theme)) {  
+    pl <- pl + custom_theme()    
+  } else {
+    if (!is.null(theme)) {
+      pl <- pl + theme_plain()
+    } 
+  }
+  if(!is.null(xlab)) {
+    pl <- pl + xlab(xlab)
+  } else {
+    pl <- pl + xlab(obs.idv)
+  }
+  if(!is.null(ylab)) {
+    pl <- pl + ylab(ylab)
+  } else {
+    pl <- pl + ylab(paste("Fraction", type))
+  }  
+  if (plot) {
+    print(pl)    
+  }
+  if(return_what == "data") {
+    return(list(vpc_dat = vpc_dat, obs = aggr_obs))    
+  } else {
+    return(pl)
+  }
+}
 
 #' Simulate data based on a model and parameter distributions
 #' 
 #' @param design
-#' @param model
+#' @param model A function with the first argument the simulation design, i.e. a dataset with the columns ... The second argument to this function is a dataset with parameters for every individual. This can be supplied by the user, or generated by this sim_data if theta and omega_mat are supplied.
 #' @param theta
 #' @param omega_mat
 #' @param par_names A vector describing 
@@ -151,63 +272,30 @@ plot_vpc <- function(sim, obs,
 #'                     strat = "sex",
 #'                     ylab = "Concentration", xlab = "Time (hrs)", title="Visual predictive check")
 sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)), 
-                      model, theta, omega_mat, par_names,
+                      model, theta, omega_mat, 
+                      par_names, par_values = NULL,
+                      draw_iiv = "mvrnorm",
+                      error = list(proportional = 0, additive = 0, exponential = 0),
                       n=100) {
-  param = draw_params_mvr( # draw parameter values. can also be just population values
-    n_ids = length(unique(obs$id)), 
-    n_sim = 500, 
-    theta, 
-    omega_mat = triangle_to_full(omega_mat),
-    par_names = par_names)  
-  sim_des <- do.call("rbind", replicate(n, design, simplify = FALSE))
-  sim_des$sdv <- model(sim_des, param)  
-  sim_des$sim <- rep(1:n, each = length(design[,1]))
-  sim_des
-}
-
-
-#' VPC function for LOQ-type data
-#' 
-#' Creates a VPC plot and/or plotting data from observed and simulation data
-#' @param sim 
-#' @param obs
-#' @return Either the data for plotting a VPC or a ggplot2 object
-#' @export
-vpc_loq <- function(sim, obs, type = "lloq", 
-                    bins, strat = NULL, dv = "dv", idv = "time",
-                    pi = c(0.05, 0.95), ci = c(0.05, 0.95),
-                    uloq = NULL, lloq = NULL) {
-  sim <- format_vpc_input_data(sim, dv, idv, lloq, uloq, strat, bins)
-  obs <- format_vpc_input_data(obs, dv, idv, lloq, uloq, strat, bins)
-  loq_perc <- function(x) { sum(x <= lloq) / length(x) } # below lloq, default   
-  if (type == "uloq") {
-    loq_perc <- function(x) { sum(x >= uloq) / length(x) }
-  }  
-  aggr_sim <- data.frame(cbind(sim %>% group_by(strat, sim, bin) %>% summarise(loq_perc(dv))))    
-  colnames(aggr_sim)[grep("loq_perc", colnames(aggr_sim))] <- "ploq"
-  tmp <- aggr_sim %>% group_by(strat, bin)    
-  vpc_dat <- data.frame(cbind(tmp %>% summarise(quantile(ploq, ci[1])),
-                              tmp %>% summarise(quantile(ploq, 0.5)),
-                              tmp %>% summarise(quantile(ploq, ci[2]))))
-  vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
-  colnames(vpc_dat) <- c("strat", "bin", "ploq_low", "ploq_med", "ploq_up")  
-  aggr_obs <- data.frame(cbind(obs %>% group_by(strat,bin) %>% summarise(loq_perc(dv)),
-                               obs %>% group_by(strat,bin) %>% summarise(loq_perc(dv)),
-                               obs %>% group_by(strat,bin) %>% summarise(loq_perc(dv))))
-  aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
-  colnames(aggr_obs) <- c("strat", "bin", "ploq_low","ploq_med","ploq_up")    
-  
-  pl <- ggplot(sim, aes(x=bin, y=dv)) + 
-    geom_line(aes(x=bin, y=ploq_med), data=vpc_dat, linetype='dashed') + 
-    geom_ribbon(data=vpc_dat, aes(x=bin, y=ploq_low, ymin=ploq_low, ymax=ploq_up), alpha=0.2) +
-    geom_line(data=aggr_obs, aes(x=bin, y=ploq_med), linetype='solid') +
-    geom_line(data=aggr_obs, aes(x=bin, y=ploq_low), linetype='dotted') +
-    geom_line(data=aggr_obs, aes(x=bin, y=ploq_up), linetype='dotted')
-  
-  if (!is.null(strat)) {
-    pl <- pl + facet_grid(strat ~ .)
+  if (is.null(par_values)) {
+    param <- draw_params_mvr( # draw parameter values. can also be just population values, or specified manually ()
+      n_ids = length(unique(obs$id)), 
+      n_sim = 500, 
+      theta, 
+      omega_mat = triangle_to_full(omega_mat),
+      par_names = par_names)      
+  } else {
+    param <- par_values
   }
-  print (pl)
+  sim_des <- do.call("rbind", replicate(n, design, simplify = FALSE))
+  sim_des$sim  <- rep(1:n, each=length(design[,1]))
+  sim_des$join <- paste(sim_des$sim, sim_des$id, sep="_")
+  param$join   <- paste(par_values$sim, par_values$id, sep="_")
+  tmp <- merge(sim_des, param,
+                by.x="join", by.y="join")
+  tmp$sdv <- add_noise( model(tmp), ruv = error)  
+  colnames(tmp) <- gsub(".x", "", colnames(tmp))
+  dplyr::arrange(tmp, sim, id, time)
 }
 
 triangle_to_full <- function (vect) {
@@ -274,6 +362,7 @@ pk_iv_1cmt <- function (t, t_inf = 1, tau = 24, dose=120, CL = 0.345, Vc = 1.75,
   tmp
 }
 
+#' @export
 add_noise <- function(x, ruv = list(proportional = 0, additive = 0, exponential = 0)) {
   if (is.null(ruv$proportional)) { ruv$proportional <- 0 }
   if (is.null(ruv$additive)) { ruv$additive <- 0 }
@@ -281,10 +370,18 @@ add_noise <- function(x, ruv = list(proportional = 0, additive = 0, exponential 
   x * (1 + rnorm(length(x), 0, ruv$proportional)) +  rnorm(length(x), 0, ruv$additive) * exp(rnorm(length(x), 0, ruv$exponential)) 
 } 
 
+#' @export
 bin_data <- function(x, bins = c(0, 3, 5, 7), idv = "time") {
   x$bin <- cut(x[[idv]], bins, labels = FALSE, right=FALSE)
   return(x)
 }
+
+themes <- list(
+  "default" = list(
+    pi_area = "#3388cc", pi_area_alpha = 0.2,  
+    med_area = "#3388cc", med_area_alpha = 0.4  
+  )
+)
 
 format_vpc_input_data <- function(dat, dv, idv, lloq, uloq, strat, bins) {
   if(length(match(dv, colnames(dat))) > 0) {
