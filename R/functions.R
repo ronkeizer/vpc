@@ -68,24 +68,23 @@ vpc <- function(sim, obs,
                               tmp %>% summarise(quantile(q50, ci[2])),
                               tmp %>% summarise(quantile(q95, ci[1])),
                               tmp %>% summarise(quantile(q95, 0.5)),
-                              tmp %>% summarise(quantile(q95, ci[2])),
-                              obs %>% group_by(strat, bin) %>% summarise(mean(idv)) ))
+                              tmp %>% summarise(quantile(q95, ci[2])) ))
   vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
   colnames(vpc_dat) <- c("strat", "bin", 
                          "q5.5","q5.50","q5.95", 
                          "q50.5","q50.50","q50.95",
-                         "q95.5","q95.50","q95.95", 
-                         "bin_mid")
-  vpc_dat$bin_min <- bins[1:(length(bins)-1)]
-  vpc_dat$bin_max <- bins[2:length(bins)]
+                         "q95.5","q95.50","q95.95")
+  vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)) )
+  vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)) )
+  vpc_dat$bin_mid <- (vpc_dat$bin_min + vpc_dat$bin_max) / 2
   aggr_obs <- data.frame(cbind(obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.05)),
                                obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.5 )),
-                               obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.95)),
-                               obs %>% group_by(strat,bin) %>% summarise(mean(idv)) ))
+                               obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.95)) ))
   aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
-  colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95", "bin_mid")
-  aggr_obs$bin_min <- bins[1:(length(bins)-1)]
-  aggr_obs$bin_max <- bins[2:length(bins)]  
+  colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95")
+  aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )
+  aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )
+  aggr_obs$bin_mid <- (aggr_obs$bin_min + aggr_obs$bin_max)/2 
   if(is.null(xlab)) {
     xlab <- obs.idv
   }
@@ -129,9 +128,7 @@ vpc <- function(sim, obs,
   if (plot) {
     print(pl)    
   }
-  if(is.null(return_what)) {
-    return()
-  } else {
+  if(!is.null(return_what)) {
     if(return_what == "data") {
       return(list(vpc_dat = vpc_dat, obs = aggr_obs))    
     } else {
@@ -186,20 +183,20 @@ vpc_loq <- function(sim,
   tmp <- aggr_sim %>% group_by(strat, bin)    
   vpc_dat <- data.frame(cbind(tmp %>% summarise(quantile(ploq, ci[1])),
                               tmp %>% summarise(quantile(ploq, 0.5)),
-                              tmp %>% summarise(quantile(ploq, ci[2])),
-                              obs %>% group_by(strat, bin) %>% summarise(mean(idv)) ))
+                              tmp %>% summarise(quantile(ploq, ci[2])) ))
   vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
-  colnames(vpc_dat) <- c("strat", "bin", "ploq_low", "ploq_med", "ploq_up", "bin_mid")  
-  vpc_dat$bin_min <- bins[1:(length(bins)-1)]
-  vpc_dat$bin_max <- bins[2:length(bins)]
+  colnames(vpc_dat) <- c("strat", "bin", "ploq_low", "ploq_med", "ploq_up")  
+  vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)) )
+  vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)) )
+  vpc_dat$bin_mid <- (vpc_dat$bin_min + vpc_dat$bin_max) / 2
   aggr_obs <- data.frame(cbind(obs %>% group_by(strat,bin) %>% summarise(loq_perc(dv)),
                                obs %>% group_by(strat,bin) %>% summarise(loq_perc(dv)),
-                               obs %>% group_by(strat,bin) %>% summarise(loq_perc(dv)),
-                               obs %>% group_by(strat, bin) %>% summarise(mean(idv))))
+                               obs %>% group_by(strat,bin) %>% summarise(loq_perc(dv)) ))
   aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
-  colnames(aggr_obs) <- c("strat", "bin", "ploq_low","ploq_med","ploq_up", "bin_mid")    
-  aggr_obs$bin_min <- bins[1:(length(bins)-1)]
-  aggr_obs$bin_max <- bins[2:length(bins)]
+  colnames(aggr_obs) <- c("strat", "bin", "ploq_low","ploq_med","ploq_up")    
+  aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )
+  aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )
+  aggr_obs$bin_mid <- (aggr_obs$bin_min + aggr_obs$bin_max)/2 
   pl <- ggplot(vpc_dat, aes(x=bin_mid, y=dv)) + 
     geom_line(aes(y=ploq_med), linetype='dashed') + 
     geom_ribbon(aes(x=bin_mid, y=ploq_low, ymin=ploq_low, ymax=ploq_up), fill=themes[[theme]]$med_area, alpha=themes[[theme]]$med_area_alpha) +
@@ -235,9 +232,7 @@ vpc_loq <- function(sim,
   if (plot) {
     print(pl)    
   }
-  if(is.null(return_what)) {
-    return()
-  } else {
+  if(!is.null(return_what)) {
     if(return_what == "data") {
       return(list(vpc_dat = vpc_dat, obs = aggr_obs))    
     } else {
