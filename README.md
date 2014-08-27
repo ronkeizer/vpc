@@ -41,15 +41,21 @@ To be supplied to function:
                     par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
                     n = 500)
     
-    ## Now we have everything ready for plotting:    
+    ## First plot with auto binning:    
+    vpc_dat <- vpc(sim, obs, stratify = c("sex"), 
+                   n_bins = 8                                   # aim for 8 or less bins in the autobin procedure
+                   plot.dv = FALSE, facet = "wrap",
+                   ylab = "Concentration", xlab = "Time (hrs)")
+
+    ## More elaborate use of options
     vpc_dat <- vpc(sim, obs,                                    # supply simulation and observation dataframes
                    obs.dv = "dv",                               # these column names are the default,                           
                    obs.idv = "time",                            #   update these if different.
                    sim.dv = "sdv",
                    sim.idv = "time",
-                   bins = c(0, 2, 4, 6, 8, 10, 25),             # bin separators
+                   bins = c(0, 2, 4, 6, 8, 10, 25),             # specify bin separators manually
                    stratify = c("sex"),                         # multiple stratifications possible, just supply as vector
-                   plot.dv = FALSE,                             # plot observations?
+                   plot.dv = TRUE,                              # plot observations?
                    facet = "wrap",                              # wrap stratifications, or as "row" or "column"
                    ylab = "Concentration", xlab = "Time (hrs)", title="Visual predictive check")
 
