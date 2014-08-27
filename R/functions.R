@@ -49,6 +49,7 @@ vpc <- function(sim, obs,
                 smooth = TRUE,
                 theme = "default",
                 custom_theme = NULL,
+                facet = "wrap",
                 return_what = NULL) {
   sim <- format_vpc_input_data(sim, sim.dv, sim.idv, lloq, uloq, stratify, bins)
   obs <- format_vpc_input_data(obs, obs.dv, obs.idv, lloq, uloq, stratify, bins)
@@ -114,7 +115,15 @@ vpc <- function(sim, obs,
     pl <- pl + scale_y_log10() 
   }
   if (!is.null(stratify)) {
-    pl <- pl + facet_wrap(~ strat)
+    if(facet == "wrap") {
+      pl <- pl + facet_wrap(~ strat)      
+    } else {
+      if(length(grep("horiz", facet))>0) {
+        pl <- pl + facet_grid(. ~ strat)                
+      } else {
+        pl <- pl + facet_grid(strat ~ .)                
+      }
+    }
   }
   if (!is.null(title)) {
     pl <- pl + ggtitle(title)  
@@ -407,8 +416,15 @@ format_vpc_input_data <- function(dat, dv, idv, lloq, uloq, strat, bins) {
   if(is.null(strat)) {
     dat$strat <- 1
   } else {
-    dat$strat <- dat[[strat]]
+    dat$strat <- ""
+     for(i in seq(strat)) {
+       if(i > 1) { 
+         dat$strat <- paste0(dat$strat, ", ")
+       }
+       dat$strat <- paste0(dat$strat, strat[i], "=", dat[,strat[i]])
+     }
   }
+  dat$strat <- as.factor(dat$strat)
   dat <- bin_data(dat, bins, "idv")  
   return(dat)
 }
