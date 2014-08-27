@@ -6,9 +6,7 @@ Create visual predictive checks, a commonly used diagnostic plot in pharmacometr
 To be supplied to function:
 
 -  observed data
--  binning strategy
--  function to simulate data (i.e. a structural model with parameter estimates / distributions), **OR**
--  a simulation data file, e.g. from NONMEM or any other simulation software
+-  function to simulate data (i.e. a structural model with parameter estimates / distributions), **OR** a simulation dataset, e.g. simulated from NONMEM or other simulation software
 
 ## Installation
 
