@@ -46,9 +46,7 @@ sim <- sim_data(obs, # the design of the dataset
                 par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
                 n = 500)
 
-vpc_dat <- vpc(sim, obs, stratify = c("sex"),
-              plot.dv = FALSE, facet = "wrap",
-              ylab = "Concentration", xlab = "Time (hrs)")
+vpc_dat <- vpc(sim, obs, stratify = c("sex"))
 }
 \seealso{
 \code{\link{vpc}}

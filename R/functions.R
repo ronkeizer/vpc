@@ -24,9 +24,7 @@
 #'                 par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
 #'                 n = 500)
 #' 
-#' vpc_dat <- vpc(sim, obs, stratify = c("sex"), 
-#'               plot.dv = FALSE, facet = "wrap",
-#'               ylab = "Concentration", xlab = "Time (hrs)")
+#' vpc_dat <- vpc(sim, obs, stratify = c("sex"))
 vpc <- function(sim, obs, 
                 bins = "auto",
                 n_bins = 8,
@@ -164,35 +162,56 @@ vpc <- function(sim, obs,
 #' @param obs
 #' @return Either the data for plotting a VPC or a ggplot2 object
 #' @export
-vpc_loq <- function(sim, 
-                    obs, 
-                    bins = NULL, 
-                    n_bins = 8,
-                    obs.dv = "dv",
-                    sim.dv =  "sdv",
-                    obs.idv = "time",
-                    sim.idv = "time",
-                    obs.id = "id",
-                    sim.id = "id",
-                    nonmem = FALSE,
-                    stratify = NULL,
-                    pi = c(0.05, 0.95), 
-                    ci = c(0.05, 0.95),
-                    uloq = NULL, 
-                    lloq = NULL, 
-                    plot = TRUE,
-                    xlab = NULL, 
-                    ylab = NULL,
-                    title = NULL,
-                    smooth = TRUE,
-                    theme = "default",
-                    custom_theme = NULL,
-                    type = "bloq") {
+#' @examples
+#' obs <- Theoph
+#' colnames(obs) <- c("id", "wt", "dose", "time", "dv")
+#' obs <- obs %>%   # create a dummy covariate to show stratification
+#'  group_by(id) %>%  
+#'  mutate(sex = round(runif(1)))
+#' 
+#' sim <- sim_data(obs, # the design of the dataset
+#'                 model = function(x) { # the model
+#'                   pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka, ke = x$ke, cl = x$cl * x$wt, ruv = list(additive = 0.1))
+#'                 }, 
+#'                 theta = c(2.774, 0.0718, .0361),                 # parameter values
+#'                 omega_mat = c(0.08854,                           # specified as lower triangle by default; 
+#'                               0.02421, 0.02241,                  # note: assumed that every theta has iiv, set to 0 if no iiv. 
+#'                               0.008069, 0.008639, 0.02862),      
+#'                 par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
+#'                 n = 500)
+#' 
+#' vpc_loq <- vpc_cens(sim, obs, lloq = 5)
+vpc_cens <- function(sim, 
+                     obs, 
+                     bins = NULL, 
+                     n_bins = 8,
+                     auto_bin_type = "simple",
+                     obs.dv = "dv",
+                     sim.dv =  "sdv",
+                     obs.idv = "time",
+                     sim.idv = "time",
+                     obs.id = "id",
+                     sim.id = "id",
+                     nonmem = FALSE,
+                     stratify = NULL,
+                     pi = c(0.05, 0.95), 
+                     ci = c(0.05, 0.95),
+                     uloq = NULL, 
+                     lloq = NULL, 
+                     plot = TRUE,
+                     xlab = NULL, 
+                     ylab = NULL,
+                     title = NULL,
+                     smooth = TRUE,
+                     theme = "default",
+                     custom_theme = NULL,
+                     type = "bloq",
+                     facet = "wrap") {
   if (class(bins) != "numeric") {
     bins <- auto_bin(obs, auto_bin_type, n_bins, x=obs.idv)
-  }
-  sim <- format_vpc_input_data(sim, sim.dv, sim.idv, sim.id, lloq, uloq, stratify, bins, log_y, log_y_min,, nonmem)
-  obs <- format_vpc_input_data(obs, obs.dv, obs.idv, obs.id, lloq, uloq, stratify, bins, log_y, log_y_min,, nonmem)
+  }  
+  sim <- format_vpc_input_data(sim, sim.dv, sim.idv, sim.id, lloq, uloq, stratify, bins, FALSE, 0, nonmem)
+  obs <- format_vpc_input_data(obs, obs.dv, obs.idv, obs.id, lloq, uloq, stratify, bins, FALSE, 0, nonmem)
   loq_perc <- function(x) { sum(x <= lloq) / length(x) } # below lloq, default   
   if (type == "uloq") {
     loq_perc <- function(x) { sum(x >= uloq) / length(x) }
@@ -300,9 +319,7 @@ vpc_loq <- function(sim,
 #'                 par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
 #'                 n = 500)
 #' 
-#' vpc_dat <- vpc(sim, obs, stratify = c("sex"), 
-#'               plot.dv = FALSE, facet = "wrap",
-#'               ylab = "Concentration", xlab = "Time (hrs)")
+#' vpc_dat <- vpc(sim, obs, stratify = c("sex"))
 sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)), 
                       model = function(x) { return(x$alpha + x$beta) }, 
                       theta, 

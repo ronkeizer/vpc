@@ -43,9 +43,7 @@ To be supplied to function:
     
     ## First plot with auto binning:    
     vpc_dat <- vpc(sim, obs, stratify = c("sex"), 
-                   n_bins = 8                                   # aim for 8 or less bins in the autobin procedure
-                   plot.dv = FALSE, facet = "wrap",
-                   ylab = "Concentration", xlab = "Time (hrs)")
+                   n_bins = 8)                                   # aim for 8 or less bins in the autobin procedure
 
     ## More elaborate use of options
     vpc_dat <- vpc(sim, obs,                                    # supply simulation and observation dataframes
@@ -59,5 +57,6 @@ To be supplied to function:
                    facet = "wrap",                              # wrap stratifications, or as "row" or "column"
                    ylab = "Concentration", xlab = "Time (hrs)", title="Visual predictive check")
 
-    
+     ## VPC for censored data (e.g. below LOQ):
+     vpc_loq <- vpc_cens(sim, obs, lloq = 5)
 
