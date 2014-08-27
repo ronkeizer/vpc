@@ -31,7 +31,9 @@ This function generates the simulated dependent values for use in the VPC plotti
 \examples{
 obs <- Theoph
 colnames(obs) <- c("id", "wt", "dose", "time", "dv")
-obs$sex <- round(runif(unique(obs$id))) # create a dummy covariate to show stratification
+obs <- obs \%>\%   # create a dummy covariate to show stratification
+ group_by(id) \%>\%
+ mutate(sex = round(runif(1)))
 
 sim <- sim_data(obs, # the design of the dataset
                 model = function(x) { # the model
@@ -44,10 +46,9 @@ sim <- sim_data(obs, # the design of the dataset
                 par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
                 n = 500)
 
-vpc_dat <- vpc(sim, obs,
-               bins = c(0, 2, 4, 6, 8, 10, 25),
-               strat = "sex",
-               ylab = "Concentration", xlab = "Time (hrs)", title="Visual predictive check")
+vpc_dat <- vpc(sim, obs, stratify = c("sex"),
+              plot.dv = FALSE, facet = "wrap",
+              ylab = "Concentration", xlab = "Time (hrs)")
 }
 \seealso{
 \code{\link{vpc}}

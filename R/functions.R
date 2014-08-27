@@ -24,18 +24,21 @@
 #'                 par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
 #'                 n = 500)
 #' 
-#' vpc_dat <- vpc(sim, obs, 
-#'                bins = c(0, 2, 4, 6, 8, 10, 25), 
-#'                stratify = "sex",
-#'                ylab = "Concentration", xlab = "Time (hrs)", title="Visual predictive check")
+#' vpc_dat <- vpc(sim, obs, stratify = c("sex"), 
+#'               plot.dv = FALSE, facet = "wrap",
+#'               ylab = "Concentration", xlab = "Time (hrs)")
 vpc <- function(sim, obs, 
-                bins = NULL, 
+                bins = "auto",
                 n_bins = 8,
+                auto_bin_type = "simple",
                 obs.dv = "dv",
                 sim.dv =  "sdv",
                 obs.idv = "time",
                 sim.idv = "time",
-                plot.dv = TRUE,
+                obs.id = "id",
+                sim.id = "id",
+                nonmem = FALSE,
+                plot.dv = FALSE,
                 stratify = NULL,
                 pi = c(0.05, 0.95), 
                 ci = c(0.05, 0.95),
@@ -50,10 +53,12 @@ vpc <- function(sim, obs,
                 smooth = TRUE,
                 theme = "default",
                 custom_theme = NULL,
-                facet = "wrap",
-                return_what = NULL) {
-  sim <- format_vpc_input_data(sim, sim.dv, sim.idv, lloq, uloq, stratify, bins, log_y, log_y_min)
-  obs <- format_vpc_input_data(obs, obs.dv, obs.idv, lloq, uloq, stratify, bins, log_y, log_y_min)
+                facet = "wrap") {
+  if (class(bins) != "numeric") {
+    bins <- auto_bin(obs, auto_bin_type, n_bins, x=obs.idv)
+  }
+  sim <- format_vpc_input_data(sim, sim.dv, sim.idv, sim.id, lloq, uloq, stratify, bins, log_y, log_y_min, nonmem)
+  obs <- format_vpc_input_data(obs, obs.dv, obs.idv, obs.id, lloq, uloq, stratify, bins, log_y, log_y_min, nonmem)
   aggr_sim <- data.frame(cbind(sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[1])),
                                sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, 0.5 )),
                                sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[2]))))
@@ -111,6 +116,9 @@ vpc <- function(sim, obs,
   if (plot.dv) {
     pl <- pl + geom_point(data=obs, aes(x=idv, y = dv))
   }
+  bdat <- data.frame(cbind(x=bins, y=NA))
+  pl <- pl + 
+    geom_rug(data=bdat, sides = "t", aes(x = x, y=y), colour="#333333")
   pl <- pl + xlab(xlab) + ylab(ylab)
   if (log_y) {
     pl <- pl + scale_y_log10() 
@@ -139,13 +147,14 @@ vpc <- function(sim, obs,
   if (plot) {
     print(pl)    
   }
-  if(!is.null(return_what)) {
-    if(return_what == "data") {
-      return(list(vpc_dat = vpc_dat, obs = aggr_obs))    
-    } else {
-      return(pl)
-    }    
-  }
+  return(
+    list(
+      obs = tbl_df(obs), 
+      sim = tbl_df(sim),
+      bins = bins, 
+      pl = pl
+    )
+  )
 }
 
 #' VPC function for left- or right-censored data (e.g. BLOQ data)
@@ -163,6 +172,9 @@ vpc_loq <- function(sim,
                     sim.dv =  "sdv",
                     obs.idv = "time",
                     sim.idv = "time",
+                    obs.id = "id",
+                    sim.id = "id",
+                    nonmem = FALSE,
                     stratify = NULL,
                     pi = c(0.05, 0.95), 
                     ci = c(0.05, 0.95),
@@ -175,10 +187,12 @@ vpc_loq <- function(sim,
                     smooth = TRUE,
                     theme = "default",
                     custom_theme = NULL,
-                    return_what = NULL,
                     type = "bloq") {
-  sim <- format_vpc_input_data(sim, sim.dv, sim.idv, lloq, uloq, stratify, bins)
-  obs <- format_vpc_input_data(obs, obs.dv, obs.idv, lloq, uloq, stratify, bins)
+  if (class(bins) != "numeric") {
+    bins <- auto_bin(obs, auto_bin_type, n_bins, x=obs.idv)
+  }
+  sim <- format_vpc_input_data(sim, sim.dv, sim.idv, sim.id, lloq, uloq, stratify, bins, log_y, log_y_min,, nonmem)
+  obs <- format_vpc_input_data(obs, obs.dv, obs.idv, obs.id, lloq, uloq, stratify, bins, log_y, log_y_min,, nonmem)
   loq_perc <- function(x) { sum(x <= lloq) / length(x) } # below lloq, default   
   if (type == "uloq") {
     loq_perc <- function(x) { sum(x >= uloq) / length(x) }
@@ -208,6 +222,9 @@ vpc_loq <- function(sim,
     geom_line(data=aggr_obs, aes(x=bin_mid, y=ploq_med), linetype='solid') +
     geom_line(data=aggr_obs, aes(x=bin_mid, y=ploq_low), linetype='dotted') +
     geom_line(data=aggr_obs, aes(x=bin_mid, y=ploq_up), linetype='dotted')  
+  bdat <- data.frame(cbind(x=bins, y=NA))
+  pl <- pl + 
+    geom_rug(data=bdat, sides = "t", aes(x = x, y=y), colour="#333333")
   if (!is.null(stratify)) {
     if(facet == "wrap") {
       pl <- pl + facet_wrap(~ strat)      
@@ -242,13 +259,14 @@ vpc_loq <- function(sim,
   if (plot) {
     print(pl)    
   }
-  if(!is.null(return_what)) {
-    if(return_what == "data") {
-      return(list(vpc_dat = vpc_dat, obs = aggr_obs))    
-    } else {
-      return(pl)
-    }    
-  }
+  return(
+    list(
+      obs = obs, 
+      sim = sim,
+      bins = bins, 
+      pl = pl
+    )
+  )
 }
 
 #' Simulate data based on a model and parameter distributions
@@ -282,10 +300,9 @@ vpc_loq <- function(sim,
 #'                 par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
 #'                 n = 500)
 #' 
-#' vpc_dat <- vpc(sim, obs, 
-#'                bins = c(0, 2, 4, 6, 8, 10, 25), 
-#'                stratify = "sex",
-#'                ylab = "Concentration", xlab = "Time (hrs)", title="Visual predictive check")
+#' vpc_dat <- vpc(sim, obs, stratify = c("sex"), 
+#'               plot.dv = FALSE, facet = "wrap",
+#'               ylab = "Concentration", xlab = "Time (hrs)")
 sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)), 
                       model = function(x) { return(x$alpha + x$beta) }, 
                       theta, 
@@ -333,6 +350,29 @@ add_recurs <- function(x, n, max) {
     x <- add_recurs(x, n, max)
   }
   x
+}
+
+find_nadirs <- function (x, thresh = 0) {
+  pks <- which(diff(sign(diff(x, na.pad = FALSE)), na.pad = FALSE) > 0) + 2
+  if (!missing(thresh)) {
+    pks[x[pks - 1] - x[pks] > thresh]
+  }
+  else pks
+}
+
+auto_bin <- function (dat, type="simple", n_bins = 8, x="time") {
+  if (type == "simple") {
+    bws <- diff(range(dat[[x]])) * seq(from=0.01, to = 1, by=0.01)
+    for (i in seq(bws)) {
+      d <- density(dat[[x]], bw=bws[i])
+      bins <- c(0, d$x[find_nadirs(d$y)], max(dat[[x]])*1.01)    
+      if (length(bins) <= (n_bins-1)) {
+        return(bins)
+      }
+    }      
+  } else {
+    return("Not implemented yet!")
+  }
 }
 
 draw_params_mvr <- function(ids, n_sim, theta, omega_mat, par_names = NULL) {
@@ -400,7 +440,28 @@ themes <- list(
   )
 )
 
-format_vpc_input_data <- function(dat, dv, idv, lloq, uloq, strat, bins, log_y, log_y_min) {
+format_vpc_input_data <- function(dat, dv, idv, id, lloq, uloq, strat, bins, log_y, log_y_min, nonmem) {
+  if (nonmem) {
+    dv = "DV"
+    idv = "TIME"
+    id = "ID"
+    if("MDV" %in% colnames(dat)) {
+      dat <- dat[dat$MDV == 0,]
+    }
+    if("EVID" %in% colnames(dat)) {
+      dat <- dat[dat$EVID == 0,]
+    }
+  }
+  if(id %in% colnames(dat)) {
+    if ("id" %in% colnames(dat) &! id == "id") {
+      colnames(dat)[match("id", colnames(dat))] <- "id.old"
+    }
+    colnames(dat)[match(id, colnames(dat))] <- "id"    
+  }
+  if(is.na(match("id", colnames(dat)))[1]) {
+    cat ("No id column found in data, stopping!")
+    stop()
+  }  
   if(dv %in% colnames(dat)) {
     if ("dv" %in% colnames(dat) &! dv == "dv") {
       colnames(dat)[match("dv", colnames(dat))] <- "dv.old"

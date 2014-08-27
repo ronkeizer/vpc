@@ -4,11 +4,11 @@
 \title{VPC function for left- or right-censored data (e.g. BLOQ data)}
 \usage{
 vpc_loq(sim, obs, bins = NULL, n_bins = 8, obs.dv = "dv",
-  sim.dv = "sdv", obs.idv = "time", sim.idv = "time", stratify = NULL,
-  pi = c(0.05, 0.95), ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
-  plot = TRUE, log_y = FALSE, xlab = NULL, ylab = NULL, title = NULL,
-  smooth = TRUE, theme = "default", custom_theme = NULL,
-  return_what = "data", type = "bloq")
+  sim.dv = "sdv", obs.idv = "time", sim.idv = "time", obs.id = "id",
+  sim.id = "id", nonmem = FALSE, stratify = NULL, pi = c(0.05, 0.95),
+  ci = c(0.05, 0.95), uloq = NULL, lloq = NULL, plot = TRUE,
+  xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
+  theme = "default", custom_theme = NULL, type = "bloq")
 }
 \arguments{
 \item{sim}{}

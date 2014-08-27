@@ -3,12 +3,13 @@
 \alias{vpc}
 \title{VPC function}
 \usage{
-vpc(sim, obs, bins = NULL, n_bins = 8, obs.dv = "dv", sim.dv = "sdv",
-  obs.idv = "time", sim.idv = "time", stratify = NULL, pi = c(0.05,
-  0.95), ci = c(0.05, 0.95), uloq = NULL, lloq = NULL, plot = TRUE,
-  log_y = FALSE, xlab = NULL, ylab = NULL, title = NULL,
-  smooth = TRUE, theme = "default", custom_theme = NULL,
-  return_what = "data")
+vpc(sim, obs, bins = "auto", n_bins = 8, auto_bin_type = "simple",
+  obs.dv = "dv", sim.dv = "sdv", obs.idv = "time", sim.idv = "time",
+  obs.id = "id", sim.id = "id", nonmem = FALSE, plot.dv = FALSE,
+  stratify = NULL, pi = c(0.05, 0.95), ci = c(0.05, 0.95), uloq = NULL,
+  lloq = NULL, plot = TRUE, log_y = FALSE, log_y_min = 0.001,
+  xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
+  theme = "default", custom_theme = NULL, facet = "wrap")
 }
 \arguments{
 \item{sim}{}
@@ -24,7 +25,9 @@ Creates a VPC plot and/or plotting data from observed and simulation data
 \examples{
 obs <- Theoph
 colnames(obs) <- c("id", "wt", "dose", "time", "dv")
-obs$sex <- round(runif(unique(obs$id))) # create a dummy covariate to show stratification
+obs <- obs \%>\%   # create a dummy covariate to show stratification
+ group_by(id) \%>\%
+ mutate(sex = round(runif(1)))
 
 sim <- sim_data(obs, # the design of the dataset
                 model = function(x) { # the model
@@ -37,10 +40,9 @@ sim <- sim_data(obs, # the design of the dataset
                 par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
                 n = 500)
 
-vpc_dat <- vpc(sim, obs,
-               bins = c(0, 2, 4, 6, 8, 10, 25),
-               strat = "sex",
-               ylab = "Concentration", xlab = "Time (hrs)", title="Visual predictive check")
+vpc_dat <- vpc(sim, obs, stratify = c("sex"),
+              plot.dv = FALSE, facet = "wrap",
+              ylab = "Concentration", xlab = "Time (hrs)")
 }
 \seealso{
 \link{sim_data}
