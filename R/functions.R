@@ -9,7 +9,9 @@
 #' @examples
 #' obs <- Theoph
 #' colnames(obs) <- c("id", "wt", "dose", "time", "dv")
-#' obs$sex <- round(runif(unique(obs$id))) # create a dummy covariate to show stratification
+#' obs <- obs %>%   # create a dummy covariate to show stratification
+#'  group_by(id) %>%  
+#'  mutate(sex = round(runif(1)))
 #' 
 #' sim <- sim_data(obs, # the design of the dataset
 #'                 model = function(x) { # the model
@@ -24,7 +26,7 @@
 #' 
 #' vpc_dat <- vpc(sim, obs, 
 #'                bins = c(0, 2, 4, 6, 8, 10, 25), 
-#'                strat = "sex",
+#'                stratify = "sex",
 #'                ylab = "Concentration", xlab = "Time (hrs)", title="Visual predictive check")
 vpc <- function(sim, obs, 
                 bins = NULL, 
@@ -33,6 +35,7 @@ vpc <- function(sim, obs,
                 sim.dv =  "sdv",
                 obs.idv = "time",
                 sim.idv = "time",
+                plot.dv = TRUE,
                 stratify = NULL,
                 pi = c(0.05, 0.95), 
                 ci = c(0.05, 0.95),
@@ -47,13 +50,8 @@ vpc <- function(sim, obs,
                 theme = "default",
                 custom_theme = NULL,
                 return_what = NULL) {
-  if (is.null(stratify)) { 
-    strat <- "strat" 
-  } else {
-    strat <- stratify
-  }
-  sim <- format_vpc_input_data(sim, sim.dv, sim.idv, lloq, uloq, strat, bins)
-  obs <- format_vpc_input_data(obs, obs.dv, obs.idv, lloq, uloq, strat, bins)
+  sim <- format_vpc_input_data(sim, sim.dv, sim.idv, lloq, uloq, stratify, bins)
+  obs <- format_vpc_input_data(obs, obs.dv, obs.idv, lloq, uloq, stratify, bins)
   aggr_sim <- data.frame(cbind(sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[1])),
                                sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, 0.5 )),
                                sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[2]))))
@@ -107,8 +105,11 @@ vpc <- function(sim, obs,
   pl <- pl +
     geom_line(data=aggr_obs, aes(x=bin_mid, y=obs50), linetype='solid') +
     geom_line(data=aggr_obs, aes(x=bin_mid, y=obs5), linetype='dotted') +
-    geom_line(data=aggr_obs, aes(x=bin_mid, y=obs95), linetype='dotted') +
-    xlab(xlab) + ylab(ylab)
+    geom_line(data=aggr_obs, aes(x=bin_mid, y=obs95), linetype='dotted') 
+  if (plot.dv) {
+    pl <- pl + geom_point(data=obs, aes(x=idv, y = dv))
+  }
+  pl <- pl + xlab(xlab) + ylab(ylab)
   if (log_y) {
     pl <- pl + scale_y_log10() 
   }
@@ -167,13 +168,8 @@ vpc_loq <- function(sim,
                     custom_theme = NULL,
                     return_what = NULL,
                     type = "bloq") {
-  if (is.null(stratify)) { 
-    strat <- "strat" 
-  } else {
-    strat <- stratify
-  }
-  sim <- format_vpc_input_data(sim, sim.dv, sim.idv, lloq, uloq, strat, bins)
-  obs <- format_vpc_input_data(obs, obs.dv, obs.idv, lloq, uloq, strat, bins)
+  sim <- format_vpc_input_data(sim, sim.dv, sim.idv, lloq, uloq, stratify, bins)
+  obs <- format_vpc_input_data(obs, obs.dv, obs.idv, lloq, uloq, stratify, bins)
   loq_perc <- function(x) { sum(x <= lloq) / length(x) } # below lloq, default   
   if (type == "uloq") {
     loq_perc <- function(x) { sum(x >= uloq) / length(x) }
@@ -228,7 +224,7 @@ vpc_loq <- function(sim,
     pl <- pl + ylab(ylab)
   } else {
     pl <- pl + ylab(paste("Fraction", type))
-  }  
+  }
   if (plot) {
     print(pl)    
   }
@@ -257,7 +253,9 @@ vpc_loq <- function(sim,
 #' @examples
 #' obs <- Theoph
 #' colnames(obs) <- c("id", "wt", "dose", "time", "dv")
-#' obs$sex <- round(runif(unique(obs$id))) # create a dummy covariate to show stratification
+#' obs <- obs %>%   # create a dummy covariate to show stratification
+#'  group_by(id) %>%  
+#'  mutate(sex = round(runif(1)))
 #' 
 #' sim <- sim_data(obs, # the design of the dataset
 #'                 model = function(x) { # the model
@@ -272,7 +270,7 @@ vpc_loq <- function(sim,
 #' 
 #' vpc_dat <- vpc(sim, obs, 
 #'                bins = c(0, 2, 4, 6, 8, 10, 25), 
-#'                strat = "sex",
+#'                stratify = "sex",
 #'                ylab = "Concentration", xlab = "Time (hrs)", title="Visual predictive check")
 sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)), 
                       model = function(x) { return(x$alpha + x$beta) }, 
