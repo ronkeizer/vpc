@@ -43,6 +43,7 @@ vpc <- function(sim, obs,
                 lloq = NULL, 
                 plot = TRUE,
                 log_y = FALSE,
+                log_y_min = 1e-3,
                 xlab = NULL, 
                 ylab = NULL,
                 title = NULL,
@@ -51,8 +52,8 @@ vpc <- function(sim, obs,
                 custom_theme = NULL,
                 facet = "wrap",
                 return_what = NULL) {
-  sim <- format_vpc_input_data(sim, sim.dv, sim.idv, lloq, uloq, stratify, bins)
-  obs <- format_vpc_input_data(obs, obs.dv, obs.idv, lloq, uloq, stratify, bins)
+  sim <- format_vpc_input_data(sim, sim.dv, sim.idv, lloq, uloq, stratify, bins, log_y, log_y_min)
+  obs <- format_vpc_input_data(obs, obs.dv, obs.idv, lloq, uloq, stratify, bins, log_y, log_y_min)
   aggr_sim <- data.frame(cbind(sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[1])),
                                sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, 0.5 )),
                                sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[2]))))
@@ -118,7 +119,7 @@ vpc <- function(sim, obs,
     if(facet == "wrap") {
       pl <- pl + facet_wrap(~ strat)      
     } else {
-      if(length(grep("horiz", facet))>0) {
+      if(length(grep("row", facet))>0) {
         pl <- pl + facet_grid(. ~ strat)                
       } else {
         pl <- pl + facet_grid(strat ~ .)                
@@ -168,7 +169,6 @@ vpc_loq <- function(sim,
                     uloq = NULL, 
                     lloq = NULL, 
                     plot = TRUE,
-                    log_y = FALSE,
                     xlab = NULL, 
                     ylab = NULL,
                     title = NULL,
@@ -208,11 +208,16 @@ vpc_loq <- function(sim,
     geom_line(data=aggr_obs, aes(x=bin_mid, y=ploq_med), linetype='solid') +
     geom_line(data=aggr_obs, aes(x=bin_mid, y=ploq_low), linetype='dotted') +
     geom_line(data=aggr_obs, aes(x=bin_mid, y=ploq_up), linetype='dotted')  
-  if (log_y) {
-    pl <- pl + scale_y_log10() 
-  }
   if (!is.null(stratify)) {
-    pl <- pl + facet_wrap(~ strat)
+    if(facet == "wrap") {
+      pl <- pl + facet_wrap(~ strat)      
+    } else {
+      if(length(grep("row", facet))>0) {
+        pl <- pl + facet_grid(. ~ strat)                
+      } else {
+        pl <- pl + facet_grid(strat ~ .)                
+      }
+    }
   }
   if (!is.null(title)) {
     pl <- pl + ggtitle(title)  
@@ -310,7 +315,6 @@ sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)),
   dplyr::arrange(tmp, sim, id, time)
 }
 
-
 triangle_to_full <- function (vect) {
   for (i in 1:100) { # find the size of the matrix
     if (length(vect) == add_recurs(0,0,i)) {
@@ -396,15 +400,21 @@ themes <- list(
   )
 )
 
-format_vpc_input_data <- function(dat, dv, idv, lloq, uloq, strat, bins) {
-  if(length(match(dv, colnames(dat))) > 0) {
+format_vpc_input_data <- function(dat, dv, idv, lloq, uloq, strat, bins, log_y, log_y_min) {
+  if(dv %in% colnames(dat)) {
+    if ("dv" %in% colnames(dat) &! dv == "dv") {
+      colnames(dat)[match("dv", colnames(dat))] <- "dv.old"
+    }
     colnames(dat)[match(dv, colnames(dat))] <- "dv"    
   }
   if(is.na(match("dv", colnames(dat)))[1]) {
     cat ("No dv column found in data, stopping!")
     stop()
   }  
-  if(length(match(idv, colnames(dat))) > 0) {
+  if(idv %in% colnames(dat)) {
+    if ("idv" %in% colnames(dat) &! idv == "idv") {
+      colnames(dat)[match("idv", colnames(dat))] <- "idv.old"
+    }
     colnames(dat)[match(idv, colnames(dat))] <- "idv"    
   }
   if(is.na(match("idv", colnames(dat)))[1]) {
@@ -413,6 +423,9 @@ format_vpc_input_data <- function(dat, dv, idv, lloq, uloq, strat, bins) {
   }  
   if (!is.null(uloq)) { dat$dv[dat$dv > uloq] <- uloq }
   if (!is.null(lloq)) { dat$dv[dat$dv < lloq] <- lloq }
+  if (log_y) {
+    dat$dv[dat$dv < log_y_min] <- log_y_min 
+  }
   if(is.null(strat)) {
     dat$strat <- 1
   } else {
