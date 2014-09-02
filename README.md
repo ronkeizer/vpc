@@ -1,12 +1,31 @@
 vpc
 ===
 
-Create visual predictive checks, a commonly used diagnostic plot in pharmacometrics, in R, without the use of NONMEM, PsN, and Xpose. This approach is more flexible, more easily customizable, and faster than the NONMEM+PsN+Xpose approach.
+Create visual predictive checks, a commonly used diagnostic plot in pharmacometrics in R 
 
-To be supplied to function:
+## Rationale
 
--  observed data
--  function to simulate data (i.e. a structural model with parameter estimates / distributions), **OR** a simulation dataset, e.g. simulated from NONMEM or other simulation software
+A widely used diagnostic tool in pharmacometrics is the VPC, which is most commonly created using PsN and Xpose, using NONMEM as the simulation engine. However, creating VPCs in PsN and Xpose can be cumbersome. The aim of the current library is to provide a tool that is:
+
+- a single-step process for creating a VPC (previously: simulation done in NONMEM, data processing by PsN, plotting by Xpose/lattice). I.e. this allows changing of vpc parameters such as binning / stratification upon creation of the plot, not in a separate pre-processing step. 
+- more easily customizable, e.g. request any prediction / confidence interval
+- more flexible: simulate data in R, or use simulated NONMEM data, or use data from other tools (Monolix / BUGS / Stan / Matlab etc)
+- more easily extendible: output is a ggplot object
+- much easier to use in the case of survival / repeated time-to-event data (the PsN/Xpose approach is very hairy for this type of data)
+- faster (mostly due to optimized data-handling with dplyr)
+
+## Functionality implemented
+
+- VPC for continuous data
+- VPC for censored data (or binary data in general)
+- Stratification (single & multiple)
+- Auto-binning (using simple search for x-variable density-nadirs)
+
+## To be implemented soon
+
+- prediction-correction
+- (repeated) time-to-event plots
+- auto-binning using approach form Lavielle et al.
 
 ## Installation
 
