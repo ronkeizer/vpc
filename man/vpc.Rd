@@ -5,11 +5,12 @@
 \usage{
 vpc(sim, obs, bins = "auto", n_bins = 8, auto_bin_type = "simple",
   obs.dv = "dv", sim.dv = "sdv", obs.idv = "time", sim.idv = "time",
-  obs.id = "id", sim.id = "id", nonmem = FALSE, plot.dv = FALSE,
-  stratify = NULL, pi = c(0.05, 0.95), ci = c(0.05, 0.95), uloq = NULL,
-  lloq = NULL, plot = TRUE, log_y = FALSE, log_y_min = 0.001,
-  xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
-  theme = "default", custom_theme = NULL, facet = "wrap")
+  obs.id = "id", sim.id = "id", obs.pred = "pred", sim.pred = "pred",
+  nonmem = FALSE, plot.dv = FALSE, stratify = NULL, pred_corr = FALSE,
+  pred_corr_lower_bnd = 0, pi = c(0.05, 0.95), ci = c(0.05, 0.95),
+  uloq = NULL, lloq = NULL, plot = TRUE, log_y = FALSE,
+  log_y_min = 0.001, xlab = NULL, ylab = NULL, title = NULL,
+  smooth = TRUE, theme = "default", custom_theme = NULL, facet = "wrap")
 }
 \arguments{
 \item{sim}{}

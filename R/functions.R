@@ -60,6 +60,10 @@ vpc <- function(sim, obs,
     bins <- auto_bin(obs, auto_bin_type, n_bins, x=obs.idv)
   }
   if (pred_corr) {
+    if (nonmem) {
+      obs.pred <- "PRED"
+      sim.pred <- "PRED"
+    }
     if (!obs.pred %in% names(obs)) {
       cat("Warning: Prediction-correction: specified pred-variable not found in observations, trying to get from simulated dataset...")      
       if (!sim.pred %in% names(sim)) {
