@@ -38,6 +38,7 @@ The VPC is a widely used diagnostic tool in pharmacometrics is the VPC, most com
     
 ## Example
 
+    library(dplyr)
     library(vpc)
 
     ## Load the theophylline PK dataset
