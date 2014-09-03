@@ -5,14 +5,16 @@ Create visual predictive checks, a commonly used diagnostic plot in pharmacometr
 
 ## Rationale
 
-The VPC is a widely used diagnostic tool in pharmacometrics is the VPC, most commonly created using [PsN](http://psn.sourceforge.net) and [Xpose](http://xpose.sourceforge.net), using NONMEM as the simulation engine. However, creating VPCs in PsN and Xpose can be cumbersome, especially for survival (time-to-event) data. The aim of the current library is to provide a tool that is:
+The VPC is a widely used diagnostic tool in pharmacometrics is the VPC, most commonly created using [PsN](http://psn.sourceforge.net) and [Xpose](http://xpose.sourceforge.net), using NONMEM as the simulation engine. However, creating VPCs in PsN and Xpose can be cumbersome, especially for survival (time-to-event) data. 
+
+The aim of the current library is to provide a tool that is:
 
 - a single-step process for creating a VPC (previously: simulation done in NONMEM, data processing by PsN, plotting by Xpose/lattice). This e.g. allows changing of vpc parameters such as binning / stratification upon creation of the plot, not in a separate pre-processing step. 
 - more flexible regarding input: simulate data in R, or use simulated NONMEM data, or use data from other tools (Monolix / BUGS / Stan / Matlab etc)
 - more easily customizable, e.g. request any prediction / confidence interval or binning strategy upon plotting.
 - more easily extensible: the output is a ggplot object which can be easily themed and extended
 - easier to use in the case of survival / repeated time-to-event data (the PsN/Xpose approach is very hairy for this type of data)
-- faster (mostly due to optimized data-handling with dplyr)
+- faster 
 
 ## Functionality available
 
