@@ -14,17 +14,17 @@ A widely used diagnostic tool in pharmacometrics is the VPC, which is most commo
 - much easier to use in the case of survival / repeated time-to-event data (the PsN/Xpose approach is very hairy for this type of data)
 - faster (mostly due to optimized data-handling with dplyr)
 
-## Functionality implemented
+## Functionality available
 
 - VPC for continuous data
 - VPC for censored data (or binary data in general)
-- Stratification (single & multiple)
-- Auto-binning (using simple search for x-variable density-nadirs)
+- dtratification (single & multiple)
+- auto-binning (search for x-variable density-nadirs)
+- prediction-correction
 - General-purpose function to simulate data from a mixed-effects structural model, from a fixed parameter vector and between-subject variability covariance matrix.
 
 ## To be implemented soon
 
-- prediction-correction
 - (repeated) time-to-event plots
 - auto-binning function from Lavielle et al.
 - user-supplied binning functions
@@ -72,6 +72,7 @@ A widely used diagnostic tool in pharmacometrics is the VPC, which is most commo
                    sim.idv = "time",
                    bins = c(0, 2, 4, 6, 8, 10, 25),             # specify bin separators manually
                    stratify = c("sex"),                         # multiple stratifications possible, just supply as vector
+                   pred_corr = FALSE,                           # perform prediction-correction?
                    plot.dv = TRUE,                              # plot observations?
                    facet = "wrap",                              # wrap stratifications, or as "row" or "column"
                    ylab = "Concentration", xlab = "Time (hrs)", title="Visual predictive check")

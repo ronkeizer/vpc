@@ -35,9 +35,13 @@ vpc <- function(sim, obs,
                 sim.idv = "time",
                 obs.id = "id",
                 sim.id = "id",
+                obs.pred = "pred",
+                sim.pred = "pred",
                 nonmem = FALSE,
                 plot.dv = FALSE,
                 stratify = NULL,
+                pred_corr = FALSE,
+                pred_corr_lower_bnd = 0,
                 pi = c(0.05, 0.95), 
                 ci = c(0.05, 0.95),
                 uloq = NULL, 
@@ -55,8 +59,33 @@ vpc <- function(sim, obs,
   if (class(bins) != "numeric") {
     bins <- auto_bin(obs, auto_bin_type, n_bins, x=obs.idv)
   }
+  if (pred_corr) {
+    if (!obs.pred %in% names(obs)) {
+      cat("Warning: Prediction-correction: specified pred-variable not found in observations, trying to get from simulated dataset...")      
+      if (!sim.pred %in% names(sim)) {
+        cat("Warning: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
+        return()
+      } else {
+        obs[[obs.pred]] <- sim[1:length(obs[,1]), sim.pred]
+        cat ("OK")
+      }
+    } else {
+      if (!sim.pred %in% names(sim)) {
+        cat("Warning: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
+        return()
+      }      
+    }
+    obs$pred <- obs[[obs.pred]]
+    sim$pred <- sim[[sim.pred]]
+  }
   sim <- format_vpc_input_data(sim, sim.dv, sim.idv, sim.id, lloq, uloq, stratify, bins, log_y, log_y_min, nonmem)
   obs <- format_vpc_input_data(obs, obs.dv, obs.idv, obs.id, lloq, uloq, stratify, bins, log_y, log_y_min, nonmem)
+  if (pred_corr) {
+    obs <- obs %>% group_by(strat, bin) %>% mutate(pred_bin = mean(pred))
+    obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
+    sim <- sim %>% group_by(strat, sim, bin) %>% mutate(pred_bin = mean(pred))
+    sim[sim$pred != 0,]$dv <- pred_corr_lower_bnd + (sim[sim$pred != 0,]$dv - pred_corr_lower_bnd) * (sim[sim$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (sim[sim$pred != 0,]$pred - pred_corr_lower_bnd)
+  }
   aggr_sim <- data.frame(cbind(sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[1])),
                                sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, 0.5 )),
                                sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[2]))))
@@ -331,7 +360,7 @@ sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)),
   if (is.null(par_values)) {
     param <- draw_params_mvr( # draw parameter values. can also be just population values, or specified manually ()
       ids = unique(as.numeric(as.character(obs$id))), 
-      n_sim = 500, 
+      n_sim = n, 
       theta, 
       omega_mat = triangle_to_full(omega_mat),
       par_names = par_names)      
@@ -342,9 +371,12 @@ sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)),
   sim_des$sim  <- rep(1:n, each=length(design[,1]))
   sim_des$join <- paste(sim_des$sim, sim_des$id, sep="_")
   param$join   <- paste(param$sim, param$id, sep="_")
-  tmp <- merge(sim_des, param,
-               by.x="join", by.y="join")
+  tmp <- tbl_df(merge(sim_des, param,
+                      by.x="join", by.y="join"))
+  tmp_pred <- cbind(design, matrix(rep(theta, each=length(design[,1])), ncol=length(theta)))
+  colnames(tmp_pred)[length(tmp_pred)-length(par_names)+1:3] <- par_names
   tmp$sdv <- add_noise(model(tmp), ruv = error)  
+  tmp$pred <- model(tmp_pred)
   colnames(tmp) <- gsub("\\.x", "", colnames(tmp))
   dplyr::arrange(tmp, sim, id, time)
 }
