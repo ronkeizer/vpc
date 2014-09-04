@@ -159,9 +159,9 @@ vpc <- function(sim, obs,
       pl <- pl + facet_wrap(~ strat)      
     } else {
       if(length(grep("row", facet))>0) {
-        pl <- pl + facet_grid(. ~ strat)                
-      } else {
         pl <- pl + facet_grid(strat ~ .)                
+      } else {
+        pl <- pl + facet_grid(. ~ strat)                
       }
     }
   }
@@ -282,9 +282,9 @@ vpc_cens <- function(sim,
       pl <- pl + facet_wrap(~ strat)      
     } else {
       if(length(grep("row", facet))>0) {
-        pl <- pl + facet_grid(. ~ strat)                
-      } else {
         pl <- pl + facet_grid(strat ~ .)                
+      } else {
+        pl <- pl + facet_grid(. ~ strat)                
       }
     }
   }
@@ -319,6 +319,244 @@ vpc_cens <- function(sim,
       pl = pl
     )
   )
+}
+
+#' VPC function for survival-type data 
+#' 
+#' Creates a VPC plot and/or plotting data from observed and simulation data
+#' @param sim 
+#' @param obs
+#' @return A VPC object 
+#' @export
+#' @examples
+#'\dontrun{
+#' ## read obs and sim data from NONMEM tables
+#' obs <- tbl_df(read.table.nm("nm/sdtab51"))  
+#' # sim <- tbl_df(read.table.nm("nm/simtab51"))
+#' # saveRDS(sim, file="nm/simtab51.gz", compress = TRUE)
+#' sim <- readRDS(file="nm/simtab51.gz")
+#' 
+#' ## create the VPC, stratified by dose
+#' vpc1 <- vpc_tte(sim, obs, 
+#'                 n_bins = 15,
+#'                 stratify = "dose",
+#'                 facet = "wrap",
+#'                 nonmem = TRUE,  # use NONMEM common data labels
+#'                 smooth = TRUE) + xlab("Test")
+#'}
+vpc_tte <- function(sim, obs, 
+                    bins = "auto",
+                    n_bins = 32,
+                    auto_bin_type = "simple",
+                    obs.dv = "dv",
+                    sim.dv =  "sdv",
+                    obs.idv = "time",
+                    sim.idv = "time",
+                    obs.id = "id",
+                    sim.id = "id",
+                    pi.med = FALSE, 
+                    nonmem = FALSE,
+                    stratify = NULL,
+                    ci = c(0.05, 0.95),
+                    plot = TRUE,
+                    xlab = NULL, 
+                    ylab = NULL,
+                    title = NULL,
+                    smooth = TRUE,
+                    theme = "default",
+                    custom_theme = NULL,
+                    facet = "wrap") {
+  if(nonmem) {
+    colnames(obs) <- tolower(colnames(obs))
+    colnames(sim) <- tolower(colnames(sim))
+    sim.dv <- "dv"
+  }
+
+  obs <- add_stratification(obs, stratify)
+  sim <- add_stratification(sim, stratify)
+  
+  # compute KM curve for observations
+  obs_km <- compute_kaplan(obs, strat = "strat")
+  
+  # compute KM curve CI for simulations
+  # first get the number of simulations (req'd if sim# is not specified)
+  sim_id <- unique(sim$id)
+  sim$id_shift <- c(sim$id[2:length(sim$id)], 0) 
+  len <- (1:length(sim$id))[sim$id == tail(sim_id,1) & sim$id_shift == sim_id[1]][1]
+  n_sims <- length(sim$id) / len
+  if (n_sims != round(n_sims)) {
+    cat ("Could not determine number of simulations performed, please specify manually!")
+    return()
+  }
+  sim$sim <- rep(1:n_sims, each=length(sim[,1])/n_sims) 
+  
+  all <- c()
+  for (i in 1:n_sims) {
+    tmp <- sim %>%
+      filter(sim == i) %>%
+      group_by(id) %>% 
+      mutate (event = max(dv))
+    cens <- tmp %>% filter(event == 0) %>% filter(time == max(time))
+    evnt <- tmp %>% filter(dv == 1) %>% filter(time == min(time))
+    tmp <- compute_kaplan(rbind(cens, evnt), strat = "strat")
+    all <- rbind(all, cbind(i, tmp))
+  }
+  bins <- seq(from = 0, max(all$time)*1.04, by = diff(range(all$time))/(n_bins), )
+  all$bin <- cut(all$time, breaks = bins, labels = FALSE, right = TRUE)
+  all$bin_min <- bins[all$bin] 
+  all$bin_max <- bins[all$bin+1] 
+  all$bin_mid <- (all$bin_min + all$bin_max)/2 
+  
+  sim_km <- all %>% 
+    group_by (bin, strat) %>% 
+    summarise (bin_mid = head(bin_mid,1), bin_min = head(bin_min,1), bin_max = head(bin_max,1), 
+               qmin = quantile(surv, 0.05), qmax = quantile(surv, 0.95), qmed = median(surv),
+               step = 0)
+  if (smooth) {
+    geom_line_custom <- geom_line
+  } else {
+    geom_line_custom <- geom_step
+  }
+  pl <- ggplot(sim_km, aes(x=bin_mid, y=qmed, group=i)) 
+  if (smooth) {
+    pl <- pl + geom_ribbon(aes(min = qmin, max=qmax, y=qmed), fill = themes[[theme]]$med_area, alpha=0.5)
+  } else {
+    pl <- pl + geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area)   
+  }
+  if (pi.med) {
+    pl <- pl + geom_line_custom(linetype="dashed")
+  }
+  pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv)) 
+  if (!is.null(stratify)) {
+    if(facet == "wrap") {
+      pl <- pl + facet_wrap(~ strat)      
+    } else {
+      if(length(grep("row", facet))>0) {
+        pl <- pl + facet_grid(strat ~ .)                
+      } else {
+        pl <- pl + facet_grid(. ~ strat)                
+      }
+    }
+  }
+  if (!is.null(title)) {
+    pl <- pl + ggtitle(title)  
+  }
+  if (!is.null(custom_theme)) {  
+    pl <- pl + custom_theme()    
+  } else {
+    if (!is.null(theme)) {
+      pl <- pl + theme_plain()
+    } 
+  }
+  if(!is.null(xlab)) {
+    pl <- pl + xlab(xlab)
+  } 
+  if(!is.null(ylab)) {
+    pl <- pl + ylab(ylab)
+  } 
+  if(plot) {
+    print(pl)
+  }
+  return(
+    list(
+      obs = obs_km, 
+      sim = sim_km,
+      bins = bins, 
+      pl = pl
+    )
+  )
+}
+
+compute_kaplan <- function(dat, strat = NULL) {
+  if (!is.null(strat)) {
+    strats <- unique(dat[[strat]])
+    tmp <- c()
+    for (i in seq(strats)) {
+      km_fit <- survfit(Surv(time = time, dv != 0) ~ 1, data = dat[dat[[strat]] == strats[i],])
+      tmp <- rbind(tmp, data.frame(time = km_fit$time, surv = km_fit$surv, strat = strats[i]))          
+    }
+    return(tmp)      
+  } else {
+    km_fit <- survfit(Surv(time = time, dv != 0) ~ 1, data = dat)
+    data.frame(time = km_fit$time, surv = km_fit$surv)           
+  }
+}
+
+add_step <- function(dat = ., vars) {
+    dat$step <- 0
+    tmp <- dat[-1,]
+    tmp$step <- 1
+    tmp[,vars] <- dat[-length(dat[,1]), vars]    
+    newdat <- data.frame(rbind(dat, tmp))
+    newdat %>% arrange(bin, -step)    
+}
+
+add_stratification <- function (dat, strat) {
+  if(is.null(strat)) {
+    dat$strat <- 1
+  } else {
+    dat$strat <- ""
+    for(i in seq(strat)) {
+      if(i > 1) { 
+        dat$strat <- paste0(dat$strat, ", ")
+      }
+      dat$strat <- paste0(dat$strat, strat[i], "=", dat[,strat[i]])
+    }
+  }  
+  dat$strat <- as.factor(dat$strat)
+  return(dat)
+}
+
+format_vpc_input_data <- function(dat, dv, idv, id, lloq, uloq, strat, bins, log_y, log_y_min, nonmem) {
+  if (nonmem) {
+    dv = "DV"
+    idv = "TIME"
+    id = "ID"
+    if("MDV" %in% colnames(dat)) {
+      dat <- dat[dat$MDV == 0,]
+    }
+    if("EVID" %in% colnames(dat)) {
+      dat <- dat[dat$EVID == 0,]
+    }
+  }
+  if(id %in% colnames(dat)) {
+    if ("id" %in% colnames(dat) &! id == "id") {
+      colnames(dat)[match("id", colnames(dat))] <- "id.old"
+    }
+    colnames(dat)[match(id, colnames(dat))] <- "id"    
+  }
+  if(is.na(match("id", colnames(dat)))[1]) {
+    cat ("No id column found in data, stopping!")
+    stop()
+  }  
+  if(dv %in% colnames(dat)) {
+    if ("dv" %in% colnames(dat) &! dv == "dv") {
+      colnames(dat)[match("dv", colnames(dat))] <- "dv.old"
+    }
+    colnames(dat)[match(dv, colnames(dat))] <- "dv"    
+  }
+  if(is.na(match("dv", colnames(dat)))[1]) {
+    cat ("No dv column found in data, stopping!")
+    stop()
+  }  
+  if(idv %in% colnames(dat)) {
+    if ("idv" %in% colnames(dat) &! idv == "idv") {
+      colnames(dat)[match("idv", colnames(dat))] <- "idv.old"
+    }
+    colnames(dat)[match(idv, colnames(dat))] <- "idv"    
+  }
+  if(is.na(match("idv", colnames(dat)))[1]) {
+    cat ("No idv column found in data, stopping!")
+    stop()
+  }  
+  if (!is.null(uloq)) { dat$dv[dat$dv > uloq] <- uloq }
+  if (!is.null(lloq)) { dat$dv[dat$dv < lloq] <- lloq }
+  if (log_y) {
+    dat$dv[dat$dv < log_y_min] <- log_y_min 
+  }
+  dat <- add_stratification(dat, strat)
+  dat <- bin_data(dat, bins, "idv")  
+  return(dat)
 }
 
 #' Simulate data based on a model and parameter distributions
@@ -414,14 +652,13 @@ sim_data_tte <- function (fit, t_cens = NULL, n = 100) {
   }
   out <- c()
   for (i in 1:n) {
-    km_fit <- survfit(Surv(time = t, dv == 1) ~ 1, data = tmp[tmp$sim == i,])
+    km_fit <- compute_kaplan(tmp[tmp$sim == i,])
     idx_new <- idx + length(unique(tmp[tmp$sim == i,]$t))-1
     out <- rbind(out, cbind(i, km_fit$time, km_fit$surv))     
   }
   colnames(out) <- c("sim", "time", "dv")
   tbl_df(data.frame(out))
 }
-
 
 triangle_to_full <- function (vect) {
   for (i in 1:100) { # find the size of the matrix
@@ -533,69 +770,6 @@ themes <- list(
   )
 )
 
-format_vpc_input_data <- function(dat, dv, idv, id, lloq, uloq, strat, bins, log_y, log_y_min, nonmem) {
-  if (nonmem) {
-    dv = "DV"
-    idv = "TIME"
-    id = "ID"
-    if("MDV" %in% colnames(dat)) {
-      dat <- dat[dat$MDV == 0,]
-    }
-    if("EVID" %in% colnames(dat)) {
-      dat <- dat[dat$EVID == 0,]
-    }
-  }
-  if(id %in% colnames(dat)) {
-    if ("id" %in% colnames(dat) &! id == "id") {
-      colnames(dat)[match("id", colnames(dat))] <- "id.old"
-    }
-    colnames(dat)[match(id, colnames(dat))] <- "id"    
-  }
-  if(is.na(match("id", colnames(dat)))[1]) {
-    cat ("No id column found in data, stopping!")
-    stop()
-  }  
-  if(dv %in% colnames(dat)) {
-    if ("dv" %in% colnames(dat) &! dv == "dv") {
-      colnames(dat)[match("dv", colnames(dat))] <- "dv.old"
-    }
-    colnames(dat)[match(dv, colnames(dat))] <- "dv"    
-  }
-  if(is.na(match("dv", colnames(dat)))[1]) {
-    cat ("No dv column found in data, stopping!")
-    stop()
-  }  
-  if(idv %in% colnames(dat)) {
-    if ("idv" %in% colnames(dat) &! idv == "idv") {
-      colnames(dat)[match("idv", colnames(dat))] <- "idv.old"
-    }
-    colnames(dat)[match(idv, colnames(dat))] <- "idv"    
-  }
-  if(is.na(match("idv", colnames(dat)))[1]) {
-    cat ("No idv column found in data, stopping!")
-    stop()
-  }  
-  if (!is.null(uloq)) { dat$dv[dat$dv > uloq] <- uloq }
-  if (!is.null(lloq)) { dat$dv[dat$dv < lloq] <- lloq }
-  if (log_y) {
-    dat$dv[dat$dv < log_y_min] <- log_y_min 
-  }
-  if(is.null(strat)) {
-    dat$strat <- 1
-  } else {
-    dat$strat <- ""
-     for(i in seq(strat)) {
-       if(i > 1) { 
-         dat$strat <- paste0(dat$strat, ", ")
-       }
-       dat$strat <- paste0(dat$strat, strat[i], "=", dat[,strat[i]])
-     }
-  }
-  dat$strat <- as.factor(dat$strat)
-  dat <- bin_data(dat, bins, "idv")  
-  return(dat)
-}
-
 theme_plain <-  function () {
   theme(
     text = element_text(family="mono"),
@@ -612,4 +786,17 @@ theme_plain <-  function () {
   )    
 }
 
+read.table.nm <- function(file, perl = TRUE) {
+  if (perl) {
+    cmd <- paste0("perl -e 'open (IN, \'<", file, "\'); my $i = 0; my $cols = 0; while (my $line = <IN>) { if ($line =~ m/[a-df-z]/i) { unless($line =~ m/^TABLE NO/ || $cols == 1) { print $line; $cols = 1; } } else { print $line } } ; close(IN);'")
+    cmd <- "ls"
+    tab <- read.table (pipe(cmd), header=T);    
+  } else { # extremely slow....
+    tab <- readLines (file)
+    skip <- grep('/[a-z]/i', tab)[1] - 1
+    del_rows <- c(grep("TABLE", tab)[-1] , grep ("TABLE", tab)[-1] + 1)
+    tab <- tab[-del_rows]
+    read.table(textConnection(tab), skip=1, header=T) 
+  }    
+}
 
