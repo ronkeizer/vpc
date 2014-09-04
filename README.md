@@ -30,6 +30,7 @@ The aim of the current library is to provide a tool that is:
 - (repeated) time-to-event plots
 - auto-binning by k-means clustering (from Lavielle et al. JPP 2011)
 - user-supplied binning functions
+- Kaplan-Meier Mean Covariate plots [KMMC](http://page-meeting.org/pdf_assets/4280-2012-06%20PAGE%20KMMC.pdf)
 
 ## Installation
 
