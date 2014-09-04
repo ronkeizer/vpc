@@ -385,6 +385,44 @@ sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)),
   dplyr::arrange(tmp, sim, id, time)
 }
 
+sim_data_tte <- function (fit, t_cens = NULL, n = 100) {
+  fit$coefficients <- as.list(fit$coefficients)
+  dat <- data.frame(model.matrix(fit))
+  for (i in seq(fit$coefficients)) { fit$coefficients[[i]] <- as.numeric (fit$coefficients[[i]]) }  
+  fact <- as.matrix(attr(fit$terms, "factors"))
+  parm <- t(fact) %*% as.numeric(fit$coefficients)
+  tmp.single <- data.frame (
+    par = exp(as.numeric(fit$coefficients[1]) + as.matrix(dat[,rownames(parm)]) %*% parm),
+    dv = 1
+  )
+  tmp <- do.call("rbind", replicate(n, tmp.single, simplify = FALSE))
+  tmp$sim  <- rep(1:n, each=length(tmp.single[,1]))
+  if (!fit$dist %in% c("exponential", "weibull")) {
+    cat (paste("Simulation of ", fit$dist, "distribution not yet implemented, sorry."))
+    return()
+  }
+  if (fit$dist == "exponential") {
+    tmp$t = rweibull(length(dat[,1]) * n, shape = 1, scale = tmp$par)
+    # or using: tmp$t = rexp(length(design$id), 1/tmp$par) 
+  } 
+  if (fit$dist == "weibull") {
+    # annoyinly, the survreg and rweibull mix up the shape/scale parameter names and also take the inverse!!!
+    tmp$t = rweibull(length(dat[,1]) * n, shape = 1/fit$scale, scale = tmp$par)
+  }
+  if (sum(tmp$t > t_cens) > 0) {  
+    tmp[tmp$t > t_cens,]$t <- t_cens
+  }
+  out <- c()
+  for (i in 1:n) {
+    km_fit <- survfit(Surv(time = t, dv == 1) ~ 1, data = tmp[tmp$sim == i,])
+    idx_new <- idx + length(unique(tmp[tmp$sim == i,]$t))-1
+    out <- rbind(out, cbind(i, km_fit$time, km_fit$surv))     
+  }
+  colnames(out) <- c("sim", "time", "dv")
+  tbl_df(data.frame(out))
+}
+
+
 triangle_to_full <- function (vect) {
   for (i in 1:100) { # find the size of the matrix
     if (length(vect) == add_recurs(0,0,i)) {
@@ -485,6 +523,8 @@ bin_data <- function(x, bins = c(0, 3, 5, 7), idv = "time") {
   x$bin <- cut(x[[idv]], bins, labels = FALSE, right=FALSE)
   return(x)
 }
+
+as.num <- function(x) { as.numeric(as.character(x)) }
 
 themes <- list(
   "default" = list(
