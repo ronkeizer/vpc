@@ -786,9 +786,13 @@ theme_plain <-  function () {
   )    
 }
 
-read.table.nm <- function(file, perl = TRUE) {
+read.table.nm <- function(file, url = FALSE, perl = TRUE) {
   if (perl) {
-    cmd <- paste0("perl -e 'open (IN, \'<", file, "\'); my $i = 0; my $cols = 0; while (my $line = <IN>) { if ($line =~ m/[a-df-z]/i) { unless($line =~ m/^TABLE NO/ || $cols == 1) { print $line; $cols = 1; } } else { print $line } } ; close(IN);'")
+    if (url) {
+      cmd <- paste0("perl -e 'use LWP::Simple; $content = get(\"", file, "\"); my @lines = split(/\n/, $content); my $i = 0; my $cols = 0; while (my $line = <@lines>) { if ($line =~ m/[a-df-z]/i) { unless($line =~ m/^TABLE NO/ || $cols == 1) { print $line; $cols = 1; } } else { print $line } } ; close(IN);'")
+    } else {
+      cmd <- paste0("perl -e 'open (IN, \"<", file, "\"); my $i = 0; my $cols = 0; while (my $line = <IN>) { if ($line =~ m/[a-df-z]/i) { unless($line =~ m/^TABLE NO/ || $cols == 1) { print $line; $cols = 1; } } else { print $line } } ; close(IN);'")
+    }
     cmd <- "ls"
     tab <- read.table (pipe(cmd), header=T);    
   } else { # extremely slow....
