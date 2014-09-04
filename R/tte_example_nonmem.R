@@ -1,6 +1,7 @@
 ## read obs en sim data from NONMEM tables
-obs <- 
-  tbl_df(read.table.nm("https://raw.githubusercontent.com/ronkeizer/vpc/master/nm/sdtab51", url=TRUE))  
+library(RCurl)
+obs <- getURL("https://raw.githubusercontent.com/ronkeizer/vpc/master/nm/sdtab51")  
+read.table.nm(obs, pipe=TRUE)
 # sim <- tbl_df(read.table.nm("nm/simtab51"))
 # saveRDS(sim, file="nm/simtab51.gz", compress = TRUE)
 sim <- readRDS(file="nm/simtab51.gz")
