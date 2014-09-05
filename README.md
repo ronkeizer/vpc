@@ -66,11 +66,13 @@ In this example, we'll simulate new data in R. But a simulation dataset from NON
                     n = 500)
 
     
-    ## VPC with auto binning:    
+VPC with auto binning:    
+
     vpc_dat <- vpc(sim, obs, stratify = c("sex"), 
                    n_bins = 8)                                   # aim for 8 or less bins in the autobin procedure
 
-    ## More elaborate use of options
+Similar VPC, but more explicit use of options:
+
     vpc_dat <- vpc(sim, obs,                                    # supply simulation and observation dataframes
                    obs.dv = "dv",                               # these column names are the default,                           
                    obs.idv = "time",                            #   update these if different.
@@ -87,9 +89,10 @@ In this example, we'll simulate new data in R. But a simulation dataset from NON
                    xlab = "Time (hrs)", 
                    title="VPC Theophylline model")
 
-The example below artificially induces an LLOQ of 5 for the above model / dataset. 
+The example below artificially induces an LLOQ of 5 for the above model / dataset, and generates a VPC for the probability of censoring.
 
      vpc_loq <- vpc_cens(sim, obs, lloq = 5)
+
 
 ### Time-to-event data
 
