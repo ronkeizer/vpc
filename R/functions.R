@@ -346,7 +346,7 @@ vpc_cens <- function(sim,
 #'}
 vpc_tte <- function(sim, obs, 
                     rtte = FALSE,
-                    rtte_show_occasions = NULL,
+                    occasions = NULL,
                     bins = "auto",
                     n_bins = 32,
                     auto_bin_type = "simple",
@@ -373,7 +373,21 @@ vpc_tte <- function(sim, obs,
     colnames(sim) <- tolower(colnames(sim))
     sim.dv <- "dv"
   }
-    
+
+  if(!is.null(stratify)) {
+    if(!is.null(rtte)) {
+      if (length(stratify) > 1) {
+        cat ("Sorry, with repeated time-to-event data, stratification on more than 1 variables is currently not supported!")
+        return()
+      }
+    } else {
+      if (length(stratify) > 2) {
+        cat ("Sorry, stratification on more than 2 variables is currently not supported!")
+        return()
+      }
+    }    
+  }
+  
   # if repeated time to event, time is longitudinal, convert to relative to previous event.
   if (rtte) {
     obs <- obs %>% group_by(id) %>% mutate(time = time - c(0,time[1:(length(time)-1)]))    
@@ -441,9 +455,9 @@ vpc_tte <- function(sim, obs,
   if (rtte) {
     sim_km$rtte <- as.num(gsub(".*rtte=(\\d.*).*", "\\1", sim_km$strat, perl = TRUE))
     obs_km$rtte <- as.num(gsub(".*rtte=(\\d.*).*", "\\1", obs_km$strat, perl = TRUE))
-    if (!is.null(rtte_show_occasions)) {
-      sim_km <- sim_km %>% filter(rtte %in% rtte_show_occasions)
-      obs_km <- obs_km %>% filter(rtte %in% rtte_show_occasions)
+    if (!is.null(occasions)) {
+      sim_km <- sim_km %>% filter(rtte %in% occasions)
+      obs_km <- obs_km %>% filter(rtte %in% occasions)
       # redefine strat factors, since otherwise empty panels will be shown
       sim_km$strat <- factor(sim_km$strat, levels = unique(sim_km$strat))
       obs_km$strat <- factor(obs_km$strat, levels = unique(obs_km$strat))
@@ -471,13 +485,25 @@ vpc_tte <- function(sim, obs,
     pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv))     
   }
   if (!is.null(stratify)) {
-    if(facet == "wrap") {
-      pl <- pl + facet_wrap(~ strat)      
-    } else {
-      if(length(grep("row", facet))>0) {
-        pl <- pl + facet_grid(strat ~ .)                
+    if (length(stratify) == 1) {
+      if(facet == "wrap") {
+        pl <- pl + facet_wrap(~ strat)      
       } else {
-        pl <- pl + facet_grid(. ~ strat)                
+        if(length(grep("row", facet))>0) {
+          pl <- pl + facet_grid(strat ~ .)                
+        } else {
+          pl <- pl + facet_grid(. ~ strat)                
+        }
+      }      
+    } else {
+      sim_km$strat1 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)-1]
+      sim_km$strat2 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)]
+      obs_km$strat1 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)-1]
+      obs_km$strat2 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)]
+      if(length(grep("row", facet))>0) {
+        pl <- pl + facet_grid(strat2 ~ strat1)                
+      } else {
+        pl <- pl + facet_grid(strat2 ~ strat1)                
       }
     }
   }
