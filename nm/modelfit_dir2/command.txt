@@ -1,1 +1,0 @@
-/usr/bin/execute -nmfe_options= run57sim.mod

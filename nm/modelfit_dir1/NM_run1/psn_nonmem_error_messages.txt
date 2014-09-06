@@ -1,3 +1,0 @@
-
-
-There was an error when running nmfe, NMtran could not be initiated for model 1  - check that nmfe-related options are correct, if used (-nmfe_options, -parafile...)

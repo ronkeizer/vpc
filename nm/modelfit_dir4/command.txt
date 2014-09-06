@@ -1,1 +1,0 @@
-/usr/bin/execute run57sim.mod

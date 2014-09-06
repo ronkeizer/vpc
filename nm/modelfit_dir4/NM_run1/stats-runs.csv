@@ -1,6 +1,0 @@
-$VAR1 = [
-          {
-            'failed' => 'There was an error when running nmfe, NMtran could not be initiated (the NMtran output file FDATA is missing)'
-          }
-        ];
-Selected 1
