@@ -345,6 +345,8 @@ vpc_cens <- function(sim,
 #'                 smooth = TRUE) + xlab("Test")
 #'}
 vpc_tte <- function(sim, obs, 
+                    rtte = FALSE,
+                    rtte_show_occasions = NULL,
                     bins = "auto",
                     n_bins = 32,
                     auto_bin_type = "simple",
@@ -371,11 +373,16 @@ vpc_tte <- function(sim, obs,
     colnames(sim) <- tolower(colnames(sim))
     sim.dv <- "dv"
   }
-
-  obs <- add_stratification(obs, stratify)
-  sim <- add_stratification(sim, stratify)
+    
+  # if repeated time to event, time is longitudinal, convert to relative to previous event.
+  if (rtte) {
+    obs <- obs %>% group_by(id) %>% mutate(time = time - c(0,time[1:(length(time)-1)]))    
+    obs <- obs %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0)) 
+    stratify <- c(stratify, "rtte")
+  }
   
-  # compute KM curve for observations
+  # add stratification column and comput KM curve for observations
+  obs <- add_stratification(obs, stratify)
   obs_km <- compute_kaplan(obs, strat = "strat")
   
   # compute KM curve CI for simulations
@@ -390,17 +397,36 @@ vpc_tte <- function(sim, obs,
   }
   sim$sim <- rep(1:n_sims, each=length(sim[,1])/n_sims) 
   
+  ## convert the simulation dataset to hold only the observations, not the whole grid
   all <- c()
   for (i in 1:n_sims) {
     tmp <- sim %>%
       filter(sim == i) %>%
       group_by(id) %>% 
-      mutate (event = max(dv))
-    cens <- tmp %>% filter(event == 0) %>% filter(time == max(time))
-    evnt <- tmp %>% filter(dv == 1) %>% filter(time == min(time))
-    tmp <- compute_kaplan(rbind(cens, evnt), strat = "strat")
+      mutate (event = max(dv), otime = time)
+    comb <- c()
+    if (sum(tmp$event == 0) > 0) { # censoring events
+      cens <- tmp %>% filter(event == 0) %>% filter(time == max(time))      
+      comb <- rbind(comb, cens)
+    }
+    if (sum(tmp$event == 1) > 0) { # observed events
+      evnt <- tmp %>% filter(dv != 0) 
+      if(rtte) {
+        evnt <- rbind(evnt %>% filter(length(time) > 1) %>% mutate(time = time - c(0,time[1:(length(time)-1)])),
+                      evnt %>% filter(length(time) == 1) )
+      } else { # otherwise, the next observations are not really observed but a byproduct of the simulation
+        evnt <- evnt %>% filter(time == min(time))
+      }
+      comb <- rbind(comb, evnt)
+      if(rtte) {
+        comb <- comb %>% arrange (id, otime) %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0))         
+      }
+    }
+    comb <- add_stratification(comb, stratify)  
+    tmp <- compute_kaplan(comb, strat = "strat")
     all <- rbind(all, cbind(i, tmp))
   }
+    
   bins <- seq(from = 0, max(all$time)*1.04, by = diff(range(all$time))/(n_bins), )
   all$bin <- cut(all$time, breaks = bins, labels = FALSE, right = TRUE)
   all$bin_min <- bins[all$bin] 
@@ -412,6 +438,17 @@ vpc_tte <- function(sim, obs,
     summarise (bin_mid = head(bin_mid,1), bin_min = head(bin_min,1), bin_max = head(bin_max,1), 
                qmin = quantile(surv, 0.05), qmax = quantile(surv, 0.95), qmed = median(surv),
                step = 0)
+  if (rtte) {
+    sim_km$rtte <- as.num(gsub(".*rtte=(\\d.*).*", "\\1", sim_km$strat, perl = TRUE))
+    obs_km$rtte <- as.num(gsub(".*rtte=(\\d.*).*", "\\1", obs_km$strat, perl = TRUE))
+    if (!is.null(rtte_show_occasions)) {
+      sim_km <- sim_km %>% filter(rtte %in% rtte_show_occasions)
+      obs_km <- obs_km %>% filter(rtte %in% rtte_show_occasions)
+      # redefine strat factors, since otherwise empty panels will be shown
+      sim_km$strat <- factor(sim_km$strat, levels = unique(sim_km$strat))
+      obs_km$strat <- factor(obs_km$strat, levels = unique(obs_km$strat))
+    }    
+  }
   if (smooth) {
     geom_line_custom <- geom_line
   } else {
@@ -426,7 +463,13 @@ vpc_tte <- function(sim, obs,
   if (pi.med) {
     pl <- pl + geom_line_custom(linetype="dashed")
   }
-  pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv)) 
+  chk_tbl <- obs_km %>% group_by(strat) %>% summarise(t = length(time))
+  if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use 
+    pl <- pl + geom_line(data = obs_km, aes(x=time, y=surv))     
+    cat ("Warning, some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'rtte_show_occasions' argument).")
+  } else {
+    pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv))     
+  }
   if (!is.null(stratify)) {
     if(facet == "wrap") {
       pl <- pl + facet_wrap(~ strat)      

@@ -1,0 +1,633 @@
+<?xml version="1.0" encoding="ASCII"?>
+<!DOCTYPE nm:output SYSTEM "output.dtd">
+<nm:output
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://namespaces.oreilly.com/xmlnut/address output.xsd"
+xmlns:nm="http://namespaces.oreilly.com/xmlnut/address"
+>
+<nm:start_datetime>2014-09-05T11:31:58.778</nm:start_datetime>
+<nm:control_stream><![CDATA[
+$SIZES      NO=500 LIM6=500
+$PROBLEM    Repeated Time To Event data,Constant Hazard
+$INPUT      ID TIME DV DOSE ICL IV IKA TYPE SMAX SMXH THR CAV CAVH CON
+            CNT=DROP CNT2=DROP CNT3=DROP HC=DROP HC2=DROP HC3=DROP FE
+            EVID
+;ETA1 ETA2 ETA3 ETA4
+$DATA       data.csv IGNORE=@
+$SUBROUTINE ADVAN=6 TOL=9
+$MODEL      COMP=(HAZARD)
+$PK
+
+  CL  = ICL
+  V   = IV
+  KA  = IKA
+
+  BASE= THETA(1)*EXP(ETA(1))
+
+$DES
+  CP  =DOSE*KA/V/(-KA+CL/V)*(EXP(-KA*T)-EXP(-CL/V*T))
+  DADT(1)=BASE        ;hazard
+
+$ERROR
+  CONC =DOSE*KA/V/(-KA+CL/V)*(EXP(-KA*TIME)-EXP(-CL/V*TIME))
+;----------RTTE Model------------------------------
+  IF(NEWIND.NE.2) OLDCHZ=0  ;reset the cumulative hazard
+  CHZ = A(1)-OLDCHZ         ;cumulative hazard
+                            ;  from previous time point
+                            ;  in data set
+  OLDCHZ = A(1)             ;rename old cumulative hazard
+  SUR = EXP(-CHZ)           ;survival probability
+
+  HAZNOW=BASE               ; rate of event
+                            ;  each time pt
+                            ;  NB: update with each new model
+
+  IF(DV.EQ.0)   Y=SUR         ;censored event (prob of survival)
+  IF(DV.NE.0)   Y=SUR*HAZNOW  ;prob density function of event
+
+  IF(ICALL.EQ.4) THEN ; for simulation
+   CALL RANDOM (2,R)
+   DV=0
+   RTTE = 0
+   IF(TIME.EQ.480) RTTE = 1 ; for the censored observation at 480 min
+   IF(R.GT.SUR) THEN
+      DV=1
+      RTTE = 1
+   ENDIF
+  ENDIF
+
+$THETA  (0,0.025) ; BASE
+$OMEGA  0.09  ;   BSV-BASE
+$SIMULATION (5988566) (39978 UNIFORM) ONLYSIM NOPREDICTION SUB=25
+;$ESTIM MAXEVAL=9990 METHOD=1 LAPLACE LIKE PRINT=1 MSFO=msfb57 SIGL=9 NSIG=3
+
+;$COV PRINT=E
+$TABLE      ID TIME SUR DOSE EVID NOPRINT ONEHEADER FILE=simtab57
+
+]]></nm:control_stream>
+<nm:nmtran><![CDATA[
+
+ WARNINGS AND ERRORS (IF ANY) FOR PROBLEM    1
+
+ (WARNING  2) NM-TRAN INFERS THAT THE DATA ARE POPULATION.
+
+ (WARNING  3) THERE MAY BE AN ERROR IN THE ABBREVIATED CODE. THE FOLLOWING
+ ONE OR MORE RANDOM VARIABLES ARE DEFINED WITH "IF" STATEMENTS THAT DO NOT
+ PROVIDE DEFINITIONS FOR BOTH THE "THEN" AND "ELSE" CASES. IF ALL
+ CONDITIONS FAIL, THE VALUES OF THESE VARIABLES WILL BE ZERO.
+
+   Y
+
+]]></nm:nmtran>
+<nm:nonmem nm:version='7.3.0'>
+<nm:license_information><![CDATA[
+License Registered to: University of California, San Francisco
+Expiration Date:    14 APR 2015
+Current Date:        5 SEP 2014
+Days until program expires : 224
+]]></nm:license_information>
+<nm:program_information><![CDATA[
+1NONLINEAR MIXED EFFECTS MODEL PROGRAM (NONMEM) VERSION 7.3.0
+ ORIGINALLY DEVELOPED BY STUART BEAL, LEWIS SHEINER, AND ALISON BOECKMANN
+ CURRENT DEVELOPERS ARE ROBERT BAUER, ICON DEVELOPMENT SOLUTIONS,
+ AND ALISON BOECKMANN. IMPLEMENTATION, EFFICIENCY, AND STANDARDIZATION
+ PERFORMED BY NOUS INFOSYSTEMS.
+]]></nm:program_information>
+<nm:problem nm:number='1' nm:subproblem='1' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+
+ PROBLEM NO.:         1
+ Repeated Time To Event data,Constant Hazard
+0DATA CHECKOUT RUN:              NO
+ DATA SET LOCATED ON UNIT NO.:    2
+ THIS UNIT TO BE REWOUND:        NO
+ NO. OF DATA RECS IN DATA SET:    23088
+ NO. OF DATA ITEMS IN DATA SET:  17
+ ID DATA ITEM IS DATA ITEM NO.:   1
+ DEP VARIABLE IS DATA ITEM NO.:   3
+ MDV DATA ITEM IS DATA ITEM NO.: 17
+0INDICES PASSED TO SUBROUTINE PRED:
+  16   2   0   0   0   0   0   0   0   0   0
+0LABELS FOR DATA ITEMS:
+ ID TIME DV DOSE ICL IV IKA TYPE SMAX SMXH THR CAV CAVH CON FE EVID MDV
+0(NONBLANK) LABELS FOR PRED-DEFINED ITEMS:
+ SUR
+0FORMAT FOR DATA:
+ (E2.0,E3.0,E1.0,E3.0,E8.0,E6.0,E8.0,4E1.0,E11.0,2E9.0,2E1.0,1F2.0)
+
+ TOT. NO. OF OBS RECS:    23040
+ TOT. NO. OF INDIVIDUALS:     48
+0LENGTH OF THETA:   1
+0DEFAULT THETA BOUNDARY TEST OMITTED:    NO
+0OMEGA HAS SIMPLE DIAGONAL FORM WITH DIMENSION:   1
+0DEFAULT OMEGA BOUNDARY TEST OMITTED:    NO
+0INITIAL ESTIMATE OF THETA:
+ LOWER BOUND    INITIAL EST    UPPER BOUND
+  0.0000E+00     0.2500E-01     0.1000E+07
+0INITIAL ESTIMATE OF OMEGA:
+ 0.9000E-01
+0SIMULATION STEP OMITTED:    NO
+ OBJ FUNC EVALUATED:         NO
+0SIMULATION RANDOM METHOD SELECTED (RANMETHOD): DEFAULT
+ SOURCE   1:
+   SEED1:       5988566   SEED2:             0   PSEUDO-NORMAL
+ SOURCE   2:
+   SEED1:         39978   SEED2:             0   PSEUDO-UNIFORM
+ NUMBER OF SUBPROBLEMS:   25
+0TABLES STEP OMITTED:    NO
+ NO. OF TABLES:           1
+ SEED NUMBER (SEED):    11456
+ RANMETHOD:
+ MC SAMPLES (ESEED):    300
+ WRES SQUARE ROOT TYPE:            EIGENVALUE
+0-- TABLE   1 --
+ PRINTED:                NO
+ HEADERS:               ONE
+ FILE TO BE FORWARDED:   NO
+ FORMAT:                S1PE11.4
+ LFORMAT:
+ RFORMAT:
+0USER-CHOSEN ITEMS:
+ ID TIME SUR DOSE EVID
+1DOUBLE PRECISION PREDPP VERSION 7.3.0
+
+ GENERAL NONLINEAR KINETICS MODEL (ADVAN6)
+0MODEL SUBROUTINE USER-SUPPLIED - ID NO. 9999
+0MAXIMUM NO. OF BASIC PK PARAMETERS:   4
+0COMPARTMENT ATTRIBUTES
+ COMPT. NO.   FUNCTION   INITIAL    ON/OFF      DOSE      DEFAULT    DEFAULT
+                         STATUS     ALLOWED    ALLOWED    FOR DOSE   FOR OBS.
+    1         HAZARD       ON         YES        YES        YES        YES
+    2         OUTPUT       OFF        YES        NO         NO         NO
+0NRD VALUE FROM SUBROUTINE TOL:   9
+1
+ ADDITIONAL PK PARAMETERS - ASSIGNMENT OF ROWS IN GG
+ COMPT. NO.                             INDICES
+              SCALE      BIOAVAIL.   ZERO-ORDER  ZERO-ORDER  ABSORB
+                         FRACTION    RATE        DURATION    LAG
+    1            *           *           *           *           *
+    2            *           -           -           -           -
+             - PARAMETER IS NOT ALLOWED FOR THIS MODEL
+             * PARAMETER IS NOT SUPPLIED BY PK SUBROUTINE;
+               WILL DEFAULT TO ONE IF APPLICABLE
+0DATA ITEM INDICES USED BY PRED ARE:
+   EVENT ID DATA ITEM IS DATA ITEM NO.:     16
+   TIME DATA ITEM IS DATA ITEM NO.:          2
+
+0PK SUBROUTINE CALLED WITH EVERY EVENT RECORD.
+ PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES.
+0ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD.
+0ERROR SUBROUTINE INDICATES THAT DERIVATIVES OF COMPARTMENT AMOUNTS ARE USED.
+0DES SUBROUTINE USES COMPACT STORAGE MODE.
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:      1
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:      64734337   SEED2:             0
+ SOURCE  2:
+    SEED1:     596055168   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='1' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='2' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:      2
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:     875104604   SEED2:             0
+ SOURCE  2:
+    SEED1:    1465461365   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='2' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='3' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:      3
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:     876073157   SEED2:             0
+ SOURCE  2:
+    SEED1:    1418776716   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='3' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='4' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:      4
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:     325250238   SEED2:             0
+ SOURCE  2:
+    SEED1:    1603635448   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='4' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='5' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:      5
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:     277982670   SEED2:             0
+ SOURCE  2:
+    SEED1:     687757071   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='5' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='6' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:      6
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:    1652323867   SEED2:             0
+ SOURCE  2:
+    SEED1:    1655371811   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='6' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='7' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:      7
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:    1825732056   SEED2:             0
+ SOURCE  2:
+    SEED1:     730485689   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='7' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='8' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:      8
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:    1743376988   SEED2:             0
+ SOURCE  2:
+    SEED1:    1461851794   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='8' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='9' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:      9
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:     167313205   SEED2:             0
+ SOURCE  2:
+    SEED1:     739483339   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='9' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='10' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:     10
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:     361415960   SEED2:             0
+ SOURCE  2:
+    SEED1:    1664583056   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='10' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='11' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:     11
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:     414296788   SEED2:             0
+ SOURCE  2:
+    SEED1:    1165884600   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='11' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='12' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:     12
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:    1480672021   SEED2:             0
+ SOURCE  2:
+    SEED1:    1607641138   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='12' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='13' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:     13
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:     130665387   SEED2:             0
+ SOURCE  2:
+    SEED1:    1705611206   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='13' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='14' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:     14
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:     723623664   SEED2:             0
+ SOURCE  2:
+    SEED1:     190917166   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='14' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='15' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:     15
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:    2032917013   SEED2:             0
+ SOURCE  2:
+    SEED1:      46177545   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='15' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='16' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:     16
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:     436607252   SEED2:             0
+ SOURCE  2:
+    SEED1:    1667199889   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='16' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='17' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:     17
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:     498466376   SEED2:             0
+ SOURCE  2:
+    SEED1:      85411465   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='17' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='18' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:     18
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:     434535084   SEED2:             0
+ SOURCE  2:
+    SEED1:    1667825907   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='18' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='19' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:     19
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:     925373602   SEED2:             0
+ SOURCE  2:
+    SEED1:    1610396741   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='19' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='20' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:     20
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:     611809348   SEED2:             0
+ SOURCE  2:
+    SEED1:    1418800058   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='20' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='21' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:     21
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:    1083766791   SEED2:             0
+ SOURCE  2:
+    SEED1:     398814358   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='21' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='22' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:     22
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:    1526832346   SEED2:             0
+ SOURCE  2:
+    SEED1:     822198107   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='22' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='23' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:     23
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:    1386636866   SEED2:             0
+ SOURCE  2:
+    SEED1:     273100164   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='23' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='24' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:     24
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:     205413366   SEED2:             0
+ SOURCE  2:
+    SEED1:    1929691342   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='24' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+<nm:problem nm:number='1' nm:subproblem='25' nm:superproblem1='0' nm:iteration1='0' nm:superproblem2='0' nm:iteration2='0'>
+<nm:problem_title>Repeated Time To Event data,Constant Hazard</nm:problem_title>
+<nm:problem_information><![CDATA[
+]]></nm:problem_information>
+<nm:simulation_information><![CDATA[
+1
+ PROBLEM NO.:         1     SUBPROBLEM NO.:     25
+
+ SIMULATION STEP PERFORMED
+ SOURCE  1:
+    SEED1:     439950463   SEED2:             0
+ SOURCE  2:
+    SEED1:    1415416553   SEED2:             0
+]]></nm:simulation_information>
+<nm:estimation nm:number='25' nm:type='1'>
+<nm:table_series>0</nm:table_series>
+</nm:estimation>
+</nm:problem>
+</nm:nonmem>
+<nm:stop_datetime>2014-09-05T11:32:15.425</nm:stop_datetime>
+<nm:total_cputime>16.166</nm:total_cputime>
+</nm:output>
