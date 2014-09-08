@@ -440,7 +440,7 @@ vpc_tte <- function(sim, obs,
     tmp <- compute_kaplan(comb, strat = "strat")
     all <- rbind(all, cbind(i, tmp))
   }
-    
+  
   bins <- seq(from = 0, max(all$time)*1.04, by = diff(range(all$time))/(n_bins), )
   all$bin <- cut(all$time, breaks = bins, labels = FALSE, right = TRUE)
   all$bin_min <- bins[all$bin] 
@@ -463,12 +463,21 @@ vpc_tte <- function(sim, obs,
       obs_km$strat <- factor(obs_km$strat, levels = unique(obs_km$strat))
     }    
   }
+  
   if (smooth) {
     geom_line_custom <- geom_line
   } else {
     geom_line_custom <- geom_step
   }
-  pl <- ggplot(sim_km, aes(x=bin_mid, y=qmed, group=i)) 
+  if (!is.null(stratify)) {
+    if (length(stratify) > 1) {
+      sim_km$strat1 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)-1]
+      sim_km$strat2 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)]
+      obs_km$strat1 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)-1]
+      obs_km$strat2 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)]   
+    }
+  }  
+  pl <- ggplot(sim_km, aes(x=bin_mid, y=qmed)) 
   if (smooth) {
     pl <- pl + geom_ribbon(aes(min = qmin, max=qmax, y=qmed), fill = themes[[theme]]$med_area, alpha=0.5)
   } else {
@@ -477,7 +486,7 @@ vpc_tte <- function(sim, obs,
   if (pi.med) {
     pl <- pl + geom_line_custom(linetype="dashed")
   }
-  show_obs <- FALSE
+  show_obs <- TRUE
   if (show_obs) {
     chk_tbl <- obs_km %>% group_by(strat) %>% summarise(t = length(time))
     if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use 
@@ -499,19 +508,18 @@ vpc_tte <- function(sim, obs,
         }
       }      
     } else {
-      sim_km$strat1 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)-1]
-      sim_km$strat2 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)]
-      obs_km$strat1 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)-1]
-      obs_km$strat2 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)]
-      #return(list(obs = obs_km, sim = sim_km))
-      if(length(grep("row", facet))>0) {
-        pl <- pl + facet_grid(strat1 ~ strat2)                
+      if ("strat1" %in% colnames(sim_km)) {
+        if(length(grep("row", facet))>0) {
+          pl <- pl + facet_grid(strat1 ~ strat2)                
+        } else {
+          pl <- pl + facet_grid(strat2 ~ strat1)                
+        }        
       } else {
-        pl <- pl + facet_grid(strat2 ~ strat1)                
+        cat ("Stratification unsuccesful.")
+        return(list(obs = obs_km, sim = sim_km, pl = pl))
       }
     }
   }
-  return(pl)
   if (!is.null(title)) {
     pl <- pl + ggtitle(title)  
   }
@@ -524,10 +532,14 @@ vpc_tte <- function(sim, obs,
   }
   if(!is.null(xlab)) {
     pl <- pl + xlab(xlab)
-  } 
+  } else {
+    pl <- pl + xlab("Time")
+  }
   if(!is.null(ylab)) {
     pl <- pl + ylab(ylab)
-  } 
+  } else {
+    pl <- pl + ylab("Survival (%)")
+  }
   if(plot) {
     print(pl)
   }
