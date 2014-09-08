@@ -25,6 +25,6 @@ vpc2 <- vpc_tte(sim2, obs2,
                 rtte = TRUE, 
                 occasions = c(1:4),
                 n_bins = 25,
-                stratify = "dose",
+                #stratify = "dose",
                 nonmem = TRUE,  # use NONMEM common data labels
                 smooth = TRUE) 

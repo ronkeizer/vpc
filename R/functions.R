@@ -477,12 +477,15 @@ vpc_tte <- function(sim, obs,
   if (pi.med) {
     pl <- pl + geom_line_custom(linetype="dashed")
   }
-  chk_tbl <- obs_km %>% group_by(strat) %>% summarise(t = length(time))
-  if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use 
-    pl <- pl + geom_line(data = obs_km, aes(x=time, y=surv))     
-    cat ("Warning, some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'rtte_show_occasions' argument).")
-  } else {
-    pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv))     
+  show_obs <- FALSE
+  if (show_obs) {
+    chk_tbl <- obs_km %>% group_by(strat) %>% summarise(t = length(time))
+    if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use 
+      pl <- pl + geom_line(data = obs_km, aes(x=time, y=surv))     
+      cat ("Warning, some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'rtte_show_occasions' argument).")
+    } else {
+      pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv))     
+    }    
   }
   if (!is.null(stratify)) {
     if (length(stratify) == 1) {
@@ -500,13 +503,15 @@ vpc_tte <- function(sim, obs,
       sim_km$strat2 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)]
       obs_km$strat1 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)-1]
       obs_km$strat2 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)]
+      #return(list(obs = obs_km, sim = sim_km))
       if(length(grep("row", facet))>0) {
-        pl <- pl + facet_grid(strat2 ~ strat1)                
+        pl <- pl + facet_grid(strat1 ~ strat2)                
       } else {
         pl <- pl + facet_grid(strat2 ~ strat1)                
       }
     }
   }
+  return(pl)
   if (!is.null(title)) {
     pl <- pl + ggtitle(title)  
   }
