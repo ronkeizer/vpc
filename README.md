@@ -11,23 +11,23 @@ The VPC is a widely used diagnostic tool in pharmacometrics is the VPC, most com
 - more flexible regarding input (use simulated data from R, NONMEM data, or any other tool)
 - more easily customizable, e.g. request any prediction / confidence interval or binning strategy upon plotting.
 - more easily extensible: the output is a ggplot object which can be easily themed and extended
-- easier to use in the case of survival / repeated time-to-event data (the PsN/Xpose approach is a bit hairy for this type of data)
+- easier to use in the case of survival / repeated time-to-event data
 - faster
 
 ## Functionality available
 
 - VPC for continuous data
 - VPC for censored data (or binary data in general)
-- VPC for (single) time-to-event data simulated from NONNMEM (using hazard integration approach)
+- VPC for time-to-event data (single and repeated)
 - stratification (single & multiple)
 - prediction-correction
 - auto-binning (search for x-variable density-nadirs)
-- general-purpose function to simulate data from a mixed-effects structural model, from a fixed parameter vector and between-subject variability covariance matrix.
+- general-purpose function to simulate data from a mixed-effects structural model, a fixed parameter vector and between-subject variability covariance matrix.
 
 ## Planned
 
-- simulate rtte from NONMEM
-- simulate tte and rtte in R (using direct sampling approach and hazard integration approach)
+- update manual, provide more examples
+- function to simulate tte and rtte in R
 - auto-binning by k-means clustering (from Lavielle et al. JPP 2011)
 - Kaplan-Meier Mean Covariate plots [KMMC](http://page-meeting.org/pdf_assets/4280-2012-06%20PAGE%20KMMC.pdf)
 
