@@ -98,9 +98,9 @@ The example below artificially induces an LLOQ of 5 for the above model / datase
 
 In general, there are two distinct approach to simulate survival data:
 
-- *Hazard integration*: Integrate the hazard over time, and at *any possible* observation time randomly draw a binary value based on the probability of observing the event at that specific time. The disadvantage of this method is that it is a slow approach due to the numerical solving of the ODE. In NONMEM you also need to use a dataset that has a dense design grid, i.e. that has observations at every possible timepoint that an event can occur for any individual. E.g. for a clinical trial, you will likely need to have a design dataset with an observation time every day. A solution to the latter NONMEM-related drawback has been presented recently: [Nyberg](http://page-meeting.org/pdf_assets/404-Poster_PAGE%20_2014_tte_sim_joakim_nyberg_with_code.pdf)
+- *Hazard integration*: Integrate the hazard over time, and at *any possible* observation timepoint randomly draw a binary value based on the probability of observing the event. The disadvantage of this method is that it is a slow approach due to the numerical solving of the ODE system. You also need to use a dataset that has a dense design grid, i.e. that has observations at every possible timepoint that an event can occur for any individual. E.g. for a clinical trial, you will likely need to have a design dataset with an observation time every day. In R it is straightforward to filter out actual events, a solution in NONMEM has been presented recently as well by [Nyberg et al. PAGE 2014](http://page-meeting.org/pdf_assets/404-Poster_PAGE%20_2014_tte_sim_joakim_nyberg_with_code.pdf).
 
-Assuming an estimation model and simulation model have been run in NONMEM:
+Example assuming an estimation model and simulation model have been run in NONMEM:
 
     obs <- tbl_df(read.table.nm("nm/sdtab51"))  
     sim <- tbl_df(read.table.nm("nm/simtab51"))
@@ -114,4 +114,4 @@ Assuming an estimation model and simulation model have been run in NONMEM:
                      smooth = TRUE)
 
 
-- *Direct sampling*: Sample event times directly from the distribution used to model the data (e.g. Weibull, exponential, Gompertz). The advantage of this approach is that it is much faster. It also does not require a dense grid. The disadvantage with this approach is however that the hazard is assumed constant over time, so models for which this is not the case cannot be simulated with this approach. This approach cannot easily be implemented in NONMEM but is quite straightforward in R. Example will follow soon.
+- *Direct sampling*: Sample event times directly from the distribution used to model the data (e.g. Weibull, exponential, Gompertz). The advantage of this approach is that it is much faster. It also does not require a dense grid. The disadvantage with this approach is however that the hazard is assumed constant over time, so models with time-dependent hazards cannot be simulated with this approach. This approach is straightforward in R but cannot easily be implemented in NONMEM. Example will follow soon.
