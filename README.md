@@ -76,16 +76,16 @@ VPC with auto binning:
 Similar VPC, but more explicit use of options:
 
     vpc_dat <- vpc(sim, obs,                                    # supply simulation and observation dataframes
-                   obs.dv = "dv",                               # these column names are the default,                           
-                   obs.idv = "time",                            #   update these if different.
-                   sim.dv = "sdv",
-                   sim.idv = "time",
+                   obs_dv = "dv",                               # these column names are the default,                           
+                   obs_idv = "time",                            #   update these if different.
+                   sim_dv = "sdv",
+                   sim_idv = "time",
                    bins = c(0, 2, 4, 6, 8, 10, 25),             # specify bin separators manually
                    stratify = c("sex"),                         # multiple stratifications possible, just supply as vector
                    pi = c(0.05, 0.95),                          # prediction interval simulated data to show
                    ci = c(0.05, 0.95),                          # confidence intervals to show
                    pred_corr = FALSE,                           # perform prediction-correction?
-                   plot.dv = TRUE,                              # plot observations?
+                   plot_dv = TRUE,                              # plot observations?
                    facet = "wrap",                              # wrap stratifications, or as "row" or "column"
                    ylab = "Concentration", 
                    xlab = "Time (hrs)", 
