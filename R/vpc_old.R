@@ -29,14 +29,14 @@ vpc <- function(sim, obs,
                 bins = "auto",
                 n_bins = 8,
                 auto_bin_type = "simple",
-                obs_dv = "dv",
-                sim_dv =  "sdv",
-                obs_idv = "time",
-                sim_idv = "time",
-                obs_id = "id",
-                sim_id = "id",
-                obs_pred = "pred",
-                sim_pred = "pred",
+                obs.dv = "dv",
+                sim.dv =  "sdv",
+                obs.idv = "time",
+                sim.idv = "time",
+                obs.id = "id",
+                sim.id = "id",
+                obs.pred = "pred",
+                sim.pred = "pred",
                 nonmem = FALSE,
                 plot.dv = FALSE,
                 stratify = NULL,
@@ -57,33 +57,33 @@ vpc <- function(sim, obs,
                 custom_theme = NULL,
                 facet = "wrap") {
   if (class(bins) != "numeric") {
-    bins <- auto_bin(obs, auto_bin_type, n_bins, x=obs_idv)
+    bins <- auto_bin(obs, auto_bin_type, n_bins, x=obs.idv)
   }
   if (pred_corr) {
     if (nonmem) {
-      obs_pred <- "PRED"
-      sim_pred <- "PRED"
+      obs.pred <- "PRED"
+      sim.pred <- "PRED"
     }
-    if (!obs_pred %in% names(obs)) {
+    if (!obs.pred %in% names(obs)) {
       cat("Warning: Prediction-correction: specified pred-variable not found in observations, trying to get from simulated dataset...")      
-      if (!sim_pred %in% names(sim)) {
+      if (!sim.pred %in% names(sim)) {
         cat("Warning: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
         return()
       } else {
-        obs[[obs_pred]] <- sim[1:length(obs[,1]), sim_pred]
+        obs[[obs.pred]] <- sim[1:length(obs[,1]), sim.pred]
         cat ("OK")
       }
     } else {
-      if (!sim_pred %in% names(sim)) {
+      if (!sim.pred %in% names(sim)) {
         cat("Warning: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
         return()
       }      
     }
-    obs$pred <- obs[[obs_pred]]
-    sim$pred <- sim[[sim_pred]]
+    obs$pred <- obs[[obs.pred]]
+    sim$pred <- sim[[sim.pred]]
   }
-  sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min, nonmem)
-  obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min, nonmem)
+  sim <- format_vpc_input_data(sim, sim.dv, sim.idv, sim.id, lloq, uloq, stratify, bins, log_y, log_y_min, nonmem)
+  obs <- format_vpc_input_data(obs, obs.dv, obs.idv, obs.id, lloq, uloq, stratify, bins, log_y, log_y_min, nonmem)
   if (pred_corr) {
     obs <- obs %>% group_by(strat, bin) %>% mutate(pred_bin = mean(pred))
     obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
@@ -122,10 +122,10 @@ vpc <- function(sim, obs,
   aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )
   aggr_obs$bin_mid <- (aggr_obs$bin_min + aggr_obs$bin_max)/2 
   if(is.null(xlab)) {
-    xlab <- obs_idv
+    xlab <- obs.idv
   }
   if(is.null(ylab)) {
-    ylab <- obs_dv
+    ylab <- obs.dv
   }
   pl <- ggplot(vpc_dat, aes(x=bin_mid, y=dv)) + 
     geom_line(aes(y=q50.50), linetype='dashed') 

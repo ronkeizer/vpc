@@ -4,8 +4,8 @@
 \title{VPC function for left- or right-censored data (e.g. BLOQ data)}
 \usage{
 vpc_cens(sim, obs, bins = NULL, n_bins = 8, auto_bin_type = "simple",
-  obs.dv = "dv", sim.dv = "sdv", obs.idv = "time", sim.idv = "time",
-  obs.id = "id", sim.id = "id", nonmem = FALSE, stratify = NULL,
+  obs_dv = "dv", sim_dv = "sdv", obs_idv = "time", sim_idv = "time",
+  obs_id = "id", sim_id = "id", nonmem = FALSE, stratify = NULL,
   pi = c(0.05, 0.95), ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
   plot = TRUE, xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
   theme = "default", custom_theme = NULL, type = "bloq", facet = "wrap")

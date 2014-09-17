@@ -29,12 +29,12 @@ vpc_cens <- function(sim,
                      bins = NULL, 
                      n_bins = 8,
                      auto_bin_type = "simple",
-                     obs.dv = "dv",
-                     sim.dv =  "sdv",
-                     obs.idv = "time",
-                     sim.idv = "time",
-                     obs.id = "id",
-                     sim.id = "id",
+                     obs_dv = "dv",
+                     sim_dv = "sdv",
+                     obs_idv = "time",
+                     sim_idv = "time",
+                     obs_id = "id",
+                     sim_id = "id",
                      nonmem = FALSE,
                      stratify = NULL,
                      pi = c(0.05, 0.95), 
@@ -51,10 +51,10 @@ vpc_cens <- function(sim,
                      type = "bloq",
                      facet = "wrap") {
   if (class(bins) != "numeric") {
-    bins <- auto_bin(obs, auto_bin_type, n_bins, x=obs.idv)
+    bins <- auto_bin(obs, auto_bin_type, n_bins, x=obs_idv)
   }  
-  sim <- format_vpc_input_data(sim, sim.dv, sim.idv, sim.id, lloq, uloq, stratify, bins, FALSE, 0, nonmem)
-  obs <- format_vpc_input_data(obs, obs.dv, obs.idv, obs.id, lloq, uloq, stratify, bins, FALSE, 0, nonmem)
+  sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, FALSE, 0, nonmem)
+  obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, FALSE, 0, nonmem)
   loq_perc <- function(x) { sum(x <= lloq) / length(x) } # below lloq, default   
   if (type == "uloq") {
     loq_perc <- function(x) { sum(x >= uloq) / length(x) }
@@ -111,7 +111,7 @@ vpc_cens <- function(sim,
   if(!is.null(xlab)) {
     pl <- pl + xlab(xlab)
   } else {
-    pl <- pl + xlab(obs.idv)
+    pl <- pl + xlab(obs_idv)
   }
   if(!is.null(ylab)) {
     pl <- pl + ylab(ylab)
