@@ -134,7 +134,40 @@ theme_plain <-  function () {
   )    
 }
 
-read.table.nm <- function(file, perl = TRUE) {
+convert_to_dense_grid <- function(dat, t = "t", id = "id", t_start = 0, t_step = 1, add = NULL) {
+  t = seq(from=t_start, to=max(dat$t), by=t_step)
+  tmp <- data.frame(cbind(id = rep(unique(dat$id), each = length(t)), 
+                          t  = rep(t, n = length(unique(dat$id))) ) )
+  tmp$dv <- 0
+  id_t <- paste0(dat$id, "-", dat$t)
+  tmp[match(id_t, paste0(tmp$id,"-",tmp$t)),]$dv <- dat$dv
+  tmp$rtte <- 0
+  tmp[match(id_t, paste0(tmp$id,"-",tmp$t)),]$rtte <- 1
+  if (!is.null(add)) {
+    tmp2 <- merge(tmp, dat[,c("id", add)] %>% group_by(id) %>% do(.[1,]), by = "id", all.y = FALSE)
+  }
+  return(tmp2)
+}
+
+relative_times <- function (dat) { 
+  tmp <- dat %>%
+    group_by(id)
+  tmp2 <- rbind(tmp %>% filter(length(time) > 1) %>% mutate(time = time - c(0,time[1:(length(time)-1)])),
+                tmp %>% filter(length(time) == 1) )
+  return(tmp2 %>% arrange(id, time))
+}
+
+convert_from_dense_grid <- function (dat) { # note: only for a single trial, requires a loop or ddply for multiple subproblems
+  tmp <- dat %>%
+    group_by(id) %>% 
+  #  filter (dv == 1 | time == max(time) )
+    filter (rtte == 1)
+  tmp2 <- rbind(tmp %>% filter(length(time) > 1) %>% mutate(time = time - c(0,time[1:(length(time)-1)])),
+                tmp %>% filter(length(time) == 1) )
+  return(tmp2 %>% arrange(id, time))
+}
+
+read_table_nm <- function(file, perl = TRUE) {
   if (perl) {
     cmd <- paste0("perl -e 'open (IN, \"<", file, "\"); my $i = 0; my $cols = 0; while (my $line = <IN>) { if ($line =~ m/[a-df-z]/i) { unless($line =~ m/^TABLE NO/ || $cols == 1) { print $line; $cols = 1; } } else { print $line } } ; close(IN);'")
     tab <- read.table (pipe(cmd), header=T);    

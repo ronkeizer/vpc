@@ -6,27 +6,45 @@
 #' @return A VPC object 
 #' @export
 #' @examples
-#' data(rtte_obs) 
-#' data(rtte_sim) 
-#' vpc_tte(rtte_sim, rtte_obs, 
-#'         strat="sex", 
-#'         sim.dv = "dv", obs.idv = "t", sim.idv = "t")
-vpc_tte <- function(sim, obs, 
+#' ## Example for repeated) time-to-event data
+#' ## with NONMEM-like data (e.g. simulated using a dense grid)
+#' data(rtte_obs_nm) 
+#' data(rtte_sim_nm) 
+#' 
+#' # treat RTTE as TTE, no stratification
+#' vpc_tte(rtte_sim_nm, rtte_obs_nm, 
+#'         rtte = FALSE, bin_method="obs",
+#'         sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+#' 
+#' # stratified for covariate and study arm
+#' vpc_tte(rtte_sim_nm, rtte_obs_nm, 
+#'         stratify = c("sex","drug"), 
+#'         rtte = FALSE, bin_method = "spread", n_bins=16,
+#'         sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+#' 
+#' # stratified per event number (we'll only look at first 3 events) and stratify per arm
+#' vpc_tte(rtte_sim_nm, rtte_obs_nm,
+#'         rtte = TRUE, occasions = c(1:3),
+#'         stratify = c("drug"), bin_method="obs", 
+#'         sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+vpc_tte <- function(sim, 
+                    obs, 
                     rtte = FALSE,
+                    rtte_flag = "rtte",
                     occasions = NULL,
-                    bins = "auto",
+                    bin_method = "obs",
                     filter_rtte = "rtte",
                     n_bins = 32,
                     n_sim = "auto",
                     sim_dense_grid = FALSE,
                     auto_bin_type = "simple",
-                    obs.dv = "dv",
-                    sim.dv =  "sdv",
-                    obs.idv = "time",
-                    sim.idv = "time",
-                    obs.id = "id",
-                    sim.id = "id",
-                    pi.med = FALSE, 
+                    obs_dv = "dv",
+                    sim_dv =  "sdv",
+                    obs_idv = "time",
+                    sim_idv = "time",
+                    obs_id = "id",
+                    sim_id = "id",
+                    pi_med = FALSE, 
                     nonmem = FALSE,
                     stratify = NULL,
                     ci = c(0.05, 0.95),
@@ -34,7 +52,7 @@ vpc_tte <- function(sim, obs,
                     xlab = NULL, 
                     ylab = NULL,
                     title = NULL,
-                    smooth = TRUE,
+                    smooth = FALSE,
                     theme = "default",
                     custom_theme = NULL,
                     facet = "wrap") {
@@ -45,8 +63,8 @@ vpc_tte <- function(sim, obs,
     filter_rtte <- "rtte"
     sim.dv <- "dv"
   }
-  if (!is.null(filter_rtte) & filter_rtte %in% names(sim)) {
-    sim$rtte_flag <- sim[[filter_rtte]]
+  if (!is.null(rtte_flag) & rtte_flag %in% names(sim)) {
+    sim$rtte_flag <- sim[[rtte_flag]]
     sim <- sim %>% filter(rtte_flag == 1)
   }
   
@@ -64,21 +82,24 @@ vpc_tte <- function(sim, obs,
     }    
   }
 
-  # format data
-  obs$time <- obs[[obs.idv]]
-  sim$time <- sim[[sim.idv]]
-  obs <- convert_from_dense_grid(obs) ## get relative times if rtte
+  # format obs data
+  obs$time <- obs[[obs_idv]]
+  obs <- relative_times(obs)
   if (rtte) {
+    obs <- relative_times(obs)    
     obs <- obs %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0)) 
     stratify <- c(stratify, "rtte")
+  } else {
+    obs$rtte <- 1
   }
   
   # add stratification column and comput KM curve for observations
   obs <- add_stratification(obs, stratify)
   obs_km <- compute_kaplan(obs, strat = "strat")
-  
-  # compute KM curve CI for simulations
+    
+  # format sim data and compute KM curve CI for simulations
   # first get the number of simulations (req'd if sim# is not specified)
+  sim$time <- sim[[sim_idv]]
   sim_id <- unique(sim$id)
   sim$id_shift <- c(sim$id[2:length(sim$id)], 0) 
   idx <- c(1, (1:length(sim$id))[sim$id == tail(sim_id,1) & sim$id_shift == sim_id[1]], length(sim$id)+1)
@@ -88,7 +109,12 @@ vpc_tte <- function(sim, obs,
   }
   
   all <- c()
-  for (i in 1:n_sims) {
+  obs_strat <- as.character(unique(obs$strat))
+  bins <- list() 
+  for (i in seq(obs_strat)) {
+      bins[[obs_strat[i]]] <- sort(unique(obs[as.character(obs$strat) == obs_strat[i],]$time))
+  }
+  for (i in 1:n_sim) {
     tmp <- sim %>%
       filter(sim == i) %>%
         convert_from_dense_grid(.)   ## convert the simulation dataset to hold only the observations, not the whole grid
@@ -96,14 +122,35 @@ vpc_tte <- function(sim, obs,
       tmp <- tmp %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0))       
     }
     tmp2 <- add_stratification(tmp %>% arrange(id, time), stratify)
-    all <- rbind(all, cbind(i, compute_kaplan(tmp2, strat = "strat")))
+#    bins <- unique(obs$time)    
+#    bins <- bins[order(bins)]
+    tmp3 <- compute_kaplan(tmp2, strat = "strat")
+    tmp3[,c("bin", "bin_min", "bin_max", "bin_mid")] <- 0 
+    for (j in seq(obs_strat)) {
+      tmp3_spl <- tmp3[tmp3$strat == obs_strat[j],]
+      if (length(tmp3_spl[,1]) > 0) {
+        tmp_bins <- unique(c(0, bins[[obs_strat[j]]], max(tmp3_spl$time)))
+        tmp3[tmp3$strat == obs_strat[j],] <- within(tmp3_spl, {
+          bin <- cut(time, breaks = tmp_bins, labels = FALSE, right = TRUE)
+          bin_min <- tmp_bins[bin] 
+          bin_max <- tmp_bins[bin+1] 
+          bin_mid <- (bin_min + bin_max) / 2
+        })        
+      }
+    }
+    all <- rbind(all, cbind(i, tmp3))
   }
-  
-  bins <- seq(from = 0, max(all$time)*1.04, by = diff(range(all$time))/(n_bins), )
-  all$bin <- cut(all$time, breaks = bins, labels = FALSE, right = TRUE)
-  all$bin_min <- bins[all$bin] 
-  all$bin_max <- bins[all$bin+1] 
-  all$bin_mid <- (all$bin_min + all$bin_max)/2 
+   
+#   if (bin_method == "obs") {
+#     bins <- unique(obs$time)    
+#     bins <- bins[order(bins)]
+#   } else {
+#     bins <- seq(from = 0, max(all$time)*1.04, by = diff(range(all$time))/(n_bins))
+#   }  
+#   all$bin <- cut(all$time, breaks = bins, labels = FALSE, right = TRUE)
+#   all$bin_min <- bins[all$bin] 
+#   all$bin_max <- bins[all$bin+1] 
+#   all$bin_mid <- (all$bin_min + all$bin_max)/2 
   
   sim_km <- all %>% 
     group_by (bin, strat) %>% 
@@ -141,14 +188,14 @@ vpc_tte <- function(sim, obs,
   } else {
     pl <- pl + geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area)   
   }
-  if (pi.med) {
+  if (pi_med) {
     pl <- pl + geom_line_custom(linetype="dashed")
   }
   show_obs <- TRUE
   if (show_obs) {
     chk_tbl <- obs_km %>% group_by(strat) %>% summarise(t = length(time))
     if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use 
-      pl <- pl + geom_line(data = obs_km, aes(x=time, y=surv))     
+      pl <- pl + geom_line(data = obs_km, aes(x=time, y=surv))
       cat ("Warning, some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'rtte_show_occasions' argument).")
     } else {
       pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv))     

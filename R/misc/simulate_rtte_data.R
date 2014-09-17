@@ -1,5 +1,4 @@
 ## Simulation of RTTE data
-library(dplyr)
 sim_rtte <- function (n = 200, 
                       rate=0.01, 
                       rate_iiv_cv = 0.3, 
@@ -33,30 +32,6 @@ sim_rtte <- function (n = 200,
     comb$dt <- round(comb$dt)
   }
   return(comb)
-}
-
-convert_to_dense_grid <- function(dat, t = "t", id = "id", t_start = 0, t_step = 1, add = NULL) {
-  t = seq(from=t_start, to=max(dat$t), by=t_step)
-  tmp <- data.frame(cbind(id = rep(unique(dat$id), each = length(t)), 
-                    t  = rep(t, n = length(unique(dat$id))) ) )
-  tmp$dv <- 0
-  id_t <- paste0(dat$id, "-", dat$t)
-  tmp[match(id_t, paste0(tmp$id,"-",tmp$t)),]$dv <- dat$dv
-  tmp$rtte <- 0
-  tmp[match(id_t, paste0(tmp$id,"-",tmp$t)),]$rtte <- 1
-  if (!is.null(add)) {
-    tmp2 <- merge(tmp, dat[,c("id", add)] %>% group_by(id) %>% do(.[1,]), by = "id", all.y = FALSE)
-  }
-  return(tmp2)
-}
-
-convert_from_dense_grid <- function (dat) { # note: only for a single trial, requires a loop or ddply for multiple subproblems
-  tmp <- dat %>%
-    group_by(id) %>% 
-    filter (dv == 1 | time == max(time))
-  tmp2 <- rbind(tmp %>% filter(length(time) > 1) %>% mutate(time = time - c(0,time[1:(length(time)-1)])),
-                tmp %>% filter(length(time) == 1) )
-  return(tmp2 %>% arrange(id, time))
 }
 
 # simulate some trial data (two arms) + one covariate (sex) having 50% higher hazard rate

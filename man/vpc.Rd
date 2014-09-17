@@ -11,16 +11,33 @@ vpc(sim, obs, bins = "auto", n_bins = 8, auto_bin_type = "simple",
   uloq = NULL, lloq = NULL, plot = TRUE, log_y = FALSE,
   log_y_min = 0.001, xlab = NULL, ylab = NULL, title = NULL,
   smooth = TRUE, theme = "default", custom_theme = NULL, facet = "wrap")
+
+vpc(sim, obs, bins = "auto", n_bins = 8, auto_bin_type = "simple",
+  obs.dv = "dv", sim.dv = "sdv", obs.idv = "time", sim.idv = "time",
+  obs.id = "id", sim.id = "id", obs.pred = "pred", sim.pred = "pred",
+  nonmem = FALSE, plot.dv = FALSE, stratify = NULL, pred_corr = FALSE,
+  pred_corr_lower_bnd = 0, pi = c(0.05, 0.95), ci = c(0.05, 0.95),
+  uloq = NULL, lloq = NULL, plot = TRUE, log_y = FALSE,
+  log_y_min = 0.001, xlab = NULL, ylab = NULL, title = NULL,
+  smooth = TRUE, theme = "default", custom_theme = NULL, facet = "wrap")
 }
 \arguments{
+\item{sim}{}
+
+\item{obs}{}
+
 \item{sim}{}
 
 \item{obs}{}
 }
 \value{
 Either the data for plotting a VPC or a ggplot2 object
+
+Either the data for plotting a VPC or a ggplot2 object
 }
 \description{
+Creates a VPC plot and/or plotting data from observed and simulation data
+
 Creates a VPC plot and/or plotting data from observed and simulation data
 }
 \examples{
@@ -42,8 +59,28 @@ sim <- sim_data(obs, # the design of the dataset
                 n = 500)
 
 vpc_dat <- vpc(sim, obs, stratify = c("sex"))
+obs <- Theoph
+colnames(obs) <- c("id", "wt", "dose", "time", "dv")
+obs <- obs \%>\%   # create a dummy covariate to show stratification
+ group_by(id) \%>\%
+ mutate(sex = round(runif(1)))
+
+sim <- sim_data(obs, # the design of the dataset
+                model = function(x) { # the model
+                  pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka, ke = x$ke, cl = x$cl * x$wt, ruv = list(additive = 0.1))
+                },
+                theta = c(2.774, 0.0718, .0361),                 # parameter values
+                omega_mat = c(0.08854,                           # specified as lower triangle by default;
+                              0.02421, 0.02241,                  # note: assumed that every theta has iiv, set to 0 if no iiv.
+                              0.008069, 0.008639, 0.02862),
+                par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
+                n = 500)
+
+vpc_dat <- vpc(sim, obs, stratify = c("sex"))
 }
 \seealso{
+\link{sim_data}
+
 \link{sim_data}
 }
 
