@@ -100,18 +100,28 @@ In general, there are two distinct approach to simulate survival data:
 
 - *Hazard integration*: Integrate the hazard over time, and at *any possible* observation timepoint randomly draw a binary value based on the probability of observing the event. The disadvantage of this method is that it is a slow approach due to the numerical solving of the ODE system. You also need to use a dataset that has a dense design grid, i.e. that has observations at every possible timepoint that an event can occur for any individual. E.g. for a clinical trial, you will likely need to have a design dataset with an observation time every day. In R it is straightforward to filter out actual events, a solution in NONMEM has been presented recently as well by [Nyberg et al. PAGE 2014](http://page-meeting.org/pdf_assets/404-Poster_PAGE%20_2014_tte_sim_joakim_nyberg_with_code.pdf).
 
-Example assuming an estimation model and simulation model have been run in NONMEM:
+- *Direct sampling*: Sample event times directly from the distribution used to model the data (e.g. Weibull, exponential, Gompertz). Advantages of this approach is that it is much faster, and it does not require a dense grid. The disadvantage with this approach is however that the hazard is assumed constant over time, so models with time-dependent hazards cannot easily be simulated with this approach. This approach is straightforward in R but cannot easily be implemented in NONMEM. Example will follow soon.
 
-    obs <- tbl_df(read.table.nm("nm/sdtab51"))  
-    sim <- tbl_df(read.table.nm("nm/simtab51"))
-    
-    ## create the VPC, stratified by dose
-    vpc_t <- vpc_tte(sim, obs, 
-                     n_bins = 15,
-                     stratify = "dose",
-                     facet = "wrap",
-                     nonmem = TRUE,  # use NONMEM common data labels
-                     smooth = TRUE)
+Example VPC assuming an estimation model and simulation model have been run in NONMEM with the *hazard integration* approach (data supplied with this library)
 
+    library(vpc)
+    data(rtte_obs_nm) 
+    data(rtte_sim_nm) 
 
-- *Direct sampling*: Sample event times directly from the distribution used to model the data (e.g. Weibull, exponential, Gompertz). The advantage of this approach is that it is much faster. It also does not require a dense grid. The disadvantage with this approach is however that the hazard is assumed constant over time, so models with time-dependent hazards cannot be simulated with this approach. This approach is straightforward in R but cannot easily be implemented in NONMEM. Example will follow soon.
+    # treat RTTE as TTE, no stratification
+    vpc_tte(rtte_sim_nm, rtte_obs_nm, 
+            rtte = FALSE, bin_method="obs",
+            sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+
+    # stratified for covariate and study arm
+    vpc_tte(rtte_sim_nm, rtte_obs_nm, 
+            stratify = c("sex","drug"), 
+            rtte = FALSE, bin_method = "spread", n_bins=16,
+            sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+
+    # stratified per event number (we'll only look at first 3 events) and stratify per arm
+    vpc_tte(rtte_sim_nm, rtte_obs_nm,
+            rtte = TRUE, occasions = c(1:3),
+            stratify = c("drug"), bin_method="obs", 
+            sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+
