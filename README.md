@@ -5,13 +5,13 @@ Create visual predictive checks, a commonly used diagnostic plot in pharmacometr
 
 ## Rationale
 
-The VPC is a widely used diagnostic tool in pharmacometrics is the VPC, most commonly created using [PsN](http://psn.sourceforge.net) and [Xpose](http://xpose.sourceforge.net), using NONMEM as the simulation engine. The aim of the current library is to provide an improved tool that is:
+The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](http://page-meeting.org/default.asp?abstract=1434)), most commonly created using [PsN](http://psn.sourceforge.net) and [Xpose](http://xpose.sourceforge.net), using NONMEM as the simulation engine. The aim of the current library is to provide an improved tool that is:
 
-- a single-step process for creating a VPC (previously: simulation done in NONMEM, data processing by PsN, plotting by Xpose/lattice). This e.g. allows changing of vpc parameters such as binning / stratification upon creation of the plot, not in a separate pre-processing step. 
-- more flexible regarding input (use simulated data from R, NONMEM data, or any other tool)
+- a single-step process for creating a VPC. This e.g. allows changing of vpc parameters such as binning / stratification upon creation of the plot, not in a separate pre-processing step. 
+- more flexible regarding input (use simulated data from R, NONMEM data, or any other simulation tool)
 - more easily customizable, e.g. request any prediction / confidence interval or binning strategy upon plotting.
 - more easily extensible: the output is a ggplot object which can be easily themed and extended
-- easier to use in the case of survival / repeated time-to-event data
+- more robust in the case of survival / repeated time-to-event data
 - faster
 
 ## Functionality available
@@ -23,13 +23,13 @@ The VPC is a widely used diagnostic tool in pharmacometrics is the VPC, most com
 - prediction-correction
 - auto-binning (search for x-variable density-nadirs)
 - general-purpose function to simulate data from a mixed-effects structural model, a fixed parameter vector and between-subject variability covariance matrix.
+- Kaplan-Meier Mean Covariate plots [KMMC](http://page-meeting.org/pdf_assets/4280-2012-06%20PAGE%20KMMC.pdf)
 
 ## Planned
 
 - update manual, provide more examples
 - function to simulate tte and rtte in R
 - auto-binning by k-means clustering (from Lavielle et al. JPP 2011)
-- Kaplan-Meier Mean Covariate plots [KMMC](http://page-meeting.org/pdf_assets/4280-2012-06%20PAGE%20KMMC.pdf)
 
 ## Installation
 
@@ -40,7 +40,7 @@ The VPC is a widely used diagnostic tool in pharmacometrics is the VPC, most com
     
 ## Examples
 
-Load the library and get the observation data. We'll be using the Theohpylline dataset, with randomly assigned 'sex' covariate. 
+Load the library and get the observation data. The examples here use the Theohpylline dataset, with randomly assigned 'sex' covariate. 
 
     library(dplyr)
     library(vpc)
@@ -100,18 +100,28 @@ In general, there are two distinct approach to simulate survival data:
 
 - *Hazard integration*: Integrate the hazard over time, and at *any possible* observation timepoint randomly draw a binary value based on the probability of observing the event. The disadvantage of this method is that it is a slow approach due to the numerical solving of the ODE system. You also need to use a dataset that has a dense design grid, i.e. that has observations at every possible timepoint that an event can occur for any individual. E.g. for a clinical trial, you will likely need to have a design dataset with an observation time every day. In R it is straightforward to filter out actual events, a solution in NONMEM has been presented recently as well by [Nyberg et al. PAGE 2014](http://page-meeting.org/pdf_assets/404-Poster_PAGE%20_2014_tte_sim_joakim_nyberg_with_code.pdf).
 
-Example assuming an estimation model and simulation model have been run in NONMEM:
+- *Direct sampling*: Sample event times directly from the distribution used to model the data (e.g. Weibull, exponential, Gompertz). Advantages of this approach is that it is much faster, and it does not require a dense grid. The disadvantage with this approach is however that the hazard is assumed constant over time, so models with time-dependent hazards cannot easily be simulated with this approach. This approach is straightforward in R but cannot easily be implemented in NONMEM. Example will follow soon.
 
-    obs <- tbl_df(read.table.nm("nm/sdtab51"))  
-    sim <- tbl_df(read.table.nm("nm/simtab51"))
-    
-    ## create the VPC, stratified by dose
-    vpc_t <- vpc_tte(sim, obs, 
-                     n_bins = 15,
-                     stratify = "dose",
-                     facet = "wrap",
-                     nonmem = TRUE,  # use NONMEM common data labels
-                     smooth = TRUE)
+Example VPC assuming an estimation model and simulation model have been run in NONMEM with the *hazard integration* approach (data supplied with this library)
 
+    library(vpc)
+    data(rtte_obs_nm) 
+    data(rtte_sim_nm) 
 
-- *Direct sampling*: Sample event times directly from the distribution used to model the data (e.g. Weibull, exponential, Gompertz). The advantage of this approach is that it is much faster. It also does not require a dense grid. The disadvantage with this approach is however that the hazard is assumed constant over time, so models with time-dependent hazards cannot be simulated with this approach. This approach is straightforward in R but cannot easily be implemented in NONMEM. Example will follow soon.
+    # treat RTTE as TTE, no stratification
+    vpc_tte(rtte_sim_nm, rtte_obs_nm, 
+            rtte = FALSE, bin_method="obs",
+            sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+
+    # stratified for covariate and study arm
+    vpc_tte(rtte_sim_nm, rtte_obs_nm, 
+            stratify = c("sex","drug"), 
+            rtte = FALSE, bin_method = "spread", n_bins=16,
+            sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+
+    # stratified per event number (we'll only look at first 3 events) and stratify per arm
+    vpc_tte(rtte_sim_nm, rtte_obs_nm,
+            rtte = TRUE, occasions = c(1:3),
+            stratify = c("drug"), bin_method="obs", 
+            sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+
