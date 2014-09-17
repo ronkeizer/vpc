@@ -3,7 +3,7 @@ library(dplyr)
 library(survival)
 
 # single time to event
-obs1 <- read.table.nm("nm/sdtab51")
+obs1 <- read.table.nm("nm/sdtab51", perl=FALSE)
 sim1 <- readRDS(file="nm/simtab51.gz")
 
 ## create the VPC, stratified by dose
@@ -15,7 +15,7 @@ vpc1 <- vpc_tte(sim1, obs1,
                 smooth = TRUE) 
 
 # repeated time to event
-obs2 <- read.table.nm("nm/sdtab57")
+obs2 <- read.table.nm("nm/sdtab57", perl=FALSE)
 sim2 <- readRDS(file="nm/simtab57.gz")
 #sim <- read.table.nm("nm/simtab57")
 #saveRDS(sim, "nm/simtab57.gz", compress=TRUE)
