@@ -5,13 +5,13 @@ Create visual predictive checks, a commonly used diagnostic plot in pharmacometr
 
 ## Rationale
 
-The VPC is a widely used diagnostic tool in pharmacometrics is the VPC, most commonly created using [PsN](http://psn.sourceforge.net) and [Xpose](http://xpose.sourceforge.net), using NONMEM as the simulation engine. The aim of the current library is to provide an improved tool that is:
+The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](http://page-meeting.org/default.asp?abstract=1434)), most commonly created using [PsN](http://psn.sourceforge.net) and [Xpose](http://xpose.sourceforge.net), using NONMEM as the simulation engine. The aim of the current library is to provide an improved tool that is:
 
-- a single-step process for creating a VPC (previously: simulation done in NONMEM, data processing by PsN, plotting by Xpose/lattice). This e.g. allows changing of vpc parameters such as binning / stratification upon creation of the plot, not in a separate pre-processing step. 
-- more flexible regarding input (use simulated data from R, NONMEM data, or any other tool)
+- a single-step process for creating a VPC. This e.g. allows changing of vpc parameters such as binning / stratification upon creation of the plot, not in a separate pre-processing step. 
+- more flexible regarding input (use simulated data from R, NONMEM data, or any other simulation tool)
 - more easily customizable, e.g. request any prediction / confidence interval or binning strategy upon plotting.
 - more easily extensible: the output is a ggplot object which can be easily themed and extended
-- easier to use in the case of survival / repeated time-to-event data
+- more robust in the case of survival / repeated time-to-event data
 - faster
 
 ## Functionality available
@@ -23,13 +23,13 @@ The VPC is a widely used diagnostic tool in pharmacometrics is the VPC, most com
 - prediction-correction
 - auto-binning (search for x-variable density-nadirs)
 - general-purpose function to simulate data from a mixed-effects structural model, a fixed parameter vector and between-subject variability covariance matrix.
+- Kaplan-Meier Mean Covariate plots [KMMC](http://page-meeting.org/pdf_assets/4280-2012-06%20PAGE%20KMMC.pdf)
 
 ## Planned
 
 - update manual, provide more examples
 - function to simulate tte and rtte in R
 - auto-binning by k-means clustering (from Lavielle et al. JPP 2011)
-- Kaplan-Meier Mean Covariate plots [KMMC](http://page-meeting.org/pdf_assets/4280-2012-06%20PAGE%20KMMC.pdf)
 
 ## Installation
 
@@ -40,7 +40,7 @@ The VPC is a widely used diagnostic tool in pharmacometrics is the VPC, most com
     
 ## Examples
 
-Load the library and get the observation data. We'll be using the Theohpylline dataset, with randomly assigned 'sex' covariate. 
+Load the library and get the observation data. The examples here use the Theohpylline dataset, with randomly assigned 'sex' covariate. 
 
     library(dplyr)
     library(vpc)
