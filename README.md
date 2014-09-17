@@ -7,23 +7,25 @@ Create visual predictive checks, a commonly used diagnostic plot in pharmacometr
 
 The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](http://page-meeting.org/default.asp?abstract=1434)), most commonly created using [PsN](http://psn.sourceforge.net) and [Xpose](http://xpose.sourceforge.net), using NONMEM as the simulation engine. The aim of the current library is to provide an improved tool that is:
 
-- a single-step process for creating a VPC. This e.g. allows changing of vpc parameters such as binning / stratification upon creation of the plot, not in a separate pre-processing step. 
-- more flexible regarding input (use simulated data from R, NONMEM data, or any other simulation tool)
-- more easily customizable, e.g. request any prediction / confidence interval or binning strategy upon plotting.
-- more easily extensible: the output is a ggplot object which can be easily themed and extended
-- more robust in the case of survival / repeated time-to-event data
+- a single-step process for creating a VPC. 
+  - allows changing of vpc parameters such as binning / stratification upon creation of the plot, not in a separate pre-processing step.
+  - easier debugging than PsN+Xpose, all data parsing and plotting in one R function
+- more flexible regarding input (use simulated data from R, NONMEM, Monolix, Stan, or any other simulation tool)
+- easier to customize, e.g. request any prediction / confidence interval or binning strategy upon plotting.
+- easier to extend: the output is a ggplot object which can be themed and extended
+- more flexible in the case of survival / repeated time-to-event data
 - faster
 
 ## Functionality available
 
 - VPC for continuous data
-- VPC for censored data (or binary data in general)
+- VPC for censored continuous data (e.g. below LOQ)
 - VPC for time-to-event data (single and repeated)
 - stratification (single & multiple)
 - prediction-correction
 - auto-binning (search for x-variable density-nadirs)
-- general-purpose function to simulate data from a mixed-effects structural model, a fixed parameter vector and between-subject variability covariance matrix.
 - Kaplan-Meier Mean Covariate plots [KMMC](http://page-meeting.org/pdf_assets/4280-2012-06%20PAGE%20KMMC.pdf)
+- general-purpose function to simulate data from a mixed-effects structural model, a fixed parameter vector and between-subject variability covariance matrix.
 
 ## Planned
 
@@ -96,13 +98,13 @@ The example below artificially induces an LLOQ of 5 for the above model / datase
 
 ### Time-to-event data
 
-In general, there are two distinct approach to simulate survival data:
+As for the VPC for continuous data, the VPC for TTE data requires simulated data. In general, there are two distinct approach to simulate survival data:
 
-- *Hazard integration*: Integrate the hazard over time, and at *any possible* observation timepoint randomly draw a binary value based on the probability of observing the event. The disadvantage of this method is that it is a slow approach due to the numerical solving of the ODE system. You also need to use a dataset that has a dense design grid, i.e. that has observations at every possible timepoint that an event can occur for any individual. E.g. for a clinical trial, you will likely need to have a design dataset with an observation time every day. In R it is straightforward to filter out actual events, a solution in NONMEM has been presented recently as well by [Nyberg et al. PAGE 2014](http://page-meeting.org/pdf_assets/404-Poster_PAGE%20_2014_tte_sim_joakim_nyberg_with_code.pdf).
+- *Hazard integration*: Integrate the hazard over time, and at *any possible* observation timepoint randomly draw a binary value based on the probability of observing the event. The disadvantage of this method is that it is slow due to the numerical solving of the ODEs. Also, a dataset with a dense design grid has to be used for simulation, i.e. one that has observation times at every possible timepoint that an event can occur for all individuals. 
 
 - *Direct sampling*: Sample event times directly from the distribution used to model the data (e.g. Weibull, exponential, Gompertz). Advantages of this approach is that it is much faster, and it does not require a dense grid. The disadvantage with this approach is however that the hazard is assumed constant over time, so models with time-dependent hazards cannot easily be simulated with this approach. This approach is straightforward in R but cannot easily be implemented in NONMEM. Example will follow soon.
 
-Example VPC assuming an estimation model and simulation model have been run in NONMEM with the *hazard integration* approach (data supplied with this library)
+### Example VPC for RTTE data
 
     library(vpc)
     data(rtte_obs_nm) 
