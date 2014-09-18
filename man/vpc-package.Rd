@@ -4,7 +4,7 @@
 \alias{vpc-package}
 \title{VPC package}
 \description{
-Create Visual Predictive Checks from within R, either from a specified model and parameter distributions, or from simulated data.
+Create Visual Predictive Checks in R
 }
 \author{
 Ron Keizer \email{ronkeizer@gmail.com}

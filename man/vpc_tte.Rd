@@ -3,9 +3,7 @@
 \alias{vpc_tte}
 \title{VPC function for survival-type data}
 \usage{
-vpc_tte(sim, obs, rtte = FALSE, rtte_flag = "rtte", occasions = NULL,
-  bin_method = "obs", filter_rtte = "rtte", n_bins = 32, n_sim = "auto",
-  sim_dense_grid = FALSE, auto_bin_type = "simple", obs_dv = "dv",
+vpc_tte(sim, obs, rtte = FALSE, events = NULL, obs_dv = "dv",
   sim_dv = "sdv", obs_idv = "time", sim_idv = "time", obs_id = "id",
   sim_id = "id", pi_med = FALSE, nonmem = FALSE, stratify = NULL,
   ci = c(0.05, 0.95), plot = TRUE, xlab = NULL, ylab = NULL,
@@ -13,15 +11,55 @@ vpc_tte(sim, obs, rtte = FALSE, rtte_flag = "rtte", occasions = NULL,
   facet = "wrap")
 }
 \arguments{
-\item{sim}{}
+\item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{obs}{}
+\item{obs}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+
+\item{rtte}{repeated time-to-event data? Deafult is FALSE (single-event TTE)}
+
+\item{events}{numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events.}
+
+\item{pi_med}{plot the median of the simulated data? Default is FALSE.}
+
+\item{obs_dv}{variable in data.frame for observed dependent value. "dv" by default}
+
+\item{sim_dv}{variable in data.frame for simulated dependent value. "sdv" by default}
+
+\item{obs_idv}{variable in data.frame for observed independent value. "time" by default}
+
+\item{sim_idv}{variable in data.frame for simulated independent value. "time" by default}
+
+\item{obs_id}{variable in data.frame for observed individual. "id" by default}
+
+\item{sim_id}{variable in data.frame for simulated individual. "id" by default}
+
+\item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is FALSE.}
+
+\item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
+
+\item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
+
+\item{plot}{Boolean indacting whether to plot the ggplot2 object after creation. Default is TRUE.}
+
+\item{xlab}{ylab as numeric vector of size 2}
+
+\item{ylab}{ylab as numeric vector of size 2}
+
+\item{title}{title}
+
+\item{smooth}{"smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.}
+
+\item{theme}{which theme to load from the themes object}
+
+\item{custom_theme}{specify a custom ggplot2 theme}
+
+\item{facet}{either "wrap", "columns", or "rows"}
 }
 \value{
-A VPC object
+a list containing calculated VPC information, and a ggplot2 object
 }
 \description{
-Creates a VPC plot and/or plotting data from observed and simulation data
+Creates a VPC plot from observed and simulation survival data
 }
 \examples{
 ## Example for repeated) time-to-event data
@@ -30,20 +68,26 @@ data(rtte_obs_nm)
 data(rtte_sim_nm)
 
 # treat RTTE as TTE, no stratification
-vpc_tte(rtte_sim_nm, rtte_obs_nm,
-        rtte = FALSE, bin_method="obs",
-        sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+vpc_tte(sim = rtte_sim_nm,
+        obs = rtte_obs_nm,
+        rtte = FALSE,
+        sim_dv = "dv", obs_idv = "t", sim_idv = "t")
 
 # stratified for covariate and study arm
-vpc_tte(rtte_sim_nm, rtte_obs_nm,
+vpc_tte(sim = rtte_sim_nm,
+        obs = rtte_obs_nm,
         stratify = c("sex","drug"),
-        rtte = FALSE, bin_method = "spread", n_bins=16,
-        sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+        rtte = FALSE,
+        sim_dv = "dv", obs_idv = "t", sim_idv = "t")
 
 # stratified per event number (we'll only look at first 3 events) and stratify per arm
-vpc_tte(rtte_sim_nm, rtte_obs_nm,
-        rtte = TRUE, occasions = c(1:3),
-        stratify = c("drug"), bin_method="obs",
-        sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+vpc_tte(sim = rtte_sim_nm,
+        obs = rtte_obs_nm,
+        rtte = TRUE, events = c(1:3),
+        stratify = c("drug"),
+        sim_dv = "dv", obs_idv = "t", sim_idv = "t")
+}
+\seealso{
+\link{vpc}
 }
 

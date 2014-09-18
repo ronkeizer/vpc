@@ -6,13 +6,13 @@
 auto_bin(dat, type = "simple", n_bins = 8, x = "time")
 }
 \arguments{
-\item{dat}{}
+\item{dat}{data}
 
-\item{type}{}
+\item{type}{auto-binning type. Currently only "simple" available.}
 
-\item{n_bins}{}
+\item{n_bins}{number of bins to aim for.}
 
-\item{x}{}
+\item{x}{name of independent variable in dataset}
 }
 \value{
 A vector of bin separators

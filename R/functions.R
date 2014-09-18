@@ -1,3 +1,15 @@
+#' Add noise / residual error to data
+#' 
+#' @param x data
+#' @param ruv list describing the magnitude of errors. List arguments: "proportional", "additive", "exponential".
+#' @export
+add_noise <- function(x, ruv = list(proportional = 0, additive = 0, exponential = 0)) {
+  if (is.null(ruv$proportional)) { ruv$proportional <- 0 }
+  if (is.null(ruv$additive)) { ruv$additive <- 0 }
+  if (is.null(ruv$exponential)) { ruv$exponential <- 0 }
+  x * (1 + rnorm(length(x), 0, ruv$proportional)) +  rnorm(length(x), 0, ruv$additive) * exp(rnorm(length(x), 0, ruv$exponential)) 
+} 
+
 add_step <- function(dat = ., vars) {
     dat$step <- 0
     tmp <- dat[-1,]
@@ -31,7 +43,7 @@ triangle_to_full <- function (vect) {
   }
   k_given_i_j <- function(x , y ) ifelse( y<x, x*(x-1)/2 + y, y*(y-1)/2 + x )
   k_mat <- function(p) outer( 1:p, 1:p, k_given_i_j )
-  return (matrix(vect[ k_mat( nr ) ] , nr = nr ))
+  return (matrix(vect[ k_mat( nr ) ] , nrow = nr ))
 }
 
 add_recurs <- function(x, n, max) {
@@ -62,51 +74,6 @@ draw_params_mvr <- function(ids, n_sim, theta, omega_mat, par_names = NULL) {
   } else {
     cat("Parameter names have to be supplied!")
   }
-}
-
-#' Simulate PK data from a 1-compartment oral model
-#' 
-#' @param t Time after dose
-#' @param tau Dosing interval
-#' @param dose Dose
-#' @param ka Absorption rate
-#' @param ke Elimination rate
-#' @param ruv Residual variability
-#' @param par_names A vector describing 
-#' @return A vector of predicted values, with or without added residual variability
-#' @export
-pk_oral_1cmt <- function (t, tau = 24, dose=120, ka = 1, ke = 1, cl = 10, ruv = NULL) {
-  v = cl / ke
-  tmp <- (dose/v) * (ka/(ka-ke)) * (exp(-ke*t) - exp(-ka*(t)))
-  if(!is.null(ruv)) {
-    tmp <- add_noise (tmp, ruv)
-  }
-  tmp
-}
-
-pk_iv_1cmt <- function (t, t_inf = 1, tau = 24, dose=120, CL = 0.345, Vc = 1.75, ruv = NULL) {
-  k <- CL / Vc
-  tmp <- c()
-  tmp <- c(tmp, (dose / (CL * t_inf)) * (1-exp(-k*t[t < t_inf])) )
-  tmp <- c(tmp, (dose / (CL * t_inf)) * (1-exp(-k*t_inf)) * exp(-k*(t[t >= t_inf] - t_inf)) )  
-  if(!is.null(ruv)) {
-    tmp <- add_noise (tmp, ruv)
-  }
-  tmp
-}
-
-#' @export
-add_noise <- function(x, ruv = list(proportional = 0, additive = 0, exponential = 0)) {
-  if (is.null(ruv$proportional)) { ruv$proportional <- 0 }
-  if (is.null(ruv$additive)) { ruv$additive <- 0 }
-  if (is.null(ruv$exponential)) { ruv$exponential <- 0 }
-  x * (1 + rnorm(length(x), 0, ruv$proportional)) +  rnorm(length(x), 0, ruv$additive) * exp(rnorm(length(x), 0, ruv$exponential)) 
-} 
-
-#' @export
-bin_data <- function(x, bins = c(0, 3, 5, 7), idv = "time") {
-  x$bin <- cut(x[[idv]], bins, labels = FALSE, right=FALSE)
-  return(x)
 }
 
 as.num <- function(x) { as.numeric(as.character(x)) }
@@ -160,23 +127,10 @@ relative_times <- function (dat) {
 convert_from_dense_grid <- function (dat) { # note: only for a single trial, requires a loop or ddply for multiple subproblems
   tmp <- dat %>%
     group_by(id) %>% 
-  #  filter (dv == 1 | time == max(time) )
     filter (rtte == 1)
+  #  filter (dv == 1 | time == max(time) )
   tmp2 <- rbind(tmp %>% filter(length(time) > 1) %>% mutate(time = time - c(0,time[1:(length(time)-1)])),
                 tmp %>% filter(length(time) == 1) )
   return(tmp2 %>% arrange(id, time))
-}
-
-read_table_nm <- function(file, perl = TRUE) {
-  if (perl) {
-    cmd <- paste0("perl -e 'open (IN, \"<", file, "\"); my $i = 0; my $cols = 0; while (my $line = <IN>) { if ($line =~ m/[a-df-z]/i) { unless($line =~ m/^TABLE NO/ || $cols == 1) { print $line; $cols = 1; } } else { print $line } } ; close(IN);'")
-    tab <- read.table (pipe(cmd), header=T);    
-  } else { # extremely slow....
-    tab <- readLines (file)
-    skip <- grep('/[a-z]/i', tab)[1] - 1
-    del_rows <- c(grep("TABLE", tab)[-1] , grep ("TABLE", tab)[-1] + 1)
-    tab <- tab[-del_rows]
-    read.table(textConnection(tab), skip=1, header=T) 
-  }    
 }
 

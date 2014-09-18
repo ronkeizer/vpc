@@ -111,19 +111,22 @@ As for the VPC for continuous data, the VPC for TTE data requires simulated data
     data(rtte_sim_nm) 
 
     # treat RTTE as TTE, no stratification
-    vpc_tte(rtte_sim_nm, rtte_obs_nm, 
-            rtte = FALSE, bin_method="obs",
-            sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+    vpc_tte(sim = rtte_sim_nm, 
+            obs = rtte_obs_nm, 
+            rtte = FALSE, 
+            sim_dv = "dv", obs_idv = "t", sim_idv = "t")
 
     # stratified for covariate and study arm
-    vpc_tte(rtte_sim_nm, rtte_obs_nm, 
+    vpc_tte(sim = rtte_sim_nm, 
+            obs = rtte_obs_nm, 
             stratify = c("sex","drug"), 
-            rtte = FALSE, bin_method = "spread", n_bins=16,
-            sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+            rtte = FALSE, 
+            sim_dv = "dv", obs_idv = "t", sim_idv = "t")
 
     # stratified per event number (we'll only look at first 3 events) and stratify per arm
-    vpc_tte(rtte_sim_nm, rtte_obs_nm,
-            rtte = TRUE, occasions = c(1:3),
-            stratify = c("drug"), bin_method="obs", 
-            sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+    vpc_tte(sim = rtte_sim_nm, 
+            obs = rtte_obs_nm,
+            rtte = TRUE, events = c(1:3),
+            stratify = c("drug"),
+            sim_dv = "dv", obs_idv = "t", sim_idv = "t")
 

@@ -17,9 +17,9 @@ pk_oral_1cmt(t, tau = 24, dose = 120, ka = 1, ke = 1, cl = 10,
 
 \item{ke}{Elimination rate}
 
-\item{ruv}{Residual variability}
+\item{cl}{Clearance}
 
-\item{par_names}{A vector describing}
+\item{ruv}{Residual variability}
 }
 \value{
 A vector of predicted values, with or without added residual variability

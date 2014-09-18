@@ -4,41 +4,84 @@
 \title{VPC function}
 \usage{
 vpc(sim, obs, bins = "auto", n_bins = 8, auto_bin_type = "simple",
-  obs.dv = "dv", sim.dv = "sdv", obs.idv = "time", sim.idv = "time",
-  obs.id = "id", sim.id = "id", obs.pred = "pred", sim.pred = "pred",
-  nonmem = FALSE, plot.dv = FALSE, stratify = NULL, pred_corr = FALSE,
-  pred_corr_lower_bnd = 0, pi = c(0.05, 0.95), ci = c(0.05, 0.95),
-  uloq = NULL, lloq = NULL, plot = TRUE, log_y = FALSE,
-  log_y_min = 0.001, xlab = NULL, ylab = NULL, title = NULL,
-  smooth = TRUE, theme = "default", custom_theme = NULL, facet = "wrap")
-
-vpc(sim, obs, bins = "auto", n_bins = 8, auto_bin_type = "simple",
-  obs.dv = "dv", sim.dv = "sdv", obs.idv = "time", sim.idv = "time",
-  obs.id = "id", sim.id = "id", obs.pred = "pred", sim.pred = "pred",
-  nonmem = FALSE, plot.dv = FALSE, stratify = NULL, pred_corr = FALSE,
+  obs_dv = "dv", sim_dv = "sdv", obs_idv = "time", sim_idv = "time",
+  obs_id = "id", sim_id = "id", obs_pred = "pred", sim_pred = "pred",
+  nonmem = FALSE, plot_dv = FALSE, stratify = NULL, pred_corr = FALSE,
   pred_corr_lower_bnd = 0, pi = c(0.05, 0.95), ci = c(0.05, 0.95),
   uloq = NULL, lloq = NULL, plot = TRUE, log_y = FALSE,
   log_y_min = 0.001, xlab = NULL, ylab = NULL, title = NULL,
   smooth = TRUE, theme = "default", custom_theme = NULL, facet = "wrap")
 }
 \arguments{
-\item{sim}{}
+\item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{obs}{}
+\item{obs}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{sim}{}
+\item{bins}{either "auto" or a numeric vector specifying the bin separators.}
 
-\item{obs}{}
+\item{n_bins}{when using the "auto" binning method, what number of bins to aim for}
+
+\item{auto_bin_type}{auto-binning type, default is "simple".}
+
+\item{obs_dv}{variable in data.frame for observed dependent value. "dv" by default}
+
+\item{sim_dv}{variable in data.frame for simulated dependent value. "sdv" by default}
+
+\item{obs_idv}{variable in data.frame for observed independent value. "time" by default}
+
+\item{sim_idv}{variable in data.frame for simulated independent value. "time" by default}
+
+\item{obs_id}{variable in data.frame for observed individual. "id" by default}
+
+\item{sim_id}{variable in data.frame for simulated individual. "id" by default}
+
+\item{obs_pred}{variable in data.frame for population predicted value. "pred" by default}
+
+\item{sim_pred}{variable in data.frame for population predicted value. "pred" by default}
+
+\item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is FALSE.}
+
+\item{plot_dv}{should observations be plotted?}
+
+\item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
+
+\item{pred_corr}{perform prediction-correction?}
+
+\item{pred_corr_lower_bnd}{lower bound for the prediction-correction}
+
+\item{pi}{simulated prediction interval to plot. Default is c(0.05, 0.95),}
+
+\item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
+
+\item{uloq}{Number or NULL indicating upper limit of quantification. Default is NULL.}
+
+\item{lloq}{Number or NULL indicating lower limit of quantification. Default is NULL.}
+
+\item{plot}{Boolean indacting whether to plot the ggplot2 object after creation. Default is TRUE.}
+
+\item{log_y}{Boolean indacting whether y-axis should be shown as logarithmic. Default is FALSE.}
+
+\item{log_y_min}{minimal value when using log_y argument. Default is 1e-3.}
+
+\item{xlab}{ylab as numeric vector of size 2}
+
+\item{ylab}{ylab as numeric vector of size 2}
+
+\item{title}{title}
+
+\item{smooth}{"smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.}
+
+\item{theme}{which theme to load from the themes object}
+
+\item{custom_theme}{specify a custom ggplot2 theme}
+
+\item{facet}{either "wrap", "columns", or "rows"}
 }
 \value{
-Either the data for plotting a VPC or a ggplot2 object
-
-Either the data for plotting a VPC or a ggplot2 object
+a list containing calculated VPC information, and a ggplot2 object
 }
 \description{
-Creates a VPC plot and/or plotting data from observed and simulation data
-
-Creates a VPC plot and/or plotting data from observed and simulation data
+Creates a VPC plot from observed and simulation data
 }
 \examples{
 obs <- Theoph
@@ -49,38 +92,20 @@ obs <- obs \%>\%   # create a dummy covariate to show stratification
 
 sim <- sim_data(obs, # the design of the dataset
                 model = function(x) { # the model
-                  pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka, ke = x$ke, cl = x$cl * x$wt, ruv = list(additive = 0.1))
+                  pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka,
+                                ke = x$ke, cl = x$cl * x$wt,
+                                ruv = list(additive = 0.1))
                 },
-                theta = c(2.774, 0.0718, .0361),                 # parameter values
-                omega_mat = c(0.08854,                           # specified as lower triangle by default;
-                              0.02421, 0.02241,                  # note: assumed that every theta has iiv, set to 0 if no iiv.
-                              0.008069, 0.008639, 0.02862),
-                par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
-                n = 500)
-
-vpc_dat <- vpc(sim, obs, stratify = c("sex"))
-obs <- Theoph
-colnames(obs) <- c("id", "wt", "dose", "time", "dv")
-obs <- obs \%>\%   # create a dummy covariate to show stratification
- group_by(id) \%>\%
- mutate(sex = round(runif(1)))
-
-sim <- sim_data(obs, # the design of the dataset
-                model = function(x) { # the model
-                  pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka, ke = x$ke, cl = x$cl * x$wt, ruv = list(additive = 0.1))
-                },
-                theta = c(2.774, 0.0718, .0361),                 # parameter values
-                omega_mat = c(0.08854,                           # specified as lower triangle by default;
-                              0.02421, 0.02241,                  # note: assumed that every theta has iiv, set to 0 if no iiv.
-                              0.008069, 0.008639, 0.02862),
-                par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
-                n = 500)
+                theta = c(2.774, 0.0718, .0361),             # parameter values
+                omega_mat = c(0.08854,                       # specified as lower triangle
+                              0.02421, 0.02241,              # note: assumed every th has iiv,
+                              0.008069, 0.008639, 0.02862),  #  set to 0 if no iiv.
+                par_names = c("ka", "ke", "cl"),             # link the parameters in the model
+                n = 500)                                     #   to the thetas/omegas
 
 vpc_dat <- vpc(sim, obs, stratify = c("sex"))
 }
 \seealso{
-\link{sim_data}
-
-\link{sim_data}
+\link{sim_data}, \link{vpc_cens}, \link{vpc_tte}
 }
 

@@ -1,11 +1,41 @@
 #' VPC function
 #' 
-#' Creates a VPC plot and/or plotting data from observed and simulation data
-#' @param sim 
-#' @param obs
-#' @return Either the data for plotting a VPC or a ggplot2 object
+#' Creates a VPC plot from observed and simulation data
+#' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param bins either "auto" or a numeric vector specifying the bin separators.  
+#' @param n_bins when using the "auto" binning method, what number of bins to aim for
+#' @param auto_bin_type auto-binning type, default is "simple".
+#' @param obs_dv variable in data.frame for observed dependent value. "dv" by default
+#' @param sim_dv variable in data.frame for simulated dependent value. "sdv" by default
+#' @param obs_idv variable in data.frame for observed independent value. "time" by default
+#' @param sim_idv variable in data.frame for simulated independent value. "time" by default
+#' @param obs_id variable in data.frame for observed individual. "id" by default
+#' @param sim_id variable in data.frame for simulated individual. "id" by default
+#' @param obs_pred variable in data.frame for population predicted value. "pred" by default
+#' @param sim_pred variable in data.frame for population predicted value. "pred" by default
+#' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is FALSE.
+#' @param plot_dv should observations be plotted?
+#' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
+#' @param pred_corr perform prediction-correction? 
+#' @param pred_corr_lower_bnd lower bound for the prediction-correction
+#' @param pi simulated prediction interval to plot. Default is c(0.05, 0.95), 
+#' @param ci confidence interval to plot. Default is (0.05, 0.95)
+#' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.  
+#' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.  
+#' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is TRUE.
+#' @param log_y Boolean indacting whether y-axis should be shown as logarithmic. Default is FALSE.
+#' @param log_y_min minimal value when using log_y argument. Default is 1e-3.
+#' @param xlab ylab as numeric vector of size 2
+#' @param ylab ylab as numeric vector of size 2
+#' @param title title
+#' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
+#' @param theme which theme to load from the themes object
+#' @param custom_theme specify a custom ggplot2 theme
+#' @param facet either "wrap", "columns", or "rows" 
+#' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
-#' @seealso \link{sim_data}
+#' @seealso \link{sim_data}, \link{vpc_cens}, \link{vpc_tte}
 #' @examples
 #' obs <- Theoph
 #' colnames(obs) <- c("id", "wt", "dose", "time", "dv")
@@ -15,17 +45,20 @@
 #' 
 #' sim <- sim_data(obs, # the design of the dataset
 #'                 model = function(x) { # the model
-#'                   pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka, ke = x$ke, cl = x$cl * x$wt, ruv = list(additive = 0.1))
+#'                   pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka, 
+#'                                 ke = x$ke, cl = x$cl * x$wt, 
+#'                                 ruv = list(additive = 0.1))
 #'                 }, 
-#'                 theta = c(2.774, 0.0718, .0361),                 # parameter values
-#'                 omega_mat = c(0.08854,                           # specified as lower triangle by default; 
-#'                               0.02421, 0.02241,                  # note: assumed that every theta has iiv, set to 0 if no iiv. 
-#'                               0.008069, 0.008639, 0.02862),      
-#'                 par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
-#'                 n = 500)
+#'                 theta = c(2.774, 0.0718, .0361),             # parameter values
+#'                 omega_mat = c(0.08854,                       # specified as lower triangle 
+#'                               0.02421, 0.02241,              # note: assumed every th has iiv,
+#'                               0.008069, 0.008639, 0.02862),  #  set to 0 if no iiv. 
+#'                 par_names = c("ka", "ke", "cl"),             # link the parameters in the model  
+#'                 n = 500)                                     #   to the thetas/omegas
 #' 
 #' vpc_dat <- vpc(sim, obs, stratify = c("sex"))
-vpc <- function(sim, obs, 
+vpc <- function(sim, 
+                obs, 
                 bins = "auto",
                 n_bins = 8,
                 auto_bin_type = "simple",
@@ -38,7 +71,7 @@ vpc <- function(sim, obs,
                 obs_pred = "pred",
                 sim_pred = "pred",
                 nonmem = FALSE,
-                plot.dv = FALSE,
+                plot_dv = FALSE,
                 stratify = NULL,
                 pred_corr = FALSE,
                 pred_corr_lower_bnd = 0,
@@ -144,7 +177,7 @@ vpc <- function(sim, obs,
     geom_line(data=aggr_obs, aes(x=bin_mid, y=obs50), linetype='solid') +
     geom_line(data=aggr_obs, aes(x=bin_mid, y=obs5), linetype='dotted') +
     geom_line(data=aggr_obs, aes(x=bin_mid, y=obs95), linetype='dotted') 
-  if (plot.dv) {
+  if (plot_dv) {
     pl <- pl + geom_point(data=obs, aes(x=idv, y = dv))
   }
   bdat <- data.frame(cbind(x=bins, y=NA))
@@ -178,7 +211,7 @@ vpc <- function(sim, obs,
   if (plot) {
     print(pl)    
   }
-  return(
+  invisible(
     list(
       obs = tbl_df(obs), 
       sim = tbl_df(sim),

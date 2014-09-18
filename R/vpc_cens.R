@@ -1,10 +1,35 @@
 #' VPC function for left- or right-censored data (e.g. BLOQ data)
 #' 
-#' Creates a VPC plot and/or plotting data from observed and simulation data
-#' @param sim 
-#' @param obs
-#' @return Either the data for plotting a VPC or a ggplot2 object
+#' Creates a VPC plot from observed and simulation data
+#' sim, 
+#' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param bins either "auto" or a numeric vector specifying the bin separators.  
+#' @param type either "lloq" (default) or "uloq".
+#' @param n_bins when using the "auto" binning method, what number of bins to aim for
+#' @param auto_bin_type auto-binning type, default is "simple".
+#' @param obs_dv variable in data.frame for observed dependent value. "dv" by default
+#' @param sim_dv variable in data.frame for simulated dependent value. "sdv" by default
+#' @param obs_idv variable in data.frame for observed independent value. "time" by default
+#' @param sim_idv variable in data.frame for simulated independent value. "time" by default
+#' @param obs_id variable in data.frame for observed individual. "id" by default
+#' @param sim_id variable in data.frame for simulated individual. "id" by default
+#' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is FALSE.
+#' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
+#' @param ci confidence interval to plot. Default is (0.05, 0.95)
+#' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.  
+#' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.  
+#' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is TRUE.
+#' @param xlab ylab as numeric vector of size 2
+#' @param ylab ylab as numeric vector of size 2
+#' @param title title
+#' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
+#' @param theme which theme to load from the themes object
+#' @param custom_theme specify a custom ggplot2 theme
+#' @param facet either "wrap", "columns", or "rows" 
+#' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
+#' @seealso \link{vpc}
 #' @examples
 #' obs <- Theoph
 #' colnames(obs) <- c("id", "wt", "dose", "time", "dv")
@@ -14,20 +39,23 @@
 #' 
 #' sim <- sim_data(obs, # the design of the dataset
 #'                 model = function(x) { # the model
-#'                   pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka, ke = x$ke, cl = x$cl * x$wt, ruv = list(additive = 0.1))
+#'                   pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka, 
+#'                                 ke = x$ke, cl = x$cl * x$wt, 
+#'                                 ruv = list(additive = 0.1))
 #'                 }, 
-#'                 theta = c(2.774, 0.0718, .0361),                 # parameter values
-#'                 omega_mat = c(0.08854,                           # specified as lower triangle by default; 
-#'                               0.02421, 0.02241,                  # note: assumed that every theta has iiv, set to 0 if no iiv. 
-#'                               0.008069, 0.008639, 0.02862),      
-#'                 par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
-#'                 n = 500)
+#'                 theta = c(2.774, 0.0718, .0361),             # parameter values
+#'                 omega_mat = c(0.08854,                       # specified as lower triangle 
+#'                               0.02421, 0.02241,              # note: assumed every th has iiv,
+#'                               0.008069, 0.008639, 0.02862),  #  set to 0 if no iiv. 
+#'                 par_names = c("ka", "ke", "cl"),             # link the parameters in the model  
+#'                 n = 500)                                     #   to the thetas/omegas
 #' 
 #' vpc_loq <- vpc_cens(sim, obs, lloq = 5)
 vpc_cens <- function(sim, 
                      obs, 
                      bins = NULL, 
                      n_bins = 8,
+                     type = "bloq",
                      auto_bin_type = "simple",
                      obs_dv = "dv",
                      sim_dv = "sdv",
@@ -37,7 +65,6 @@ vpc_cens <- function(sim,
                      sim_id = "id",
                      nonmem = FALSE,
                      stratify = NULL,
-                     pi = c(0.05, 0.95), 
                      ci = c(0.05, 0.95),
                      uloq = NULL, 
                      lloq = NULL, 
@@ -48,7 +75,6 @@ vpc_cens <- function(sim,
                      smooth = TRUE,
                      theme = "default",
                      custom_theme = NULL,
-                     type = "bloq",
                      facet = "wrap") {
   if (class(bins) != "numeric") {
     bins <- auto_bin(obs, auto_bin_type, n_bins, x=obs_idv)
@@ -56,9 +82,9 @@ vpc_cens <- function(sim,
   sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, FALSE, 0, nonmem)
   obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, FALSE, 0, nonmem)
   loq_perc <- function(x) { sum(x <= lloq) / length(x) } # below lloq, default   
-  if (type == "uloq") {
+  if (tolower(type) == "uloq") {
     loq_perc <- function(x) { sum(x >= uloq) / length(x) }
-  }  
+  }
   aggr_sim <- data.frame(cbind(sim %>% group_by(strat, sim, bin) %>% summarise(loq_perc(dv))))    
   colnames(aggr_sim)[grep("loq_perc", colnames(aggr_sim))] <- "ploq"
   tmp <- aggr_sim %>% group_by(strat, bin)    
@@ -121,7 +147,7 @@ vpc_cens <- function(sim,
   if (plot) {
     print(pl)    
   }
-  return(
+  invisible(
     list(
       obs = obs, 
       sim = sim,

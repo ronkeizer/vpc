@@ -5,15 +5,13 @@ Author: Ron Keizer <ronkeizer@gmail.com>
 Maintainer: Ron Keizer <ronkeizer@gmail.com>
 Description: Create visual predictive checks in R, a commonly used diagnostic
     plot in pharmacometrics. Create it completely within the R environment, so
-    without the use of NONMEM, PsN, and Xpose. Compared to PsN + Xpose, this
-    approach is more flexible, more easily customizable, and faster, although
-    it requires the user to rewrite the model in R.
+    without the use of PsN and Xpose.
 Depends:
     R (>= 3.1.0),
     dplyr,
     ggplot2,
     MASS,
     survival
-License: MIT
+License: GPL-2
 LazyData: true
 URL: https://github.com/ronkeizer/vpc

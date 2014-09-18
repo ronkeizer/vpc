@@ -1,10 +1,31 @@
 #' VPC function for survival-type data 
 #' 
-#' Creates a VPC plot and/or plotting data from observed and simulation data
-#' @param sim 
-#' @param obs
-#' @return A VPC object 
+#' Creates a VPC plot from observed and simulation survival data
+#' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param rtte repeated time-to-event data? Deafult is FALSE (single-event TTE)
+#' @param events numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events. 
+#' @param pi_med plot the median of the simulated data? Default is FALSE.
+#' @param obs_dv variable in data.frame for observed dependent value. "dv" by default
+#' @param sim_dv variable in data.frame for simulated dependent value. "sdv" by default
+#' @param obs_idv variable in data.frame for observed independent value. "time" by default
+#' @param sim_idv variable in data.frame for simulated independent value. "time" by default
+#' @param obs_id variable in data.frame for observed individual. "id" by default
+#' @param sim_id variable in data.frame for simulated individual. "id" by default
+#' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is FALSE.
+#' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
+#' @param ci confidence interval to plot. Default is (0.05, 0.95)
+#' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is TRUE.
+#' @param xlab ylab as numeric vector of size 2
+#' @param ylab ylab as numeric vector of size 2
+#' @param title title
+#' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
+#' @param theme which theme to load from the themes object
+#' @param custom_theme specify a custom ggplot2 theme
+#' @param facet either "wrap", "columns", or "rows" 
+#' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
+#' @seealso \link{vpc}
 #' @examples
 #' ## Example for repeated) time-to-event data
 #' ## with NONMEM-like data (e.g. simulated using a dense grid)
@@ -12,32 +33,28 @@
 #' data(rtte_sim_nm) 
 #' 
 #' # treat RTTE as TTE, no stratification
-#' vpc_tte(rtte_sim_nm, rtte_obs_nm, 
-#'         rtte = FALSE, bin_method="obs",
-#'         sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+#' vpc_tte(sim = rtte_sim_nm, 
+#'         obs = rtte_obs_nm, 
+#'         rtte = FALSE, 
+#'         sim_dv = "dv", obs_idv = "t", sim_idv = "t")
 #' 
 #' # stratified for covariate and study arm
-#' vpc_tte(rtte_sim_nm, rtte_obs_nm, 
+#' vpc_tte(sim = rtte_sim_nm, 
+#'         obs = rtte_obs_nm, 
 #'         stratify = c("sex","drug"), 
-#'         rtte = FALSE, bin_method = "spread", n_bins=16,
-#'         sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+#'         rtte = FALSE,
+#'         sim_dv = "dv", obs_idv = "t", sim_idv = "t")
 #' 
 #' # stratified per event number (we'll only look at first 3 events) and stratify per arm
-#' vpc_tte(rtte_sim_nm, rtte_obs_nm,
-#'         rtte = TRUE, occasions = c(1:3),
-#'         stratify = c("drug"), bin_method="obs", 
-#'         sim_dv = "dv", obs_idv = "t", sim_idv = "t", n_sim = 100)
+#' vpc_tte(sim = rtte_sim_nm, 
+#'         obs = rtte_obs_nm,
+#'         rtte = TRUE, events = c(1:3),
+#'         stratify = c("drug"), 
+#'         sim_dv = "dv", obs_idv = "t", sim_idv = "t")
 vpc_tte <- function(sim, 
                     obs, 
                     rtte = FALSE,
-                    rtte_flag = "rtte",
-                    occasions = NULL,
-                    bin_method = "obs",
-                    filter_rtte = "rtte",
-                    n_bins = 32,
-                    n_sim = "auto",
-                    sim_dense_grid = FALSE,
-                    auto_bin_type = "simple",
+                    events = NULL,
                     obs_dv = "dv",
                     sim_dv =  "sdv",
                     obs_idv = "time",
@@ -59,13 +76,8 @@ vpc_tte <- function(sim,
   if(nonmem) { # set options common to NONMEM
     colnames(obs) <- tolower(colnames(obs))
     colnames(sim) <- tolower(colnames(sim))
-    sim_dense_grid <- TRUE
-    filter_rtte <- "rtte"
+    rtte_flag <- "rtte"
     sim.dv <- "dv"
-  }
-  if (!is.null(rtte_flag) & rtte_flag %in% names(sim)) {
-    sim$rtte_flag <- sim[[rtte_flag]]
-    sim <- sim %>% filter(rtte_flag == 1)
   }
   
   if(!is.null(stratify)) {
@@ -104,8 +116,10 @@ vpc_tte <- function(sim,
   sim$id_shift <- c(sim$id[2:length(sim$id)], 0) 
   idx <- c(1, (1:length(sim$id))[sim$id == tail(sim_id,1) & sim$id_shift == sim_id[1]], length(sim$id)+1)
   sim$sim <- 0
+  n_sim <- 0
   for (i in 1:(length(idx)-1)) {
     sim$sim[idx[i] : (idx[i+1]-1)] <- i 
+    n_sim <- n_sim + 1
   }
   
   all <- c()
@@ -122,8 +136,6 @@ vpc_tte <- function(sim,
       tmp <- tmp %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0))       
     }
     tmp2 <- add_stratification(tmp %>% arrange(id, time), stratify)
-#    bins <- unique(obs$time)    
-#    bins <- bins[order(bins)]
     tmp3 <- compute_kaplan(tmp2, strat = "strat")
     tmp3[,c("bin", "bin_min", "bin_max", "bin_mid")] <- 0 
     for (j in seq(obs_strat)) {
@@ -140,18 +152,7 @@ vpc_tte <- function(sim,
     }
     all <- rbind(all, cbind(i, tmp3))
   }
-   
-#   if (bin_method == "obs") {
-#     bins <- unique(obs$time)    
-#     bins <- bins[order(bins)]
-#   } else {
-#     bins <- seq(from = 0, max(all$time)*1.04, by = diff(range(all$time))/(n_bins))
-#   }  
-#   all$bin <- cut(all$time, breaks = bins, labels = FALSE, right = TRUE)
-#   all$bin_min <- bins[all$bin] 
-#   all$bin_max <- bins[all$bin+1] 
-#   all$bin_mid <- (all$bin_min + all$bin_max)/2 
-  
+
   sim_km <- all %>% 
     group_by (bin, strat) %>% 
     summarise (bin_mid = head(bin_mid,1), bin_min = head(bin_min,1), bin_max = head(bin_max,1), 
@@ -160,9 +161,9 @@ vpc_tte <- function(sim,
   if (rtte) {
     sim_km$rtte <- as.num(gsub(".*rtte=(\\d.*).*", "\\1", sim_km$strat, perl = TRUE))
     obs_km$rtte <- as.num(gsub(".*rtte=(\\d.*).*", "\\1", obs_km$strat, perl = TRUE))
-    if (!is.null(occasions)) {
-      sim_km <- sim_km %>% filter(rtte %in% occasions)
-      obs_km <- obs_km %>% filter(rtte %in% occasions)
+    if (!is.null(events)) {
+      sim_km <- sim_km %>% filter(rtte %in% events)
+      obs_km <- obs_km %>% filter(rtte %in% events)
       # redefine strat factors, since otherwise empty panels will be shown
       sim_km$strat <- factor(sim_km$strat, levels = unique(sim_km$strat))
       obs_km$strat <- factor(obs_km$strat, levels = unique(obs_km$strat))
@@ -196,7 +197,7 @@ vpc_tte <- function(sim,
     chk_tbl <- obs_km %>% group_by(strat) %>% summarise(t = length(time))
     if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use 
       pl <- pl + geom_line(data = obs_km, aes(x=time, y=surv))
-      cat ("Warning, some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'rtte_show_occasions' argument).")
+      cat ("Warning, some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).")
     } else {
       pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv))     
     }    
@@ -248,7 +249,7 @@ vpc_tte <- function(sim,
   if(plot) {
     print(pl)
   }
-  return(
+  invisible(
     list(
       obs = obs_km, 
       sim = sim_km,
