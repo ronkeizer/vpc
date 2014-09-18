@@ -27,9 +27,8 @@ The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](htt
 - Kaplan-Meier Mean Covariate plots [KMMC](http://page-meeting.org/pdf_assets/4280-2012-06%20PAGE%20KMMC.pdf)
 - general-purpose function to simulate data from a mixed-effects structural model, a fixed parameter vector and between-subject variability covariance matrix.
 
-## Planned
+## Planned functionality
 
-- update manual, provide more examples
 - function to simulate tte and rtte in R
 - auto-binning by k-means clustering (from Lavielle et al. JPP 2011)
 
@@ -39,7 +38,16 @@ The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](htt
     install_github("ronkeizer/vpc")
     library(vpc)
     ?vpc
-    
+   
+## How to use
+
+- There are three main functions:
+  - `vpc`: VPC for continuous data
+  - `vpc_cens`: VPC for censored continuous data (e.g. data < LOQ)
+  - `vpc_tte`: VPC for (repeated) time-to-event data
+- The main arguments to these three function are the `sim` and `obs` arguments, which specify a simulation dataset and an observation dataset. All other arguments can be used to customize data parsing and visual appearance of the VPC such as stratification and binning.
+- All three functions will return an object with parsed data and the ggplot2 object. By default, the VPC will also be plotted.
+
 ## Examples
 
 Load the library and get the observation data. The examples here use the Theohpylline dataset, with randomly assigned 'sex' covariate. 
@@ -67,16 +75,24 @@ In this example, we'll simulate new data in R. But a simulation dataset from NON
                     par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
                     n = 500)
 
+If we would do the above with data from NONMEM, we could do e.g.:
+
+    obs <- read_table_nm("sdtab1")   # an output table with at least ID, TIME, DV
+    sim <- read_table_nm("simtab1")  # a simulation file with at least ID, TIME, DV
+    vpc (sim = sim, obs = obs, nonmem=TRUE)
     
 VPC with auto binning:    
 
-    vpc_dat <- vpc(sim, obs, stratify = c("sex"), 
-                   n_bins = 8)                                   # aim for 8 or less bins in the autobin procedure
+    vpc(sim = sim, 
+        obs = obs, 
+        stratify = c("sex"), 
+        n_bins = 8)                                   # aim for 8 or less bins in the autobin procedure
 
 Similar VPC, but more explicit use of options:
 
-    vpc_dat <- vpc(sim, obs,                                    # supply simulation and observation dataframes
-                   obs_dv = "dv",                               # these column names are the default,                           
+    vpc_dat <- vpc(sim = sim, 
+                   obs = obs,                                   # supply simulation and observation dataframes
+                   obs_dv = "dv",                               # these column names are the default,
                    obs_idv = "time",                            #   update these if different.
                    sim_dv = "sdv",
                    sim_idv = "time",
