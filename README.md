@@ -111,7 +111,7 @@ With more explicit use of options, and saving the object:
                    xlab = "Time (hrs)", 
                    title="VPC Theophylline model")
 
-__Note: If you imported the data from NONMEM, the VPC function will automatically detect column names from NONMEM, such as ID, TIME, DV. If not, you might have to change the variable names for the dependent and independent variable, as well as the individual.__
+_Note: If you imported the data from NONMEM, the VPC function will automatically detect column names from NONMEM, such as ID, TIME, DV. If not, you might have to change the variable names for the dependent and independent variable, as well as the individual._
 
 ### Censored data
 
@@ -120,15 +120,13 @@ The example below artificially induces an LLOQ of 5 for the above model / datase
      vpc_loq <- vpc_cens(sim, obs, lloq = 5)
 
 
-## Time-to-event data
+### Time-to-event data
 
-As for the VPC for continuous data, the VPC for TTE data requires simulated data. In general, there are two distinct approach to simulate survival data:
+Similar to the VPC for continuous data, the VPC for TTE data requires simulated data. In general, there are two distinct approach to simulate survival data:
 
 - *Hazard integration*: Integrate the hazard over time, and at *any possible* observation timepoint randomly draw a binary value based on the probability of observing the event. The disadvantage of this method is that it is slow due to the numerical solving of the ODEs. Also, a dataset with a dense design grid has to be used for simulation, i.e. one that has observation times at every possible timepoint that an event can occur for all individuals. 
 
 - *Direct sampling*: Sample event times directly from the distribution used to model the data (e.g. Weibull, exponential, Gompertz). Advantages of this approach is that it is much faster, and it does not require a dense grid. The disadvantage with this approach is however that the hazard is assumed constant over time, so models with time-dependent hazards cannot easily be simulated with this approach. This approach is straightforward in R but cannot easily be implemented in NONMEM. Example will follow soon.
-
-### Example RTTE data
 
     library(vpc)
     data(rtte_obs_nm) 
