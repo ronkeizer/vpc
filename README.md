@@ -111,7 +111,7 @@ With more explicit use of options, and saving the object:
                    xlab = "Time (hrs)", 
                    title="VPC Theophylline model")
 
-_Note: If you imported the data from NONMEM, the VPC function will automatically detect column names from NONMEM, such as ID, TIME, DV. If you simulated data in R or got the data from a different software, you'll probably have to change the variable names for the dependent and independent variable, and the individual index._
+_Note: If you imported the data from NONMEM, the VPC function will automatically detect column names from NONMEM, such as ID, TIME, DV. If you simulated data in R or got the data from a different software, you will probably have to change the variable names for the dependent and independent variable, and the individual index._
 
 ### Censored data
 
