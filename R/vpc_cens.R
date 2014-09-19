@@ -79,7 +79,9 @@ vpc_cens <- function(sim,
   if (nonmem == "auto") {
     if(sum(c("ID","TIME") %in% colnames(obs)) == 2) { # most likely, data is from NONMEM
       nonmem <- TRUE
-    }     
+    } else {
+      nonmem <- FALSE
+    }        
   } else {
     if(class(nonmem) != "logical") {
       nonmem <- FALSE

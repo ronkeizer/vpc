@@ -92,7 +92,9 @@ vpc <- function(sim,
   if (nonmem == "auto") {
     if(sum(c("ID","TIME") %in% colnames(obs)) == 2) { # most likely, data is from NONMEM
       nonmem <- TRUE
-    }     
+    } else {
+      nonmem <- FALSE
+    }        
   } else {
     if(class(nonmem) != "logical") {
       nonmem <- FALSE
@@ -154,6 +156,7 @@ vpc <- function(sim,
   
   # add the sim index number
   sim$sim <- add_sim_index_number(sim)    
+
   aggr_sim <- data.frame(cbind(sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[1])),
                                sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, 0.5 )),
                                sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[2]))))
