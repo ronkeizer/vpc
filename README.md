@@ -13,7 +13,6 @@ The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](htt
 - more flexible regarding input (use simulated data from R, NONMEM, Monolix, Stan, or any other simulation tool)
 - easier to customize, e.g. request any prediction / confidence interval or binning strategy upon plotting.
 - easier to extend: the output is a ggplot object which can be themed and extended
-- more flexible in the case of survival / repeated time-to-event data
 - faster
 
 ## Functionality available
