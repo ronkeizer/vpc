@@ -62,7 +62,7 @@ Load the library and get the observation data. The examples here use the Theohpy
             group_by(id) %>%  
             mutate(sex = round(runif(1))) # generate a "sex" covariate
     
-In this example, we'll simulate new data in R. But a simulation dataset from NONMEM or any other simulation software can be imported
+In the first example, we'll perform the simulation in R. 
 
     sim <- sim_data(obs, # the design of the dataset
                     model = function(x) { # the model
@@ -75,20 +75,15 @@ In this example, we'll simulate new data in R. But a simulation dataset from NON
                     par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
                     n = 500)
 
-If we would do the above with data from NONMEM, we could do e.g.:
+However, if we would do the simulation in NONMEM, we could simple use the commands below to create the VPC:
 
     obs <- read_table_nm("sdtab1")   # an output table with at least ID, TIME, DV
     sim <- read_table_nm("simtab1")  # a simulation file with at least ID, TIME, DV
-    vpc (sim = sim, obs = obs, nonmem=TRUE)
-    
-VPC with auto binning:    
+    vpc (sim = sim, obs = obs)
 
-    vpc(sim = sim, 
-        obs = obs, 
-        stratify = c("sex"), 
-        n_bins = 8)                                   # aim for 8 or less bins in the autobin procedure
+The `read_table_nm()` function is a fast way to read in output from NONMEM's $TABLE record. The VPC function will automatically detect column names from NONMEM, such as ID, TIME, DV.
 
-Similar VPC, but more explicit use of options:
+A similar VPC, but more explicit use of options:
 
     vpc_dat <- vpc(sim = sim, 
                    obs = obs,                                   # supply simulation and observation dataframes
@@ -112,7 +107,7 @@ The example below artificially induces an LLOQ of 5 for the above model / datase
      vpc_loq <- vpc_cens(sim, obs, lloq = 5)
 
 
-### Time-to-event data
+## Time-to-event data
 
 As for the VPC for continuous data, the VPC for TTE data requires simulated data. In general, there are two distinct approach to simulate survival data:
 
@@ -120,7 +115,7 @@ As for the VPC for continuous data, the VPC for TTE data requires simulated data
 
 - *Direct sampling*: Sample event times directly from the distribution used to model the data (e.g. Weibull, exponential, Gompertz). Advantages of this approach is that it is much faster, and it does not require a dense grid. The disadvantage with this approach is however that the hazard is assumed constant over time, so models with time-dependent hazards cannot easily be simulated with this approach. This approach is straightforward in R but cannot easily be implemented in NONMEM. Example will follow soon.
 
-### Example VPC for RTTE data
+### Example RTTE data
 
     library(vpc)
     data(rtte_obs_nm) 
