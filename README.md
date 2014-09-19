@@ -13,7 +13,6 @@ The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](htt
 - more flexible regarding input (use simulated data from R, NONMEM, Monolix, Stan, or any other simulation tool)
 - easier to customize, e.g. request any prediction / confidence interval or binning strategy upon plotting.
 - easier to extend: the output is a ggplot object which can be themed and extended
-- more flexible in the case of survival / repeated time-to-event data
 - faster
 
 ## Functionality available
@@ -50,7 +49,8 @@ The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](htt
 
 ## Examples
 
-Load the library and get the observation data. The examples here use the Theohpylline dataset, with randomly assigned 'sex' covariate. 
+Load the library and get the observation data and simulation data. 
+In the first example, we'll use a dataset that's available in R by default (Theophylline) and also generate the simulation dataset in R. 
 
     library(dplyr)
     library(vpc)
@@ -60,10 +60,7 @@ Load the library and get the observation data. The examples here use the Theohpy
     colnames(obs) <- c("id", "wt", "dose", "time", "dv")
     obs <- obs %>%
             group_by(id) %>%  
-            mutate(sex = round(runif(1))) # generate a "sex" covariate
-    
-In this example, we'll simulate new data in R. But a simulation dataset from NONMEM or any other simulation software can be imported
-
+            mutate(sex = round(runif(1))) # randomly assign a "sex" covariate
     sim <- sim_data(obs, # the design of the dataset
                     model = function(x) { # the model
                       pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka, ke = x$ke, cl = x$cl * x$wt, ruv = list(additive = 0.1))
@@ -75,20 +72,26 @@ In this example, we'll simulate new data in R. But a simulation dataset from NON
                     par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
                     n = 500)
 
-If we would do the above with data from NONMEM, we could do e.g.:
+However, instead we could use observation and simulation data from NONMEM, e.g.:
 
     obs <- read_table_nm("sdtab1")   # an output table with at least ID, TIME, DV
     sim <- read_table_nm("simtab1")  # a simulation file with at least ID, TIME, DV
-    vpc (sim = sim, obs = obs, nonmem=TRUE)
-    
-VPC with auto binning:    
 
-    vpc(sim = sim, 
-        obs = obs, 
-        stratify = c("sex"), 
-        n_bins = 8)                                   # aim for 8 or less bins in the autobin procedure
+The `read_table_nm()` function comes with the `vpc` library and is a fast way to read in output data from $TABLE. 
 
-Similar VPC, but more explicit use of options:
+Next, the VPC can simply be created using:
+
+    vpc (sim = sim, obs = obs)
+
+Stratification for DOSE and SEX:
+
+    vpc (sim = sim, obs = obs, strat = c("dose", "sex"))
+
+Pred-correction, and plotting of data:
+
+    vpc (sim = sim, obs = obs, pred_correction = TRUE, plot_dv = TRUE)
+
+With more explicit use of options, and saving the object:
 
     vpc_dat <- vpc(sim = sim, 
                    obs = obs,                                   # supply simulation and observation dataframes
@@ -107,25 +110,28 @@ Similar VPC, but more explicit use of options:
                    xlab = "Time (hrs)", 
                    title="VPC Theophylline model")
 
-The example below artificially induces an LLOQ of 5 for the above model / dataset, and generates a VPC for the probability of censoring.
+_Note: If you imported the data from NONMEM, the VPC function will automatically detect column names from NONMEM, such as ID, TIME, DV. If you simulated data in R or got the data from a different software, you will probably have to change the variable names for the dependent and independent variable, and the individual index._
 
-     vpc_loq <- vpc_cens(sim, obs, lloq = 5)
+### Censored data
 
+The `vpc_cens()` function can be used to create a VPC for the probability of left- or right-censoring such as in the case of data <LLOQ or >ULOQ. There is no need to add a variable to the dataset to flag the censored cases, the function only requires the `lloq` or `uloq`. The example below artificially induces an LLOQ of 5 for the above model / dataset, and generates a VPC for the probability of left-censoring.
+
+     vpc_cens(sim, obs, lloq = 5)
 
 ### Time-to-event data
 
-As for the VPC for continuous data, the VPC for TTE data requires simulated data. In general, there are two distinct approach to simulate survival data:
+Similar to the VPC for continuous data, the VPC for TTE data requires simulated data. In general, there are two distinct approach to simulate survival data:
 
 - *Hazard integration*: Integrate the hazard over time, and at *any possible* observation timepoint randomly draw a binary value based on the probability of observing the event. The disadvantage of this method is that it is slow due to the numerical solving of the ODEs. Also, a dataset with a dense design grid has to be used for simulation, i.e. one that has observation times at every possible timepoint that an event can occur for all individuals. 
 
 - *Direct sampling*: Sample event times directly from the distribution used to model the data (e.g. Weibull, exponential, Gompertz). Advantages of this approach is that it is much faster, and it does not require a dense grid. The disadvantage with this approach is however that the hazard is assumed constant over time, so models with time-dependent hazards cannot easily be simulated with this approach. This approach is straightforward in R but cannot easily be implemented in NONMEM. Example will follow soon.
 
-### Example VPC for RTTE data
+An example for time-to-event data is shown below. The datasets are supplied with the `vpc` library.
 
     library(vpc)
     data(rtte_obs_nm) 
     data(rtte_sim_nm) 
-
+    
     # treat RTTE as TTE, no stratification
     vpc_tte(sim = rtte_sim_nm, 
             obs = rtte_obs_nm, 
