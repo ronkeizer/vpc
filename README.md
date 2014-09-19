@@ -73,14 +73,14 @@ In the first example, we'll use a dataset that's available in R by default (Theo
                     par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
                     n = 500)
 
-However, if we would get the observation and simulation data from NONMEM, we could simple use:
+However, instead we could use observation and simulation data from NONMEM, e.g.:
 
     obs <- read_table_nm("sdtab1")   # an output table with at least ID, TIME, DV
     sim <- read_table_nm("simtab1")  # a simulation file with at least ID, TIME, DV
 
-The `read_table_nm()` function comes with the `vpc` library and is a fast way to read in output from $TABLE. 
+The `read_table_nm()` function comes with the `vpc` library and is a fast way to read in output data from $TABLE. 
 
-Next, the VPC can then simply be created using:
+Next, the VPC can simply be created using:
 
     vpc (sim = sim, obs = obs)
 
