@@ -111,14 +111,13 @@ With more explicit use of options, and saving the object:
                    xlab = "Time (hrs)", 
                    title="VPC Theophylline model")
 
-_Note: If you imported the data from NONMEM, the VPC function will automatically detect column names from NONMEM, such as ID, TIME, DV. If not, you might have to change the variable names for the dependent and independent variable, as well as the individual._
+_Note: If you imported the data from NONMEM, the VPC function will automatically detect column names from NONMEM, such as ID, TIME, DV. If you simulated data in R or got the data from a different software, you'll probably have to change the variable names for the dependent and independent variable, and the individual index._
 
 ### Censored data
 
-The example below artificially induces an LLOQ of 5 for the above model / dataset, and generates a VPC for the probability of censoring.
+The `vpc_cens()` function can be used to create a VPC for the probability of left- or right-censoring such as in the case of data <LLOQ or >ULOQ. There is no need to add a variable to the dataset to flag the censored cases, the function only requires the `lloq` or `uloq`. The example below artificially induces an LLOQ of 5 for the above model / dataset, and generates a VPC for the probability of left-censoring.
 
-     vpc_loq <- vpc_cens(sim, obs, lloq = 5)
-
+     vpc_cens(sim, obs, lloq = 5)
 
 ### Time-to-event data
 
