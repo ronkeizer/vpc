@@ -14,7 +14,7 @@
 #' @param sim_idv variable in data.frame for simulated independent value. "time" by default
 #' @param obs_id variable in data.frame for observed individual. "id" by default
 #' @param sim_id variable in data.frame for simulated individual. "id" by default
-#' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is FALSE.
+#' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED).  Default is "auto" for autodetect
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.  
@@ -63,7 +63,7 @@ vpc_cens <- function(sim,
                      sim_idv = "time",
                      obs_id = "id",
                      sim_id = "id",
-                     nonmem = FALSE,
+                     nonmem = "auto",
                      stratify = NULL,
                      ci = c(0.05, 0.95),
                      uloq = NULL, 
@@ -76,11 +76,42 @@ vpc_cens <- function(sim,
                      theme = "default",
                      custom_theme = NULL,
                      facet = "wrap") {
+  if (nonmem == "auto") {
+    if(sum(c("ID","TIME") %in% colnames(obs)) == 2) { # most likely, data is from NONMEM
+      nonmem <- TRUE
+    }     
+  } else {
+    if(class(nonmem) != "logical") {
+      nonmem <- FALSE
+    }
+  } 
+  if (nonmem) {
+    obs_dv = "DV"
+    obs_idv = "TIME"
+    obs_id = "ID"
+    obs_pred <- "PRED"
+    sim_dv = "DV"
+    sim_idv = "TIME"
+    sim_id = "ID"
+    sim_pred <- "PRED"
+    if("MDV" %in% colnames(obs)) {
+      obs <- obs[obs$MDV == 0,]
+    }
+    if("EVID" %in% colnames(obs)) {
+      obs <- obs[obs$EVID == 0,]
+    }
+    if("MDV" %in% colnames(sim)) {
+      sim <- sim[sim$MDV == 0,]
+    }
+    if("EVID" %in% colnames(obs)) {
+      sim <- sim[sim$EVID == 0,]
+    }
+  }
   if (class(bins) != "numeric") {
     bins <- auto_bin(obs, auto_bin_type, n_bins, x=obs_idv)
   }  
-  sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, FALSE, 0, nonmem)
-  obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, FALSE, 0, nonmem)
+  sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, FALSE, 0)
+  obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, FALSE, 0)
   loq_perc <- function(x) { sum(x <= lloq) / length(x) } # below lloq, default   
   if (tolower(type) == "uloq") {
     loq_perc <- function(x) { sum(x >= uloq) / length(x) }

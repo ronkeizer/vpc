@@ -1,15 +1,4 @@
-format_vpc_input_data <- function(dat, dv, idv, id, lloq, uloq, strat, bins, log_y, log_y_min, nonmem) {
-  if (nonmem) {
-    dv = "DV"
-    idv = "TIME"
-    id = "ID"
-    if("MDV" %in% colnames(dat)) {
-      dat <- dat[dat$MDV == 0,]
-    }
-    if("EVID" %in% colnames(dat)) {
-      dat <- dat[dat$EVID == 0,]
-    }
-  }
+format_vpc_input_data <- function(dat, dv, idv, id, lloq, uloq, strat, bins, log_y, log_y_min) {
   if(id %in% colnames(dat)) {
     if ("id" %in% colnames(dat) &! id == "id") {
       colnames(dat)[match("id", colnames(dat))] <- "id.old"

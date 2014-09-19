@@ -12,7 +12,7 @@
 #' @param sim_idv variable in data.frame for simulated independent value. "time" by default
 #' @param obs_id variable in data.frame for observed individual. "id" by default
 #' @param sim_id variable in data.frame for simulated individual. "id" by default
-#' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is FALSE.
+#' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect.
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is TRUE.
@@ -62,7 +62,7 @@ vpc_tte <- function(sim,
                     obs_id = "id",
                     sim_id = "id",
                     pi_med = FALSE, 
-                    nonmem = FALSE,
+                    nonmem = "auto",
                     stratify = NULL,
                     ci = c(0.05, 0.95),
                     plot = TRUE,
@@ -73,11 +73,37 @@ vpc_tte <- function(sim,
                     theme = "default",
                     custom_theme = NULL,
                     facet = "wrap") {
-  if(nonmem) { # set options common to NONMEM
+  if (nonmem == "auto") {
+    if(sum(c("ID","TIME") %in% colnames(obs)) == 2) { # most likely, data is from NONMEM
+      nonmem <- TRUE
+    }     
+  } else {
+    if(class(nonmem) != "logical") {
+      nonmem <- FALSE
+    }
+  } 
+  if (nonmem) {
+    obs_dv = "dv"
+    obs_idv = "time"
+    obs_id = "id"
+    sim_dv = "dv"
+    sim_idv = "time"
+    sim_id = "id"
+    rtte_flag <- "rtte"
+    if("MDV" %in% colnames(obs)) {
+      obs <- obs[obs$MDV == 0,]
+    }
+    if("EVID" %in% colnames(obs)) {
+      obs <- obs[obs$EVID == 0,]
+    }
+    if("MDV" %in% colnames(sim)) {
+      sim <- sim[sim$MDV == 0,]
+    }
+    if("EVID" %in% colnames(obs)) {
+      sim <- sim[sim$EVID == 0,]
+    }
     colnames(obs) <- tolower(colnames(obs))
     colnames(sim) <- tolower(colnames(sim))
-    rtte_flag <- "rtte"
-    sim.dv <- "dv"
   }
   
   if(!is.null(stratify)) {
@@ -110,17 +136,9 @@ vpc_tte <- function(sim,
   obs_km <- compute_kaplan(obs, strat = "strat")
     
   # format sim data and compute KM curve CI for simulations
-  # first get the number of simulations (req'd if sim# is not specified)
   sim$time <- sim[[sim_idv]]
-  sim_id <- unique(sim$id)
-  sim$id_shift <- c(sim$id[2:length(sim$id)], 0) 
-  idx <- c(1, (1:length(sim$id))[sim$id == tail(sim_id,1) & sim$id_shift == sim_id[1]], length(sim$id)+1)
-  sim$sim <- 0
-  n_sim <- 0
-  for (i in 1:(length(idx)-1)) {
-    sim$sim[idx[i] : (idx[i+1]-1)] <- i 
-    n_sim <- n_sim + 1
-  }
+  sim$sim <- add_sim_index_number(sim)
+  n_sim <- length(unique(sim$sim))
   
   all <- c()
   obs_strat <- as.character(unique(obs$strat))

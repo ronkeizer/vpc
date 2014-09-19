@@ -14,7 +14,7 @@
 #' @param sim_id variable in data.frame for simulated individual. "id" by default
 #' @param obs_pred variable in data.frame for population predicted value. "pred" by default
 #' @param sim_pred variable in data.frame for population predicted value. "pred" by default
-#' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is FALSE.
+#' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect
 #' @param plot_dv should observations be plotted?
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param pred_corr perform prediction-correction? 
@@ -70,7 +70,7 @@ vpc <- function(sim,
                 sim_id = "id",
                 obs_pred = "pred",
                 sim_pred = "pred",
-                nonmem = FALSE,
+                nonmem = "auto",
                 plot_dv = FALSE,
                 stratify = NULL,
                 pred_corr = FALSE,
@@ -89,40 +89,71 @@ vpc <- function(sim,
                 theme = "default",
                 custom_theme = NULL,
                 facet = "wrap") {
+  if (nonmem == "auto") {
+    if(sum(c("ID","TIME") %in% colnames(obs)) == 2) { # most likely, data is from NONMEM
+      nonmem <- TRUE
+    }     
+  } else {
+    if(class(nonmem) != "logical") {
+      nonmem <- FALSE
+    }
+  } 
+  if (nonmem) {
+    obs_dv = "DV"
+    obs_idv = "TIME"
+    obs_id = "ID"
+    obs_pred <- "PRED"
+    sim_dv = "DV"
+    sim_idv = "TIME"
+    sim_id = "ID"
+    sim_pred <- "PRED"
+    if("MDV" %in% colnames(obs)) {
+      obs <- obs[obs$MDV == 0,]
+    }
+    if("EVID" %in% colnames(obs)) {
+      obs <- obs[obs$EVID == 0,]
+    }
+    if("MDV" %in% colnames(sim)) {
+      sim <- sim[sim$MDV == 0,]
+    }
+    if("EVID" %in% colnames(obs)) {
+      sim <- sim[sim$EVID == 0,]
+    }
+  }
   if (class(bins) != "numeric") {
     bins <- auto_bin(obs, auto_bin_type, n_bins, x=obs_idv)
+    if (is.null(bins)) {
+      stop("Binning unsuccessful, try increasing the number of bins.")
+    }
   }
   if (pred_corr) {
-    if (nonmem) {
-      obs_pred <- "PRED"
-      sim_pred <- "PRED"
-    }
     if (!obs_pred %in% names(obs)) {
-      cat("Warning: Prediction-correction: specified pred-variable not found in observations, trying to get from simulated dataset...")      
+      warning("Warning: Prediction-correction: specified pred-variable not found in observations, trying to get from simulated dataset...")      
       if (!sim_pred %in% names(sim)) {
-        cat("Warning: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
-        return()
+        stop("Error: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
       } else {
         obs[[obs_pred]] <- sim[1:length(obs[,1]), sim_pred]
-        cat ("OK")
+        warning ("OK")
       }
     } else {
       if (!sim_pred %in% names(sim)) {
-        cat("Warning: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
-        return()
+        stop("Warning: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
       }      
     }
     obs$pred <- obs[[obs_pred]]
     sim$pred <- sim[[sim_pred]]
   }
-  sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min, nonmem)
-  obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min, nonmem)
+  sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min)
+  obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min)
   if (pred_corr) {
     obs <- obs %>% group_by(strat, bin) %>% mutate(pred_bin = mean(pred))
     obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
     sim <- sim %>% group_by(strat, sim, bin) %>% mutate(pred_bin = mean(pred))
     sim[sim$pred != 0,]$dv <- pred_corr_lower_bnd + (sim[sim$pred != 0,]$dv - pred_corr_lower_bnd) * (sim[sim$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (sim[sim$pred != 0,]$pred - pred_corr_lower_bnd)
   }
+  
+  # add the sim index number
+  sim$sim <- add_sim_index_number(sim)    
   aggr_sim <- data.frame(cbind(sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[1])),
                                sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, 0.5 )),
                                sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[2]))))
