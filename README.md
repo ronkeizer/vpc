@@ -127,10 +127,12 @@ Similar to the VPC for continuous data, the VPC for TTE data requires simulated 
 
 - *Direct sampling*: Sample event times directly from the distribution used to model the data (e.g. Weibull, exponential, Gompertz). Advantages of this approach is that it is much faster, and it does not require a dense grid. The disadvantage with this approach is however that the hazard is assumed constant over time, so models with time-dependent hazards cannot easily be simulated with this approach. This approach is straightforward in R but cannot easily be implemented in NONMEM. Example will follow soon.
 
+An example for time-to-event data is shown below. The datasets are supplied with the `vpc` library.
+
     library(vpc)
     data(rtte_obs_nm) 
     data(rtte_sim_nm) 
-
+    
     # treat RTTE as TTE, no stratification
     vpc_tte(sim = rtte_sim_nm, 
             obs = rtte_obs_nm, 
