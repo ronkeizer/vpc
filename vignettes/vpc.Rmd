@@ -1,7 +1,18 @@
+---
+title: "Creating visual predictive checks in R"
+author: "Ron Keizer"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Creating visual predictive checks in R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
+---
+
 vpc
 ===
 
-Create visual predictive checks, a commonly used diagnostic plot in pharmacometrics in R 
+Create visual predictive checks, a commonly used diagnostic plot in pharmacometrics, using the `vpc` library in R. 
 
 ## Rationale
 
@@ -28,15 +39,17 @@ The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](htt
 
 ## Planned functionality
 
+- npde plots with prediction intervals, see e.g. [here](http://page-meeting.org/pdf_assets/9164-venise12_posternpde.pdf)
 - function to simulate tte and rtte in R
 - auto-binning by k-means clustering (from Lavielle et al. JPP 2011)
 
 ## Installation
 
-    library("devtools")
-    install_github("ronkeizer/vpc")
+```{r, warning=FALSE, message=FALSE, error=FALSE}
+    # library("devtools")
+    # install_github("ronkeizer/vpc")
     library(vpc)
-    ?vpc
+```
    
 ## How to use
 
@@ -52,6 +65,7 @@ The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](htt
 Load the library and get the observation data and simulation data. 
 In the first example, we'll use a dataset that's available in R by default (Theophylline) and also generate the simulation dataset in R. 
 
+```{r, warning=FALSE, message=FALSE, error=FALSE}
     library(dplyr)
     library(vpc)
 
@@ -71,44 +85,54 @@ In the first example, we'll use a dataset that's available in R by default (Theo
                                   0.008069, 0.008639, 0.02862),      
                     par_names = c("ka", "ke", "cl"),                 # link the parameters in the model to the thetas/omegas
                     n = 500)
+```
 
 However, instead we could use observation and simulation data from NONMEM, e.g.:
 
-    obs <- read_table_nm("sdtab1")   # an output table with at least ID, TIME, DV
-    sim <- read_table_nm("simtab1")  # a simulation file with at least ID, TIME, DV
+```{r, warning=FALSE, message=FALSE, error=FALSE}
+# obs <- read_table_nm("sdtab1")   # an output table with at least ID, TIME, DV
+# sim <- read_table_nm("simtab1")  # a simulation file with at least ID, TIME, DV
+```
 
 The `read_table_nm()` function comes with the `vpc` library and is a fast way to read in output data from $TABLE. 
 
 Next, the VPC can simply be created using:
 
-    vpc (sim = sim, obs = obs)
+```{r, fig.width=5, fig.height=5}
+vpc (sim = sim, obs = obs)
+```
 
-Stratification for DOSE and SEX:
+Stratified by SEX:
 
-    vpc (sim = sim, obs = obs, strat = c("dose", "sex"))
+```{r, fig.width=5, fig.height=5}
+vpc (sim = sim, obs = obs, strat = c("sex"))
+```
 
 Pred-correction, and plotting of data:
 
-    vpc (sim = sim, obs = obs, pred_corr = TRUE, plot_dv = TRUE)
+```{r, fig.width=5, fig.height=5}
+vpc (sim = sim, obs = obs, pred_corr = TRUE, plot_dv = TRUE)
+```
 
 With more explicit use of options, and saving the object:
 
-    vpc_dat <- vpc(sim = sim, 
-                   obs = obs,                                   # supply simulation and observation dataframes
-                   obs_dv = "dv",                               # these column names are the default,
-                   obs_idv = "time",                            #   update these if different.
-                   sim_dv = "sdv",
-                   sim_idv = "time",
-                   bins = c(0, 2, 4, 6, 8, 10, 25),             # specify bin separators manually
-                   stratify = c("sex"),                         # multiple stratifications possible, just supply as vector
-                   pi = c(0.05, 0.95),                          # prediction interval simulated data to show
-                   ci = c(0.05, 0.95),                          # confidence intervals to show
-                   pred_corr = FALSE,                           # perform prediction-correction?
-                   plot_dv = TRUE,                              # plot observations?
-                   facet = "wrap",                              # wrap stratifications, or as "row" or "column"
-                   ylab = "Concentration", 
-                   xlab = "Time (hrs)", 
-                   title="VPC Theophylline model")
+```{r, fig.width=4, fig.height=4}
+vpc_dat <- vpc(sim = sim, 
+               obs = obs,                                   # supply simulation and observation dataframes
+               obs_dv = "dv",                               # these column names are the default,
+               obs_idv = "time",                            #   update these if different.
+               sim_dv = "sdv",
+               sim_idv = "time",
+               bins = c(0, 2, 4, 6, 8, 10, 25),             # specify bin separators manually
+               stratify = c("sex"),                         # multiple stratifications possible, just supply as vector
+               pi = c(0.05, 0.95),                          # prediction interval simulated data to show
+               ci = c(0.05, 0.95),                          # confidence intervals to show
+               pred_corr = FALSE,                           # perform prediction-correction?
+               plot_dv = TRUE,                              # plot observations?
+               facet = "wrap",                              # wrap stratifications, or as "row" or "column"
+               ylab = "Concentration", 
+               xlab = "Time (hrs)")
+```
 
 _Note: If you imported the data from NONMEM, the VPC function will automatically detect column names from NONMEM, such as ID, TIME, DV. If you simulated data in R or got the data from a different software, you will probably have to change the variable names for the dependent and independent variable, and the individual index._
 
@@ -116,7 +140,9 @@ _Note: If you imported the data from NONMEM, the VPC function will automatically
 
 The `vpc_cens()` function can be used to create a VPC for the probability of left- or right-censoring such as in the case of data <LLOQ or >ULOQ. There is no need to add a variable to the dataset to flag the censored cases, the function only requires the `lloq` or `uloq`. The example below artificially induces an LLOQ of 5 for the above model / dataset, and generates a VPC for the probability of left-censoring.
 
-     vpc_cens(sim, obs, lloq = 5)
+```{r, fig.width=4, fig.height=4}
+vpc_cens(sim, obs, lloq = 5)
+```
 
 ### Time-to-event data
 
@@ -128,27 +154,35 @@ Similar to the VPC for continuous data, the VPC for TTE data requires simulated 
 
 An example for time-to-event data is shown below. The datasets are supplied with the `vpc` library.
 
-    library(vpc)
-    data(rtte_obs_nm) 
-    data(rtte_sim_nm) 
-    
-    # treat RTTE as TTE, no stratification
-    vpc_tte(sim = rtte_sim_nm, 
-            obs = rtte_obs_nm, 
-            rtte = FALSE, 
-            sim_dv = "dv", obs_idv = "t", sim_idv = "t")
+```{r}
+data(rtte_obs_nm) 
+data(rtte_sim_nm) 
+```
 
-    # stratified for covariate and study arm
-    vpc_tte(sim = rtte_sim_nm, 
-            obs = rtte_obs_nm, 
-            stratify = c("sex","drug"), 
-            rtte = FALSE, 
-            sim_dv = "dv", obs_idv = "t", sim_idv = "t")
+Treat RTTE as TTE, no stratification:
+```{r, fig.width=4, fig.height=4}
+vpc_tte(sim = rtte_sim_nm, 
+        obs = rtte_obs_nm, 
+        rtte = FALSE, 
+        sim_dv = "dv", obs_idv = "t", sim_idv = "t")
+```
 
-    # stratified per event number (we'll only look at first 3 events) and stratify per arm
-    vpc_tte(sim = rtte_sim_nm, 
-            obs = rtte_obs_nm,
-            rtte = TRUE, events = c(1:3),
-            stratify = c("drug"),
-            sim_dv = "dv", obs_idv = "t", sim_idv = "t")
+Stratified for covariate and study arm:
+```{r, fig.width=6, fig.height=6}
+vpc_tte(sim = rtte_sim_nm, 
+        obs = rtte_obs_nm, 
+        stratify = c("sex","drug"), 
+        rtte = FALSE, 
+        sim_dv = "dv", obs_idv = "t", sim_idv = "t")
+```
+
+Stratified for event number and study arm:
+```{r, fig.width=6, fig.height=6}
+vpc_tte(sim = rtte_sim_nm, 
+        obs = rtte_obs_nm,
+        rtte = TRUE, events = c(1:3),
+        stratify = c("drug"),
+        sim_dv = "dv", obs_idv = "t", sim_idv = "t")
+```
+
 

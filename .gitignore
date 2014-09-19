@@ -3,3 +3,4 @@
 .RData
 vpc.Rproj
 .DS_Store
+inst/doc

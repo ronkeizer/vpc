@@ -94,7 +94,7 @@ vpc <- function(sim,
       nonmem <- TRUE
     } else {
       nonmem <- FALSE
-    }        
+    } 
   } else {
     if(class(nonmem) != "logical") {
       nonmem <- FALSE
@@ -155,7 +155,7 @@ vpc <- function(sim,
   }
   
   # add the sim index number
-  sim$sim <- add_sim_index_number(sim)    
+  sim$sim <- add_sim_index_number(sim, id = "id")    
 
   aggr_sim <- data.frame(cbind(sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[1])),
                                sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, 0.5 )),
@@ -174,9 +174,9 @@ vpc <- function(sim,
                               tmp %>% summarise(quantile(q95, ci[2])) ))
   vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
   colnames(vpc_dat) <- c("strat", "bin", 
-                         "q5.5","q5.50","q5.95", 
-                         "q50.5","q50.50","q50.95",
-                         "q95.5","q95.50","q95.95")
+                         "q5.low","q5.med","q5.up", 
+                         "q50.low","q50.med","q50.up",
+                         "q95.low","q95.med","q95.up")
   vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)) )
   vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)) )
   vpc_dat$bin_mid <- (vpc_dat$bin_min + vpc_dat$bin_max) / 2
@@ -195,17 +195,17 @@ vpc <- function(sim,
     ylab <- obs_dv
   }
   pl <- ggplot(vpc_dat, aes(x=bin_mid, y=dv)) + 
-    geom_line(aes(y=q50.50), linetype='dashed') 
+    geom_line(aes(y=q50.med), linetype='dashed') 
   if (smooth) {
     pl <- pl + 
-      geom_ribbon(aes(x=bin_mid, y=q50.5, ymin=q50.5, ymax=q50.95), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
-      geom_ribbon(aes(x=bin_mid, y=q5.5, ymin=q5.5, ymax=q5.95), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
-      geom_ribbon(aes(x=bin_mid, y=q95.5, ymin=q95.5, ymax=q95.95), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) 
+      geom_ribbon(aes(x=bin_mid, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
+      geom_ribbon(aes(x=bin_mid, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
+      geom_ribbon(aes(x=bin_mid, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) 
   } else {
     pl <- pl + 
-      geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.5, ymin=q50.5, ymax=q50.95), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
-      geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q5.5, ymin=q5.5, ymax=q5.95), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
-      geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q95.5, ymin=q95.5, ymax=q95.95), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area)     
+      geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
+      geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
+      geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area)     
   }
   pl <- pl +
     geom_line(data=aggr_obs, aes(x=bin_mid, y=obs50), linetype='solid') +
@@ -249,6 +249,7 @@ vpc <- function(sim,
     list(
       obs = tbl_df(obs), 
       sim = tbl_df(sim),
+      pl_dat = vpc_dat,
       bins = bins, 
       pl = pl
     )

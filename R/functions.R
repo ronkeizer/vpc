@@ -35,7 +35,10 @@ add_stratification <- function (dat, strat) {
   return(dat)
 }
 
+as.num <- function(x) { as.numeric(as.character(x)) }
+
 add_sim_index_number <- function (sim, id = "id") { # for multiple simulations in a single dataframe, add an index number for every simulation
+  sim[[id]] <- as.num(sim[[id]])
   sim_id <- unique(sim[[id]])
   sim$id_shift <- c(sim[[id]][2:length(sim[[id]])], 0) 
   idx <- c(1, (1:length(sim[[id]]))[sim[[id]] == tail(sim_id,1) & sim$id_shift == sim_id[1]], length(sim[[id]])+1)
@@ -86,8 +89,6 @@ draw_params_mvr <- function(ids, n_sim, theta, omega_mat, par_names = NULL) {
     cat("Parameter names have to be supplied!")
   }
 }
-
-as.num <- function(x) { as.numeric(as.character(x)) }
 
 themes <- list(
   "default" = list(
