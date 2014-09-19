@@ -9,13 +9,6 @@ vignette: >
   %\usepackage[utf8]{inputenc}
 ---
 
-vpc
-===
-
-Create visual predictive checks, a commonly used diagnostic plot in pharmacometrics, using the `vpc` library in R. 
-
-## Rationale
-
 The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](http://page-meeting.org/default.asp?abstract=1434)), most commonly created using [PsN](http://psn.sourceforge.net) and [Xpose](http://xpose.sourceforge.net), using NONMEM as the simulation engine. The aim of the current library is to provide an improved tool that is:
 
 - a single-step process for creating a VPC. 
@@ -25,23 +18,6 @@ The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](htt
 - easier to customize, e.g. request any prediction / confidence interval or binning strategy upon plotting.
 - easier to extend: the output is a ggplot object which can be themed and extended
 - faster
-
-## Functionality available
-
-- VPC for continuous data
-- VPC for censored continuous data (e.g. below LOQ)
-- VPC for time-to-event data (single and repeated)
-- stratification (single & multiple)
-- prediction-correction
-- auto-binning (search for x-variable density-nadirs)
-- Kaplan-Meier Mean Covariate plots [KMMC](http://page-meeting.org/pdf_assets/4280-2012-06%20PAGE%20KMMC.pdf)
-- general-purpose function to simulate data from a mixed-effects structural model, a fixed parameter vector and between-subject variability covariance matrix.
-
-## Planned functionality
-
-- npde plots with prediction intervals, see e.g. [here](http://page-meeting.org/pdf_assets/9164-venise12_posternpde.pdf)
-- function to simulate tte and rtte in R
-- auto-binning by k-means clustering (from Lavielle et al. JPP 2011)
 
 ## Installation
 
