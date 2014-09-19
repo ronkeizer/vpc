@@ -28,6 +28,7 @@ The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](htt
 
 ## Planned functionality
 
+- npde plots with prediction intervals, see e.g. [here](http://page-meeting.org/pdf_assets/9164-venise12_posternpde.pdf)
 - function to simulate tte and rtte in R
 - auto-binning by k-means clustering (from Lavielle et al. JPP 2011)
 
