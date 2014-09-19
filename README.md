@@ -79,11 +79,22 @@ However, if we would do the simulation in NONMEM, we could simple use the comman
 
     obs <- read_table_nm("sdtab1")   # an output table with at least ID, TIME, DV
     sim <- read_table_nm("simtab1")  # a simulation file with at least ID, TIME, DV
+
+The `read_table_nm()` function is a fast way to read in output from NONMEM's $TABLE record. 
+
+Next, the VPC can then simply be created using:
+
     vpc (sim = sim, obs = obs)
 
-The `read_table_nm()` function is a fast way to read in output from NONMEM's $TABLE record. The VPC function will automatically detect column names from NONMEM, such as ID, TIME, DV.
+Stratification for DOSE and SEX:
 
-A similar VPC, but more explicit use of options:
+    vpc (sim = sim, obs = obs, strat = c("dose", "sex"))
+
+Pred-correction, and plotting of data:
+
+    vpc (sim = sim, obs = obs, pred_correction = TRUE, plot_dv = TRUE)
+
+With more explicit use of options, and saving the object:
 
     vpc_dat <- vpc(sim = sim, 
                    obs = obs,                                   # supply simulation and observation dataframes
@@ -101,6 +112,8 @@ A similar VPC, but more explicit use of options:
                    ylab = "Concentration", 
                    xlab = "Time (hrs)", 
                    title="VPC Theophylline model")
+
+__Note: If you imported the data from NONMEM, the VPC function will automatically detect column names from NONMEM, such as ID, TIME, DV. If not, you might have to change the variable names for the dependent and independent variable, as well as the individual.__
 
 The example below artificially induces an LLOQ of 5 for the above model / dataset, and generates a VPC for the probability of censoring.
 
