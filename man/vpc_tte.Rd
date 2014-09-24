@@ -3,9 +3,10 @@
 \alias{vpc_tte}
 \title{VPC function for survival-type data}
 \usage{
-vpc_tte(sim, obs, rtte = FALSE, events = NULL, obs_dv = "dv",
-  sim_dv = "sdv", obs_idv = "time", sim_idv = "time", obs_id = "id",
-  sim_id = "id", pi_med = FALSE, nonmem = FALSE, stratify = NULL,
+vpc_tte(sim = NULL, obs = NULL, rtte = FALSE, events = NULL,
+  obs_dv = "dv", sim_dv = "sdv", obs_idv = "time", sim_idv = "time",
+  obs_id = "id", sim_id = "id", pi_med = FALSE, nonmem = "auto",
+  stratify = NULL, stratify_color = NULL, stratify_facet = TRUE,
   ci = c(0.05, 0.95), plot = TRUE, xlab = NULL, ylab = NULL,
   title = NULL, smooth = FALSE, theme = "default", custom_theme = NULL,
   facet = "wrap")
@@ -33,7 +34,7 @@ vpc_tte(sim, obs, rtte = FALSE, events = NULL, obs_dv = "dv",
 
 \item{sim_id}{variable in data.frame for simulated individual. "id" by default}
 
-\item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is FALSE.}
+\item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect.}
 
 \item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
 

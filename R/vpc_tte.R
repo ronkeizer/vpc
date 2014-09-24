@@ -13,9 +13,10 @@
 #' @param obs_id variable in data.frame for observed individual. "id" by default
 #' @param sim_id variable in data.frame for simulated individual. "id" by default
 #' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect.
-#' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
+#' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied. If stratify_color is also specified, only 1 additional stratification can be specified.
+#' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
-#' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is TRUE.
+#' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.
 #' @param xlab ylab as numeric vector of size 2
 #' @param ylab ylab as numeric vector of size 2
 #' @param title title
@@ -51,8 +52,8 @@
 #'         rtte = TRUE, events = c(1:3),
 #'         stratify = c("drug"), 
 #'         sim_dv = "dv", obs_idv = "t", sim_idv = "t")
-vpc_tte <- function(sim, 
-                    obs, 
+vpc_tte <- function(sim = NULL, 
+                    obs = NULL, 
                     rtte = FALSE,
                     events = NULL,
                     obs_dv = "dv",
@@ -64,8 +65,10 @@ vpc_tte <- function(sim,
                     pi_med = FALSE, 
                     nonmem = "auto",
                     stratify = NULL,
+                    stratify_color = NULL,
+                    legend_pos = NULL,
                     ci = c(0.05, 0.95),
-                    plot = TRUE,
+                    plot = FALSE,
                     xlab = NULL, 
                     ylab = NULL,
                     title = NULL,
@@ -84,6 +87,19 @@ vpc_tte <- function(sim,
       nonmem <- FALSE
     }
   } 
+  stratify_original <- stratify
+  if(!is.null(stratify_color)) {
+    if (is.null(stratify)) {
+      stratify <- stratify_color
+    }
+    if (length(stratify_color) > 1) {
+      stop("Error: please specify only 1 stratification variable for color!")      
+    }
+    if (!stratify_color %in% stratify) {
+      stratify_original <- stratify
+      stratify <- c(stratify, stratify_color)
+    }
+  }
   if (nonmem) {
     obs_dv = "dv"
     obs_idv = "time"
@@ -92,17 +108,21 @@ vpc_tte <- function(sim,
     sim_idv = "time"
     sim_id = "id"
     rtte_flag <- "rtte"
-    if("MDV" %in% colnames(obs)) {
-      obs <- obs[obs$MDV == 0,]
+    if(!is.null(obs)) {
+      if("MDV" %in% colnames(obs)) {
+        obs <- obs[obs$MDV == 0,]
+      }
+      if("EVID" %in% colnames(obs)) {
+        obs <- obs[obs$EVID == 0,]
+      }      
     }
-    if("EVID" %in% colnames(obs)) {
-      obs <- obs[obs$EVID == 0,]
-    }
-    if("MDV" %in% colnames(sim)) {
-      sim <- sim[sim$MDV == 0,]
-    }
-    if("EVID" %in% colnames(obs)) {
-      sim <- sim[sim$EVID == 0,]
+    if(!is.null(sim)) {
+      if("MDV" %in% colnames(sim)) {
+        sim <- sim[sim$MDV == 0,]
+      }
+      if("EVID" %in% colnames(obs)) {
+        sim <- sim[sim$EVID == 0,]
+      }
     }
     colnames(obs) <- tolower(colnames(obs))
     colnames(sim) <- tolower(colnames(sim))
@@ -111,83 +131,109 @@ vpc_tte <- function(sim,
   if(!is.null(stratify)) {
     if(rtte) {
       if (length(stratify) > 1) {
-        cat ("Sorry, with repeated time-to-event data, stratification on more than 1 variables is currently not supported!")
-        return()
+        stop ("Sorry, with repeated time-to-event data, stratification on more than 1 variables is currently not supported!")
+        invisible()
       }
     } else {
       if (length(stratify) > 2) {
-        cat ("Sorry, stratification on more than 2 variables is currently not supported!")
-        return()
+        stop ("Sorry, stratification on more than 2 variables is currently not supported!")
+        invisible()
       }
     }    
   }
 
   # format obs data
-  obs$time <- obs[[obs_idv]]
-  obs <- relative_times(obs)
-  if (rtte) {
-    obs <- relative_times(obs)    
-    obs <- obs %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0)) 
-    stratify <- c(stratify, "rtte")
-  } else {
-    obs$rtte <- 1
-  }
-  
-  # add stratification column and comput KM curve for observations
-  obs <- add_stratification(obs, stratify)
-  obs_km <- compute_kaplan(obs, strat = "strat")
-    
-  # format sim data and compute KM curve CI for simulations
-  sim$time <- sim[[sim_idv]]
-  sim$sim <- add_sim_index_number(sim)
-  n_sim <- length(unique(sim$sim))
-  
-  all <- c()
-  obs_strat <- as.character(unique(obs$strat))
-  bins <- list() 
-  for (i in seq(obs_strat)) {
-      bins[[obs_strat[i]]] <- sort(unique(obs[as.character(obs$strat) == obs_strat[i],]$time))
-  }
-  for (i in 1:n_sim) {
-    tmp <- sim %>%
-      filter(sim == i) %>%
-        convert_from_dense_grid(.)   ## convert the simulation dataset to hold only the observations, not the whole grid
+  if(!is.null(obs)) {
+    if (length(obs[[obs_id]]) == 0) {
+      warning("Warning: no ID column found, assuming 1 row per ID!")
+      obs$id <- 1:length(obs[,1])
+    }
+    obs$time <- obs[[obs_idv]]
+    obs$dv <- obs[[obs_dv]]
+    obs <- relative_times(obs)
     if (rtte) {
-      tmp <- tmp %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0))       
+      obs <- relative_times(obs)    
+      obs <- obs %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0)) 
+      stratify <- c(stratify, "rtte")
+    } else {
+      obs$rtte <- 1
     }
-    tmp2 <- add_stratification(tmp %>% arrange(id, time), stratify)
-    tmp3 <- compute_kaplan(tmp2, strat = "strat")
-    tmp3[,c("bin", "bin_min", "bin_max", "bin_mid")] <- 0 
-    for (j in seq(obs_strat)) {
-      tmp3_spl <- tmp3[tmp3$strat == obs_strat[j],]
-      if (length(tmp3_spl[,1]) > 0) {
-        tmp_bins <- unique(c(0, bins[[obs_strat[j]]], max(tmp3_spl$time)))
-        tmp3[tmp3$strat == obs_strat[j],] <- within(tmp3_spl, {
-          bin <- cut(time, breaks = tmp_bins, labels = FALSE, right = TRUE)
-          bin_min <- tmp_bins[bin] 
-          bin_max <- tmp_bins[bin+1] 
-          bin_mid <- (bin_min + bin_max) / 2
-        })        
-      }
-    }
-    all <- rbind(all, cbind(i, tmp3))
-  }
+  
+    # add stratification column and comput KM curve for observations
+    obs <- add_stratification(obs, stratify)
+    obs_km <- compute_kaplan(obs, strat = "strat")
 
-  sim_km <- all %>% 
-    group_by (bin, strat) %>% 
-    summarise (bin_mid = head(bin_mid,1), bin_min = head(bin_min,1), bin_max = head(bin_max,1), 
-               qmin = quantile(surv, 0.05), qmax = quantile(surv, 0.95), qmed = median(surv),
-               step = 0)
-  if (rtte) {
-    sim_km$rtte <- as.num(gsub(".*rtte=(\\d.*).*", "\\1", sim_km$strat, perl = TRUE))
-    obs_km$rtte <- as.num(gsub(".*rtte=(\\d.*).*", "\\1", obs_km$strat, perl = TRUE))
-    if (!is.null(events)) {
-      sim_km <- sim_km %>% filter(rtte %in% events)
-      obs_km <- obs_km %>% filter(rtte %in% events)
-      # redefine strat factors, since otherwise empty panels will be shown
-      sim_km$strat <- factor(sim_km$strat, levels = unique(sim_km$strat))
-      obs_km$strat <- factor(obs_km$strat, levels = unique(obs_km$strat))
+    # get bins
+    obs_strat <- as.character(unique(obs$strat))
+    bins <- list() 
+    for (i in seq(obs_strat)) {
+      bins[[obs_strat[i]]] <- sort(unique(obs[as.character(obs$strat) == obs_strat[i],]$time))
     }    
+  } else { # get bins from sim
+    obs_strat <- as.character(unique(sim$strat))
+    bins <- list() 
+    for (i in seq(obs_strat)) {
+      bins[[obs_strat[i]]] <- sort(unique(sim[as.character(sim$strat) == obs_strat[i],]$time))
+    }    
+    obs_km <- NULL
+  }
+    
+  if(!is.null(sim)) {
+    # format sim data and compute KM curve CI for simulations
+    sim$time <- sim[[sim_idv]]
+    sim$sim <- add_sim_index_number(sim)
+    n_sim <- length(unique(sim$sim))    
+    all <- c()
+    for (i in 1:n_sim) {
+      tmp <- sim %>%
+        filter(sim == i) %>%
+        convert_from_dense_grid(.)   ## convert the simulation dataset to hold only the observations, not the whole grid
+      if (rtte) {
+        tmp <- tmp %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0))       
+      }
+      tmp2 <- add_stratification(tmp %>% arrange(id, time), stratify)
+      tmp3 <- compute_kaplan(tmp2, strat = "strat")
+      tmp3[,c("bin", "bin_min", "bin_max", "bin_mid")] <- 0 
+      for (j in seq(obs_strat)) {
+        tmp3_spl <- tmp3[tmp3$strat == obs_strat[j],]
+        if (length(tmp3_spl[,1]) > 0) {
+          tmp_bins <- unique(c(0, bins[[obs_strat[j]]], max(tmp3_spl$time)))
+          tmp3[tmp3$strat == obs_strat[j],] <- within(tmp3_spl, {
+            bin <- cut(time, breaks = tmp_bins, labels = FALSE, right = TRUE)
+            bin_min <- tmp_bins[bin] 
+            bin_max <- tmp_bins[bin+1] 
+            bin_mid <- (bin_min + bin_max) / 2
+          })        
+        }
+      }
+      all <- rbind(all, cbind(i, tmp3))
+    }
+  
+    sim_km <- all %>% 
+      group_by (bin, strat) %>% 
+      summarise (bin_mid = head(bin_mid,1), bin_min = head(bin_min,1), bin_max = head(bin_max,1), 
+                 qmin = quantile(surv, 0.05), qmax = quantile(surv, 0.95), qmed = median(surv),
+                 step = 0)
+  } else {
+    sim_km <- NULL
+  }
+  
+  if (rtte) {
+    if(!is.null(sim)) {
+      sim_km$rtte <- as.num(gsub(".*rtte=(\\d.*).*", "\\1", sim_km$strat, perl = TRUE))
+      if (!is.null(events)) {
+        sim_km <- sim_km %>% filter(rtte %in% events)
+        # redefine strat factors, since otherwise empty panels will be shown
+        sim_km$strat <- factor(sim_km$strat, levels = unique(sim_km$strat))
+      }      
+    }
+    if(!is.null(obs)) {
+      obs_km$rtte <- as.num(gsub(".*rtte=(\\d.*).*", "\\1", obs_km$strat, perl = TRUE))
+      if (!is.null(events)) {
+        obs_km <- obs_km %>% filter(rtte %in% events)
+        obs_km$strat <- factor(obs_km$strat, levels = unique(obs_km$strat))
+      } 
+    }
   }
   
   if (smooth) {
@@ -195,54 +241,85 @@ vpc_tte <- function(sim,
   } else {
     geom_line_custom <- geom_step
   }
-  if (!is.null(stratify)) {
-    if (length(stratify) > 1) {
+  if (!is.null(stratify_original)) {
+    if (length(stratify) == 2) {
       sim_km$strat1 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)-1]
       sim_km$strat2 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)]
       obs_km$strat1 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)-1]
-      obs_km$strat2 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)]   
+      obs_km$strat2 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)]        
     }
   }  
-  pl <- ggplot(sim_km, aes(x=bin_mid, y=qmed)) 
-  if (smooth) {
-    pl <- pl + geom_ribbon(aes(min = qmin, max=qmax, y=qmed), fill = themes[[theme]]$med_area, alpha=0.5)
-  } else {
-    pl <- pl + geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area)   
-  }
-  if (pi_med) {
-    pl <- pl + geom_line_custom(linetype="dashed")
-  }
-  show_obs <- TRUE
-  if (show_obs) {
-    chk_tbl <- obs_km %>% group_by(strat) %>% summarise(t = length(time))
-    if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use 
-      pl <- pl + geom_line(data = obs_km, aes(x=time, y=surv))
-      cat ("Warning, some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).")
+  if (!is.null(sim)) {  
+    pl <- ggplot(sim_km, aes(x=bin_mid, y=qmed, group=strat))       
+    if (smooth) {
+      pl <- pl + geom_ribbon(aes(min = qmin, max=qmax, y=qmed), fill = themes[[theme]]$med_area, alpha=0.5)
     } else {
-      pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv))     
-    }    
+      pl <- pl + geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area)   
+    }
+    if (pi_med) {
+      pl <- pl + geom_line_custom(linetype="dashed")
+    }
+  } else {
+    if (!is.null(stratify_color)) {
+      if (length(stratify) == 2) {
+        pl <- ggplot(obs_km, aes(x=time, y=dv, colour=strat2))         
+      } else {
+        pl <- ggplot(obs_km, aes(x=time, y=dv, colour=strat))           
+      }
+      pl <- pl + scale_colour_discrete(name=paste(stratify))
+#        theme(legend.title=element_blank())
+    } else {
+      pl <- ggplot(obs_km, aes(x=time, y=dv, group=strat, colour=strat))   
+    }
+  }
+  if (!is.null(obs)) {  
+    show_obs <- TRUE
+    if (show_obs) {
+      chk_tbl <- obs_km %>% group_by(strat) %>% summarise(t = length(time))
+      if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use 
+        pl <- pl + geom_line(data = obs_km, aes(x=time, y=surv))
+        warning ("Warning, some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).")
+      } else {
+        pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv))     
+      }    
+    }
   }
   if (!is.null(stratify)) {
-    if (length(stratify) == 1) {
-      if(facet == "wrap") {
-        pl <- pl + facet_wrap(~ strat)      
+    if (length(stratify_original) == 1) {
+      if (!is.null(stratify_color)) {
+          if (facet == "wrap") {
+            pl <- pl + facet_wrap(~ strat1)      
+          } else {
+            if(length(grep("row", facet))>0) {
+              pl <- pl + facet_grid(strat1 ~ .)                
+            } else {
+              pl <- pl + facet_grid(. ~ strat1)                
+            }
+          } 
       } else {
-        if(length(grep("row", facet))>0) {
-          pl <- pl + facet_grid(strat ~ .)                
+        if (facet == "wrap") {
+          pl <- pl + facet_wrap(~ strat)      
         } else {
-          pl <- pl + facet_grid(. ~ strat)                
-        }
-      }      
+          if(length(grep("row", facet))>0) {
+            pl <- pl + facet_grid(strat ~ .)                
+          } else {
+            pl <- pl + facet_grid(. ~ strat)                
+          }
+        }         
+      } 
     } else {
-      if ("strat1" %in% colnames(sim_km)) {
+      if ("strat1" %in% c(colnames(sim_km), colnames(obs_km))) {
         if(length(grep("row", facet))>0) {
           pl <- pl + facet_grid(strat1 ~ strat2)                
         } else {
           pl <- pl + facet_grid(strat2 ~ strat1)                
         }        
       } else {
-        cat ("Stratification unsuccesful.")
-        return(list(obs = obs_km, sim = sim_km, pl = pl))
+        if ("strat" %in% c(colnames(sim_km), colnames(obs_km))) {
+          # color stratification only
+        } else {          
+          stop ("Stratification unsuccesful.")          
+        }
       }
     }
   }
@@ -255,6 +332,10 @@ vpc_tte <- function(sim,
     if (!is.null(theme)) {
       pl <- pl + theme_plain()
     } 
+  }
+  # place legend in better spot
+  if(!is.null(legend_pos)) {
+    pl <- pl + theme(legend.position = legend_pos)    
   }
   if(!is.null(xlab)) {
     pl <- pl + xlab(xlab)
@@ -269,12 +350,5 @@ vpc_tte <- function(sim,
   if(plot) {
     print(pl)
   }
-  invisible(
-    list(
-      obs = obs_km, 
-      sim = sim_km,
-      bins = bins, 
-      pl = pl
-    )
-  )
+  invisible(pl)
 }

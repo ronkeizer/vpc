@@ -17,13 +17,14 @@
 #' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect
 #' @param plot_dv should observations be plotted?
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
+#' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param pred_corr perform prediction-correction? 
 #' @param pred_corr_lower_bnd lower bound for the prediction-correction
 #' @param pi simulated prediction interval to plot. Default is c(0.05, 0.95), 
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.  
 #' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.  
-#' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is TRUE.
+#' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.
 #' @param log_y Boolean indacting whether y-axis should be shown as logarithmic. Default is FALSE.
 #' @param log_y_min minimal value when using log_y argument. Default is 1e-3.
 #' @param xlab ylab as numeric vector of size 2
@@ -57,8 +58,8 @@
 #'                 n = 500)                                     #   to the thetas/omegas
 #' 
 #' vpc_dat <- vpc(sim, obs, stratify = c("sex"))
-vpc <- function(sim, 
-                obs, 
+vpc <- function(sim = NULL, 
+                obs = NULL, 
                 bins = "auto",
                 n_bins = 8,
                 auto_bin_type = "simple",
@@ -71,15 +72,18 @@ vpc <- function(sim,
                 obs_pred = "pred",
                 sim_pred = "pred",
                 nonmem = "auto",
+                plot = FALSE,
                 plot_dv = FALSE,
+                plot_obs_ci = TRUE,
                 stratify = NULL,
+                stratify_color = NULL,
+                legend_pos = NULL,
                 pred_corr = FALSE,
                 pred_corr_lower_bnd = 0,
                 pi = c(0.05, 0.95), 
                 ci = c(0.05, 0.95),
                 uloq = NULL, 
                 lloq = NULL, 
-                plot = TRUE,
                 log_y = FALSE,
                 log_y_min = 1e-3,
                 xlab = NULL, 
@@ -109,27 +113,51 @@ vpc <- function(sim,
     sim_idv = "TIME"
     sim_id = "ID"
     sim_pred <- "PRED"
-    if("MDV" %in% colnames(obs)) {
-      obs <- obs[obs$MDV == 0,]
+    if(!is.null(obs)) {
+      if("MDV" %in% colnames(obs)) {
+        obs <- obs[obs$MDV == 0,]
+      }
+      if("EVID" %in% colnames(obs)) {
+        obs <- obs[obs$EVID == 0,]
+      }      
     }
-    if("EVID" %in% colnames(obs)) {
-      obs <- obs[obs$EVID == 0,]
-    }
-    if("MDV" %in% colnames(sim)) {
-      sim <- sim[sim$MDV == 0,]
-    }
-    if("EVID" %in% colnames(obs)) {
-      sim <- sim[sim$EVID == 0,]
+    if(!is.null(sim)) {  
+      if("MDV" %in% colnames(sim)) {
+        sim <- sim[sim$MDV == 0,]
+      }
+      if("EVID" %in% colnames(obs)) {
+        sim <- sim[sim$EVID == 0,]
+      }
     }
   }
+  stratify_original <- stratify
+  if(!is.null(stratify_color)) {
+    if (is.null(stratify)) {
+      stratify <- stratify_color
+    }
+    if (length(stratify_color) > 1) {
+      stop("Error: please specify only 1 stratification variable for color!")      
+    }
+    if (!stratify_color %in% stratify) {
+      stratify_original <- stratify
+      stratify <- c(stratify, stratify_color)
+    }
+  }
+  if(!is.null(obs) & !is.null(sim)) {
+    stop("At least a simulation or an observation dataset are required to create a plot!")
+  }
   if (class(bins) != "numeric") {
-    bins <- auto_bin(obs, auto_bin_type, n_bins, x=obs_idv)
+    if(!is.null(obs)) {
+      bins <- auto_bin(obs, auto_bin_type, n_bins+2, x=obs_idv)      
+    } else { # get from sim
+      bins <- auto_bin(sim, auto_bin_type, n_bins+2, x=obs_idv)            
+    }
     if (is.null(bins)) {
       stop("Binning unsuccessful, try increasing the number of bins.")
     }
   }
   if (pred_corr) {
-    if (!obs_pred %in% names(obs)) {
+    if (!is.null(obs) & !obs_pred %in% names(obs)) {
       warning("Warning: Prediction-correction: specified pred-variable not found in observations, trying to get from simulated dataset...")      
       if (!sim_pred %in% names(sim)) {
         stop("Error: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
@@ -142,77 +170,120 @@ vpc <- function(sim,
         stop("Warning: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
       }      
     }
-    obs$pred <- obs[[obs_pred]]
-    sim$pred <- sim[[sim_pred]]
+    if(!is.null(obs)) {
+      obs$pred <- obs[[obs_pred]]      
+    }
+    if(!is.null(sim)) {
+      sim$pred <- sim[[sim_pred]]      
+    }
   }
-  sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min)
-  obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min)
-  if (pred_corr) {
-    obs <- obs %>% group_by(strat, bin) %>% mutate(pred_bin = mean(pred))
-    obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
-    sim <- sim %>% group_by(strat, sim, bin) %>% mutate(pred_bin = mean(pred))
-    sim[sim$pred != 0,]$dv <- pred_corr_lower_bnd + (sim[sim$pred != 0,]$dv - pred_corr_lower_bnd) * (sim[sim$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (sim[sim$pred != 0,]$pred - pred_corr_lower_bnd)
+  if (!is.null(obs)) {  
+    obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min)
+    if (pred_corr) {
+      obs <- obs %>% group_by(strat, bin) %>% mutate(pred_bin = mean(pred))
+      obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
+    }
+  }
+  if (!is.null(sim)) {  
+    sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min)
+    if (pred_corr) {
+      sim <- sim %>% group_by(strat, sim, bin) %>% mutate(pred_bin = mean(pred))
+      sim[sim$pred != 0,]$dv <- pred_corr_lower_bnd + (sim[sim$pred != 0,]$dv - pred_corr_lower_bnd) * (sim[sim$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (sim[sim$pred != 0,]$pred - pred_corr_lower_bnd)
+    }
   }
   
   # add the sim index number
-  sim$sim <- add_sim_index_number(sim, id = "id")    
-
-  aggr_sim <- data.frame(cbind(sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[1])),
-                               sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, 0.5 )),
-                               sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[2]))))
-  aggr_sim <- aggr_sim[,-grep("(bin.|strat.|sim.)", colnames(aggr_sim))]  
-  colnames(aggr_sim)[grep("quantile", colnames(aggr_sim))] <- c("q5", "q50", "q95")
-  tmp <- aggr_sim %>% group_by(strat, bin)
-  vpc_dat <- data.frame(cbind(tmp %>% summarise(quantile(q5, ci[1])),
-                              tmp %>% summarise(quantile(q5, 0.5)),
-                              tmp %>% summarise(quantile(q5, ci[2])),
-                              tmp %>% summarise(quantile(q50, ci[1])),
-                              tmp %>% summarise(quantile(q50, 0.5)),
-                              tmp %>% summarise(quantile(q50, ci[2])),
-                              tmp %>% summarise(quantile(q95, ci[1])),
-                              tmp %>% summarise(quantile(q95, 0.5)),
-                              tmp %>% summarise(quantile(q95, ci[2])) ))
-  vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
-  colnames(vpc_dat) <- c("strat", "bin", 
-                         "q5.low","q5.med","q5.up", 
-                         "q50.low","q50.med","q50.up",
-                         "q95.low","q95.med","q95.up")
-  vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)) )
-  vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)) )
-  vpc_dat$bin_mid <- (vpc_dat$bin_min + vpc_dat$bin_max) / 2
-  aggr_obs <- data.frame(cbind(obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.05)),
-                               obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.5 )),
-                               obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.95)) ))
-  aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
-  colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95")
-  aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )
-  aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )
-  aggr_obs$bin_mid <- (aggr_obs$bin_min + aggr_obs$bin_max)/2 
+  if (!is.null(sim)) {
+    sim$sim <- add_sim_index_number(sim, id = "id")    
+    aggr_sim <- data.frame(cbind(sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[1])),
+                                 sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, 0.5 )),
+                                 sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[2]))))
+    aggr_sim <- aggr_sim[,-grep("(bin.|strat.|sim.)", colnames(aggr_sim))]  
+    colnames(aggr_sim)[grep("quantile", colnames(aggr_sim))] <- c("q5", "q50", "q95")
+    tmp <- aggr_sim %>% group_by(strat, bin)
+    vpc_dat <- data.frame(cbind(tmp %>% summarise(quantile(q5, ci[1])),
+                                tmp %>% summarise(quantile(q5, 0.5)),
+                                tmp %>% summarise(quantile(q5, ci[2])),
+                                tmp %>% summarise(quantile(q50, ci[1])),
+                                tmp %>% summarise(quantile(q50, 0.5)),
+                                tmp %>% summarise(quantile(q50, ci[2])),
+                                tmp %>% summarise(quantile(q95, ci[1])),
+                                tmp %>% summarise(quantile(q95, 0.5)),
+                                tmp %>% summarise(quantile(q95, ci[2])) ))
+    vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
+    colnames(vpc_dat) <- c("strat", "bin", 
+                           "q5.low","q5.med","q5.up", 
+                           "q50.low","q50.med","q50.up",
+                           "q95.low","q95.med","q95.up")
+    vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
+    vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
+    vpc_dat$bin_mid <- ((vpc_dat$bin_min + vpc_dat$bin_max) / 2)[vpc_dat$bin]
+  } else {
+    vpc_dat <- NULL
+  }
+  if(!is.null(obs)) {
+    aggr_obs <- data.frame(cbind(obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.05)),
+                                 obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.5 )),
+                                 obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.95)) ))
+    aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
+    colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95")
+    aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
+    aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
+    aggr_obs$bin_mid <- ((aggr_obs$bin_min + aggr_obs$bin_max)/2) [aggr_obs$bin]    
+  } else {
+    aggr_obs <- NULL
+  }
   if(is.null(xlab)) {
     xlab <- obs_idv
   }
   if(is.null(ylab)) {
     ylab <- obs_dv
   }
-  pl <- ggplot(vpc_dat, aes(x=bin_mid, y=dv)) + 
-    geom_line(aes(y=q50.med), linetype='dashed') 
-  if (smooth) {
-    pl <- pl + 
-      geom_ribbon(aes(x=bin_mid, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
-      geom_ribbon(aes(x=bin_mid, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
-      geom_ribbon(aes(x=bin_mid, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) 
+  if (!is.null(stratify_original)) {
+    if (length(stratify) == 2) {
+      vpc_dat$strat1 <- unlist(strsplit(as.character(vpc_dat$strat), ", "))[(1:length(vpc_dat$strat)*2)-1]
+      vpc_dat$strat2 <- unlist(strsplit(as.character(vpc_dat$strat), ", "))[(1:length(vpc_dat$strat)*2)]
+      aggr_obs$strat1 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)-1]
+      aggr_obs$strat2 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)]   
+    }
+  }  
+  if (!is.null(sim)) {
+    pl <- ggplot(vpc_dat, aes(x=bin_mid, y=dv)) + 
+      geom_line(aes(y=q50.med), linetype='dashed')     
+    if (smooth) {
+      pl <- pl + 
+        geom_ribbon(aes(x=bin_mid, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
+        geom_ribbon(aes(x=bin_mid, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
+        geom_ribbon(aes(x=bin_mid, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) 
+    } else {
+      pl <- pl + 
+        geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
+        geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
+        geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area)     
+    }
   } else {
-    pl <- pl + 
-      geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
-      geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
-      geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area)     
+    if (!is.null(stratify_color)) {
+      if (length(stratify) == 2) {
+        pl <- ggplot(aggr_obs, aes(colour=as.factor(strat2)))         
+      } else {
+        pl <- ggplot(aggr_obs, aes(colour=as.factor(strat)))           
+      }
+      pl <- pl + scale_colour_discrete(name="")
+    } else {
+      pl <- ggplot(aggr_obs)  
+    }
   }
-  pl <- pl +
-    geom_line(data=aggr_obs, aes(x=bin_mid, y=obs50), linetype='solid') +
-    geom_line(data=aggr_obs, aes(x=bin_mid, y=obs5), linetype='dotted') +
-    geom_line(data=aggr_obs, aes(x=bin_mid, y=obs95), linetype='dotted') 
-  if (plot_dv) {
-    pl <- pl + geom_point(data=obs, aes(x=idv, y = dv))
+  if(!is.null(obs)) {
+    pl <- pl +
+      geom_line(data=aggr_obs, aes(x=bin_mid, y=obs50), linetype='solid') 
+    if(plot_obs_ci) {
+    pl <- pl +
+      geom_line(data=aggr_obs, aes(x=bin_mid, y=obs5), linetype='dotted') +
+      geom_line(data=aggr_obs, aes(x=bin_mid, y=obs95), linetype='dotted') 
+    }
+    if (plot_dv) {
+      pl <- pl + geom_point(data=obs, aes(x=idv, y = dv))
+    }    
   }
   bdat <- data.frame(cbind(x=bins, y=NA))
   pl <- pl + 
@@ -222,13 +293,41 @@ vpc <- function(sim,
     pl <- pl + scale_y_log10() 
   }
   if (!is.null(stratify)) {
-    if(facet == "wrap") {
-      pl <- pl + facet_wrap(~ strat)      
-    } else {
-      if(length(grep("row", facet))>0) {
-        pl <- pl + facet_grid(strat ~ .)                
-      } else {
-        pl <- pl + facet_grid(. ~ strat)                
+    if (length(stratify_original) == 1) {
+      if (!is.null(stratify_color)) {
+        if (facet == "wrap") {
+          pl <- pl + facet_wrap(~ strat1)      
+        } else {
+          if(length(grep("row", facet))>0) {
+            pl <- pl + facet_grid(strat1 ~ .)                
+          } else {
+            pl <- pl + facet_grid(. ~ strat1)                
+          }
+        } 
+      } else { 
+        if (facet == "wrap") {
+          pl <- pl + facet_wrap(~ strat)      
+        } else {
+          if(length(grep("row", facet))>0) {
+            pl <- pl + facet_grid(strat ~ .)                
+          } else {
+            pl <- pl + facet_grid(. ~ strat)                
+          }
+        }         
+      } 
+    } else { # 2 grid-stratification 
+      if ("strat1" %in% c(colnames(vpc_dat), colnames(aggr_obs))) {
+        if(length(grep("row", facet))>0) {
+          pl <- pl + facet_grid(strat1 ~ strat2)                
+        } else {
+          pl <- pl + facet_grid(strat2 ~ strat1)                
+        }        
+      } else { # only color stratification
+        if ("strat" %in% c(colnames(vpc_dat), colnames(aggr_obs))) {
+          # color stratification only
+        } else {          
+          stop ("Stratification unsuccesful.")          
+        }
       }
     }
   }
@@ -245,13 +344,5 @@ vpc <- function(sim,
   if (plot) {
     print(pl)    
   }
-  invisible(
-    list(
-      obs = tbl_df(obs), 
-      sim = tbl_df(sim),
-      pl_dat = vpc_dat,
-      bins = bins, 
-      pl = pl
-    )
-  )
+  invisible(pl)
 }

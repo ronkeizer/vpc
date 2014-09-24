@@ -3,6 +3,7 @@
 export(add_noise)
 export(auto_bin)
 export(bin_data)
+export(npde_vs_time)
 export(pk_oral_1cmt)
 export(read_table_nm)
 export(sim_data)

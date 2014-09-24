@@ -104,7 +104,7 @@ theme_plain <-  function () {
     axis.title.x = element_text(family="sans",vjust=-0.25),
     axis.title.y = element_text(family="sans"),
     legend.background = element_rect(fill = "white"),
-    legend.position = c(0.14, 0.80),
+    #legend.position = c(0.14, 0.80),
     panel.grid.major = element_line(colour = "#e5e5e5"),
     panel.grid.minor = element_blank(),
     panel.background = element_rect(fill = "#efefef", colour = NA),
@@ -129,10 +129,13 @@ convert_to_dense_grid <- function(dat, t = "t", id = "id", t_start = 0, t_step =
 }
 
 relative_times <- function (dat) { 
-  tmp <- dat %>%
-    group_by(id)
-  tmp2 <- rbind(tmp %>% filter(length(time) > 1) %>% mutate(time = time - c(0,time[1:(length(time)-1)])),
-                tmp %>% filter(length(time) == 1) )
+  tmp <- dat %>% group_by(id)
+  if (dim(tmp %>% filter(length(time) > 1))[1] == 0) { # tte
+    tmp2 <- tmp
+  } else { # repeated tte
+    tmp2 <- rbind(tmp %>% filter(length(time) > 1) %>% mutate(time = time - c(0,time[1:(length(time)-1)])),
+                  tmp %>% filter(length(time) == 1) )
+  }
   return(tmp2 %>% arrange(id, time))
 }
 

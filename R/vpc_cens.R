@@ -19,7 +19,7 @@
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.  
 #' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.  
-#' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is TRUE.
+#' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.
 #' @param xlab ylab as numeric vector of size 2
 #' @param ylab ylab as numeric vector of size 2
 #' @param title title
@@ -68,7 +68,7 @@ vpc_cens <- function(sim,
                      ci = c(0.05, 0.95),
                      uloq = NULL, 
                      lloq = NULL, 
-                     plot = TRUE,
+                     plot = FALSE,
                      xlab = NULL, 
                      ylab = NULL,
                      title = NULL,
@@ -180,12 +180,5 @@ vpc_cens <- function(sim,
   if (plot) {
     print(pl)    
   }
-  invisible(
-    list(
-      obs = obs, 
-      sim = sim,
-      bins = bins, 
-      pl = pl
-    )
-  )
+  invisible(pl)
 }

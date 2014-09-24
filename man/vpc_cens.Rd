@@ -6,7 +6,7 @@
 vpc_cens(sim, obs, bins = NULL, n_bins = 8, type = "bloq",
   auto_bin_type = "simple", obs_dv = "dv", sim_dv = "sdv",
   obs_idv = "time", sim_idv = "time", obs_id = "id", sim_id = "id",
-  nonmem = FALSE, stratify = NULL, ci = c(0.05, 0.95), uloq = NULL,
+  nonmem = "auto", stratify = NULL, ci = c(0.05, 0.95), uloq = NULL,
   lloq = NULL, plot = TRUE, xlab = NULL, ylab = NULL, title = NULL,
   smooth = TRUE, theme = "default", custom_theme = NULL, facet = "wrap")
 }
@@ -35,7 +35,7 @@ vpc_cens(sim, obs, bins = NULL, n_bins = 8, type = "bloq",
 
 \item{sim_id}{variable in data.frame for simulated individual. "id" by default}
 
-\item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is FALSE.}
+\item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED).  Default is "auto" for autodetect}
 
 \item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
 

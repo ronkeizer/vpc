@@ -6,7 +6,7 @@
 vpc(sim, obs, bins = "auto", n_bins = 8, auto_bin_type = "simple",
   obs_dv = "dv", sim_dv = "sdv", obs_idv = "time", sim_idv = "time",
   obs_id = "id", sim_id = "id", obs_pred = "pred", sim_pred = "pred",
-  nonmem = FALSE, plot_dv = FALSE, stratify = NULL, pred_corr = FALSE,
+  nonmem = "auto", plot_dv = FALSE, stratify = NULL, pred_corr = FALSE,
   pred_corr_lower_bnd = 0, pi = c(0.05, 0.95), ci = c(0.05, 0.95),
   uloq = NULL, lloq = NULL, plot = TRUE, log_y = FALSE,
   log_y_min = 0.001, xlab = NULL, ylab = NULL, title = NULL,
@@ -39,7 +39,7 @@ vpc(sim, obs, bins = "auto", n_bins = 8, auto_bin_type = "simple",
 
 \item{sim_pred}{variable in data.frame for population predicted value. "pred" by default}
 
-\item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is FALSE.}
+\item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect}
 
 \item{plot_dv}{should observations be plotted?}
 
