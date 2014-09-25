@@ -24,6 +24,7 @@ The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](htt
 - prediction-correction
 - auto-binning (search for x-variable density-nadirs)
 - Kaplan-Meier Mean Covariate plots [KMMC](http://page-meeting.org/pdf_assets/4280-2012-06%20PAGE%20KMMC.pdf)
+- plot without simulated data (`sim=NULL`), or without observed data(`obs=NULL`). _(this sounds like a rather uninteresting feature, but it is actually pretty useful, since it is now very easy to apply binning and multiple stratifications to observations or simulated data only, create multiple-stratified Kaplan-Meier curves from observed data, etc.)_
 - general-purpose function to simulate data from a mixed-effects structural model, a fixed parameter vector and between-subject variability covariance matrix.
 
 ## Planned functionality
