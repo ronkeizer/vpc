@@ -130,6 +130,9 @@ vpc <- function(sim = NULL,
       }
     }
   }
+  if(!is.null(obs) & !is.null(sim)) {
+    stop("At least a simulation or an observation dataset are required to create a plot!")
+  }
   stratify_original <- stratify
   if(!is.null(stratify_color)) {
     if (is.null(stratify)) {
@@ -142,9 +145,6 @@ vpc <- function(sim = NULL,
       stratify_original <- stratify
       stratify <- c(stratify, stratify_color)
     }
-  }
-  if(!is.null(obs) & !is.null(sim)) {
-    stop("At least a simulation or an observation dataset are required to create a plot!")
   }
   if (class(bins) != "numeric") {
     if(!is.null(obs)) {
@@ -344,5 +344,5 @@ vpc <- function(sim = NULL,
   if (plot) {
     print(pl)    
   }
-  invisible(pl)
+  return(pl)
 }

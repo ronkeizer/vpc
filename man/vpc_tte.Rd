@@ -6,8 +6,8 @@
 vpc_tte(sim = NULL, obs = NULL, rtte = FALSE, events = NULL,
   obs_dv = "dv", sim_dv = "sdv", obs_idv = "time", sim_idv = "time",
   obs_id = "id", sim_id = "id", pi_med = FALSE, nonmem = "auto",
-  stratify = NULL, stratify_color = NULL, stratify_facet = TRUE,
-  ci = c(0.05, 0.95), plot = TRUE, xlab = NULL, ylab = NULL,
+  stratify = NULL, stratify_color = NULL, legend_pos = NULL,
+  ci = c(0.05, 0.95), plot = FALSE, xlab = NULL, ylab = NULL,
   title = NULL, smooth = FALSE, theme = "default", custom_theme = NULL,
   facet = "wrap")
 }
@@ -36,11 +36,13 @@ vpc_tte(sim = NULL, obs = NULL, rtte = FALSE, events = NULL,
 
 \item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect.}
 
-\item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
+\item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied. If stratify_color is also specified, only 1 additional stratification can be specified.}
+
+\item{stratify_color}{variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.}
 
 \item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
 
-\item{plot}{Boolean indacting whether to plot the ggplot2 object after creation. Default is TRUE.}
+\item{plot}{Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.}
 
 \item{xlab}{ylab as numeric vector of size 2}
 

@@ -3,12 +3,13 @@
 \alias{vpc_cens}
 \title{VPC function for left- or right-censored data (e.g. BLOQ data)}
 \usage{
-vpc_cens(sim, obs, bins = NULL, n_bins = 8, type = "bloq",
-  auto_bin_type = "simple", obs_dv = "dv", sim_dv = "sdv",
-  obs_idv = "time", sim_idv = "time", obs_id = "id", sim_id = "id",
-  nonmem = "auto", stratify = NULL, ci = c(0.05, 0.95), uloq = NULL,
-  lloq = NULL, plot = TRUE, xlab = NULL, ylab = NULL, title = NULL,
-  smooth = TRUE, theme = "default", custom_theme = NULL, facet = "wrap")
+vpc_cens(sim = NULL, obs = NULL, bins = NULL, n_bins = 8,
+  type = "bloq", auto_bin_type = "simple", obs_dv = "dv",
+  sim_dv = "sdv", obs_idv = "time", sim_idv = "time", obs_id = "id",
+  sim_id = "id", nonmem = "auto", stratify = NULL, ci = c(0.05, 0.95),
+  uloq = NULL, lloq = NULL, plot = FALSE, xlab = NULL, ylab = NULL,
+  title = NULL, smooth = TRUE, theme = "default", custom_theme = NULL,
+  facet = "wrap")
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -39,13 +40,15 @@ vpc_cens(sim, obs, bins = NULL, n_bins = 8, type = "bloq",
 
 \item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
 
+\item{stratify_color}{variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.}
+
 \item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
 
 \item{uloq}{Number or NULL indicating upper limit of quantification. Default is NULL.}
 
 \item{lloq}{Number or NULL indicating lower limit of quantification. Default is NULL.}
 
-\item{plot}{Boolean indacting whether to plot the ggplot2 object after creation. Default is TRUE.}
+\item{plot}{Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.}
 
 \item{xlab}{ylab as numeric vector of size 2}
 

@@ -3,14 +3,16 @@
 \alias{vpc}
 \title{VPC function}
 \usage{
-vpc(sim, obs, bins = "auto", n_bins = 8, auto_bin_type = "simple",
-  obs_dv = "dv", sim_dv = "sdv", obs_idv = "time", sim_idv = "time",
-  obs_id = "id", sim_id = "id", obs_pred = "pred", sim_pred = "pred",
-  nonmem = "auto", plot_dv = FALSE, stratify = NULL, pred_corr = FALSE,
+vpc(sim = NULL, obs = NULL, bins = "auto", n_bins = 8,
+  auto_bin_type = "simple", obs_dv = "dv", sim_dv = "sdv",
+  obs_idv = "time", sim_idv = "time", obs_id = "id", sim_id = "id",
+  obs_pred = "pred", sim_pred = "pred", nonmem = "auto", plot = FALSE,
+  plot_dv = FALSE, plot_obs_ci = TRUE, stratify = NULL,
+  stratify_color = NULL, legend_pos = NULL, pred_corr = FALSE,
   pred_corr_lower_bnd = 0, pi = c(0.05, 0.95), ci = c(0.05, 0.95),
-  uloq = NULL, lloq = NULL, plot = TRUE, log_y = FALSE,
-  log_y_min = 0.001, xlab = NULL, ylab = NULL, title = NULL,
-  smooth = TRUE, theme = "default", custom_theme = NULL, facet = "wrap")
+  uloq = NULL, lloq = NULL, log_y = FALSE, log_y_min = 0.001,
+  xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
+  theme = "default", custom_theme = NULL, facet = "wrap")
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -45,6 +47,8 @@ vpc(sim, obs, bins = "auto", n_bins = 8, auto_bin_type = "simple",
 
 \item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
 
+\item{stratify_color}{variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.}
+
 \item{pred_corr}{perform prediction-correction?}
 
 \item{pred_corr_lower_bnd}{lower bound for the prediction-correction}
@@ -57,7 +61,7 @@ vpc(sim, obs, bins = "auto", n_bins = 8, auto_bin_type = "simple",
 
 \item{lloq}{Number or NULL indicating lower limit of quantification. Default is NULL.}
 
-\item{plot}{Boolean indacting whether to plot the ggplot2 object after creation. Default is TRUE.}
+\item{plot}{Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.}
 
 \item{log_y}{Boolean indacting whether y-axis should be shown as logarithmic. Default is FALSE.}
 

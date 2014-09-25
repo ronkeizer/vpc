@@ -350,5 +350,5 @@ vpc_tte <- function(sim = NULL,
   if(plot) {
     print(pl)
   }
-  invisible(pl)
+  return(pl)
 }
