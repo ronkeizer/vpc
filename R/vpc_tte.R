@@ -250,38 +250,72 @@ vpc_tte <- function(sim = NULL,
     }
   }  
   if (!is.null(sim)) {  
+    if (!is.null(stratify_color)) {
+      if (length(stratify) == 2) {
+        sim_km$strat_color <- sim_km$strat2
+      } else {
+        sim_km$strat_color <- sim_km$strat  
+      }
+    }
     pl <- ggplot(sim_km, aes(x=bin_mid, y=qmed, group=strat))       
     if (smooth) {
-      pl <- pl + geom_ribbon(aes(min = qmin, max=qmax, y=qmed), fill = themes[[theme]]$med_area, alpha=0.5)
+      if (!is.null(stratify_color)) {
+        pl <- pl + 
+          geom_ribbon(aes(min = qmin, max=qmax, y=qmed, fill=strat_color), alpha=themes[[theme]]$med_area_alpha) +
+          scale_fill_discrete(name="")
+      } else {
+        pl <- pl + geom_ribbon(aes(min = qmin, max=qmax, y=qmed), fill = themes[[theme]]$med_area, alpha=themes[[theme]]$med_area_alpha)        
+      }
     } else {
-      pl <- pl + geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area)   
+      if (!is.null(stratify_color)) {
+        pl <- pl + 
+          geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax, fill=strat_color), alpha=themes[[theme]]$med_area_alpha) +
+          scale_fill_discrete(name="")
+      } else {
+        pl <- pl + geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area)           
+      }
     }
     if (pi_med) {
       pl <- pl + geom_line_custom(linetype="dashed")
     }
   } else {
-    if (!is.null(stratify_color)) {
-      if (length(stratify) == 2) {
-        pl <- ggplot(obs_km, aes(x=time, y=dv, colour=strat2))         
-      } else {
-        pl <- ggplot(obs_km, aes(x=time, y=dv, colour=strat))           
-      }
-      pl <- pl + scale_colour_discrete(name=paste(stratify))
-#        theme(legend.title=element_blank())
-    } else {
-      pl <- ggplot(obs_km, aes(x=time, y=dv, group=strat, colour=strat))   
-    }
+    pl <- pl + geom_step(data = obs_km)
   }
+#   } else {
+#     if (!is.null(stratify_color)) {
+#       if (length(stratify) == 2) {
+#         pl <- ggplot(obs_km, aes(x=time, y=dv, colour=strat2))         
+#       } else {
+#         pl <- ggplot(obs_km, aes(x=time, y=dv, colour=strat))           
+#       }
+#       pl <- pl + scale_colour_discrete(name=paste(stratify))
+# #        theme(legend.title=element_blank())
+#     } else {
+#       pl <- ggplot(obs_km, aes(x=time, y=dv, group=strat, colour=strat))   
+#     }
+#   }
   if (!is.null(obs)) {  
     show_obs <- TRUE
+    if(!is.null(stratify_color)) {
+      if (length(stratify) == 2) {
+        obs_km$strat_color <- obs_km$strat2
+      } else {
+        obs_km$strat_color <- obs_km$strat  
+      }
+    }    
     if (show_obs) {
       chk_tbl <- obs_km %>% group_by(strat) %>% summarise(t = length(time))
       if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use 
-        pl <- pl + geom_line(data = obs_km, aes(x=time, y=surv))
-        warning ("Warning, some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).")
+        geom_step <- geom_line
+      }
+      warning ("Warning, some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).")
+      if (!is.null(stratify_color)) {
+        pl <- pl + 
+          geom_step(data = obs_km, aes(x=time, y=surv, colour=strat_color)) +         
+          scale_colour_discrete(name="")
       } else {
-        pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv))     
-      }    
+        pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv, group=strat))         
+      }
     }
   }
   if (!is.null(stratify)) {
