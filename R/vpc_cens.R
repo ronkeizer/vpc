@@ -114,7 +114,7 @@ vpc_cens <- function(sim = NULL,
       }
     }
   }
-  if(!is.null(obs) & !is.null(sim)) {
+  if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }
   stratify_original <- stratify

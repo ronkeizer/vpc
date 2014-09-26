@@ -87,6 +87,9 @@ vpc_tte <- function(sim = NULL,
       nonmem <- FALSE
     }
   } 
+  if(is.null(obs) && is.null(sim)) {
+    stop("At least a simulation or an observation dataset are required to create a plot!")
+  }
   stratify_original <- stratify
   if(!is.null(stratify_color)) {
     if (is.null(stratify)) {
