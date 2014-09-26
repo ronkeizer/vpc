@@ -63,14 +63,14 @@ vpc <- function(sim = NULL,
                 bins = "auto",
                 n_bins = 8,
                 auto_bin_type = "simple",
-                obs_dv = "dv",
-                sim_dv =  "sdv",
-                obs_idv = "time",
-                sim_idv = "time",
-                obs_id = "id",
-                sim_id = "id",
-                obs_pred = "pred",
-                sim_pred = "pred",
+                obs_dv = NULL,
+                sim_dv =  NULL,
+                obs_idv = NULL,
+                sim_idv = NULL,
+                obs_id = NULL,
+                sim_id = NULL,
+                obs_pred = NULL,
+                sim_pred = NULL,
                 nonmem = "auto",
                 plot = FALSE,
                 plot_dv = FALSE,
@@ -94,7 +94,7 @@ vpc <- function(sim = NULL,
                 custom_theme = NULL,
                 facet = "wrap") {
   if (nonmem == "auto") {
-    if(sum(c("ID","TIME") %in% colnames(obs)) == 2) { # most likely, data is from NONMEM
+    if(sum(c("ID", "TIME") %in% colnames(obs)) == 2) { # most likely, data is from NONMEM
       nonmem <- TRUE
     } else {
       nonmem <- FALSE
@@ -105,14 +105,14 @@ vpc <- function(sim = NULL,
     }
   } 
   if (nonmem) {
-    obs_dv = "DV"
-    obs_idv = "TIME"
-    obs_id = "ID"
-    obs_pred <- "PRED"
-    sim_dv = "DV"
-    sim_idv = "TIME"
-    sim_id = "ID"
-    sim_pred <- "PRED"
+    if (is.null(obs_dv)) { obs_dv <- "DV" }
+    if (is.null(obs_idv)) { obs_idv <- "TIME" }
+    if (is.null(obs_id)) { obs_id <- "ID" }
+    if (is.null(obs_pred)) { obs_pred <- "PRED" }
+    if (is.null(sim_dv)) { sim_dv <- "DV" }
+    if (is.null(sim_idv)) { sim_idv <- "TIME" }
+    if (is.null(sim_id)) { sim_id <- "ID" }
+    if (is.null(sim_pred)) { sim_pred <- "PRED" }
     if(!is.null(obs)) {
       if("MDV" %in% colnames(obs)) {
         obs <- obs[obs$MDV == 0,]
@@ -129,6 +129,15 @@ vpc <- function(sim = NULL,
         sim <- sim[sim$EVID == 0,]
       }
     }
+  } else {
+    if(is.null(obs_dv)) { obs_dv = "dv" }
+    if(is.null(sim_dv)) { sim_dv = "dv" }
+    if(is.null(obs_idv)) { obs_idv = "time" }
+    if(is.null(sim_idv)) { sim_idv = "time" }
+    if(is.null(obs_id)) { obs_id = "id" }
+    if(is.null(sim_id)) { sim_id = "id" }
+    if(is.null(obs_pred)) { obs_pred = "pred" }
+    if(is.null(sim_pred)) { sim_pred = "pred" }      
   }
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
