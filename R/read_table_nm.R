@@ -11,11 +11,13 @@ read_table_nm <- function(file, perl = TRUE) {
   if (perl) {
     cmd <- paste0("perl -e 'open (IN, \"<", file, "\"); my $i = 0; my $cols = 0; while (my $line = <IN>) { if ($line =~ m/[a-df-z]/i) { unless($line =~ m/^TABLE NO/ || $cols == 1) { print $line; $cols = 1; } } else { print $line } } ; close(IN);'")
     tab <- read.table (pipe(cmd), header=T);    
-  } else { # extremely slow....
+  } else { # much slower....
     tab <- readLines (file)
-    skip <- grep('/[a-z]/i', tab)[1] - 1
+#    skip <- grep('/[a-z]/i', tab)[1] - 1
     del_rows <- c(grep("TABLE", tab)[-1] , grep ("TABLE", tab)[-1] + 1)
-    tab <- tab[-del_rows]
+    if(length(del_rows) > 0) {
+      tab <- tab[-del_rows]      
+    }
     read.table(textConnection(tab), skip=1, header=T) 
   }    
 }
