@@ -88,27 +88,27 @@ Stratified by SEX:
 Pred-correction, and plotting of data:
 
 ```{r, fig.width=5, fig.height=5}
-vpc (sim = sim, obs = obs, pred_corr = TRUE, plot_dv = TRUE)
+#vpc (sim = sim, obs = obs, pred_corr = TRUE, plot_dv = TRUE)
 ```
 
 With more explicit use of options, and saving the object:
 
 ```{r, fig.width=4, fig.height=4}
-vpc_dat <- vpc(sim = sim, 
-               obs = obs,                                   # supply simulation and observation dataframes
-               obs_dv = "dv",                               # these column names are the default,
-               obs_idv = "time",                            #   update these if different.
-               sim_dv = "sdv",
-               sim_idv = "time",
-               bins = c(0, 2, 4, 6, 8, 10, 25),             # specify bin separators manually
-               stratify = c("sex"),                         # multiple stratifications possible, just supply as vector
-               pi = c(0.05, 0.95),                          # prediction interval simulated data to show
-               ci = c(0.05, 0.95),                          # confidence intervals to show
-               pred_corr = FALSE,                           # perform prediction-correction?
-               plot_dv = TRUE,                              # plot observations?
-               facet = "wrap",                              # wrap stratifications, or as "row" or "column"
-               ylab = "Concentration", 
-               xlab = "Time (hrs)")
+# vpc_dat <- vpc(sim = sim, 
+#                obs = obs,                                   # supply simulation and observation dataframes
+#                obs_dv = "dv",                               # these column names are the default,
+#                obs_idv = "time",                            #   update these if different.
+#                sim_dv = "sdv",
+#                sim_idv = "time",
+#                bins = c(0, 2, 4, 6, 8, 10, 25),             # specify bin separators manually
+#                stratify = c("sex"),                         # multiple stratifications possible, just supply as vector
+#                pi = c(0.05, 0.95),                          # prediction interval simulated data to show
+#                ci = c(0.05, 0.95),                          # confidence intervals to show
+#                pred_corr = FALSE,                           # perform prediction-correction?
+#                plot_dv = TRUE,                              # plot observations?
+#                facet = "wrap",                              # wrap stratifications, or as "row" or "column"
+#                ylab = "Concentration", 
+#                xlab = "Time (hrs)")
 ```
 
 _Note: If you imported the data from NONMEM, the VPC function will automatically detect column names from NONMEM, such as ID, TIME, DV. If you simulated data in R or got the data from a different software, you will probably have to change the variable names for the dependent and independent variable, and the individual index._
@@ -118,7 +118,7 @@ _Note: If you imported the data from NONMEM, the VPC function will automatically
 The `vpc_cens()` function can be used to create a VPC for the probability of left- or right-censoring such as in the case of data <LLOQ or >ULOQ. There is no need to add a variable to the dataset to flag the censored cases, the function only requires the `lloq` or `uloq`. The example below artificially induces an LLOQ of 5 for the above model / dataset, and generates a VPC for the probability of left-censoring.
 
 ```{r, fig.width=4, fig.height=4}
-vpc_cens(sim, obs, lloq = 5)
+#vpc_cens(sim, obs, lloq = 5)
 ```
 
 ### Time-to-event data
@@ -138,10 +138,10 @@ data(rtte_sim_nm)
 
 Treat RTTE as TTE, no stratification:
 ```{r, fig.width=4, fig.height=4}
-vpc_tte(sim = rtte_sim_nm, 
-        obs = rtte_obs_nm, 
-        rtte = FALSE, 
-        sim_dv = "dv", obs_idv = "t", sim_idv = "t")
+# vpc_tte(sim = rtte_sim_nm, 
+#         obs = rtte_obs_nm, 
+#         rtte = FALSE, 
+#        sim_dv = "dv", obs_idv = "t", sim_idv = "t")
 ```
 
 Stratified for covariate and study arm:
