@@ -4,9 +4,9 @@
 \title{VPC function}
 \usage{
 vpc(sim = NULL, obs = NULL, bins = "auto", n_bins = 8,
-  auto_bin_type = "simple", obs_dv = "dv", sim_dv = "sdv",
-  obs_idv = "time", sim_idv = "time", obs_id = "id", sim_id = "id",
-  obs_pred = "pred", sim_pred = "pred", nonmem = "auto", plot = FALSE,
+  auto_bin_type = "simple", obs_dv = NULL, sim_dv = NULL,
+  obs_idv = NULL, sim_idv = NULL, obs_id = NULL, sim_id = NULL,
+  obs_pred = NULL, sim_pred = NULL, nonmem = "auto", plot = FALSE,
   plot_dv = FALSE, plot_obs_ci = TRUE, stratify = NULL,
   stratify_color = NULL, legend_pos = NULL, pred_corr = FALSE,
   pred_corr_lower_bnd = 0, pi = c(0.05, 0.95), ci = c(0.05, 0.95),

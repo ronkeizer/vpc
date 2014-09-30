@@ -195,20 +195,21 @@ vpc <- function(sim = NULL,
   }
   if (!is.null(sim)) {  
     sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min)
+    sim$sim <- add_sim_index_number(sim, id = "id")    
     if (pred_corr) {
       sim <- sim %>% group_by(strat, bin) %>% mutate(pred_bin = mean(pred))
       sim[sim$pred != 0,]$dv <- pred_corr_lower_bnd + (sim[sim$pred != 0,]$dv - pred_corr_lower_bnd) * (sim[sim$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (sim[sim$pred != 0,]$pred - pred_corr_lower_bnd)
     }
   }
-  
-  # add the sim index number
   if (!is.null(sim)) {
-    sim$sim <- add_sim_index_number(sim, id = "id")    
-    aggr_sim <- data.frame(cbind(sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[1])),
-                                 sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, 0.5 )),
-                                 sim %>% group_by(strat, sim, bin) %>% summarise(quantile(dv, pi[2]))))
+    tmp1 <- sim %>% group_by(strat, sim, bin)
+    aggr_sim <- data.frame(cbind(tmp1 %>% summarise(quantile(dv, pi[1])),
+                                 tmp1 %>% summarise(quantile(dv, 0.5 )),
+                                 tmp1 %>% summarise(quantile(dv, pi[2])),
+                                 tmp1 %>% summarise(mean(idv))))
     aggr_sim <- aggr_sim[,-grep("(bin.|strat.|sim.)", colnames(aggr_sim))]  
     colnames(aggr_sim)[grep("quantile", colnames(aggr_sim))] <- c("q5", "q50", "q95")
+    colnames(aggr_sim)[length(aggr_sim[1,])] <- "mn_idv"
     tmp <- aggr_sim %>% group_by(strat, bin)
     vpc_dat <- data.frame(cbind(tmp %>% summarise(quantile(q5, ci[1])),
                                 tmp %>% summarise(quantile(q5, 0.5)),
@@ -218,27 +219,31 @@ vpc <- function(sim = NULL,
                                 tmp %>% summarise(quantile(q50, ci[2])),
                                 tmp %>% summarise(quantile(q95, ci[1])),
                                 tmp %>% summarise(quantile(q95, 0.5)),
-                                tmp %>% summarise(quantile(q95, ci[2])) ))
+                                tmp %>% summarise(quantile(q95, ci[2])),
+                                tmp %>% summarise(mean(mn_idv))))
     vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
     colnames(vpc_dat) <- c("strat", "bin", 
                            "q5.low","q5.med","q5.up", 
                            "q50.low","q50.med","q50.up",
-                           "q95.low","q95.med","q95.up")
+                           "q95.low","q95.med","q95.up",
+                           "bin_mid")
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
-    vpc_dat$bin_mid <- ((vpc_dat$bin_min + vpc_dat$bin_max) / 2)[vpc_dat$bin]
+#    vpc_dat$bin_mid <- ((vpc_dat$bin_min + vpc_dat$bin_max) / 2)[vpc_dat$bin]
   } else {
     vpc_dat <- NULL
   }
   if(!is.null(obs)) {
-    aggr_obs <- data.frame(cbind(obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.05)),
-                                 obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.5 )),
-                                 obs %>% group_by(strat,bin) %>% summarise(quantile(dv, 0.95)) ))
+    tmp1 <- obs %>% group_by(strat,bin)
+    aggr_obs <- data.frame(cbind(tmp1 %>% summarise(quantile(dv, 0.05)),
+                                 tmp1 %>% summarise(quantile(dv, 0.5 )),
+                                 tmp1 %>% summarise(quantile(dv, 0.95)),
+                                 tmp1 %>% summarise(mean(idv))))
     aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
-    colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95")
+    colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95", "bin_mid")
     aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
     aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
-    aggr_obs$bin_mid <- ((aggr_obs$bin_min + aggr_obs$bin_max)/2) [aggr_obs$bin]    
+#    aggr_obs$bin_mid <- ((aggr_obs$bin_min + aggr_obs$bin_max)/2) [aggr_obs$bin]    
   } else {
     aggr_obs <- NULL
   }
@@ -257,7 +262,7 @@ vpc <- function(sim = NULL,
     }
   }  
   if (!is.null(sim)) {
-    pl <- ggplot(vpc_dat, aes(x=bin_mid, y=dv)) + 
+    pl <- ggplot(vpc_dat, aes(x=bin_mid)) + 
       geom_line(aes(y=q50.med), linetype='dashed')     
     if (smooth) {
       pl <- pl + 
