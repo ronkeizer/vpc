@@ -4,8 +4,8 @@
 #' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param bins either "auto" or a numeric vector specifying the bin separators.  
+#' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.  
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
-#' @param auto_bin_type auto-binning type, default is "simple".
 #' @param obs_dv variable in data.frame for observed dependent value. "dv" by default
 #' @param sim_dv variable in data.frame for simulated dependent value. "sdv" by default
 #' @param obs_idv variable in data.frame for observed independent value. "time" by default
@@ -62,7 +62,6 @@ vpc <- function(sim = NULL,
                 obs = NULL, 
                 bins = "auto",
                 n_bins = 8,
-                auto_bin_type = "simple",
                 obs_dv = NULL,
                 sim_dv =  NULL,
                 obs_idv = NULL,
@@ -157,9 +156,9 @@ vpc <- function(sim = NULL,
   }
   if (class(bins) != "numeric") {
     if(!is.null(obs)) {
-      bins <- auto_bin(obs, auto_bin_type, n_bins+2, x=obs_idv)      
+      bins <- auto_bin(obs, bins, n_bins, x=obs_idv)  
     } else { # get from sim
-      bins <- auto_bin(sim, auto_bin_type, n_bins+2, x=obs_idv)            
+      bins <- auto_bin(sim, bins, n_bins, x=obs_idv)            
     }
     if (is.null(bins)) {
       stop("Binning unsuccessful, try increasing the number of bins.")

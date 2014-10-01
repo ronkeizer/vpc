@@ -4,10 +4,9 @@
 #' sim, 
 #' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
-#' @param bins either "auto" or a numeric vector specifying the bin separators.  
+#' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.  
 #' @param type either "lloq" (default) or "uloq".
-#' @param n_bins when using the "auto" binning method, what number of bins to aim for
-#' @param auto_bin_type auto-binning type, default is "simple".
+#' @param n_bins number of bins
 #' @param obs_dv variable in data.frame for observed dependent value. "dv" by default
 #' @param sim_dv variable in data.frame for simulated dependent value. "sdv" by default
 #' @param obs_idv variable in data.frame for observed independent value. "time" by default
@@ -57,7 +56,6 @@ vpc_cens <- function(sim = NULL,
                      bins = NULL, 
                      n_bins = 8,
                      type = "bloq",
-                     auto_bin_type = "simple",
                      obs_dv = "dv",
                      sim_dv = "sdv",
                      obs_idv = "time",
@@ -133,48 +131,59 @@ vpc_cens <- function(sim = NULL,
   }
   if (class(bins) != "numeric") {
     if(!is.null(obs)) {
-      bins <- auto_bin(obs, auto_bin_type, n_bins+2, x=obs_idv)      
+      bins <- auto_bin(obs, bins, n_bins, x=obs_idv)      
     } else { # get from sim
-      bins <- auto_bin(sim, auto_bin_type, n_bins+2, x=obs_idv)            
+      bins <- auto_bin(sim, bins, n_bins, x=obs_idv)            
     }
     if (is.null(bins)) {
       stop("Binning unsuccessful, try increasing the number of bins.")
     }
   }
+  log_y <- FALSE # dummy, required for format_vpc_input_data function
+  log_y_min <- 0
   if (!is.null(obs)) {  
     obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min)
   }
   if (!is.null(sim)) {  
     sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min)
+    sim$sim <- add_sim_index_number(sim, id = "id")    
   }
   loq_perc <- function(x) { sum(x <= lloq) / length(x) } # below lloq, default   
   if (tolower(type) == "uloq") {
     loq_perc <- function(x) { sum(x >= uloq) / length(x) }
   }
   if (!is.null(sim)) {
-    aggr_sim <- data.frame(cbind(sim %>% group_by(strat, sim, bin) %>% summarise(loq_perc(dv))))    
+    tmp1 <- sim %>% group_by(strat, sim, bin)
+    aggr_sim <- data.frame(cbind(tmp1 %>% summarise(loq_perc(dv)),
+                                 tmp1 %>% summarise(mean(idv))))
     colnames(aggr_sim)[grep("loq_perc", colnames(aggr_sim))] <- "ploq"
+    colnames(aggr_sim)[length(aggr_sim[1,])] <- c("mn_idv")
     tmp <- aggr_sim %>% group_by(strat, bin)    
     vpc_dat <- data.frame(cbind(tmp %>% summarise(quantile(ploq, ci[1])),
                                 tmp %>% summarise(quantile(ploq, 0.5)),
-                                tmp %>% summarise(quantile(ploq, ci[2])) ))
+                                tmp %>% summarise(quantile(ploq, ci[2])),
+                                tmp %>% summarise(mean(mn_idv))
+                                ))
     vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
-    colnames(vpc_dat) <- c("strat", "bin", "ploq_low", "ploq_med", "ploq_up")  
-    vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)) )
-    vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)) )
-    vpc_dat$bin_mid <- (vpc_dat$bin_min + vpc_dat$bin_max) / 2    
+    colnames(vpc_dat) <- c("strat", "bin", "ploq_low", "ploq_med", "ploq_up", "bin_mid")  
+    vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
+    vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
+#    vpc_dat$bin_mid <- (vpc_dat$bin_min + vpc_dat$bin_max) / 2    
   } else {
     vpc_dat <- NULL
   }
   if(!is.null(obs)) {
-    aggr_obs <- data.frame(cbind(obs %>% group_by(strat,bin) %>% summarise(loq_perc(dv)),
-                                 obs %>% group_by(strat,bin) %>% summarise(loq_perc(dv)),
-                                 obs %>% group_by(strat,bin) %>% summarise(loq_perc(dv)) ))
+    tmp <- obs %>% group_by(strat,bin)
+    aggr_obs <- data.frame(cbind(tmp %>% summarise(loq_perc(dv)),
+                                 tmp %>% summarise(loq_perc(dv)),
+                                 tmp %>% summarise(loq_perc(dv)),
+                                 tmp %>% summarise(mean(idv))))
     aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
     colnames(aggr_obs) <- c("strat", "bin", "ploq_low","ploq_med","ploq_up")    
-    aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )
-    aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )
-    aggr_obs$bin_mid <- (aggr_obs$bin_min + aggr_obs$bin_max)/2     
+    colnames(aggr_obs)[length(aggr_obs[1,])] <- c("bin_mid")
+    aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
+    aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
+    # aggr_obs$bin_mid <- (aggr_obs$bin_min + aggr_obs$bin_max)/2     
   } else {
     aggr_obs <- NULL
   }
@@ -188,8 +197,14 @@ vpc_cens <- function(sim = NULL,
   }
   if (!is.null(sim)) {
     pl <- ggplot(vpc_dat, aes(x=bin_mid, y=dv)) + 
-      geom_line(aes(y=ploq_med), linetype='dashed') + 
-      geom_ribbon(aes(x=bin_mid, y=ploq_low, ymin=ploq_low, ymax=ploq_up), fill=themes[[theme]]$med_area, alpha=themes[[theme]]$med_area_alpha) 
+      geom_line(aes(y=ploq_med), linetype='dashed') 
+    if (smooth) {
+      pl <- pl + 
+        geom_ribbon(aes(x=bin_mid, y=ploq_low, ymin=ploq_low, ymax=ploq_up), fill=themes[[theme]]$med_area, alpha=themes[[theme]]$med_area_alpha) 
+    } else {
+      pl <- pl + 
+        geom_rect(aes(xmin=bin_min, xmax=bin_max, x=bin_mid, y=ploq_low, ymin=ploq_low, ymax=ploq_up), fill=themes[[theme]]$med_area, alpha=themes[[theme]]$med_area_alpha) 
+    }
   } else {
     if (!is.null(stratify_color)) {
       if (length(stratify) == 2) {

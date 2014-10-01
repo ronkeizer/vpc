@@ -69,14 +69,6 @@ add_recurs <- function(x, n, max) {
   x
 }
 
-find_nadirs <- function (x, thresh = 0) {
-  pks <- which(diff(sign(diff(x, na.pad = FALSE)), na.pad = FALSE) > 0) + 2
-  if (!missing(thresh)) {
-    pks[x[pks - 1] - x[pks] > thresh]
-  }
-  else pks
-}
-
 draw_params_mvr <- function(ids, n_sim, theta, omega_mat, par_names = NULL) {
   n_ids <- length(ids)
   if (!is.null(par_names)) {
