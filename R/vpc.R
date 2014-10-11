@@ -60,7 +60,7 @@
 #' vpc_dat <- vpc(sim, obs, stratify = c("sex"))
 vpc <- function(sim = NULL, 
                 obs = NULL, 
-                bins = "auto",
+                bins = "density",
                 n_bins = 8,
                 obs_dv = NULL,
                 sim_dv =  NULL,

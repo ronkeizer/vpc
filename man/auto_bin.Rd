@@ -3,7 +3,7 @@
 \alias{auto_bin}
 \title{Calculate appropriate bin separators for vpc}
 \usage{
-auto_bin(dat, type = "simple", n_bins = 8, x = "time")
+auto_bin(dat, type = "density", n_bins = 8, x = "time", equalize = TRUE)
 }
 \arguments{
 \item{dat}{data}

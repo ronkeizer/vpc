@@ -3,11 +3,10 @@
 \alias{vpc}
 \title{VPC function}
 \usage{
-vpc(sim = NULL, obs = NULL, bins = "auto", n_bins = 8,
-  auto_bin_type = "simple", obs_dv = NULL, sim_dv = NULL,
-  obs_idv = NULL, sim_idv = NULL, obs_id = NULL, sim_id = NULL,
-  obs_pred = NULL, sim_pred = NULL, nonmem = "auto", plot = FALSE,
-  plot_dv = FALSE, plot_obs_ci = TRUE, stratify = NULL,
+vpc(sim = NULL, obs = NULL, bins = "auto", n_bins = 8, obs_dv = NULL,
+  sim_dv = NULL, obs_idv = NULL, sim_idv = NULL, obs_id = NULL,
+  sim_id = NULL, obs_pred = NULL, sim_pred = NULL, nonmem = "auto",
+  plot = FALSE, plot_dv = FALSE, plot_obs_ci = TRUE, stratify = NULL,
   stratify_color = NULL, legend_pos = NULL, pred_corr = FALSE,
   pred_corr_lower_bnd = 0, pi = c(0.05, 0.95), ci = c(0.05, 0.95),
   uloq = NULL, lloq = NULL, log_y = FALSE, log_y_min = 0.001,
@@ -22,8 +21,6 @@ vpc(sim = NULL, obs = NULL, bins = "auto", n_bins = 8,
 \item{bins}{either "auto" or a numeric vector specifying the bin separators.}
 
 \item{n_bins}{when using the "auto" binning method, what number of bins to aim for}
-
-\item{auto_bin_type}{auto-binning type, default is "simple".}
 
 \item{obs_dv}{variable in data.frame for observed dependent value. "dv" by default}
 
@@ -80,6 +77,8 @@ vpc(sim = NULL, obs = NULL, bins = "auto", n_bins = 8,
 \item{custom_theme}{specify a custom ggplot2 theme}
 
 \item{facet}{either "wrap", "columns", or "rows"}
+
+\item{bins}{either "density", "time", or "data", or a numeric vector specifying the bin separators.}
 }
 \value{
 a list containing calculated VPC information, and a ggplot2 object

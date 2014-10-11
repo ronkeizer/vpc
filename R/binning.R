@@ -14,35 +14,38 @@ auto_bin <- function (dat, type="density", n_bins = 8, x="time", equalize = TRUE
   all_bins <- list()
   l_bins <- c()
   n_bins <- n_bins + 1 # bin_separators
-  if (type == "density") {
-    bws <- diff(range(dat[[x]])) * seq(from=0.002, to = .25, by=0.002)
-    for (i in seq(bws)) {
-      d <- density(dat[[x]], bw=bws[i])
-      all_bins[[i]] <- c(0, d$x[find_nadirs(d$y)], max(dat[[x]])*1.01)
-      l_bins[i] <- length(all_bins[[i]])
-    }     
-    return(all_bins[[order(abs(l_bins - n_bins))[1]]]) # return closest to requested bins
-  } 
-  if (type == "time") {
-    tmp <- levels(cut(x = unique(dat[[x]]), breaks = n_bins, right = TRUE))
-    tmp <- gsub("\\(", "", tmp)
-    tmp <- gsub("\\]", "", tmp)
-    tmp2 <- unlist(strsplit(tmp, ","))
-    sel <- 1:(length(tmp2)/2)*2 - 1
-    bins <- c(as.num(tmp2[sel]), max(dat[[x]])*1.001)
-    return(bins)
-  }
-  if (type == "data") {
-    sorted <- sort(dat[[x]])
-    tmp <- levels(cut(x = 1:length(sorted), breaks = n_bins, right = TRUE))
-    tmp <- gsub("\\(", "", tmp)
-    tmp <- gsub("\\]", "", tmp)
-    tmp2 <- unlist(strsplit(tmp, ","))
-    sel <- 1:(length(tmp2)/2)*2 - 1
-    idx <- as.num(tmp2[sel])
-    idx[idx < 0] <- 0
-    bins <- c(sorted[idx], max(dat[[x]])*1.001)
-    return(bins)    
+  if(type != "time" & type != "data") {
+    if (type == "density" || type == "auto") {
+      bws <- diff(range(dat[[x]])) * seq(from=0.002, to = .25, by=0.002)
+      for (i in seq(bws)) {
+        d <- density(dat[[x]], bw=bws[i])
+        all_bins[[i]] <- c(0, d$x[find_nadirs(d$y)], max(dat[[x]])*1.01)
+        l_bins[i] <- length(all_bins[[i]])
+      }     
+      return(all_bins[[order(abs(l_bins - n_bins))[1]]]) # return closest to requested bins
+    }
+  } else {
+    if (type == "time") {
+      tmp <- levels(cut(x = unique(dat[[x]]), breaks = n_bins, right = TRUE))
+      tmp <- gsub("\\(", "", tmp)
+      tmp <- gsub("\\]", "", tmp)
+      tmp2 <- unlist(strsplit(tmp, ","))
+      sel <- 1:(length(tmp2)/2)*2 - 1
+      bins <- c(as.num(tmp2[sel]), max(dat[[x]])*1.001)
+      return(bins)
+    }
+    if (type == "data") {
+      sorted <- sort(dat[[x]])
+      tmp <- levels(cut(x = 1:length(sorted), breaks = n_bins, right = TRUE))
+      tmp <- gsub("\\(", "", tmp)
+      tmp <- gsub("\\]", "", tmp)
+      tmp2 <- unlist(strsplit(tmp, ","))
+      sel <- 1:(length(tmp2)/2)*2 - 1
+      idx <- as.num(tmp2[sel])
+      idx[idx < 0] <- 0
+      bins <- c(sorted[idx], max(dat[[x]])*1.001)
+      return(bins)    
+    }    
   }
   return(paste0("Binning method ", type, " not implemented yet!"))
 }

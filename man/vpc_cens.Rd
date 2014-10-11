@@ -4,25 +4,23 @@
 \title{VPC function for left- or right-censored data (e.g. BLOQ data)}
 \usage{
 vpc_cens(sim = NULL, obs = NULL, bins = NULL, n_bins = 8,
-  type = "bloq", auto_bin_type = "simple", obs_dv = "dv",
-  sim_dv = "sdv", obs_idv = "time", sim_idv = "time", obs_id = "id",
-  sim_id = "id", nonmem = "auto", stratify = NULL,
-  stratify_color = NULL, ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
-  plot = FALSE, xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
-  theme = "default", custom_theme = NULL, facet = "wrap")
+  type = "bloq", obs_dv = "dv", sim_dv = "sdv", obs_idv = "time",
+  sim_idv = "time", obs_id = "id", sim_id = "id", nonmem = "auto",
+  stratify = NULL, stratify_color = NULL, ci = c(0.05, 0.95),
+  uloq = NULL, lloq = NULL, plot = FALSE, xlab = NULL, ylab = NULL,
+  title = NULL, smooth = TRUE, theme = "default", custom_theme = NULL,
+  facet = "wrap")
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
 \item{obs}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{bins}{either "auto" or a numeric vector specifying the bin separators.}
+\item{bins}{either "density", "time", or "data", or a numeric vector specifying the bin separators.}
 
-\item{n_bins}{when using the "auto" binning method, what number of bins to aim for}
+\item{n_bins}{number of bins}
 
 \item{type}{either "lloq" (default) or "uloq".}
-
-\item{auto_bin_type}{auto-binning type, default is "simple".}
 
 \item{obs_dv}{variable in data.frame for observed dependent value. "dv" by default}
 
