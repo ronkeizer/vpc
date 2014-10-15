@@ -8,7 +8,7 @@ vignette: >
   %\usepackage[utf8]{inputenc}
 ---
 
-# output: rmarkdown::html_vignette
+output: rmarkdown::html_vignette
 
 The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](http://page-meeting.org/default.asp?abstract=1434)), most commonly created using [PsN](http://psn.sourceforge.net) and [Xpose](http://xpose.sourceforge.net), using NONMEM as the simulation engine. The aim of the current library is to provide an improved tool that is:
 
@@ -42,7 +42,7 @@ The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](htt
 Load the library and get the observation data and simulation data. 
 In the first example, we'll use a dataset that's available in R by default (Theophylline) and also generate the simulation dataset in R. 
 
-```{r, eval=FALSE, warning=FALSE, message=FALSE, error=FALSE}
+```{r, warning=FALSE, message=FALSE, error=FALSE}
     library(dplyr)
     library(vpc)
 
@@ -75,25 +75,25 @@ The `read_table_nm()` function comes with the `vpc` library and is a fast way to
 
 Next, the VPC can simply be created using:
 
-```{r, eval=FALSE, fig.width=5, fig.height=5}
+```{r, fig.width=5, fig.height=5}
 vpc (sim = sim, obs = obs)
 ```
 
 Stratified by SEX:
 
-```{r, eval=FALSE, fig.width=5, fig.height=5}
-vpc (sim = sim, obs = obs, strat = c("sex"))
+```{r, fig.width=5, fig.height=5}
+vpc (sim = sim, obs = obs, stratify = c("sex"))
 ```
 
 Pred-correction, and plotting of data:
 
-```{r, eval=FALSE, fig.width=5, fig.height=5}
+```{r, fig.width=5, fig.height=5}
 vpc (sim = sim, obs = obs, pred_corr = TRUE, plot_dv = TRUE)
 ```
 
 With more explicit use of options, and saving the object:
 
-```{r, eval=FALSE, fig.width=4, fig.height=4}
+```{r, fig.width=4, fig.height=4}
 vpc_dat <- vpc(sim = sim, 
                obs = obs,                                   # supply simulation and observation dataframes
                obs_dv = "dv",                               # these column names are the default,
@@ -117,7 +117,7 @@ _Note: If you imported the data from NONMEM, the VPC function will automatically
 
 The `vpc_cens()` function can be used to create a VPC for the probability of left- or right-censoring such as in the case of data <LLOQ or >ULOQ. There is no need to add a variable to the dataset to flag the censored cases, the function only requires the `lloq` or `uloq`. The example below artificially induces an LLOQ of 5 for the above model / dataset, and generates a VPC for the probability of left-censoring.
 
-```{r, eval=FALSE, fig.width=4, fig.height=4}
+```{r, fig.width=4, fig.height=4}
 vpc_cens(sim, obs, lloq = 5)
 ```
 
@@ -131,13 +131,13 @@ Similar to the VPC for continuous data, the VPC for TTE data requires simulated 
 
 An example for time-to-event data is shown below. The datasets are supplied with the `vpc` library.
 
-```{r, eval=FALSE}
+```{r}
 data(rtte_obs_nm) 
 data(rtte_sim_nm) 
 ```
 
 Treat RTTE as TTE, no stratification:
-```{r, eval=FALSE, fig.width=4, fig.height=4}
+```{r, fig.width=4, fig.height=4}
 vpc_tte(sim = rtte_sim_nm,          
         obs = rtte_obs_nm, 
         rtte = FALSE, 
@@ -145,7 +145,7 @@ vpc_tte(sim = rtte_sim_nm,
 ```
 
 Stratified for covariate and study arm:
-```{r, eval=FALSE, fig.width=6, fig.height=6}
+```{r, fig.width=6, fig.height=6}
 vpc_tte(sim = rtte_sim_nm, 
         obs = rtte_obs_nm, 
         stratify = c("sex","drug"), 
@@ -154,7 +154,7 @@ vpc_tte(sim = rtte_sim_nm,
 ```
 
 Stratified for event number and study arm:
-```{r, eval=FALSE, fig.width=6, fig.height=6}
+```{r, fig.width=6, fig.height=6}
 vpc_tte(sim = rtte_sim_nm, 
         obs = rtte_obs_nm,
         rtte = TRUE, events = c(1:3),
