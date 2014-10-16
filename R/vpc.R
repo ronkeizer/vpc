@@ -166,7 +166,7 @@ vpc <- function(sim = NULL,
   }
   if (pred_corr) {
     if (!is.null(obs) & !obs_pred %in% names(obs)) {
-      warning("Warning: Prediction-correction: specified pred-variable not found in observations, trying to get from simulated dataset...")      
+      warning("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...")      
       if (!sim_pred %in% names(sim)) {
         stop("Error: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
       } else {

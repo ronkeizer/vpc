@@ -82,7 +82,7 @@ vpc (sim = sim, obs = obs)
 Stratified by SEX:
 
 ```{r, fig.width=5, fig.height=5}
-vpc (sim = sim, obs = obs, stratify = c("sex"))
+vpc (sim = sim, obs = obs, stratify = c("sex"), facet = "rows")
 ```
 
 Pred-correction, and plotting of data:
