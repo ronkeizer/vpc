@@ -35,12 +35,12 @@ The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](htt
   - `vpc_cens`: VPC for censored continuous data (e.g. data < LOQ)
   - `vpc_tte`: VPC for (repeated) time-to-event data
 - The main arguments to these three function are the `sim` and `obs` arguments, which specify a simulation dataset and an observation dataset. All other arguments can be used to customize data parsing and visual appearance of the VPC such as stratification and binning.
-- All three functions will return an object with parsed data and the ggplot2 object. By default, the VPC will also be plotted.
+- All three functions will return a ggplot2 object.
 
 ## Examples
 
 Load the library and get the observation data and simulation data. 
-In the first example, we'll use a dataset that's available in R by default (Theophylline) and also generate the simulation dataset in R. 
+In the first example, we'll use a dataset that's available in R by default (Theophylline) and generate the simulation dataset in R. 
 
 ```{r, warning=FALSE, message=FALSE, error=FALSE}
     library(dplyr)
@@ -54,8 +54,9 @@ In the first example, we'll use a dataset that's available in R by default (Theo
             mutate(sex = round(runif(1))) # randomly assign a "sex" covariate
     sim <- sim_data(obs, # the design of the dataset
                     model = function(x) { # the model
-                      pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka, ke = x$ke, cl = x$cl * x$wt, ruv = list(additive = 0.1))
+                      pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka, ke = x$ke, cl = x$cl * x$wt)
                     }, 
+                    error = list(additive = 0.1),
                     theta = c(2.774, 0.0718, .0361),                 # parameter values
                     omega_mat = c(0.08854,                           # specified as lower triangle by default; 
                                   0.02421, 0.02241,                  # note: assumed that every theta has iiv, set to 0 if no iiv. 
@@ -64,14 +65,14 @@ In the first example, we'll use a dataset that's available in R by default (Theo
                     n = 500)
 ```
 
-However, instead we could use observation and simulation data from NONMEM, e.g.:
+However, instead we could use observation and simulation data from NONMEM, e.g. (not run):
 
 ```{r, eval=FALSE, warning=FALSE, message=FALSE, error=FALSE}
 obs <- read_table_nm("sdtab1")   # an output table with at least ID, TIME, DV
 sim <- read_table_nm("simtab1")  # a simulation file with at least ID, TIME, DV
 ```
 
-The `read_table_nm()` function comes with the `vpc` library and is a fast way to read in output data from $TABLE. 
+The `read_table_nm()` function comes with the `vpc` library and is a fast way to read in output data created from the $TABLE record in NONMEM, including tables with multiple subproblems. 
 
 Next, the VPC can simply be created using:
 
@@ -85,6 +86,8 @@ Stratified by SEX:
 vpc (sim = sim, obs = obs, stratify = c("sex"), facet = "rows")
 ```
 
+The vpc functions in this packages allow stratification by 2 variables (horizontal and vertical faceting). If more strata are desired, a new combined variable should be defined that defines the factors.
+
 Pred-correction, and plotting of data:
 
 ```{r, fig.width=5, fig.height=5}
@@ -94,24 +97,32 @@ vpc (sim = sim, obs = obs, pred_corr = TRUE, plot_dv = TRUE)
 With more explicit use of options, and saving the object:
 
 ```{r, fig.width=4, fig.height=4}
-vpc_dat <- vpc(sim = sim, 
-               obs = obs,                                   # supply simulation and observation dataframes
-               obs_dv = "dv",                               # these column names are the default,
-               obs_idv = "time",                            #   update these if different.
-               sim_dv = "sdv",
-               sim_idv = "time",
-               bins = c(0, 2, 4, 6, 8, 10, 25),             # specify bin separators manually
-               stratify = c("sex"),                         # multiple stratifications possible, just supply as vector
-               pi = c(0.05, 0.95),                          # prediction interval simulated data to show
-               ci = c(0.05, 0.95),                          # confidence intervals to show
-               pred_corr = FALSE,                           # perform prediction-correction?
-               plot_dv = TRUE,                              # plot observations?
-               facet = "wrap",                              # wrap stratifications, or as "row" or "column"
-               ylab = "Concentration", 
-                xlab = "Time (hrs)")
+vpc(sim = sim, 
+           obs = obs,                                   # supply simulation and observation dataframes
+           obs_dv = "dv",                               # these column names are the default,
+           obs_idv = "time",                            #   update these if different.
+           sim_dv = "sdv",
+           sim_idv = "time",
+           bins = c(0, 2, 4, 6, 8, 10, 25),             # specify bin separators manually
+           stratify = c("sex"),                         # multiple stratifications possible, just supply as vector
+           pi = c(0.05, 0.95),                          # prediction interval simulated data to show
+           ci = c(0.05, 0.95),                          # confidence intervals to show
+           pred_corr = FALSE,                           # perform prediction-correction?
+           plot_dv = TRUE,                              # plot observations?
+           facet = "wrap",                              # wrap stratifications, or as "row" or "column"
+           ylab = "Concentration", 
+            xlab = "Time (hrs)")
 ```
 
 _Note: If you imported the data from NONMEM, the VPC function will automatically detect column names from NONMEM, such as ID, TIME, DV. If you simulated data in R or got the data from a different software, you will probably have to change the variable names for the dependent and independent variable, and the individual index._
+
+### Censored data
+
+The vpc functions currently provide three options for binning (`bins=` argument):
+
+- `time`:  Divide bins equally over time (or whatever independent variable is used). Recommended only when there is no observable clustering in the indenpendent variable.
+- `data`: Divide bins equally over the amount of data ordered by independent variable. Recommended only when data are for nominal timepoints _and_ all datapoints are available.  
+- `density`: Default. Divide bins based on data-density, i.e. place the bin-separators at nadirs in the density function. An approximate number of bins can be specified, but it is not certain that the algorithm will strictly use the specified number. See the `auto_bin()` function for more details.
 
 ### Censored data
 

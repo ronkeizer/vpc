@@ -16,7 +16,7 @@ auto_bin <- function (dat, type="density", n_bins = 8, x="time", equalize = TRUE
   n_bins <- n_bins + 1 # bin_separators
   if(type != "time" & type != "data") {
     if (type == "density" || type == "auto") {
-      bws <- diff(range(dat[[x]])) * seq(from=0.002, to = .25, by=0.002)
+      bws <- diff(range(dat[[x]])) * seq(from=0.01, to = .25, by=0.01)
       for (i in seq(bws)) {
         d <- density(dat[[x]], bw=bws[i])
         all_bins[[i]] <- c(0, d$x[find_nadirs(d$y)], max(dat[[x]])*1.01)
