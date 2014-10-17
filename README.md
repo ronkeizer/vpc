@@ -19,6 +19,7 @@ The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](htt
 
 - VPC for continuous data
 - VPC for censored continuous data (e.g. below LOQ)
+- VPC for categorical data
 - VPC for time-to-event data (single and repeated)
 - stratification (single & multiple)
 - prediction-correction
