@@ -9,6 +9,7 @@ Description: Create visual predictive checks in R, a commonly used diagnostic
 Depends:
     R (>= 3.1.0),
     dplyr,
+    reshape2,
     ggplot2,
     MASS,
     survival

@@ -86,6 +86,13 @@ vpc_cat  <- function(sim = NULL,
         sim <- sim[sim$EVID == 0,]
       }
     }
+  } else {
+    if(is.null(obs_dv)) { obs_dv = "dv" }
+    if(is.null(sim_dv)) { sim_dv = "dv" }
+    if(is.null(obs_idv)) { obs_idv = "time" }
+    if(is.null(sim_idv)) { sim_idv = "time" }
+    if(is.null(obs_id)) { obs_id = "id" }
+    if(is.null(sim_id)) { sim_id = "id" }
   }
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")

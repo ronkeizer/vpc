@@ -4,12 +4,12 @@
 \title{VPC function for left- or right-censored data (e.g. BLOQ data)}
 \usage{
 vpc_cens(sim = NULL, obs = NULL, bins = "density", n_bins = 8,
-  type = "bloq", obs_dv = "dv", sim_dv = "sdv", obs_idv = "time",
-  sim_idv = "time", obs_id = "id", sim_id = "id", nonmem = "auto",
+  type = "bloq", obs_dv = NULL, sim_dv = NULL, obs_idv = NULL,
+  sim_idv = NULL, obs_id = NULL, sim_id = NULL, nonmem = "auto",
   stratify = NULL, stratify_color = NULL, ci = c(0.05, 0.95),
   uloq = NULL, lloq = NULL, plot = FALSE, xlab = NULL, ylab = NULL,
-  title = NULL, smooth = TRUE, theme = "default", custom_theme = NULL,
-  facet = "wrap")
+  plot_sim_med = FALSE, title = NULL, smooth = TRUE, theme = "default",
+  custom_theme = NULL, facet = "wrap")
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
