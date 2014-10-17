@@ -1,0 +1,30 @@
+$patient_id
+[1] "53f3c2b138e37b0000000003"
+
+$target
+[1] 750
+
+$method
+[1] "r_ml"
+
+$interval
+[1] 12
+
+$save_advice
+[1] TRUE
+
+$patient_id
+[1] "53f3c2b138e37b0000000003"
+
+$target
+[1] 750
+
+$method
+[1] "r_ml"
+
+$interval
+[1] 12
+
+$save_advice
+[1] TRUE
+

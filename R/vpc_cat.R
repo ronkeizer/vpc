@@ -1,4 +1,4 @@
-#' VPC function for left- or right-censored data (e.g. BLOQ data)
+#' VPC function for categorical
 #' 
 #' Creates a VPC plot from observed and simulation data
 #' sim, 
@@ -14,8 +14,6 @@
 #' @param obs_id variable in data.frame for observed individual. "id" by default
 #' @param sim_id variable in data.frame for simulated individual. "id" by default
 #' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED).  Default is "auto" for autodetect
-#' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
-#' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.  
 #' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.  
@@ -30,28 +28,7 @@
 #' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
 #' @seealso \link{vpc}
-#' @examples
-#' obs <- Theoph
-#' colnames(obs) <- c("id", "wt", "dose", "time", "dv")
-#' obs <- obs %>%   # create a dummy covariate to show stratification
-#'  group_by(id) %>%  
-#'  mutate(sex = round(runif(1)))
-#' 
-#' sim <- sim_data(obs, # the design of the dataset
-#'                 model = function(x) { # the model
-#'                   pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka, 
-#'                                 ke = x$ke, cl = x$cl * x$wt, 
-#'                                 ruv = list(additive = 0.1))
-#'                 }, 
-#'                 theta = c(2.774, 0.0718, .0361),             # parameter values
-#'                 omega_mat = c(0.08854,                       # specified as lower triangle 
-#'                               0.02421, 0.02241,              # note: assumed every th has iiv,
-#'                               0.008069, 0.008639, 0.02862),  #  set to 0 if no iiv. 
-#'                 par_names = c("ka", "ke", "cl"),             # link the parameters in the model  
-#'                 n = 500)                                     #   to the thetas/omegas
-#' 
-#' vpc_loq <- vpc_cens(sim, obs, lloq = 5)
-vpc_cens <- function(sim = NULL, 
+vpc_cat  <- function(sim = NULL, 
                      obs = NULL, 
                      bins = "density", 
                      n_bins = 8,
@@ -63,15 +40,13 @@ vpc_cens <- function(sim = NULL,
                      obs_id = NULL,
                      sim_id = NULL,
                      nonmem = "auto",
-                     stratify = NULL,
-                     stratify_color = NULL,
                      ci = c(0.05, 0.95),
                      uloq = NULL, 
                      lloq = NULL, 
                      plot = FALSE,
                      xlab = NULL, 
-                     ylab = NULL,
                      plot_sim_med = FALSE,
+                     ylab = NULL,
                      title = NULL,
                      smooth = TRUE,
                      theme = "default",
@@ -94,7 +69,7 @@ vpc_cens <- function(sim = NULL,
     if (is.null(obs_id)) { obs_id <- "ID" }
     if (is.null(sim_dv)) { sim_dv <- "DV" }
     if (is.null(sim_idv)) { sim_idv <- "TIME" }
-    if (is.null(sim_id)) { sim_id <- "ID" }
+    if (is.null(sim_id)) { sim_id <- "ID" }    
     if(!is.null(obs)) {
       if("MDV" %in% colnames(obs)) {
         obs <- obs[obs$MDV == 0,]
@@ -115,19 +90,6 @@ vpc_cens <- function(sim = NULL,
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }
-  stratify_original <- stratify
-  if(!is.null(stratify_color)) {
-    if (is.null(stratify)) {
-      stratify <- stratify_color
-    }
-    if (length(stratify_color) > 1) {
-      stop("Error: please specify only 1 stratification variable for color!")      
-    }
-    if (!stratify_color %in% stratify) {
-      stratify_original <- stratify
-      stratify <- c(stratify, stratify_color)
-    }
-  }
   if (class(bins) != "numeric") {
     if(!is.null(obs)) {
       bins <- auto_bin(obs, bins, n_bins, x=obs_idv)      
@@ -140,6 +102,7 @@ vpc_cens <- function(sim = NULL,
   }
   log_y <- FALSE # dummy, required for format_vpc_input_data function
   log_y_min <- 0
+  stratify <- NULL
   if (!is.null(obs)) {  
     obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min)
   }
@@ -147,24 +110,32 @@ vpc_cens <- function(sim = NULL,
     sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min)
     sim$sim <- add_sim_index_number(sim, id = "id")    
   }
-  loq_perc <- function(x) { sum(x <= lloq) / length(x) } # below lloq, default   
-  if (tolower(type) == "uloq") {
-    loq_perc <- function(x) { sum(x >= uloq) / length(x) }
-  }
+  fact_perc <- function(x, fact) { sum(x == fact) / length(x) } # below lloq, default     
+  obs$dv <- as.factor(obs$dv) 
+  lev <- levels(obs$dv)  
   if (!is.null(sim)) {
-    tmp1 <- sim %>% group_by(strat, sim, bin)
-    aggr_sim <- data.frame(cbind(tmp1 %>% summarise(loq_perc(dv)),
-                                 tmp1 %>% summarise(mean(idv))))
-    colnames(aggr_sim)[grep("loq_perc", colnames(aggr_sim))] <- "ploq"
-    colnames(aggr_sim)[length(aggr_sim[1,])] <- c("mn_idv")
-    tmp <- aggr_sim %>% group_by(strat, bin)    
-    vpc_dat <- data.frame(cbind(tmp %>% summarise(quantile(ploq, ci[1])),
-                                tmp %>% summarise(quantile(ploq, 0.5)),
-                                tmp %>% summarise(quantile(ploq, ci[2])),
-                                tmp %>% summarise(mean(mn_idv))
+    tmp1 <- sim %>% group_by(sim, bin)
+    for (i in seq(lev)) {
+      if (i == 1) {
+        aggr_sim <- tmp1 %>% summarise(fact_perc(dv, lev[i]))
+      } else {
+        aggr_sim <- cbind(aggr_sim, tmp1 %>% summarise(fact_perc(dv, lev[i])) )           
+      }
+    } 
+    aggr_sim <- cbind(aggr_sim, tmp1 %>% summarise(mean(idv)))
+    aggr_sim <- data.frame(aggr_sim)
+    aggr_sim <- aggr_sim[,-grep("(bin.|sim.)", colnames(aggr_sim))]
+    colnames(aggr_sim) <- c("sim", "bin", paste0("fact_", lev), "mn_idv") 
+    tmp3 <- reshape2::melt(aggr_sim, id=c("sim", "bin", "mn_idv"))
+    tmp3$strat <- rep(lev, each = length(aggr_sim[,1]))
+    tmp4 <- tmp3 %>% group_by(strat, bin)    
+    vpc_dat <- data.frame(cbind(tmp4 %>% summarise(quantile(value, ci[1])),
+                                tmp4 %>% summarise(quantile(value, 0.5)),
+                                tmp4 %>% summarise(quantile(value, ci[2])),
+                                tmp4 %>% summarise(mean(mn_idv))
                                 ))
     vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
-    colnames(vpc_dat) <- c("strat", "bin", "ploq_low", "ploq_med", "ploq_up", "bin_mid")  
+    colnames(vpc_dat) <- c("strat", "bin", "prob_low", "prob_med", "prob_up", "bin_mid")  
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
 #    vpc_dat$bin_mid <- (vpc_dat$bin_min + vpc_dat$bin_max) / 2    
@@ -172,39 +143,45 @@ vpc_cens <- function(sim = NULL,
     vpc_dat <- NULL
   }
   if(!is.null(obs)) {
-    tmp <- obs %>% group_by(strat,bin)
-    aggr_obs <- data.frame(cbind(tmp %>% summarise(loq_perc(dv)),
-                                 tmp %>% summarise(loq_perc(dv)),
-                                 tmp %>% summarise(loq_perc(dv)),
-                                 tmp %>% summarise(mean(idv))))
-    aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
-    colnames(aggr_obs) <- c("strat", "bin", "ploq_low","ploq_med","ploq_up")    
-    colnames(aggr_obs)[length(aggr_obs[1,])] <- c("bin_mid")
-    aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
-    aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
-    # aggr_obs$bin_mid <- (aggr_obs$bin_min + aggr_obs$bin_max)/2     
+    tmp <- obs %>% group_by(bin)
+    for (i in seq(lev)) {
+      if (i == 1) {
+        aggr_obs <- tmp %>% summarise(fact_perc(dv, lev[i]))
+      } else {
+        aggr_obs <- cbind(aggr_obs, tmp %>% summarise(fact_perc(dv, lev[i])) )           
+      }
+    }     
+    tmp1 <- data.frame(cbind(aggr_obs, data.frame(tmp %>% summarise(mean(idv)))))
+    tmp1 <- tmp1[,-grep("(bin.|strat.|sim.)", colnames(tmp1))]
+    colnames(tmp1) <- c("bin", paste0("fact_", lev), "bin_mid")    
+    tmp2 <- reshape2::melt(tmp1, id=c("bin", "bin_mid"))
+    tmp2$strat <- rep(lev, each=length(aggr_obs[,1]))
+    tmp2$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(tmp2$strat)) )[tmp2$bin]
+    tmp2$bin_max <- rep(bins[2:length(bins)], length(unique(tmp2$strat)) )[tmp2$bin]  
+    aggr_obs <- tmp2
+    colnames(aggr_obs)[4] <- "prob"
   } else {
     aggr_obs <- NULL
   }
-  if (!is.null(stratify_original)) {
-    if (length(stratify) == 2) {
-      vpc_dat$strat1 <- unlist(strsplit(as.character(vpc_dat$strat), ", "))[(1:length(vpc_dat$strat)*2)-1]
-      vpc_dat$strat2 <- unlist(strsplit(as.character(vpc_dat$strat), ", "))[(1:length(vpc_dat$strat)*2)]
-      aggr_obs$strat1 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)-1]
-      aggr_obs$strat2 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)]   
-    }
-  }
+#   if (!is.null(stratify_original)) {
+#     if (length(stratify) == 2) {
+#       vpc_dat$strat1 <- unlist(strsplit(as.character(vpc_dat$strat), ", "))[(1:length(vpc_dat$strat)*2)-1]
+#       vpc_dat$strat2 <- unlist(strsplit(as.character(vpc_dat$strat), ", "))[(1:length(vpc_dat$strat)*2)]
+#       aggr_obs$strat1 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)-1]
+#       aggr_obs$strat2 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)]   
+#     }
+#   }
   if (!is.null(sim)) {
     pl <- ggplot(vpc_dat, aes(x=bin_mid, y=dv)) 
     if(plot_sim_med) {
-      geom_line(aes(y=ploq_med), linetype='dashed') 
+      geom_line(aes(y=prob_med), linetype='dashed')       
     }
     if (smooth) {
       pl <- pl + 
-        geom_ribbon(aes(x=bin_mid, y=ploq_low, ymin=ploq_low, ymax=ploq_up), fill=themes[[theme]]$med_area, alpha=themes[[theme]]$med_area_alpha) 
+        geom_ribbon(aes(x=bin_mid, y=prob_low, ymin=prob_low, ymax=prob_up), fill=themes[[theme]]$med_area, alpha=themes[[theme]]$med_area_alpha) 
     } else {
       pl <- pl + 
-        geom_rect(aes(xmin=bin_min, xmax=bin_max, x=bin_mid, y=ploq_low, ymin=ploq_low, ymax=ploq_up), fill=themes[[theme]]$med_area, alpha=themes[[theme]]$med_area_alpha) 
+        geom_rect(aes(xmin=bin_min, xmax=bin_max, x=bin_mid, y=prob_low, ymin=prob_low, ymax=prob_up), fill=themes[[theme]]$med_area, alpha=themes[[theme]]$med_area_alpha) 
     }
   } else {
     if (!is.null(stratify_color)) {
@@ -216,56 +193,62 @@ vpc_cens <- function(sim = NULL,
       pl <- pl + scale_colour_discrete(name="")
     } else {
       pl <- ggplot(aggr_obs, aes(y=dv))        
-    }
-    
+    }    
   }
   if (!is.null(obs)) {
     pl <- pl +
-      geom_line(data=aggr_obs, aes(x=bin_mid, y=ploq_med), linetype='solid') 
-#       geom_line(data=aggr_obs, aes(x=bin_mid, y=ploq_low), linetype='dotted') +
-#       geom_line(data=aggr_obs, aes(x=bin_mid, y=ploq_up), linetype='dotted')    
+      geom_line(data=aggr_obs, aes(x=bin_mid, y=prob), linetype='solid') 
   }
   bdat <- data.frame(cbind(x=bins, y=NA))
   pl <- pl + 
     geom_rug(data=bdat, sides = "t", aes(x = x, y=y), colour="#333333")
-  if (!is.null(stratify)) {
-    if (length(stratify_original) == 1) {
-      if (!is.null(stratify_color)) {
-        if (facet == "wrap") {
-          pl <- pl + facet_wrap(~ strat1)      
-        } else {
-          if(length(grep("row", facet))>0) {
-            pl <- pl + facet_grid(strat1 ~ .)                
-          } else {
-            pl <- pl + facet_grid(. ~ strat1)                
-          }
-        } 
-      } else { 
-        if (facet == "wrap") {
-          pl <- pl + facet_wrap(~ strat)      
-        } else {
-          if(length(grep("row", facet))>0) {
-            pl <- pl + facet_grid(strat ~ .)                
-          } else {
-            pl <- pl + facet_grid(. ~ strat)                
-          }
-        }         
-      } 
-    } else { # 2 grid-stratification 
-      if ("strat1" %in% c(colnames(vpc_dat), colnames(aggr_obs))) {
-        if(length(grep("row", facet))>0) {
-          pl <- pl + facet_grid(strat1 ~ strat2)                
-        } else {
-          pl <- pl + facet_grid(strat2 ~ strat1)                
-        }        
-      } else { # only color stratification
-        if ("strat" %in% c(colnames(vpc_dat), colnames(aggr_obs))) {
-          # color stratification only
-        } else {          
-          stop ("Stratification unsuccesful.")          
-        }
-      }
-    }
+#   if (!is.null(stratify)) {
+#     if (length(stratify_original) == 1) {
+#       if (!is.null(stratify_color)) {
+#         if (facet == "wrap") {
+#           pl <- pl + facet_wrap(~ strat1)      
+#         } else {
+#           if(length(grep("row", facet))>0) {
+#             pl <- pl + facet_grid(strat1 ~ .)                
+#           } else {
+#             pl <- pl + facet_grid(. ~ strat1)                
+#           }
+#         } 
+#       } else { 
+#         if (facet == "wrap") {
+#           pl <- pl + facet_wrap(~ strat)      
+#         } else {
+#           if(length(grep("row", facet))>0) {
+#             pl <- pl + facet_grid(strat ~ .)                
+#           } else {
+#             pl <- pl + facet_grid(. ~ strat)                
+#           }
+#         }         
+#       } 
+#     } else { # 2 grid-stratification 
+#       if ("strat1" %in% c(colnames(vpc_dat), colnames(aggr_obs))) {
+#         if(length(grep("row", facet))>0) {
+#           pl <- pl + facet_grid(strat1 ~ strat2)                
+#         } else {
+#           pl <- pl + facet_grid(strat2 ~ strat1)                
+#         }        
+#       } else { # only color stratification
+#         if ("strat" %in% c(colnames(vpc_dat), colnames(aggr_obs))) {
+#           # color stratification only
+#         } else {          
+#           stop ("Stratification unsuccesful.")          
+#         }
+#       }
+#     }
+#   }
+  if (facet == "wrap") {  
+    pl <- pl + facet_wrap(~ strat)                
+  } else {
+    if(length(grep("row", facet))>0) {
+      pl <- pl + facet_grid(strat ~ .)                
+    } else { 
+      pl <- pl + facet_grid(. ~ strat)                
+    }    
   }
   if (!is.null(title)) {
     pl <- pl + ggtitle(title)  
@@ -285,9 +268,9 @@ vpc_cens <- function(sim = NULL,
   if(!is.null(ylab)) {
     pl <- pl + ylab(ylab)
   } else {
-    pl <- pl + ylab(paste("Fraction", type))
+    pl <- pl + ylab("Probability")
   }
-  pl <- pl + ylim(c(0, 1))
+  pl <- pl + ylim(c(0,1))
   if (plot) {
     print(pl)    
   }
