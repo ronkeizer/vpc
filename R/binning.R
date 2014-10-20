@@ -1,9 +1,9 @@
 #' Calculate appropriate bin separators for vpc
 #' 
-#' @param dat data
-#' @param type auto-binning type. Currently only "simple" available.
-#' @param n_bins number of bins to aim for.
-#' @param x name of independent variable in dataset
+#' @param dat data frame
+#' @param type auto-binning type: "density", "time", or "data"
+#' @param n_bins number of bins to use. For "density" the function might not return a solution with the exact number of bins.
+#' @param column name of independent variable
 #' @return A vector of bin separators
 #' @export auto_bin
 #' @seealso \code{\link{vpc}}
@@ -58,7 +58,7 @@ find_nadirs <- function (x, thresh = 0) {
   else pks
 }
 
-#' Bin data, e.g. for use in VPC
+#' Function to bin data based on a vector of bin separators, e.g. for use in VPC
 #' 
 #' @param x data
 #' @param bins numeric vector specifying bin separators
