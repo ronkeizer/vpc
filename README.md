@@ -14,7 +14,8 @@ The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](htt
 - easier to customize, e.g. request any prediction / confidence interval or binning strategy upon plotting.
 - easier to extend: the output is a ggplot object which can be themed and extended
 - faster
-- 
+
+
 ## Functionality available
 
 Plots:
