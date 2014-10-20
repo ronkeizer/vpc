@@ -48,3 +48,7 @@ Options:
 ## How to use
 
 See [vignette](http://ronkeizer.github.io/vpc/)
+
+## License
+
+[MIT license](http://opensource.org/licenses/MIT)
