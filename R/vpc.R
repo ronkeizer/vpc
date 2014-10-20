@@ -61,7 +61,7 @@
 vpc <- function(sim = NULL, 
                 obs = NULL, 
                 bins = "jenks",
-                n_bins = 8,
+                n_bins = "auto",
                 obs_dv = NULL,
                 sim_dv =  NULL,
                 obs_idv = NULL,

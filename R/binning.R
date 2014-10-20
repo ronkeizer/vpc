@@ -13,6 +13,19 @@
 auto_bin <- function (dat, type="kmeans", n_bins = 8, x="time") {
   all_bins <- list()
   l_bins <- c()
+  if(type %in% c("jenks", "kmeans", "pretty", "quantile", "hclust", "sd", "bclust", "fisher")) {
+    require("classInt")
+    if(class(n_bins) != "numeric" | is.null(n_bins)) {
+      bins <- classIntervals(dat[[x]], style = type)                
+    } else {
+      bins <- classIntervals(dat[[x]], n = n_bins-1, style = type)        
+    }
+    return(bins$brks)      
+  } 
+  if (n_bins == "auto") {
+    warning("Automatic optimization of bin number is not available for this binning method, reverting to 8 bins.")
+    n_bins <- 8
+  }
   n_bins <- n_bins + 1 # bin_separators
   if(type != "time" & type != "data") {
     if (type == "density" || type == "auto") {
@@ -24,11 +37,6 @@ auto_bin <- function (dat, type="kmeans", n_bins = 8, x="time") {
       }     
       return(all_bins[[order(abs(l_bins - n_bins))[1]]]) # return closest to requested bins
     }
-    if(type %in% c("jenks", "kmeans", "pretty", "quantile", "hclust", "sd", "bclust", "fisher")) {
-      require("classInt")
-      bins <- classIntervals(dat[[x]], n = n_bins-1, style = type)
-      return(bins$brks)      
-    } 
     stop("Specified binning method not recognized!")
   } else {
     if (type == "time") {

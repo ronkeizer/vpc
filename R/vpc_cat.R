@@ -31,7 +31,7 @@
 vpc_cat  <- function(sim = NULL, 
                      obs = NULL, 
                      bins = "jenks",
-                     n_bins = 8,
+                     n_bins = "auto",
                      type = "bloq",
                      obs_dv = NULL,
                      sim_dv =  NULL,
