@@ -53,7 +53,7 @@
 #' vpc_loq <- vpc_cens(sim, obs, lloq = 5)
 vpc_cens <- function(sim = NULL, 
                      obs = NULL, 
-                     bins = "density", 
+                     bins = "jenks",
                      n_bins = 8,
                      type = "bloq",
                      obs_dv = NULL,

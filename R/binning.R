@@ -10,7 +10,7 @@
 #' @details
 #' This function calculates bin separators (e.g. for use in a vpc) based on nadirs in the density functions for the indenpendent variable
 
-auto_bin <- function (dat, type="density", n_bins = 8, x="time") {
+auto_bin <- function (dat, type="kmeans", n_bins = 8, x="time") {
   all_bins <- list()
   l_bins <- c()
   n_bins <- n_bins + 1 # bin_separators
@@ -24,6 +24,12 @@ auto_bin <- function (dat, type="density", n_bins = 8, x="time") {
       }     
       return(all_bins[[order(abs(l_bins - n_bins))[1]]]) # return closest to requested bins
     }
+    if(type %in% c("jenks", "kmeans", "pretty", "quantile", "hclust", "sd", "bclust", "fisher")) {
+      require("classInt")
+      bins <- classIntervals(dat[[x]], n = n_bins-1, style = type)
+      return(bins$brks)      
+    } 
+    stop("Specified binning method not recognized!")
   } else {
     if (type == "time") {
       tmp <- levels(cut(x = unique(dat[[x]]), breaks = n_bins, right = TRUE))

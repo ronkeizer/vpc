@@ -30,7 +30,7 @@
 #' @seealso \link{vpc}
 vpc_cat  <- function(sim = NULL, 
                      obs = NULL, 
-                     bins = "density", 
+                     bins = "jenks",
                      n_bins = 8,
                      type = "bloq",
                      obs_dv = NULL,
