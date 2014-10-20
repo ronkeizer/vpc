@@ -10,7 +10,7 @@
 #' @details
 #' This function calculates bin separators (e.g. for use in a vpc) based on nadirs in the density functions for the indenpendent variable
 
-auto_bin <- function (dat, type="density", n_bins = 8, x="time", equalize = TRUE) {
+auto_bin <- function (dat, type="density", n_bins = 8, x="time") {
   all_bins <- list()
   l_bins <- c()
   n_bins <- n_bins + 1 # bin_separators
