@@ -28,7 +28,7 @@ Options:
 - stratification (single & multiple)
 - prediction-correction
 - binning methods (Jenk's classification, K-means clustering, by time, by number of data points, by density, etc).
-- automatated ('optimal') or manual determination of number of bins
+- automatated (using Sturges' rule) or manual input of number of bins
 - Kaplan-Meier Mean Covariate plots [KMMC](http://page-meeting.org/pdf_assets/4280-2012-06%20PAGE%20KMMC.pdf)
 - plot without simulated data (`sim=NULL`), or without observed data(`obs=NULL`).
 - general-purpose function (`sim_data`) to simulate data from a mixed-effects structural model, a fixed parameter vector and between-subject variability covariance matrix.
