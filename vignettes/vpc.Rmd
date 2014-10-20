@@ -12,7 +12,7 @@ The VPC is the most widely used diagnostic tool in pharmacometrics (see e.g. [he
 
 - a single-step process for creating a VPC in R, without the need for PsN or Xpose. 
   - allows changing of vpc parameters such as binning / stratification upon creation of the plot, not in a separate pre-processing step.
-  - easier debugging than PsN+Xpose, all data parsing and plotting in one R function
+  - easier debugging than PsN+Xpose, all data parsing and plotting in one R package
 - more flexible regarding input (use simulated data from R, NONMEM, Monolix, Stan, or any other simulation tool)
 - easier to customize, e.g. request any prediction / confidence interval or binning strategy upon plotting.
 - easier to extend: the output is a ggplot object which can be themed and extended
