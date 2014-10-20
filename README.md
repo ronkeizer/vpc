@@ -27,7 +27,7 @@ Plots:
 Options:
 - stratification (single & multiple)
 - prediction-correction
-- auto-binning (search for x-variable density-nadirs)
+- binning methods (Jenk's classification, K-means clustering, by time, by number of data points, by density, etc).
 - Kaplan-Meier Mean Covariate plots [KMMC](http://page-meeting.org/pdf_assets/4280-2012-06%20PAGE%20KMMC.pdf)
 - plot without simulated data (`sim=NULL`), or without observed data(`obs=NULL`). _(this seems an uninteresting feature, but it is actually pretty useful, since it makes it very easy to apply binning and multiple stratifications to observations or simulated data only, e.g. create multiple-stratified Kaplan-Meier curves from observed data etc.)_
 - general-purpose function (`sim_data`) to simulate data from a mixed-effects structural model, a fixed parameter vector and between-subject variability covariance matrix.
@@ -35,8 +35,9 @@ Options:
 ## Planned functionality
 
 - npde plots with prediction intervals, see e.g. [here](http://page-meeting.org/pdf_assets/9164-venise12_posternpde.pdf)
+- optimization of bin numbers
 - function to simulate tte and rtte in R
-- auto-binning by k-means clustering (from Lavielle et al. JPP 2011)
+
 
 ## Installation
 
