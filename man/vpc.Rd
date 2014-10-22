@@ -3,7 +3,7 @@
 \alias{vpc}
 \title{VPC function}
 \usage{
-vpc(sim = NULL, obs = NULL, bins = "density", n_bins = 8,
+vpc(sim = NULL, obs = NULL, bins = "jenks", n_bins = "auto",
   obs_dv = NULL, sim_dv = NULL, obs_idv = NULL, sim_idv = NULL,
   obs_id = NULL, sim_id = NULL, obs_pred = NULL, sim_pred = NULL,
   nonmem = "auto", plot = FALSE, plot_dv = FALSE, plot_obs_ci = TRUE,
