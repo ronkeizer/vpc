@@ -1,0 +1,3 @@
+#' @export
+#' @rdname chain
+`%>%` <- magrittr::`%>%`
