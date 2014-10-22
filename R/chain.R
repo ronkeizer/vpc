@@ -51,5 +51,4 @@
 #' 1:10 %>% rep(.)     # like rep(1:10)
 #' 1:10 %>% rep(I(.))  # like 1:10 %>% rep(., .) and rep(1:10, 1:10)
 #' }
-#' @export
 `%>%` <- magrittr::`%>%`
