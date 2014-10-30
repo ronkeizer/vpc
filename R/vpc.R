@@ -186,14 +186,14 @@ vpc <- function(sim = NULL,
     }
   }
   if (!is.null(obs)) {  
-    obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min)
+    obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
     if (pred_corr) {
       obs <- obs %>% group_by(strat, bin) %>% mutate(pred_bin = mean(pred))
       obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
     }
   }
   if (!is.null(sim)) {  
-    sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min)
+    sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
     sim$sim <- add_sim_index_number(sim, id = "id")    
     if (pred_corr) {
       sim <- sim %>% group_by(strat, bin) %>% mutate(pred_bin = mean(pred))

@@ -149,10 +149,10 @@ vpc_cens <- function(sim = NULL,
   log_y <- FALSE # dummy, required for format_vpc_input_data function
   log_y_min <- 0
   if (!is.null(obs)) {  
-    obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min)
+    obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
   }
   if (!is.null(sim)) {  
-    sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min)
+    sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
     sim$sim <- add_sim_index_number(sim, id = "id")    
   }
   loq_perc <- function(x) { sum(x <= lloq) / length(x) } # below lloq, default   
