@@ -74,6 +74,10 @@ vpc <- function(sim = NULL,
                 plot = FALSE,
                 plot_dv = FALSE,
                 plot_obs_ci = TRUE,
+                plot_pi_ci = TRUE,
+                plot_obs_median = TRUE,
+                plot_sim_median = TRUE,
+                plot_sim_median_ci = TRUE,
                 stratify = NULL,
                 stratify_color = NULL,
                 legend_pos = NULL,
@@ -261,18 +265,22 @@ vpc <- function(sim = NULL,
     }
   }  
   if (!is.null(sim)) {
-    pl <- ggplot(vpc_dat, aes(x=bin_mid)) + 
-      geom_line(aes(y=q50.med), linetype='dashed')     
-    if (smooth) {
-      pl <- pl + 
-        geom_ribbon(aes(x=bin_mid, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
-        geom_ribbon(aes(x=bin_mid, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
-        geom_ribbon(aes(x=bin_mid, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) 
-    } else {
-      pl <- pl + 
-        geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
-        geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
-        geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area)     
+    pl <- ggplot(vpc_dat, aes(x=bin_mid)) 
+    if(plot_sim_median) {
+      pl <- pl + geom_line(aes(y=q50.med), linetype='dashed')           
+    }
+    if (plot_pi_ci) {
+      if (smooth) {
+        pl <- pl + 
+          geom_ribbon(aes(x=bin_mid, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
+          geom_ribbon(aes(x=bin_mid, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
+          geom_ribbon(aes(x=bin_mid, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) 
+      } else {
+        pl <- pl + 
+          geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
+          geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
+          geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area)     
+      }      
     }
   } else {
     if (!is.null(stratify_color)) {
@@ -287,12 +295,14 @@ vpc <- function(sim = NULL,
     }
   }
   if(!is.null(obs)) {
-    pl <- pl +
-      geom_line(data=aggr_obs, aes(x=bin_mid, y=obs50), linetype='solid') 
+    if (plot_obs_median) {
+      pl <- pl +
+        geom_line(data=aggr_obs, aes(x=bin_mid, y=obs50), linetype='solid')       
+    }
     if(plot_obs_ci) {
-    pl <- pl +
-      geom_line(data=aggr_obs, aes(x=bin_mid, y=obs5), linetype='dotted') +
-      geom_line(data=aggr_obs, aes(x=bin_mid, y=obs95), linetype='dotted') 
+      pl <- pl +
+        geom_line(data=aggr_obs, aes(x=bin_mid, y=obs5), linetype='dotted') +
+        geom_line(data=aggr_obs, aes(x=bin_mid, y=obs95), linetype='dotted') 
     }
     if (plot_dv) {
       pl <- pl + geom_point(data=obs, aes(x=idv, y = dv))
