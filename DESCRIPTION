@@ -13,7 +13,8 @@ Depends:
     ggplot2,
     MASS,
     survival,
-    classInt
+    classInt,
+    data.table
 Imports:
     magrittr
 License: GPL-2
