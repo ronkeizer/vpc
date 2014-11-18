@@ -3,7 +3,7 @@
 \alias{vpc_cens}
 \title{VPC function for left- or right-censored data (e.g. BLOQ data)}
 \usage{
-vpc_cens(sim = NULL, obs = NULL, bins = "density", n_bins = 8,
+vpc_cens(sim = NULL, obs = NULL, bins = "jenks", n_bins = 8,
   type = "bloq", obs_dv = NULL, sim_dv = NULL, obs_idv = NULL,
   sim_idv = NULL, obs_id = NULL, sim_id = NULL, nonmem = "auto",
   stratify = NULL, stratify_color = NULL, ci = c(0.05, 0.95),

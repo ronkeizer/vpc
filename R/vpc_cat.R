@@ -30,8 +30,8 @@
 #' @seealso \link{vpc}
 vpc_cat  <- function(sim = NULL, 
                      obs = NULL, 
-                     bins = "density", 
-                     n_bins = 8,
+                     bins = "jenks",
+                     n_bins = "auto",
                      type = "bloq",
                      obs_dv = NULL,
                      sim_dv =  NULL,
@@ -111,10 +111,10 @@ vpc_cat  <- function(sim = NULL,
   log_y_min <- 0
   stratify <- NULL
   if (!is.null(obs)) {  
-    obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min)
+    obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
   }
   if (!is.null(sim)) {  
-    sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min)
+    sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
     sim$sim <- add_sim_index_number(sim, id = "id")    
   }
   fact_perc <- function(x, fact) { sum(x == fact) / length(x) } # below lloq, default     

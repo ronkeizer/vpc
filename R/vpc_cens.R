@@ -53,9 +53,8 @@
 #' vpc_loq <- vpc_cens(sim, obs, lloq = 5)
 vpc_cens <- function(sim = NULL, 
                      obs = NULL, 
-                     bins = "density", 
+                     bins = "jenks",
                      n_bins = 8,
-                     type = "bloq",
                      obs_dv = NULL,
                      sim_dv =  NULL,
                      obs_idv = NULL,
@@ -77,6 +76,18 @@ vpc_cens <- function(sim = NULL,
                      theme = "default",
                      custom_theme = NULL,
                      facet = "wrap") {
+  if (is.null(uloq) & is.null(lloq)) {
+    stop("You have to specify either a lower limit of quantification (lloq=...) or an upper limit (uloq=...).") 
+  }
+  if (!is.null(uloq) & !is.null(lloq)) {
+    stop("You have to specify either a lower limit of quantification (lloq=...) or an upper limit (uloq=...), but you can't specify both.") 
+  }
+  if (is.null(lloq)) {
+    type <- "right-censored"
+  }
+  if (is.null(lloq)) {
+    type <- "left-censored"
+  }
   if (nonmem == "auto") {
     if(sum(c("ID","TIME") %in% colnames(obs)) == 2) { # most likely, data is from NONMEM
       nonmem <- TRUE
@@ -149,14 +160,14 @@ vpc_cens <- function(sim = NULL,
   log_y <- FALSE # dummy, required for format_vpc_input_data function
   log_y_min <- 0
   if (!is.null(obs)) {  
-    obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min)
+    obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
   }
   if (!is.null(sim)) {  
-    sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min)
+    sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
     sim$sim <- add_sim_index_number(sim, id = "id")    
   }
   loq_perc <- function(x) { sum(x <= lloq) / length(x) } # below lloq, default   
-  if (tolower(type) == "uloq") {
+  if (is.null(lloq)) {
     loq_perc <- function(x) { sum(x >= uloq) / length(x) }
   }
   if (!is.null(sim)) {

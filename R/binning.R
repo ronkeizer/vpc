@@ -1,18 +1,31 @@
 #' Calculate appropriate bin separators for vpc
 #' 
-#' @param dat data
-#' @param type auto-binning type. Currently only "simple" available.
-#' @param n_bins number of bins to aim for.
-#' @param x name of independent variable in dataset
+#' @param dat data frame
+#' @param type auto-binning type: "density", "time", or "data"
+#' @param n_bins number of bins to use. For "density" the function might not return a solution with the exact number of bins.
+#' @param column name of independent variable
 #' @return A vector of bin separators
 #' @export auto_bin
 #' @seealso \code{\link{vpc}}
 #' @details
 #' This function calculates bin separators (e.g. for use in a vpc) based on nadirs in the density functions for the indenpendent variable
 
-auto_bin <- function (dat, type="density", n_bins = 8, x="time", equalize = TRUE) {
+auto_bin <- function (dat, type="kmeans", n_bins = 8, x="time") {
   all_bins <- list()
   l_bins <- c()
+  if(type %in% c("jenks", "kmeans", "pretty", "quantile", "hclust", "sd", "bclust", "fisher")) {
+    require("classInt")
+    if(class(n_bins) != "numeric" | is.null(n_bins)) {
+      bins <- classIntervals(dat[[x]], style = type)                
+    } else {
+      bins <- classIntervals(dat[[x]], n = n_bins-1, style = type)        
+    }
+    return(bins$brks)      
+  } 
+  if (n_bins == "auto") {
+    warning("Automatic optimization of bin number is not available for this binning method, reverting to 8 bins.")
+    n_bins <- 8
+  }
   n_bins <- n_bins + 1 # bin_separators
   if(type != "time" & type != "data") {
     if (type == "density" || type == "auto") {
@@ -24,6 +37,7 @@ auto_bin <- function (dat, type="density", n_bins = 8, x="time", equalize = TRUE
       }     
       return(all_bins[[order(abs(l_bins - n_bins))[1]]]) # return closest to requested bins
     }
+    stop("Specified binning method not recognized!")
   } else {
     if (type == "time") {
       tmp <- levels(cut(x = unique(dat[[x]]), breaks = n_bins, right = TRUE))
@@ -58,7 +72,7 @@ find_nadirs <- function (x, thresh = 0) {
   else pks
 }
 
-#' Bin data, e.g. for use in VPC
+#' Function to bin data based on a vector of bin separators, e.g. for use in VPC
 #' 
 #' @param x data
 #' @param bins numeric vector specifying bin separators

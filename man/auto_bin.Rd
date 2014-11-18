@@ -3,16 +3,16 @@
 \alias{auto_bin}
 \title{Calculate appropriate bin separators for vpc}
 \usage{
-auto_bin(dat, type = "density", n_bins = 8, x = "time", equalize = TRUE)
+auto_bin(dat, type = "kmeans", n_bins = 8, x = "time")
 }
 \arguments{
-\item{dat}{data}
+\item{dat}{data frame}
 
-\item{type}{auto-binning type. Currently only "simple" available.}
+\item{type}{auto-binning type: "density", "time", or "data"}
 
-\item{n_bins}{number of bins to aim for.}
+\item{n_bins}{number of bins to use. For "density" the function might not return a solution with the exact number of bins.}
 
-\item{x}{name of independent variable in dataset}
+\item{column}{name of independent variable}
 }
 \value{
 A vector of bin separators

@@ -3,7 +3,7 @@
 \alias{vpc_cat}
 \title{VPC function for categorical}
 \usage{
-vpc_cat(sim = NULL, obs = NULL, bins = "density", n_bins = 8,
+vpc_cat(sim = NULL, obs = NULL, bins = "jenks", n_bins = "auto",
   type = "bloq", obs_dv = NULL, sim_dv = NULL, obs_idv = NULL,
   sim_idv = NULL, obs_id = NULL, sim_id = NULL, nonmem = "auto",
   ci = c(0.05, 0.95), uloq = NULL, lloq = NULL, plot = FALSE,

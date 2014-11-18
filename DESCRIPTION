@@ -12,7 +12,10 @@ Depends:
     reshape2,
     ggplot2,
     MASS,
-    survival
+    survival,
+    classInt
+Imports:
+    magrittr
 License: GPL-2
 LazyData: true
 URL: https://github.com/ronkeizer/vpc
