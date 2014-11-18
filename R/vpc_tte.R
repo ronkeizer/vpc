@@ -214,7 +214,7 @@ vpc_tte <- function(sim = NULL,
   
     sim_km <- all %>% 
       group_by (bin, strat) %>% 
-      summarise (bin_mid = head(bin_mid,1), bin_min = head(bin_min,1), bin_max = head(bin_max,1), 
+      dplyr::summarize (bin_mid = head(bin_mid,1), bin_min = head(bin_min,1), bin_max = head(bin_max,1), 
                  qmin = quantile(surv, 0.05), qmax = quantile(surv, 0.95), qmed = median(surv),
                  step = 0)
   } else {
@@ -307,7 +307,7 @@ vpc_tte <- function(sim = NULL,
       }
     }    
     if (show_obs) {
-      chk_tbl <- obs_km %>% group_by(strat) %>% summarise(t = length(time))
+      chk_tbl <- obs_km %>% group_by(strat) %>% dplyr::summarize(t = length(time))
       if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use 
         geom_step <- geom_line
       }

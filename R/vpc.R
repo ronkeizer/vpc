@@ -202,24 +202,24 @@ vpc <- function(sim = NULL,
   }
   if (!is.null(sim)) {
     tmp1 <- sim %>% group_by(strat, sim, bin)
-    aggr_sim <- data.frame(cbind(tmp1 %>% summarise(quantile(dv, pi[1])),
-                                 tmp1 %>% summarise(quantile(dv, 0.5 )),
-                                 tmp1 %>% summarise(quantile(dv, pi[2])),
-                                 tmp1 %>% summarise(mean(idv))))
+    aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarize(quantile(dv, pi[1])),
+                                 tmp1 %>% dplyr::summarize(quantile(dv, 0.5 )),
+                                 tmp1 %>% dplyr::summarize(quantile(dv, pi[2])),
+                                 tmp1 %>% dplyr::summarize(mean(idv))))
     aggr_sim <- aggr_sim[,-grep("(bin.|strat.|sim.)", colnames(aggr_sim))]  
     colnames(aggr_sim)[grep("quantile", colnames(aggr_sim))] <- c("q5", "q50", "q95")
     colnames(aggr_sim)[length(aggr_sim[1,])] <- "mn_idv"
     tmp <- aggr_sim %>% group_by(strat, bin)
-    vpc_dat <- data.frame(cbind(tmp %>% summarise(quantile(q5, ci[1])),
-                                tmp %>% summarise(quantile(q5, 0.5)),
-                                tmp %>% summarise(quantile(q5, ci[2])),
-                                tmp %>% summarise(quantile(q50, ci[1])),
-                                tmp %>% summarise(quantile(q50, 0.5)),
-                                tmp %>% summarise(quantile(q50, ci[2])),
-                                tmp %>% summarise(quantile(q95, ci[1])),
-                                tmp %>% summarise(quantile(q95, 0.5)),
-                                tmp %>% summarise(quantile(q95, ci[2])),
-                                tmp %>% summarise(mean(mn_idv))))
+    vpc_dat <- data.frame(cbind(tmp %>% dplyr::summarize(quantile(q5, ci[1])),
+                                tmp %>% dplyr::summarize(quantile(q5, 0.5)),
+                                tmp %>% dplyr::summarize(quantile(q5, ci[2])),
+                                tmp %>% dplyr::summarize(quantile(q50, ci[1])),
+                                tmp %>% dplyr::summarize(quantile(q50, 0.5)),
+                                tmp %>% dplyr::summarize(quantile(q50, ci[2])),
+                                tmp %>% dplyr::summarize(quantile(q95, ci[1])),
+                                tmp %>% dplyr::summarize(quantile(q95, 0.5)),
+                                tmp %>% dplyr::summarize(quantile(q95, ci[2])),
+                                tmp %>% dplyr::summarize(mean(mn_idv))))
     vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
     colnames(vpc_dat) <- c("strat", "bin", 
                            "q5.low","q5.med","q5.up", 

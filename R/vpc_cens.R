@@ -161,15 +161,15 @@ vpc_cens <- function(sim = NULL,
   }
   if (!is.null(sim)) {
     tmp1 <- sim %>% group_by(strat, sim, bin)
-    aggr_sim <- data.frame(cbind(tmp1 %>% summarise(loq_perc(dv)),
-                                 tmp1 %>% summarise(mean(idv))))
+    aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarize(loq_perc(dv)),
+                                 tmp1 %>% dplyr::summarize(mean(idv))))
     colnames(aggr_sim)[grep("loq_perc", colnames(aggr_sim))] <- "ploq"
     colnames(aggr_sim)[length(aggr_sim[1,])] <- c("mn_idv")
     tmp <- aggr_sim %>% group_by(strat, bin)    
-    vpc_dat <- data.frame(cbind(tmp %>% summarise(quantile(ploq, ci[1])),
-                                tmp %>% summarise(quantile(ploq, 0.5)),
-                                tmp %>% summarise(quantile(ploq, ci[2])),
-                                tmp %>% summarise(mean(mn_idv))
+    vpc_dat <- data.frame(cbind(tmp %>% dplyr::summarize(quantile(ploq, ci[1])),
+                                tmp %>% dplyr::summarize(quantile(ploq, 0.5)),
+                                tmp %>% dplyr::summarize(quantile(ploq, ci[2])),
+                                tmp %>% dplyr::summarize(mean(mn_idv))
                                 ))
     vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
     colnames(vpc_dat) <- c("strat", "bin", "ploq_low", "ploq_med", "ploq_up", "bin_mid")  
@@ -181,10 +181,10 @@ vpc_cens <- function(sim = NULL,
   }
   if(!is.null(obs)) {
     tmp <- obs %>% group_by(strat,bin)
-    aggr_obs <- data.frame(cbind(tmp %>% summarise(loq_perc(dv)),
-                                 tmp %>% summarise(loq_perc(dv)),
-                                 tmp %>% summarise(loq_perc(dv)),
-                                 tmp %>% summarise(mean(idv))))
+    aggr_obs <- data.frame(cbind(tmp %>% dplyr::summarize(loq_perc(dv)),
+                                 tmp %>% dplyr::summarize(loq_perc(dv)),
+                                 tmp %>% dplyr::summarize(loq_perc(dv)),
+                                 tmp %>% dplyr::summarize(mean(idv))))
     aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
     colnames(aggr_obs) <- c("strat", "bin", "ploq_low","ploq_med","ploq_up")    
     colnames(aggr_obs)[length(aggr_obs[1,])] <- c("bin_mid")

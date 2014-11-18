@@ -8,8 +8,6 @@ vignette: >
   %\usepackage[utf8]{inputenc}
 ---
 
-output: rmarkdown::html_vignette
-
 The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](http://page-meeting.org/default.asp?abstract=1434)), most commonly created using [PsN](http://psn.sourceforge.net) and [Xpose](http://xpose.sourceforge.net), using NONMEM as the simulation engine. The aim of the current library is to provide an improved tool that is:
 
 - a single-step process for creating a VPC. 
@@ -109,7 +107,7 @@ vpc(sim = sim,
            ci = c(0.05, 0.95),                          # confidence intervals to show
            pred_corr = FALSE,                           # perform prediction-correction?
            plot_dv = TRUE,                              # plot observations?
-           facet = "wrap",                              # wrap stratifications, or as "row" or "column"
+           facet = "rows",                              # wrap stratifications, or as "row" or "column"
            ylab = "Concentration", 
             xlab = "Time (hrs)")
 ```
