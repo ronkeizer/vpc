@@ -11,13 +11,12 @@ read_table_nm <- function(file, perl = NULL) {
   file <- gsub("~", path.expand("~"), file)
   tab_fr <- suppressWarnings(try(data.table::fread(file), silent = TRUE))
   if ("data.frame" %in% class(tab_fr)) {
-    tab <- data.frame(tab_fr)
-    colnames(tab) <- gsub(" ", "", colnames(tab_fr))
-
+    data.table::setnames(tab_fr, gsub(" ", "", colnames(tab_fr)))
+    sel <- grep("[A-DF-Z]", tab_fr[[1]])
     if(length(sel)>0) {
-      return(data.frame(apply(tab[-sel,], 2, as.numeric))) 
+      return(data.frame(apply(tab_fr[-sel,], 2, as.numeric)))    
     } else {
-      return(tab)
+      return(data.frame(apply(tab_fr, 2, as.numeric)))
     }
   } else {
     cat ("Tip: NONMEM tables can be read much faster when 'NOTITLE FORMAT=,1PE11.4' is used in $TABLE")
