@@ -9,11 +9,11 @@
 
 read_table_nm <- function(file, perl = NULL) {
   file <- gsub("~", path.expand("~"), file)
-  tab_fr <- try(data.table::fread(file), silent = TRUE)
+  tab_fr <- suppressWarnings(try(data.table::fread(file), silent = TRUE))
   if ("data.frame" %in% class(tab_fr)) {
     tab <- data.frame(tab_fr)
     colnames(tab) <- gsub(" ", "", colnames(tab_fr))
-    sel <- grep("[A-DF-Z]", tab[,1])
+
     if(length(sel)>0) {
       return(data.frame(apply(tab[-sel,], 2, as.numeric))) 
     } else {
