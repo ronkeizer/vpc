@@ -16,6 +16,11 @@
 #' @param sim_pred variable in data.frame for population predicted value. "pred" by default
 #' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect
 #' @param plot_dv should observations be plotted?
+#' @param plot_obs_ci default is TRUE
+#' @param plot_pi_ci default is TRUE
+#' @param plot_obs_median default is TRUE
+#' @param plot_sim_median default is TRUE
+#' @param plot_sim_median_ci default is TRUE
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param pred_corr perform prediction-correction? 
@@ -269,15 +274,22 @@ vpc <- function(sim = NULL,
     if(plot_sim_median) {
       pl <- pl + geom_line(aes(y=q50.med), linetype='dashed')           
     }
+    if(plot_sim_median_ci) {
+      if (smooth) {
+        pl <- pl +
+          geom_ribbon(aes(x=bin_mid, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) 
+      } else {
+        pl <- pl +
+          geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) 
+      }       
+    }
     if (plot_pi_ci) {
       if (smooth) {
         pl <- pl + 
-          geom_ribbon(aes(x=bin_mid, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
           geom_ribbon(aes(x=bin_mid, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
           geom_ribbon(aes(x=bin_mid, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) 
       } else {
         pl <- pl + 
-          geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) +
           geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
           geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area)     
       }      
