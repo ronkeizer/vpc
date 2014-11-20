@@ -5,5 +5,5 @@
 #' @docType package
 #' @name vpc-package
 #' @import MASS dplyr ggplot2 survival
-#' @author Ron Keizer \email{ronkeizer@gmail.com}
+#' @author Ron Keizer \email{ronkeizer@@gmail.com}
 NULL

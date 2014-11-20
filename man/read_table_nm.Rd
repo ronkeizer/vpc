@@ -3,12 +3,12 @@
 \alias{read_table_nm}
 \title{Read table file simulated with NONMEM}
 \usage{
-read_table_nm(file, perl = TRUE)
+read_table_nm(file, perl = NULL)
 }
 \arguments{
 \item{file}{The file to be read}
 
-\item{perl}{a boolean parameter indicating whether to use Perl to read in the file. Default is TRUE. Use of Perl is advised as it is much faster.}
+\item{perl}{a boolean or NULL variable indicating whether to use Perl to read in the file. Default is NULL, which will make the function check whether Perl is available. Use of Perl is advised as it is much faster.}
 }
 \value{
 a data.frame

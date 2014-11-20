@@ -7,11 +7,13 @@ vpc(sim = NULL, obs = NULL, bins = "jenks", n_bins = "auto",
   obs_dv = NULL, sim_dv = NULL, obs_idv = NULL, sim_idv = NULL,
   obs_id = NULL, sim_id = NULL, obs_pred = NULL, sim_pred = NULL,
   nonmem = "auto", plot = FALSE, plot_dv = FALSE, plot_obs_ci = TRUE,
-  stratify = NULL, stratify_color = NULL, legend_pos = NULL,
-  pred_corr = FALSE, pred_corr_lower_bnd = 0, pi = c(0.05, 0.95),
-  ci = c(0.05, 0.95), uloq = NULL, lloq = NULL, log_y = FALSE,
-  log_y_min = 0.001, xlab = NULL, ylab = NULL, title = NULL,
-  smooth = TRUE, theme = "default", custom_theme = NULL, facet = "wrap")
+  plot_pi_ci = TRUE, plot_obs_median = TRUE, plot_sim_median = TRUE,
+  plot_sim_median_ci = TRUE, stratify = NULL, stratify_color = NULL,
+  legend_pos = NULL, pred_corr = FALSE, pred_corr_lower_bnd = 0,
+  pi = c(0.05, 0.95), ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
+  log_y = FALSE, log_y_min = 0.001, xlab = NULL, ylab = NULL,
+  title = NULL, smooth = TRUE, theme = "default", custom_theme = NULL,
+  facet = "wrap")
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -43,6 +45,16 @@ vpc(sim = NULL, obs = NULL, bins = "jenks", n_bins = "auto",
 \item{plot}{Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.}
 
 \item{plot_dv}{should observations be plotted?}
+
+\item{plot_obs_ci}{default is TRUE}
+
+\item{plot_pi_ci}{default is TRUE}
+
+\item{plot_obs_median}{default is TRUE}
+
+\item{plot_sim_median}{default is TRUE}
+
+\item{plot_sim_median_ci}{default is TRUE}
 
 \item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
 
