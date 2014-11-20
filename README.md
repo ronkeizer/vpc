@@ -39,10 +39,13 @@ Options:
 ## Installation
 
     library("devtools")
+    install.packages("data.table", repo="http://cran.cnr.Berkeley.edu")
     install_github("ronkeizer/vpc")
     library(vpc)
     ?vpc
-   
+  
+_NOte: The `data.table` package is installed manually here before the `vpc` package since it often doesn't install automatically. If there are any addtional packages that do not install automatically, use install.package with a proper repository to do so._ 
+
 ## How to use
 
 See [vignette](http://ronkeizer.github.io/vpc/)
