@@ -12,7 +12,7 @@ Depends:
     reshape2,
     ggplot2,
     MASS,
-    survival,
+    survival, 
     classInt,
     data.table
 Imports:
