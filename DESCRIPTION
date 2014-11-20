@@ -7,7 +7,7 @@ Description: Create visual predictive checks in R, a commonly used diagnostic
     plot in pharmacometrics. Create it completely within the R environment, so
     without the use of PsN and Xpose.
 Depends:
-    R (>= 3.1.0),
+    R (>= 2.14.0),
     dplyr,
     reshape2,
     ggplot2,
