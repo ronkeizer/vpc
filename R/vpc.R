@@ -15,7 +15,7 @@
 #' @param obs_pred variable in data.frame for population predicted value. "pred" by default
 #' @param sim_pred variable in data.frame for population predicted value. "pred" by default
 #' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect
-#' @param plot_dv should observations be plotted?
+#' @param plot_obs_dv should observations be plotted?
 #' @param plot_obs_ci default is TRUE
 #' @param plot_pi_ci default is TRUE
 #' @param plot_obs_median default is TRUE
@@ -77,7 +77,7 @@ vpc <- function(sim = NULL,
                 sim_pred = NULL,
                 nonmem = "auto",
                 plot = FALSE,
-                plot_dv = FALSE,
+                plot_obs_dv = FALSE,
                 plot_obs_ci = TRUE,
                 plot_pi_ci = TRUE,
                 plot_obs_median = TRUE,
@@ -316,7 +316,7 @@ vpc <- function(sim = NULL,
         geom_line(data=aggr_obs, aes(x=bin_mid, y=obs5), linetype='dotted') +
         geom_line(data=aggr_obs, aes(x=bin_mid, y=obs95), linetype='dotted') 
     }
-    if (plot_dv) {
+    if (plot_obs_dv) {
       pl <- pl + geom_point(data=obs, aes(x=idv, y = dv))
     }    
   }
