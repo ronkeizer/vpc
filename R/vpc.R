@@ -79,10 +79,11 @@ vpc <- function(sim = NULL,
                 plot = FALSE,
                 plot_obs_dv = FALSE,
                 plot_obs_ci = TRUE,
-                plot_pi_ci = TRUE,
                 plot_obs_median = TRUE,
-                plot_sim_median = TRUE,
+                plot_sim_median = FALSE,
                 plot_sim_median_ci = TRUE,
+                plot_pi = FALSE,
+                plot_pi_ci = TRUE,
                 stratify = NULL,
                 stratify_color = NULL,
                 legend_pos = NULL,
@@ -272,7 +273,7 @@ vpc <- function(sim = NULL,
   if (!is.null(sim)) {
     pl <- ggplot(vpc_dat, aes(x=bin_mid)) 
     if(plot_sim_median) {
-      pl <- pl + geom_line(aes(y=q50.med), linetype='dashed')           
+      pl <- pl + geom_line(aes(y=q50.med), linetype='dotted')           
     }
     if(plot_sim_median_ci) {
       if (smooth) {
@@ -282,6 +283,11 @@ vpc <- function(sim = NULL,
         pl <- pl +
           geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) 
       }       
+    }
+    if (plot_pi) {
+      pl <- pl + 
+        geom_line(aes(x=bin_mid, y=q5.med), linetype='dotted') +
+        geom_line(aes(x=bin_mid, y=q95.med), linetype='dotted')       
     }
     if (plot_pi_ci) {
       if (smooth) {
@@ -309,12 +315,12 @@ vpc <- function(sim = NULL,
   if(!is.null(obs)) {
     if (plot_obs_median) {
       pl <- pl +
-        geom_line(data=aggr_obs, aes(x=bin_mid, y=obs50), linetype='solid')       
+        geom_line(data=aggr_obs, aes(x=bin_mid, y=obs50), linetype='solid', size=.9)       
     }
     if(plot_obs_ci) {
       pl <- pl +
-        geom_line(data=aggr_obs, aes(x=bin_mid, y=obs5), linetype='dotted') +
-        geom_line(data=aggr_obs, aes(x=bin_mid, y=obs95), linetype='dotted') 
+        geom_line(data=aggr_obs, aes(x=bin_mid, y=obs5), linetype='dashed') +
+        geom_line(data=aggr_obs, aes(x=bin_mid, y=obs95), linetype='dashed') 
     }
     if (plot_obs_dv) {
       pl <- pl + geom_point(data=obs, aes(x=idv, y = dv))
