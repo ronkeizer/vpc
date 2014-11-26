@@ -63,6 +63,7 @@ vpc_tte <- function(sim = NULL,
                     sim_idv = "time",
                     obs_id = "id",
                     sim_id = "id",
+                    dense_grid = FALSE,
                     pi_med = FALSE, 
                     nonmem = "auto",
                     reverse_prob = FALSE,
@@ -155,7 +156,6 @@ vpc_tte <- function(sim = NULL,
     }
     obs$time <- obs[[obs_idv]]
     obs$dv <- obs[[obs_dv]]
-    obs <- relative_times(obs)
     if (rtte) {
       obs <- relative_times(obs)    
       obs <- obs %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0)) 
@@ -191,18 +191,22 @@ vpc_tte <- function(sim = NULL,
     all <- c()
     for (i in 1:n_sim) {
       tmp <- sim %>%
-        filter(sim == i) %>%
-        convert_from_dense_grid(.)   ## convert the simulation dataset to hold only the observations, not the whole grid
-      if (rtte) {
-        tmp <- tmp %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0))       
+        dplyr::filter(sim == i)
+      if (dense_grid == TRUE) {
+        tmp <- tmp %>%
+          convert_from_dense_grid(.)   ## convert the simulation dataset to hold only the observations, not the whole grid
       }
-      tmp2 <- add_stratification(tmp %>% arrange(id, time), tolower(stratify))
+      if (rtte) {
+        tmp <- tmp %>% dplyr::group_by(id) %>% dplyr::mutate(rtte = cumsum(dv != 0))       
+      }
+      tmp2 <- add_stratification(tmp %>% dplyr::arrange(id, time), tolower(stratify))
       tmp3 <- compute_kaplan(tmp2, strat = "strat", reverse_prob = reverse_prob)
       tmp3[,c("bin", "bin_min", "bin_max", "bin_mid")] <- 0 
       for (j in seq(obs_strat)) {
         tmp3_spl <- tmp3[tmp3$strat == obs_strat[j],]
         if (length(tmp3_spl[,1]) > 0) {
-          tmp_bins <- unique(c(0, bins[[obs_strat[j]]], max(tmp3_spl$time)))
+          bins_sim <- sort(unique(tmp3_spl$time))
+          tmp_bins <- unique(c(0, bins_sim, max(tmp3_spl$time)))
           tmp3[tmp3$strat == obs_strat[j],] <- within(tmp3_spl, {
             bin <- cut(time, breaks = tmp_bins, labels = FALSE, right = TRUE)
             bin_min <- tmp_bins[bin] 
@@ -213,9 +217,9 @@ vpc_tte <- function(sim = NULL,
       }
       all <- rbind(all, cbind(i, tmp3))
     }
-  
+
     sim_km <- all %>% 
-      group_by (bin, strat) %>% 
+      dplyr::group_by (bin, strat) %>% 
       dplyr::summarize (bin_mid = head(bin_mid,1), bin_min = head(bin_min,1), bin_max = head(bin_max,1), 
                  qmin = quantile(surv, 0.05), qmax = quantile(surv, 0.95), qmed = median(surv),
                  step = 0)
