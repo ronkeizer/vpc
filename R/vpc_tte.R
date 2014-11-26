@@ -13,6 +13,7 @@
 #' @param obs_id variable in data.frame for observed individual. "id" by default
 #' @param sim_id variable in data.frame for simulated individual. "id" by default
 #' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect.
+#' @param reverse_prob reverse the probability scale (i.e. plot 1-probability)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied. If stratify_color is also specified, only 1 additional stratification can be specified.
 #' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
@@ -64,6 +65,7 @@ vpc_tte <- function(sim = NULL,
                     sim_id = "id",
                     pi_med = FALSE, 
                     nonmem = "auto",
+                    reverse_prob = FALSE,
                     stratify = NULL,
                     stratify_color = NULL,
                     legend_pos = NULL,
@@ -163,8 +165,8 @@ vpc_tte <- function(sim = NULL,
     }
   
     # add stratification column and comput KM curve for observations
-    obs <- add_stratification(obs, stratify)
-    obs_km <- compute_kaplan(obs, strat = "strat")
+    obs <- add_stratification(obs, tolower(stratify))
+    obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob)
 
     # get bins
     obs_strat <- as.character(unique(obs$strat))
@@ -194,8 +196,8 @@ vpc_tte <- function(sim = NULL,
       if (rtte) {
         tmp <- tmp %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0))       
       }
-      tmp2 <- add_stratification(tmp %>% arrange(id, time), stratify)
-      tmp3 <- compute_kaplan(tmp2, strat = "strat")
+      tmp2 <- add_stratification(tmp %>% arrange(id, time), tolower(stratify))
+      tmp3 <- compute_kaplan(tmp2, strat = "strat", reverse_prob = reverse_prob)
       tmp3[,c("bin", "bin_min", "bin_max", "bin_mid")] <- 0 
       for (j in seq(obs_strat)) {
         tmp3_spl <- tmp3[tmp3$strat == obs_strat[j],]
