@@ -184,11 +184,14 @@ vpc_tte <- function(sim = NULL,
   }
     
   if(!is.null(sim)) {
+    
     # format sim data and compute KM curve CI for simulations
     sim$time <- sim[[sim_idv]]
     sim$sim <- add_sim_index_number(sim)
     n_sim <- length(unique(sim$sim))    
     all <- c()
+#    bins_sim <- 
+    tmp_bins <- unique(c(0, sort(unique(sim$time)), max(tmp3_spl$time)))          
     for (i in 1:n_sim) {
       tmp <- sim %>%
         dplyr::filter(sim == i)
@@ -202,24 +205,14 @@ vpc_tte <- function(sim = NULL,
       tmp2 <- add_stratification(tmp %>% dplyr::arrange(id, time), tolower(stratify))
       tmp3 <- compute_kaplan(tmp2, strat = "strat", reverse_prob = reverse_prob)
       tmp3[,c("bin", "bin_min", "bin_max", "bin_mid")] <- 0 
-      for (j in seq(obs_strat)) {
-        tmp3_spl <- tmp3[tmp3$strat == obs_strat[j],]
-        if (length(tmp3_spl[,1]) > 0) {
-          bins_sim <- sort(unique(tmp3_spl$time))
-          tmp_bins <- unique(c(0, bins_sim, max(tmp3_spl$time)))
-          tmp3[tmp3$strat == obs_strat[j],] <- within(tmp3_spl, {
-            bin <- cut(time, breaks = tmp_bins, labels = FALSE, right = TRUE)
-            bin_min <- tmp_bins[bin] 
-            bin_max <- tmp_bins[bin+1] 
-            bin_mid <- (bin_min + bin_max) / 2
-          })        
-        }
-      }
+      tmp3$bin <- cut(tmp3$time, breaks = tmp_bins, labels = FALSE, right = TRUE)
+      tmp3$bin_min <- tmp_bins[tmp3$bin] 
+      tmp3$bin_max <- tmp_bins[tmp3$bin+1] 
+      tmp3$bin_mid <- (tmp3$bin_min + tmp3$bin_max) / 2      
       all <- rbind(all, cbind(i, tmp3))
     }
-
     sim_km <- all %>% 
-      dplyr::group_by (bin, strat) %>% 
+      dplyr::group_by (strat, bin) %>% 
       dplyr::summarize (bin_mid = head(bin_mid,1), bin_min = head(bin_min,1), bin_max = head(bin_max,1), 
                  qmin = quantile(surv, 0.05), qmax = quantile(surv, 0.95), qmed = median(surv),
                  step = 0)
