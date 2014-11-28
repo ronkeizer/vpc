@@ -191,7 +191,7 @@ vpc_tte <- function(sim = NULL,
     n_sim <- length(unique(sim$sim))    
     all <- c()
 #    bins_sim <- 
-    tmp_bins <- unique(c(0, sort(unique(sim$time)), max(tmp3_spl$time)))          
+    tmp_bins <- unique(c(0, sort(unique(sim$time)), max(sim$time)))              
     for (i in 1:n_sim) {
       tmp <- sim %>%
         dplyr::filter(sim == i)
