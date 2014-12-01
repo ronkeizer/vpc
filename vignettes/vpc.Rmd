@@ -159,8 +159,8 @@ vpc_cens(sim, obs, lloq = 5)
 VPCs can also be made for categorical data. These show the probability of observing a specific discrete outcome (or count), and plot this versus the simulated probability, shown as a confidence interval.
 
 ```{r, eval = eval_all}
-obs_cat <- read_table_nm(file=system.file("include", "sdtab45", package = "vpc"))
-sim_cat <- read_table_nm(file=system.file("include", "simtab45", package = "vpc"))
+obs_cat <- read_table_nm(file=system.file("extdata", "sdtab45", package = "vpc"))
+sim_cat <- read_table_nm(file=system.file("extdata", "simtab45", package = "vpc"))
 vpc_cat (sim = sim_cat, obs = obs_cat, 
           obs_dv = "SMXH", sim_dv = "SMXH") 
 ```
@@ -185,7 +185,7 @@ Treat RTTE as TTE, no stratification:
 vpc_tte(sim = rtte_sim_nm,          
         obs = rtte_obs_nm, 
         rtte = FALSE, 
-        sim_dv = "dv", obs_idv = "t", sim_idv = "t")
+        sim_dv = "dv", obs_idv = "dt", sim_idv = "t")
 ```
 
 Stratified for covariate and study arm:
@@ -194,7 +194,7 @@ vpc_tte(sim = rtte_sim_nm,
         obs = rtte_obs_nm, 
         stratify = c("sex","drug"), 
         rtte = FALSE, 
-        sim_dv = "dv", obs_idv = "t", sim_idv = "t")
+        sim_dv = "dv", obs_idv = "dt", sim_idv = "t")
 ```
 
 Stratified for event number and study arm:

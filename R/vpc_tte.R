@@ -26,6 +26,7 @@
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param ggplot_theme specify a custom ggplot2 theme
 #' @param facet either "wrap", "columns", or "rows" 
+#' @param show_warnings Default is FALSE
 #' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
 #' @seealso \link{vpc}
@@ -64,7 +65,7 @@ vpc_tte <- function(sim = NULL,
                     sim_idv = "time",
                     obs_id = "id",
                     sim_id = "id",
-                    dense_grid = FALSE,
+                    dense_grid = TRUE,
                     pi_med = FALSE, 
                     nonmem = "auto",
                     reverse_prob = FALSE,
@@ -78,7 +79,8 @@ vpc_tte <- function(sim = NULL,
                     smooth = FALSE,
                     vpc_theme = NULL,
                     ggplot_theme = NULL,
-                    facet = "wrap") {
+                    facet = "wrap",
+                    show_warnings = FALSE) {
   if (nonmem == "auto") {
     if(sum(c("ID","TIME") %in% colnames(obs)) == 2) { # most likely, data is from NONMEM
       nonmem <- TRUE
@@ -300,7 +302,9 @@ vpc_tte <- function(sim = NULL,
       if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use 
         geom_step <- geom_line
       }
-      warning ("Warning, some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).")
+      if (show_warnings) {
+        warning ("Warning, some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).")        
+      }
       if (!is.null(stratify_color)) {
         pl <- pl + 
           geom_step(data = obs_km, aes(x=time, y=surv, colour=strat_color)) +         
