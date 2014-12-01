@@ -21,7 +21,7 @@ The VPC is the most widely used diagnostic tool in pharmacometrics (see e.g. [he
 ## Installation
 
 ```{r, warning=FALSE, message=FALSE, error=FALSE}
-    eval_all <- FALSE
+    eval_all <- TRUE
     # library("devtools")
     # install_github("ronkeizer/vpc")
     library(vpc)
@@ -106,7 +106,7 @@ vpc(sim = sim,
            obs_idv = "time",                            #   update these if different.
            sim_dv = "sdv",
            sim_idv = "time",
-           bins = c(0, 2, 4, 6, 8, 10, 25),             # specify bin separators manually
+           bins = c(0, 2, 4, 6, 8, 10, 16, 25),             # specify bin separators manually
            stratify = c("sex"),                         # multiple stratifications possible, just supply as vector
            pi = c(0.05, 0.95),                          # prediction interval simulated data to show
            ci = c(0.05, 0.95),                          # confidence intervals to show
@@ -159,8 +159,8 @@ vpc_cens(sim, obs, lloq = 5)
 VPCs can also be made for categorical data. These show the probability of observing a specific discrete outcome (or count), and plot this versus the simulated probability, shown as a confidence interval.
 
 ```{r, eval = eval_all}
-obs_cat <- read_table_nm(file=system.file("extdata", "sdtab45", package = "vpc"))
-sim_cat <- read_table_nm(file=system.file("extdata", "simtab45", package = "vpc"))
+obs_cat <- read_table_nm(file="~/git/vpc/inst/extdata/sdtab45")
+sim_cat <- read_table_nm(file="~/git/vpc/inst/extdata/simtab45")
 vpc_cat (sim = sim_cat, obs = obs_cat, 
           obs_dv = "SMXH", sim_dv = "SMXH") 
 ```

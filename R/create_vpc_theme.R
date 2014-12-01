@@ -28,7 +28,7 @@ create_vpc_theme <- function (update = NULL) {
                    
     obs_median_color = "#000000",
     obs_median_linetype = "solid",
-    obs_median_size = 1.5,  
+    obs_median_size = 1,  
                    
     obs_ci_color = "#000000",
     obs_ci_linetype = "dashed",
