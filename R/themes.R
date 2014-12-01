@@ -1,3 +1,6 @@
+#' Nicer default theme for ggplot2
+#' 
+#' @export
 theme_plain <-  function () {
   theme(
     text = element_text(family="mono"),

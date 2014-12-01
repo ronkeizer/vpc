@@ -123,9 +123,10 @@ Colors, fills, transparency (alpha), and linetypes and sizes can be changed easi
 
 ```{r, eval = eval_all, fig.width=4, fig.height=4}
 vpc(sim, obs,
-    vpc_theme = vpc_theme (update = list(
-       sim_pi_fill = "#666666", sim_pi_alpha = 0.1,
-       sim_median_fill = "#666666", sim_median_alpha = 0.3))
+    vpc_theme = create_vpc_theme (update = list(
+       sim_pi_fill = "#aa6666", sim_pi_alpha = 0.15,
+       sim_median_fill = "#66aa66", sim_median_alpha = 0.3,
+       obs_ci_color = "red", obs_ci_linetype = 'solid'))
 )
 ```
 

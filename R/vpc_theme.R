@@ -1,4 +1,4 @@
-vpc_theme <- function (update = NULL) {
+set_vpc_theme <- function (update = NULL) {
   tmp <- structure(list(  
     obs_color = "#000000",
     obs_size = 1,

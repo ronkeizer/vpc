@@ -5,10 +5,11 @@
 \usage{
 vpc_tte(sim = NULL, obs = NULL, rtte = FALSE, events = NULL,
   obs_dv = "dv", sim_dv = "sdv", obs_idv = "time", sim_idv = "time",
-  obs_id = "id", sim_id = "id", pi_med = FALSE, nonmem = "auto",
-  stratify = NULL, stratify_color = NULL, legend_pos = NULL,
-  ci = c(0.05, 0.95), plot = FALSE, xlab = NULL, ylab = NULL,
-  title = NULL, smooth = FALSE, theme = "default", custom_theme = NULL,
+  obs_id = "id", sim_id = "id", dense_grid = FALSE, pi_med = FALSE,
+  nonmem = "auto", reverse_prob = FALSE, stratify = NULL,
+  stratify_color = NULL, legend_pos = NULL, ci = c(0.05, 0.95),
+  plot = FALSE, xlab = NULL, ylab = NULL, title = NULL,
+  smooth = FALSE, theme = "default", custom_theme = NULL,
   facet = "wrap")
 }
 \arguments{
@@ -35,6 +36,8 @@ vpc_tte(sim = NULL, obs = NULL, rtte = FALSE, events = NULL,
 \item{pi_med}{plot the median of the simulated data? Default is FALSE.}
 
 \item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect.}
+
+\item{reverse_prob}{reverse the probability scale (i.e. plot 1-probability)}
 
 \item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied. If stratify_color is also specified, only 1 additional stratification can be specified.}
 
