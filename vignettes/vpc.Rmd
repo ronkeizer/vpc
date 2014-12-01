@@ -119,6 +119,17 @@ vpc(sim = sim,
 
 _Note: If you imported the data from NONMEM, the VPC function will automatically detect column names from NONMEM, such as ID, TIME, DV. If you simulated data in R or got the data from a different software, you will probably have to change the variable names for the dependent and independent variable, and the individual index._
 
+Colors, fills, transparency (alpha), and linetypes and sizes can be changed easily using the `vpc_theme` argument and function. More general plot theming can be accomplished by supplying a ggplot2 theme to the `ggplot_theme` argument.
+
+```{r, eval = eval_all, fig.width=4, fig.height=4}
+vpc(sim, obs,
+    vpc_theme = vpc_theme (update = list(
+       sim_pi_fill = "#666666", sim_pi_alpha = 0.1,
+       sim_median_fill = "#666666", sim_median_alpha = 0.3))
+)
+```
+
+
 ### Binning
 
 The vpc functions currently provide three options for binning (`bins=` argument):

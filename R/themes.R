@@ -1,10 +1,3 @@
-themes <- list(
-  "default" = list(
-    pi_area = "#3388cc", pi_area_alpha = 0.2,  
-    med_area = "#3388cc", med_area_alpha = 0.4  
-  )
-)
-
 theme_plain <-  function () {
   theme(
     text = element_text(family="mono"),

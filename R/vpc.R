@@ -36,8 +36,8 @@
 #' @param ylab ylab as numeric vector of size 2
 #' @param title title
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
-#' @param theme which theme to load from the themes object
-#' @param custom_theme specify a custom ggplot2 theme
+#' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
+#' @param ggplot_theme specify a custom ggplot2 theme
 #' @param facet either "wrap", "columns", or "rows" 
 #' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
@@ -99,8 +99,8 @@ vpc <- function(sim = NULL,
                 ylab = NULL,
                 title = NULL,
                 smooth = TRUE,
-                theme = "default",
-                custom_theme = NULL,
+                vpc_theme = NULL,
+                ggplot_theme = NULL,
                 facet = "wrap") {
   if (nonmem == "auto") {
     if(sum(c("ID", "TIME") %in% colnames(obs)) == 2) { # most likely, data is from NONMEM
@@ -256,6 +256,9 @@ vpc <- function(sim = NULL,
   } else {
     aggr_obs <- NULL
   }
+  if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
+    vpc_theme <- modify_theme()
+  }
   if(is.null(xlab)) {
     xlab <- obs_idv
   }
@@ -273,31 +276,31 @@ vpc <- function(sim = NULL,
   if (!is.null(sim)) {
     pl <- ggplot(vpc_dat, aes(x=bin_mid)) 
     if(plot_sim_median) {
-      pl <- pl + geom_line(aes(y=q50.med), linetype='dotted')           
+      pl <- pl + geom_line(aes(y=q50.med), colour=vpc_theme$sim_median_color, linetype=vpc_theme$sim_median_linetype, size=vpc_theme$sim_median_size)           
     }
     if(plot_sim_median_ci) {
       if (smooth) {
         pl <- pl +
-          geom_ribbon(aes(x=bin_mid, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) 
+          geom_ribbon(aes(x=bin_mid, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill) 
       } else {
         pl <- pl +
-          geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area) 
+          geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_color) 
       }       
     }
     if (plot_pi) {
       pl <- pl + 
-        geom_line(aes(x=bin_mid, y=q5.med), linetype='dotted') +
-        geom_line(aes(x=bin_mid, y=q95.med), linetype='dotted')       
+        geom_line(aes(x=bin_mid, y=q5.med), colour==vpc_theme$sim_pi_color, linetype=vpc_theme$sim_pi_linetype, size=vpc_theme$sim_pi_size) +
+        geom_line(aes(x=bin_mid, y=q95.med), colour==vpc_theme$sim_pi_color, linetype=vpc_theme$sim_pi_linetype, size=vpc_theme$sim_pi_size)       
     }
     if (plot_pi_ci) {
       if (smooth) {
         pl <- pl + 
-          geom_ribbon(aes(x=bin_mid, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
-          geom_ribbon(aes(x=bin_mid, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) 
+          geom_ribbon(aes(x=bin_mid, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill) +
+          geom_ribbon(aes(x=bin_mid, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill) 
       } else {
         pl <- pl + 
-          geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area) +
-          geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=themes[[theme]]$pi_area_alpha, fill = themes[[theme]]$pi_area)     
+          geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill) +
+          geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill)     
       }      
     }
   } else {
@@ -315,15 +318,15 @@ vpc <- function(sim = NULL,
   if(!is.null(obs)) {
     if (plot_obs_median) {
       pl <- pl +
-        geom_line(data=aggr_obs, aes(x=bin_mid, y=obs50), linetype='solid', size=.9)       
+        geom_line(data=aggr_obs, aes(x=bin_mid, y=obs50), linetype=vpc_theme$obs_median_linetype, colour=vpc_theme$obs_median_color, size=vpc_theme$obs_median_size)       
     }
     if(plot_obs_ci) {
       pl <- pl +
-        geom_line(data=aggr_obs, aes(x=bin_mid, y=obs5), linetype='dashed') +
-        geom_line(data=aggr_obs, aes(x=bin_mid, y=obs95), linetype='dashed') 
+        geom_line(data=aggr_obs, aes(x=bin_mid, y=obs5), linetype=vpc_theme$obs_ci_linetype, colour=vpc_theme$obs_ci_color, size=vpc_theme$obs_ci_size) +
+        geom_line(data=aggr_obs, aes(x=bin_mid, y=obs95), linetype=vpc_theme$obs_ci_linetype, colour=vpc_theme$obs_ci_color, size=vpc_theme$obs_ci_size) 
     }
     if (plot_obs_dv) {
-      pl <- pl + geom_point(data=obs, aes(x=idv, y = dv))
+      pl <- pl + geom_point(data=obs, aes(x=idv, y = dv), size=vpc_theme$obs_size, colour=vpc_theme$obs_color)
     }    
   }
   bdat <- data.frame(cbind(x=bins, y=NA))
@@ -375,8 +378,8 @@ vpc <- function(sim = NULL,
   if (!is.null(title)) {
     pl <- pl + ggtitle(title)  
   }
-  if (!is.null(custom_theme)) {  
-    pl <- pl + custom_theme()    
+  if (!is.null(ggplot_theme)) {  
+    pl <- pl + ggplot_theme()    
   } else {
     if (!is.null(theme)) {
       pl <- pl + theme_plain()
