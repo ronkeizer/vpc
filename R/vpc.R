@@ -257,7 +257,7 @@ vpc <- function(sim = NULL,
     aggr_obs <- NULL
   }
   if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
-    vpc_theme <- modify_theme()
+    vpc_theme <- update_theme()
   }
   if(is.null(xlab)) {
     xlab <- obs_idv
