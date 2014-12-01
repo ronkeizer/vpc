@@ -14,12 +14,13 @@ auto_bin <- function (dat, type="kmeans", n_bins = 8, x="time") {
   all_bins <- list()
   l_bins <- c()
   if(type %in% c("jenks", "kmeans", "pretty", "quantile", "hclust", "sd", "bclust", "fisher")) {
-    require("classInt")
-    if(class(n_bins) != "numeric" | is.null(n_bins)) {
-      bins <- classIntervals(dat[[x]], style = type)                
-    } else {
-      bins <- classIntervals(dat[[x]], n = n_bins-1, style = type)        
-    }
+    suppressWarnings({
+      if(class(n_bins) != "numeric" | is.null(n_bins)) {
+        bins <- classIntervals(dat[[x]], style = type)                
+      } else {
+        bins <- classIntervals(dat[[x]], n = n_bins-1, style = type)        
+      }      
+    })
     return(bins$brks)      
   } 
   if (n_bins == "auto") {

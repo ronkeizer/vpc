@@ -5,7 +5,6 @@
 #' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.  
-#' @param type either "lloq" (default) or "uloq".
 #' @param n_bins number of bins
 #' @param obs_dv variable in data.frame for observed dependent value. "dv" by default
 #' @param sim_dv variable in data.frame for simulated dependent value. "sdv" by default
@@ -24,8 +23,8 @@
 #' @param ylab ylab as numeric vector of size 2
 #' @param title title
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
-#' @param theme which theme to load from the themes object
-#' @param custom_theme specify a custom ggplot2 theme
+#' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
+#' @param ggplot_theme specify a custom ggplot2 theme
 #' @param facet either "wrap", "columns", or "rows" 
 #' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
@@ -73,8 +72,8 @@ vpc_cens <- function(sim = NULL,
                      plot_sim_med = FALSE,
                      title = NULL,
                      smooth = TRUE,
-                     theme = "default",
-                     custom_theme = NULL,
+                     vpc_theme = NULL,
+                     ggplot_theme = NULL,
                      facet = "wrap") {
   if (is.null(uloq) & is.null(lloq)) {
     stop("You have to specify either a lower limit of quantification (lloq=...) or an upper limit (uloq=...).") 
@@ -85,7 +84,7 @@ vpc_cens <- function(sim = NULL,
   if (is.null(lloq)) {
     type <- "right-censored"
   }
-  if (is.null(lloq)) {
+  if (is.null(uloq)) {
     type <- "left-censored"
   }
   if (nonmem == "auto") {
@@ -213,6 +212,9 @@ vpc_cens <- function(sim = NULL,
       aggr_obs$strat2 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)]   
     }
   }
+  if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
+    vpc_theme <- create_vpc_theme()
+  }
   if (!is.null(sim)) {
     pl <- ggplot(vpc_dat, aes(x=bin_mid, y=dv)) 
     if(plot_sim_med) {
@@ -220,10 +222,10 @@ vpc_cens <- function(sim = NULL,
     }
     if (smooth) {
       pl <- pl + 
-        geom_ribbon(aes(x=bin_mid, y=ploq_low, ymin=ploq_low, ymax=ploq_up), fill=themes[[theme]]$med_area, alpha=themes[[theme]]$med_area_alpha) 
+        geom_ribbon(aes(x=bin_mid, y=ploq_low, ymin=ploq_low, ymax=ploq_up), fill=vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha) 
     } else {
       pl <- pl + 
-        geom_rect(aes(xmin=bin_min, xmax=bin_max, x=bin_mid, y=ploq_low, ymin=ploq_low, ymax=ploq_up), fill=themes[[theme]]$med_area, alpha=themes[[theme]]$med_area_alpha) 
+        geom_rect(aes(xmin=bin_min, xmax=bin_max, x=bin_mid, y=ploq_low, ymin=ploq_low, ymax=ploq_up), fill=vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha) 
     }
   } else {
     if (!is.null(stratify_color)) {
@@ -289,8 +291,8 @@ vpc_cens <- function(sim = NULL,
   if (!is.null(title)) {
     pl <- pl + ggtitle(title)  
   }
-  if (!is.null(custom_theme)) {  
-    pl <- pl + custom_theme()    
+  if (!is.null(ggplot_theme)) {  
+    pl <- pl + ggplot_theme()    
   } else {
     if (!is.null(theme)) {
       pl <- pl + theme_plain()

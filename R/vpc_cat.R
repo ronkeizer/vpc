@@ -18,12 +18,13 @@
 #' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.  
 #' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.  
 #' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.
+#' @param plot_sim_med Plot the simulated median? Default is FALSE
 #' @param xlab ylab as numeric vector of size 2
 #' @param ylab ylab as numeric vector of size 2
 #' @param title title
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
-#' @param theme which theme to load from the themes object
-#' @param custom_theme specify a custom ggplot2 theme
+#' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
+#' @param ggplot_theme specify a custom ggplot2 theme
 #' @param facet either "wrap", "columns", or "rows" 
 #' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
@@ -49,8 +50,8 @@ vpc_cat  <- function(sim = NULL,
                      ylab = NULL,
                      title = NULL,
                      smooth = TRUE,
-                     theme = "default",
-                     custom_theme = NULL,
+                     vpc_theme = NULL,
+                     ggplot_theme = NULL,
                      facet = "wrap") {
   if (nonmem == "auto") {
     if(sum(c("ID","TIME") %in% colnames(obs)) == 2) { # most likely, data is from NONMEM
@@ -178,6 +179,9 @@ vpc_cat  <- function(sim = NULL,
 #       aggr_obs$strat2 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)]   
 #     }
 #   }
+  if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
+    vpc_theme <- create_vpc_theme()
+  }
   if (!is.null(sim)) {
     pl <- ggplot(vpc_dat, aes(x=bin_mid, y=dv)) 
     if(plot_sim_med) {
@@ -185,10 +189,10 @@ vpc_cat  <- function(sim = NULL,
     }
     if (smooth) {
       pl <- pl + 
-        geom_ribbon(aes(x=bin_mid, y=prob_low, ymin=prob_low, ymax=prob_up), fill=themes[[theme]]$med_area, alpha=themes[[theme]]$med_area_alpha) 
+        geom_ribbon(aes(x=bin_mid, y=prob_low, ymin=prob_low, ymax=prob_up), fill=vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha) 
     } else {
       pl <- pl + 
-        geom_rect(aes(xmin=bin_min, xmax=bin_max, x=bin_mid, y=prob_low, ymin=prob_low, ymax=prob_up), fill=themes[[theme]]$med_area, alpha=themes[[theme]]$med_area_alpha) 
+        geom_rect(aes(xmin=bin_min, xmax=bin_max, x=bin_mid, y=prob_low, ymin=prob_low, ymax=prob_up), fill=vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha) 
     }
   } else {
     if (!is.null(stratify_color)) {
@@ -260,12 +264,10 @@ vpc_cat  <- function(sim = NULL,
   if (!is.null(title)) {
     pl <- pl + ggtitle(title)  
   }
-  if (!is.null(custom_theme)) {  
-    pl <- pl + custom_theme()    
+  if (!is.null(ggplot_theme)) {  
+    pl <- pl + ggplot_theme()    
   } else {
-    if (!is.null(theme)) {
-      pl <- pl + theme_plain()
-    } 
+    pl <- pl + theme_plain() 
   }
   if(!is.null(xlab)) {
     pl <- pl + xlab(xlab)

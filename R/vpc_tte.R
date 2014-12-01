@@ -13,6 +13,7 @@
 #' @param obs_id variable in data.frame for observed individual. "id" by default
 #' @param sim_id variable in data.frame for simulated individual. "id" by default
 #' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect.
+#' @param dense_grid Was a dense grid used to simulate and should the vpc_tte function remove the non-event data? TRUE or FALSE. Either way should not affect plot, when points removed the plot will just be generated faster.
 #' @param reverse_prob reverse the probability scale (i.e. plot 1-probability)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied. If stratify_color is also specified, only 1 additional stratification can be specified.
 #' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
@@ -22,8 +23,8 @@
 #' @param ylab ylab as numeric vector of size 2
 #' @param title title
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
-#' @param theme which theme to load from the themes object
-#' @param custom_theme specify a custom ggplot2 theme
+#' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
+#' @param ggplot_theme specify a custom ggplot2 theme
 #' @param facet either "wrap", "columns", or "rows" 
 #' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
@@ -69,15 +70,14 @@ vpc_tte <- function(sim = NULL,
                     reverse_prob = FALSE,
                     stratify = NULL,
                     stratify_color = NULL,
-                    legend_pos = NULL,
                     ci = c(0.05, 0.95),
                     plot = FALSE,
                     xlab = NULL, 
                     ylab = NULL,
                     title = NULL,
                     smooth = FALSE,
-                    theme = "default",
-                    custom_theme = NULL,
+                    vpc_theme = NULL,
+                    ggplot_theme = NULL,
                     facet = "wrap") {
   if (nonmem == "auto") {
     if(sum(c("ID","TIME") %in% colnames(obs)) == 2) { # most likely, data is from NONMEM
@@ -259,22 +259,25 @@ vpc_tte <- function(sim = NULL,
         sim_km$strat_color <- sim_km$strat  
       }
     }
+    if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
+      vpc_theme <- create_vpc_theme()
+    }    
     pl <- ggplot(sim_km, aes(x=bin_mid, y=qmed, group=strat))       
     if (smooth) {
       if (!is.null(stratify_color)) {
         pl <- pl + 
-          geom_ribbon(aes(min = qmin, max=qmax, y=qmed, fill=strat_color), alpha=themes[[theme]]$med_area_alpha) +
+          geom_ribbon(aes(min = qmin, max=qmax, y=qmed, fill=strat_color), alpha=vpc_theme$sim_median_alpha) +
           scale_fill_discrete(name="")
       } else {
-        pl <- pl + geom_ribbon(aes(min = qmin, max=qmax, y=qmed), fill = themes[[theme]]$med_area, alpha=themes[[theme]]$med_area_alpha)        
+        pl <- pl + geom_ribbon(aes(min = qmin, max=qmax, y=qmed), fill = vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha)        
       }
     } else {
       if (!is.null(stratify_color)) {
         pl <- pl + 
-          geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax, fill=strat_color), alpha=themes[[theme]]$med_area_alpha) +
+          geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax, fill=strat_color), alpha=vpc_theme$sim_median_alpha) +
           scale_fill_discrete(name="")
       } else {
-        pl <- pl + geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax), alpha=themes[[theme]]$med_area_alpha, fill = themes[[theme]]$med_area)           
+        pl <- pl + geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)           
       }
     }
     if (pi_med) {
@@ -283,19 +286,6 @@ vpc_tte <- function(sim = NULL,
   } else {
     pl <- pl + geom_step(data = obs_km)
   }
-#   } else {
-#     if (!is.null(stratify_color)) {
-#       if (length(stratify) == 2) {
-#         pl <- ggplot(obs_km, aes(x=time, y=dv, colour=strat2))         
-#       } else {
-#         pl <- ggplot(obs_km, aes(x=time, y=dv, colour=strat))           
-#       }
-#       pl <- pl + scale_colour_discrete(name=paste(stratify))
-# #        theme(legend.title=element_blank())
-#     } else {
-#       pl <- ggplot(obs_km, aes(x=time, y=dv, group=strat, colour=strat))   
-#     }
-#   }
   if (!is.null(obs)) {  
     show_obs <- TRUE
     if(!is.null(stratify_color)) {
@@ -362,16 +352,12 @@ vpc_tte <- function(sim = NULL,
   if (!is.null(title)) {
     pl <- pl + ggtitle(title)  
   }
-  if (!is.null(custom_theme)) {  
-    pl <- pl + custom_theme()    
+  if (!is.null(ggplot_theme)) {  
+    pl <- pl + ggplot_theme()    
   } else {
     if (!is.null(theme)) {
       pl <- pl + theme_plain()
     } 
-  }
-  # place legend in better spot
-  if(!is.null(legend_pos)) {
-    pl <- pl + theme(legend.position = legend_pos)    
   }
   if(!is.null(xlab)) {
     pl <- pl + xlab(xlab)

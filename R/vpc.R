@@ -331,7 +331,7 @@ vpc <- function(sim = NULL,
   }
   bdat <- data.frame(cbind(x=bins, y=NA))
   pl <- pl + 
-    geom_rug(data=bdat, sides = "t", aes(x = x, y=y), colour="#333333")
+    geom_rug(data=bdat, sides = "t", aes(x = x, y=y), colour=vpc_theme$bin_separators_color)
   pl <- pl + xlab(xlab) + ylab(ylab)
   if (log_y) {
     pl <- pl + scale_y_log10() 

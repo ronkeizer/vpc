@@ -11,7 +11,7 @@ read_table_nm <- function(file, perl = NULL) {
   file <- gsub("~", path.expand("~"), file)
   if (file.exists(file)) {
     tab_fr <- suppressWarnings(try(data.table::fread(file), silent = TRUE))
-    if ("data.frame" %in% class(tab_fr)) {
+    if ("data.frame" %in% class(tab_fr) & !is.na(unlist(tab_fr[1])[1])) {
       data.table::setnames(tab_fr, gsub(" ", "", colnames(tab_fr)))
       sel <- grep("[A-DF-Z]", tab_fr[[1]])
       if(length(sel)>0) {

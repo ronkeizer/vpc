@@ -8,7 +8,7 @@ vpc_cat(sim = NULL, obs = NULL, bins = "jenks", n_bins = "auto",
   sim_idv = NULL, obs_id = NULL, sim_id = NULL, nonmem = "auto",
   ci = c(0.05, 0.95), uloq = NULL, lloq = NULL, plot = FALSE,
   xlab = NULL, plot_sim_med = FALSE, ylab = NULL, title = NULL,
-  smooth = TRUE, theme = "default", custom_theme = NULL, facet = "wrap")
+  smooth = TRUE, vpc_theme = NULL, ggplot_theme = NULL, facet = "wrap")
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -45,15 +45,17 @@ vpc_cat(sim = NULL, obs = NULL, bins = "jenks", n_bins = "auto",
 
 \item{xlab}{ylab as numeric vector of size 2}
 
+\item{plot_sim_med}{Plot the simulated median? Default is FALSE}
+
 \item{ylab}{ylab as numeric vector of size 2}
 
 \item{title}{title}
 
 \item{smooth}{"smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.}
 
-\item{theme}{which theme to load from the themes object}
+\item{vpc_theme}{theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()}
 
-\item{custom_theme}{specify a custom ggplot2 theme}
+\item{ggplot_theme}{specify a custom ggplot2 theme}
 
 \item{facet}{either "wrap", "columns", or "rows"}
 }

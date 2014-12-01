@@ -8,7 +8,7 @@ vpc_cens(sim = NULL, obs = NULL, bins = "jenks", n_bins = 8,
   obs_id = NULL, sim_id = NULL, nonmem = "auto", stratify = NULL,
   stratify_color = NULL, ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
   plot = FALSE, xlab = NULL, ylab = NULL, plot_sim_med = FALSE,
-  title = NULL, smooth = TRUE, theme = "default", custom_theme = NULL,
+  title = NULL, smooth = TRUE, vpc_theme = NULL, ggplot_theme = NULL,
   facet = "wrap")
 }
 \arguments{
@@ -54,13 +54,11 @@ vpc_cens(sim = NULL, obs = NULL, bins = "jenks", n_bins = 8,
 
 \item{smooth}{"smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.}
 
-\item{theme}{which theme to load from the themes object}
+\item{vpc_theme}{theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()}
 
-\item{custom_theme}{specify a custom ggplot2 theme}
+\item{ggplot_theme}{specify a custom ggplot2 theme}
 
 \item{facet}{either "wrap", "columns", or "rows"}
-
-\item{type}{either "lloq" (default) or "uloq".}
 }
 \value{
 a list containing calculated VPC information, and a ggplot2 object

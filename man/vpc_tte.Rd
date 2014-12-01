@@ -7,10 +7,9 @@ vpc_tte(sim = NULL, obs = NULL, rtte = FALSE, events = NULL,
   obs_dv = "dv", sim_dv = "sdv", obs_idv = "time", sim_idv = "time",
   obs_id = "id", sim_id = "id", dense_grid = FALSE, pi_med = FALSE,
   nonmem = "auto", reverse_prob = FALSE, stratify = NULL,
-  stratify_color = NULL, legend_pos = NULL, ci = c(0.05, 0.95),
-  plot = FALSE, xlab = NULL, ylab = NULL, title = NULL,
-  smooth = FALSE, theme = "default", custom_theme = NULL,
-  facet = "wrap")
+  stratify_color = NULL, ci = c(0.05, 0.95), plot = FALSE, xlab = NULL,
+  ylab = NULL, title = NULL, smooth = FALSE, vpc_theme = NULL,
+  ggplot_theme = NULL, facet = "wrap")
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -32,6 +31,8 @@ vpc_tte(sim = NULL, obs = NULL, rtte = FALSE, events = NULL,
 \item{obs_id}{variable in data.frame for observed individual. "id" by default}
 
 \item{sim_id}{variable in data.frame for simulated individual. "id" by default}
+
+\item{dense_grid}{Was a dense grid used to simulate and should the vpc_tte function remove the non-event data? TRUE or FALSE. Either way should not affect plot, when points removed the plot will just be generated faster.}
 
 \item{pi_med}{plot the median of the simulated data? Default is FALSE.}
 
@@ -55,9 +56,9 @@ vpc_tte(sim = NULL, obs = NULL, rtte = FALSE, events = NULL,
 
 \item{smooth}{"smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.}
 
-\item{theme}{which theme to load from the themes object}
+\item{vpc_theme}{theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()}
 
-\item{custom_theme}{specify a custom ggplot2 theme}
+\item{ggplot_theme}{specify a custom ggplot2 theme}
 
 \item{facet}{either "wrap", "columns", or "rows"}
 }

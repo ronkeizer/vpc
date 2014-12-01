@@ -16,3 +16,12 @@ theme_plain <-  function () {
     strip.text = element_text(face="bold", colour = "white")
   )    
 }
+
+#' Empty theme
+#' @export
+theme_empty <- function () {
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))
+}
