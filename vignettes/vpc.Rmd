@@ -21,7 +21,7 @@ The VPC is the most widely used diagnostic tool in pharmacometrics (see e.g. [he
 ## Installation
 
 ```{r, warning=FALSE, message=FALSE, error=FALSE}
-    eval_all <- TRUE
+    eval_all <- FALSE
     # library("devtools")
     # install_github("ronkeizer/vpc")
     library(vpc)
