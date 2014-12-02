@@ -9,11 +9,12 @@ vpc(sim = NULL, obs = NULL, bins = "jenks", n_bins = "auto",
   nonmem = "auto", plot = FALSE, plot_obs_dv = FALSE,
   plot_obs_ci = TRUE, plot_obs_median = TRUE, plot_sim_median = FALSE,
   plot_sim_median_ci = TRUE, plot_pi = FALSE, plot_pi_ci = TRUE,
-  stratify = NULL, stratify_color = NULL, legend_pos = NULL,
-  pred_corr = FALSE, pred_corr_lower_bnd = 0, pi = c(0.05, 0.95),
-  ci = c(0.05, 0.95), uloq = NULL, lloq = NULL, log_y = FALSE,
-  log_y_min = 0.001, xlab = NULL, ylab = NULL, title = NULL,
-  smooth = TRUE, vpc_theme = NULL, ggplot_theme = NULL, facet = "wrap")
+  plot_pi_as_area = FALSE, stratify = NULL, stratify_color = NULL,
+  legend_pos = NULL, pred_corr = FALSE, pred_corr_lower_bnd = 0,
+  pi = c(0.05, 0.95), ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
+  log_y = FALSE, log_y_min = 0.001, xlab = NULL, ylab = NULL,
+  title = NULL, smooth = TRUE, vpc_theme = NULL, ggplot_theme = NULL,
+  facet = "wrap")
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -55,6 +56,8 @@ vpc(sim = NULL, obs = NULL, bins = "jenks", n_bins = "auto",
 \item{plot_sim_median_ci}{default is TRUE}
 
 \item{plot_pi_ci}{default is TRUE}
+
+\item{plot_pi_as_area}{plot the prediction interval itself instead of the confidence intervals around the prediction quantiles? Default is FALSE, not a recommended approach for proper VPC.}
 
 \item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
 

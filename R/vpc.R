@@ -17,6 +17,7 @@
 #' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect
 #' @param plot_obs_dv should observations be plotted?
 #' @param plot_obs_ci default is TRUE
+#' @param plot_pi_as_area plot the prediction interval itself instead of the confidence intervals around the prediction quantiles? Default is FALSE, not a recommended approach for proper VPC.
 #' @param plot_pi_ci default is TRUE
 #' @param plot_obs_median default is TRUE
 #' @param plot_sim_median default is TRUE
@@ -84,6 +85,7 @@ vpc <- function(sim = NULL,
                 plot_sim_median_ci = TRUE,
                 plot_pi = FALSE,
                 plot_pi_ci = TRUE,
+                plot_pi_as_area = FALSE,
                 stratify = NULL,
                 stratify_color = NULL,
                 legend_pos = NULL,
@@ -278,29 +280,39 @@ vpc <- function(sim = NULL,
     if(plot_sim_median) {
       pl <- pl + geom_line(aes(y=q50.med), colour=vpc_theme$sim_median_color, linetype=vpc_theme$sim_median_linetype, size=vpc_theme$sim_median_size)           
     }
-    if(plot_sim_median_ci) {
+    if(plot_pi_as_area) {
       if (smooth) {
         pl <- pl +
-          geom_ribbon(aes(x=bin_mid, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill) 
+          geom_ribbon(aes(x=bin_mid, y=q50.med, ymin=q5.med, ymax=q95.med), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill) 
       } else {
         pl <- pl +
-          geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_color) 
+          geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.med, ymin=q5.med, ymax=q95.med), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_color) 
       }       
-    }
-    if (plot_pi) {
-      pl <- pl + 
-        geom_line(aes(x=bin_mid, y=q5.med), colour==vpc_theme$sim_pi_color, linetype=vpc_theme$sim_pi_linetype, size=vpc_theme$sim_pi_size) +
-        geom_line(aes(x=bin_mid, y=q95.med), colour==vpc_theme$sim_pi_color, linetype=vpc_theme$sim_pi_linetype, size=vpc_theme$sim_pi_size)       
-    }
-    if (plot_pi_ci) {
-      if (smooth) {
+    } else {
+      if(plot_sim_median_ci) {
+        if (smooth) {
+          pl <- pl +
+            geom_ribbon(aes(x=bin_mid, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill) 
+        } else {
+          pl <- pl +
+            geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_color) 
+        }       
+      }
+      if (plot_pi) {
         pl <- pl + 
-          geom_ribbon(aes(x=bin_mid, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill) +
-          geom_ribbon(aes(x=bin_mid, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill) 
-      } else {
-        pl <- pl + 
-          geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill) +
-          geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill)     
+          geom_line(aes(x=bin_mid, y=q5.med), colour==vpc_theme$sim_pi_color, linetype=vpc_theme$sim_pi_linetype, size=vpc_theme$sim_pi_size) +
+          geom_line(aes(x=bin_mid, y=q95.med), colour==vpc_theme$sim_pi_color, linetype=vpc_theme$sim_pi_linetype, size=vpc_theme$sim_pi_size)       
+      }
+      if (plot_pi_ci) {
+        if (smooth) {
+          pl <- pl + 
+            geom_ribbon(aes(x=bin_mid, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill) +
+            geom_ribbon(aes(x=bin_mid, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill) 
+        } else {
+          pl <- pl + 
+            geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill) +
+            geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill)     
+        }      
       }      
     }
   } else {
