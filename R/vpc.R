@@ -300,8 +300,8 @@ vpc <- function(sim = NULL,
       }
       if (plot_pi) {
         pl <- pl + 
-          geom_line(aes(x=bin_mid, y=q5.med), colour==vpc_theme$sim_pi_color, linetype=vpc_theme$sim_pi_linetype, size=vpc_theme$sim_pi_size) +
-          geom_line(aes(x=bin_mid, y=q95.med), colour==vpc_theme$sim_pi_color, linetype=vpc_theme$sim_pi_linetype, size=vpc_theme$sim_pi_size)       
+          geom_line(aes(x=bin_mid, y=q5.med), colour=vpc_theme$sim_pi_color, linetype=vpc_theme$sim_pi_linetype, size=vpc_theme$sim_pi_size) +
+          geom_line(aes(x=bin_mid, y=q95.med), colour=vpc_theme$sim_pi_color, linetype=vpc_theme$sim_pi_linetype, size=vpc_theme$sim_pi_size)       
       }
       if (plot_pi_ci) {
         if (smooth) {

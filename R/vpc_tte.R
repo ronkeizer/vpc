@@ -65,7 +65,7 @@ vpc_tte <- function(sim = NULL,
                     sim_idv = "time",
                     obs_id = "id",
                     sim_id = "id",
-                    dense_grid = TRUE,
+                    dense_grid = "auto",
                     pi_med = FALSE, 
                     nonmem = "auto",
                     reverse_prob = FALSE,
@@ -186,18 +186,24 @@ vpc_tte <- function(sim = NULL,
   }
     
   if(!is.null(sim)) {
-    
     # format sim data and compute KM curve CI for simulations
     sim$time <- sim[[sim_idv]]
     sim$sim <- add_sim_index_number(sim)
-    n_sim <- length(unique(sim$sim))    
+    n_sim <- length(unique(sim$sim))        
+    if (dense_grid == "auto") { # crude test if dense grid
+      rel_length <- length(simb[,1])/length(obs[,1])
+      if (rel_length > n_sim * 5) {
+        dense_grid <- TRUE
+      } else {
+        dense_grid <- FALSE
+      }
+    }
     all <- c()
 #    bins_sim <- 
     tmp_bins <- unique(c(0, sort(unique(sim$time)), max(sim$time)))              
     for (i in 1:n_sim) {
-      tmp <- sim %>%
-        dplyr::filter(sim == i)
-      if (dense_grid == TRUE) {
+      tmp <- sim %>% dplyr::filter(sim == i)
+      if (dense_grid) {
         tmp <- tmp %>%
           convert_from_dense_grid(.)   ## convert the simulation dataset to hold only the observations, not the whole grid
       }
