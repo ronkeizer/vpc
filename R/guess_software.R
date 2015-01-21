@@ -1,7 +1,20 @@
-#' guess software package based on data
-#' @param software string specifying type of software
-#' @param x analysis data from software
-#' @export
+# guess software package based on data
+# @param software string specifying type of software
+# @param x analysis data from software
+# dont document for Roxygen as internal function
 guess_software <- function(software, x) {
-  return("nonmem")
+  options <-  c("auto", "nonmem", "phoenix")
+  software <- tolower(software)
+  if(!software %in% options) {
+    stop(paste("Please define one of the following software types:", paste(options, collapse=", ")))
+  }   
+  if(software == "nonmem" | software == "phoenix") return(software)
+  
+  # nonmem typically will have MDV and DV
+  if(all(c("MDV", "DV") %in% names(x))) {
+    software <- "nonmem"
+  } else {
+    software <- "phoenix"
+  }
+  return(software)
 }
