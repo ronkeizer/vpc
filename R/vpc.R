@@ -14,7 +14,7 @@
 #' @param sim_id variable in data.frame for simulated individual. "id" by default
 #' @param obs_pred variable in data.frame for population predicted value. "pred" by default
 #' @param sim_pred variable in data.frame for population predicted value. "pred" by default
-#' @param software should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect
+#' @param software name of software platform using (eg nonmem, phoenix)
 #' @param plot_obs_dv should observations be plotted?
 #' @param plot_obs_ci default is TRUE
 #' @param plot_pi_as_area plot the prediction interval itself instead of the confidence intervals around the prediction quantiles? Default is FALSE, not a recommended approach for proper VPC.
