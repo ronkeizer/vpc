@@ -14,8 +14,8 @@
 #' @param sim_id variable in data.frame for simulated individual. "id" by default
 #' @param obs_pred variable in data.frame for population predicted value. "pred" by default
 #' @param sim_pred variable in data.frame for population predicted value. "pred" by default
-#' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect
 #' @param show what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci) 
+#' @param software name of software platform using (eg nonmem, phoenix)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param pred_corr perform prediction-correction? 
@@ -70,10 +70,11 @@ vpc <- function(sim = NULL,
                 sim_id = NULL,
                 obs_pred = NULL,
                 sim_pred = NULL,
-                nonmem = "auto",
+                software = "auto",
                 plot = TRUE,
                 show = NULL,                
                 legend_pos = NULL,
+                plot = FALSE,
                 stratify = NULL,
                 stratify_color = NULL,
                 pred_corr = FALSE,
@@ -91,18 +92,10 @@ vpc <- function(sim = NULL,
                 vpc_theme = NULL,
                 ggplot_theme = NULL,
                 facet = "wrap") {
-  if (nonmem == "auto") {
-    if(sum(c("ID", "TIME") %in% colnames(obs)) == 2) { # most likely, data is from NONMEM
-      nonmem <- TRUE
-    } else {
-      nonmem <- FALSE
-    } 
-  } else {
-    if(class(nonmem) != "logical") {
-      nonmem <- FALSE
-    }
-  } 
-  if (nonmem) {
+  
+   software_type <- guess_software(software, obs)
+
+  if (software_type == "nonmem") {
     if (is.null(obs_dv)) { obs_dv <- "DV" }
     if (is.null(obs_idv)) { obs_idv <- "TIME" }
     if (is.null(obs_id)) { obs_id <- "ID" }
