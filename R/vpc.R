@@ -14,14 +14,8 @@
 #' @param sim_id variable in data.frame for simulated individual. "id" by default
 #' @param obs_pred variable in data.frame for population predicted value. "pred" by default
 #' @param sim_pred variable in data.frame for population predicted value. "pred" by default
+#' @param show what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci) 
 #' @param software name of software platform using (eg nonmem, phoenix)
-#' @param plot_obs_dv should observations be plotted?
-#' @param plot_obs_ci default is TRUE
-#' @param plot_pi_as_area plot the prediction interval itself instead of the confidence intervals around the prediction quantiles? Default is FALSE, not a recommended approach for proper VPC.
-#' @param plot_pi_ci default is TRUE
-#' @param plot_obs_median default is TRUE
-#' @param plot_sim_median default is TRUE
-#' @param plot_sim_median_ci default is TRUE
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param pred_corr perform prediction-correction? 
@@ -77,18 +71,12 @@ vpc <- function(sim = NULL,
                 obs_pred = NULL,
                 sim_pred = NULL,
                 software = "auto",
+                plot = TRUE,
+                show = NULL,                
+                legend_pos = NULL,
                 plot = FALSE,
-                plot_obs_dv = FALSE,
-                plot_obs_ci = TRUE,
-                plot_obs_median = TRUE,
-                plot_sim_median = FALSE,
-                plot_sim_median_ci = TRUE,
-                plot_pi = FALSE,
-                plot_pi_ci = TRUE,
-                plot_pi_as_area = FALSE,
                 stratify = NULL,
                 stratify_color = NULL,
-                legend_pos = NULL,
                 pred_corr = FALSE,
                 pred_corr_lower_bnd = 0,
                 pi = c(0.05, 0.95), 
@@ -141,6 +129,23 @@ vpc <- function(sim = NULL,
     if(is.null(sim_id)) { sim_id = "id" }
     if(is.null(obs_pred)) { obs_pred = "pred" }
     if(is.null(sim_pred)) { sim_pred = "pred" }      
+  }
+  if (!is.null(show)) { # non-default plot options
+    not_found <- names(show)[!(names(show) %in% names(show_use))]
+    show <- show[names(show) != not_found]
+    show_use <- list (
+      obs_dv = FALSE,
+      obs_ci = TRUE,
+      obs_median = TRUE,
+      sim_median = FALSE,
+      sim_median_ci = TRUE,
+      pi = FALSE,
+      pi_ci = TRUE,
+      pi_as_area = FALSE)  
+    show_use[(names(show_use) %in% names(show))] <- show
+    if (length(not_found) > 0) {
+      warning(paste0("Specified plotting option(s) '", paste(not_found, collapse="', '"), "' not available and will be ignored."))
+    }
   }
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
@@ -269,10 +274,10 @@ vpc <- function(sim = NULL,
   }  
   if (!is.null(sim)) {
     pl <- ggplot(vpc_dat, aes(x=bin_mid)) 
-    if(plot_sim_median) {
+    if(show_use$sim_median) {
       pl <- pl + geom_line(aes(y=q50.med), colour=vpc_theme$sim_median_color, linetype=vpc_theme$sim_median_linetype, size=vpc_theme$sim_median_size)           
     }
-    if(plot_pi_as_area) {
+    if(show_use$pi_as_area) {
       if (smooth) {
         pl <- pl +
           geom_ribbon(aes(x=bin_mid, y=q50.med, ymin=q5.med, ymax=q95.med), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill) 
@@ -281,7 +286,7 @@ vpc <- function(sim = NULL,
           geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.med, ymin=q5.med, ymax=q95.med), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_color) 
       }       
     } else {
-      if(plot_sim_median_ci) {
+      if(show_use$sim_median_ci) {
         if (smooth) {
           pl <- pl +
             geom_ribbon(aes(x=bin_mid, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill) 
@@ -290,12 +295,12 @@ vpc <- function(sim = NULL,
             geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_color) 
         }       
       }
-      if (plot_pi) {
+      if (show_use$pi) {
         pl <- pl + 
           geom_line(aes(x=bin_mid, y=q5.med), colour=vpc_theme$sim_pi_color, linetype=vpc_theme$sim_pi_linetype, size=vpc_theme$sim_pi_size) +
           geom_line(aes(x=bin_mid, y=q95.med), colour=vpc_theme$sim_pi_color, linetype=vpc_theme$sim_pi_linetype, size=vpc_theme$sim_pi_size)       
       }
-      if (plot_pi_ci) {
+      if (show_use$pi_ci) {
         if (smooth) {
           pl <- pl + 
             geom_ribbon(aes(x=bin_mid, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill) +
@@ -320,16 +325,16 @@ vpc <- function(sim = NULL,
     }
   }
   if(!is.null(obs)) {
-    if (plot_obs_median) {
+    if (show_use$obs_median) {
       pl <- pl +
         geom_line(data=aggr_obs, aes(x=bin_mid, y=obs50), linetype=vpc_theme$obs_median_linetype, colour=vpc_theme$obs_median_color, size=vpc_theme$obs_median_size)       
     }
-    if(plot_obs_ci) {
+    if(show_use$obs_ci) {
       pl <- pl +
         geom_line(data=aggr_obs, aes(x=bin_mid, y=obs5), linetype=vpc_theme$obs_ci_linetype, colour=vpc_theme$obs_ci_color, size=vpc_theme$obs_ci_size) +
         geom_line(data=aggr_obs, aes(x=bin_mid, y=obs95), linetype=vpc_theme$obs_ci_linetype, colour=vpc_theme$obs_ci_color, size=vpc_theme$obs_ci_size) 
     }
-    if (plot_obs_dv) {
+    if (show_use$obs_dv) {
       pl <- pl + geom_point(data=obs, aes(x=idv, y = dv), size=vpc_theme$obs_size, colour=vpc_theme$obs_color)
     }    
   }
