@@ -14,7 +14,7 @@
 #' @param sim_id variable in data.frame for simulated individual. "id" by default
 #' @param obs_pred variable in data.frame for population predicted value. "pred" by default
 #' @param sim_pred variable in data.frame for population predicted value. "pred" by default
-#' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect
+#' @param software should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect
 #' @param plot_obs_dv should observations be plotted?
 #' @param plot_obs_ci default is TRUE
 #' @param plot_pi_as_area plot the prediction interval itself instead of the confidence intervals around the prediction quantiles? Default is FALSE, not a recommended approach for proper VPC.
@@ -76,7 +76,7 @@ vpc <- function(sim = NULL,
                 sim_id = NULL,
                 obs_pred = NULL,
                 sim_pred = NULL,
-                nonmem = "auto",
+                software = "auto",
                 plot = FALSE,
                 plot_obs_dv = FALSE,
                 plot_obs_ci = TRUE,
@@ -104,18 +104,10 @@ vpc <- function(sim = NULL,
                 vpc_theme = NULL,
                 ggplot_theme = NULL,
                 facet = "wrap") {
-  if (nonmem == "auto") {
-    if(sum(c("ID", "TIME") %in% colnames(obs)) == 2) { # most likely, data is from NONMEM
-      nonmem <- TRUE
-    } else {
-      nonmem <- FALSE
-    } 
-  } else {
-    if(class(nonmem) != "logical") {
-      nonmem <- FALSE
-    }
-  } 
-  if (nonmem) {
+  
+   software_type <- guess_software(software, obs)
+
+  if (software_type == "nonmem") {
     if (is.null(obs_dv)) { obs_dv <- "DV" }
     if (is.null(obs_idv)) { obs_idv <- "TIME" }
     if (is.null(obs_id)) { obs_id <- "ID" }
