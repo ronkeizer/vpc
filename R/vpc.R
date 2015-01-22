@@ -3,6 +3,7 @@
 #' Creates a VPC plot from observed and simulation data
 #' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
 #' @param bins either "auto" or a numeric vector specifying the bin separators.  
 #' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.  
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
@@ -56,6 +57,7 @@
 #' vpc_dat <- vpc(sim, obs, stratify = c("sex"))
 vpc <- function(sim = NULL, 
                 obs = NULL, 
+                psn_folder = NULL,
                 bins = "jenks",
                 n_bins = "auto",
                 obs_cols = NULL,
@@ -82,6 +84,11 @@ vpc <- function(sim = NULL,
                 ggplot_theme = NULL,
                 facet = "wrap") {
 
+   if(!is.null(psn_folder)) {
+     obs <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
+     sim <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="simulation.1.npctab")[1]))
+     software = "nonmem"
+   }
    software_type <- guess_software(software, obs)
    # column names
    obs_cols_default <- list(dv = "dv", id = "id", idv = "time", pred = "pred")
@@ -105,11 +112,11 @@ vpc <- function(sim = NULL,
         obs <- obs[obs$EVID == 0,]
       }      
     }
-    if(!is.null(sim)) {  
+    if(!is.null(sim)) {
       if("MDV" %in% colnames(sim)) {
         sim <- sim[sim$MDV == 0,]
       }
-      if("EVID" %in% colnames(obs)) {
+      if("EVID" %in% colnames(sim)) {
         sim <- sim[sim$EVID == 0,]
       }
     }
@@ -123,10 +130,9 @@ vpc <- function(sim = NULL,
     if(is.null(obs_cols$pred)) { obs_cols$pred = "pred" }
     if(is.null(sim_cols$pred)) { sim_cols$pred = "pred" }      
   }
-  obs <- format_vpc_input_data(obs, obs_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
+  obs <- format_vpc_input_data(obs, obs_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")  
   sim <- format_vpc_input_data(sim, sim_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
-  
-    show_default <- list (
+  show_default <- list (
       obs_dv = FALSE,
       obs_ci = TRUE,
       obs_median = TRUE,
