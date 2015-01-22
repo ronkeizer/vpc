@@ -84,58 +84,56 @@ vpc <- function(sim = NULL,
 
    software_type <- guess_software(software, obs)
    # column names
-   obs_cols_default <- list(dv = "dv", id = "id", idv = "time", pred = "pred")
-   obs_cols <- replace_list_elements(obs_cols_default, obs_cols)
-   sim_cols_default <- list(dv = "dv", id = "id", idv = "time", pred = "pred")
-   sim_cols <- replace_list_elements(sim_cols_default, sim_cols)
+
+   show_default <- list (
+     obs_dv = FALSE,
+     obs_ci = TRUE,
+     obs_median = TRUE,
+     sim_median = FALSE,
+     sim_median_ci = TRUE,
+     pi = FALSE,
+     pi_ci = TRUE,
+     pi_as_area = FALSE)
+   show <- replace_list_elements(show_default, show)
+   
    if (software_type == "nonmem") {
-      obs_cols$dv <- "DV" 
-      obs_cols$idv <- "TIME" 
-      obs_cols$id <- "ID" 
-      obs_cols$pred <- "PRED" 
-      sim_cols$dv <- "DV" 
-      sim_cols$idv <- "TIME" 
-      sim_cols$id <- "ID" 
-      sim_cols$pred <- "PRED" 
-    if(!is.null(obs)) {
-      if("MDV" %in% colnames(obs)) {
-        obs <- obs[obs$MDV == 0,]
+     obs_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
+     sim_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
+     
+      if(!is.null(obs)) {
+        old_class <- class(obs)
+        class(obs) <- c("nonmem", old_class)
       }
-      if("EVID" %in% colnames(obs)) {
-        obs <- obs[obs$EVID == 0,]
-      }      
+      if(!is.null(sim)) {
+        old_class <- class(sim)
+        class(sim) <- c("nonmem", old_class)
+      }
+   } else {
+     # assumes phoenix dataset
+     obs_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
+     sim_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
+   }
+   
+   if(!is.null(obs_cols)) {
+     obs_cols <- replace_list_elements(obs_cols_default, obs_cols)
+   }
+   if(!is.null(sim_cols)) {
+     sim_cols <- replace_list_elements(sim_cols_default, sim_cols)
+     
+   }
+   
+    if(!is.null(obs)) {
+      obs <- filter_dv(obs)
     }
     if(!is.null(sim)) {  
-      if("MDV" %in% colnames(sim)) {
-        sim <- sim[sim$MDV == 0,]
-      }
-      if("EVID" %in% colnames(obs)) {
-        sim <- sim[sim$EVID == 0,]
-      }
+     sim <- filter_dv(sim)
     }
-  } else {
-    if(is.null(obs_cols$dv)) { obs_cols$dv = "dv" }
-    if(is.null(sim_cols$dv)) { sim_cols$dv = "dv" }
-    if(is.null(obs_cols$idv)) { obs_cols$idv = "time" }
-    if(is.null(sim_cols$idv)) { sim_cols$idv = "time" }
-    if(is.null(obs_cols$id)) { obs_cols$id = "id" }
-    if(is.null(sim_cols$id)) { sim_cols$id = "id" }
-    if(is.null(obs_cols$pred)) { obs_cols$pred = "pred" }
-    if(is.null(sim_cols$pred)) { sim_cols$pred = "pred" }      
-  }
+ 
+  
   obs <- format_vpc_input_data(obs, obs_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
   sim <- format_vpc_input_data(sim, sim_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
   
-    show_default <- list (
-      obs_dv = FALSE,
-      obs_ci = TRUE,
-      obs_median = TRUE,
-      sim_median = FALSE,
-      sim_median_ci = TRUE,
-      pi = FALSE,
-      pi_ci = TRUE,
-      pi_as_area = FALSE)
-    show <- replace_list_elements(show_default, show)
+
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }
