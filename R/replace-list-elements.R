@@ -8,7 +8,7 @@
 #'    at this time.
 #' @examples 
 #' \dontrun{
-#' list <- list(dv = "dv", idv = "idv")
+#' list <- list(ipred = "ipred", dv = "dv", idv = "idv", "pred" = "pred")
 #' replacement <- list(dv = "conc", idv = "time")
 #' list <- replace_list_elements(list, replacement)
 #' }
