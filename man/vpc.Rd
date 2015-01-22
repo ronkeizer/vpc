@@ -4,9 +4,9 @@
 \alias{vpc}
 \title{VPC function}
 \usage{
-vpc(sim = NULL, obs = NULL, bins = "jenks", n_bins = "auto",
-  obs_cols = NULL, sim_cols = NULL, software = "auto", show = NULL,
-  legend_pos = NULL, plot = FALSE, stratify = NULL,
+vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
+  n_bins = "auto", obs_cols = NULL, sim_cols = NULL, software = "auto",
+  show = NULL, legend_pos = NULL, plot = FALSE, stratify = NULL,
   stratify_color = NULL, pred_corr = FALSE, pred_corr_lower_bnd = 0,
   pi = c(0.05, 0.95), ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
   log_y = FALSE, log_y_min = 0.001, xlab = NULL, ylab = NULL,
@@ -17,6 +17,8 @@ vpc(sim = NULL, obs = NULL, bins = "jenks", n_bins = "auto",
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
 \item{obs}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+
+\item{psn_folder}{instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder}
 
 \item{bins}{either "auto" or a numeric vector specifying the bin separators.}
 

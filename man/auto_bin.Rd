@@ -4,7 +4,7 @@
 \alias{auto_bin}
 \title{Calculate appropriate bin separators for vpc}
 \usage{
-auto_bin(dat, type = "kmeans", n_bins = 8, x = "time")
+auto_bin(dat, type = "kmeans", n_bins = 8)
 }
 \arguments{
 \item{dat}{data frame}
