@@ -82,8 +82,6 @@ draw_params_mvr <- function(ids, n_sim, theta, omega_mat, par_names = NULL) {
   }
 }
 
-
-
 convert_to_dense_grid <- function(dat, t = "t", id = "id", t_start = 0, t_step = 1, add = NULL) {
   t = seq(from=t_start, to=max(dat$t), by=t_step)
   tmp <- data.frame(cbind(id = rep(unique(dat$id), each = length(t)), 
@@ -111,9 +109,10 @@ relative_times <- function (dat) {
 }
 
 convert_from_dense_grid <- function (dat) { # note: only for a single trial, requires a loop or ddply for multiple subproblems
-  tmp <- dat %>%
-    group_by(id) %>% 
-    filter (rtte == 1)
+  tmp <- dat %>% group_by(id)  
+  if("rtte" %in% names(dat)) {
+    tmp <- tmp %>% filter (rtte == 1)
+  }
   #  filter (dv == 1 | time == max(time) )
   tmp2 <- rbind(tmp %>% filter(length(time) > 1) %>% mutate(time = time - c(0,time[1:(length(time)-1)])),
                 tmp %>% filter(length(time) == 1) )
