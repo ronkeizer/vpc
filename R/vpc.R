@@ -6,8 +6,8 @@
 #' @param bins either "auto" or a numeric vector specifying the bin separators.  
 #' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.  
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
-#' @param obs_columns observation dataset column names
-#' @param sim_columns simulation dataset column names
+#' @param obs_cols observation dataset column names
+#' @param sim_cols simulation dataset column names
 #' @param obs_pred variable in data.frame for population predicted value. "pred" by default
 #' @param sim_pred variable in data.frame for population predicted value. "pred" by default
 #' @param show what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci) 
@@ -85,27 +85,19 @@ vpc <- function(sim = NULL,
    software_type <- guess_software(software, obs)
    
    # column names
-   obs_columns <- list(dv = "dv", id = "id", idv = "time", pred = "pred")    
-   if (!is.null(obs_cols)) { 
-     obs_columns[(names(obs_columns) %in% names(obs_cols))] <- obs_cols
-   } else {
-     obs_columns <- obs_cols     
-   }
-   sim_columns <- list(dv = "dv", id = "id", idv = "time", pred = "pred")    
-   if (!is.null(sim_columns)) { 
-     sim_columns[(names(sim_columns) %in% names(sim_cols))] <- sim_cols
-   } else {
-     sim_columns <- sim_columns     
-   }   
+   obs_cols_default <- list(dv = "dv", id = "id", idv = "time", pred = "pred")
+   obs_cols <- replace_list_elements(obs_cols_default, obs_cols)
+   sim_cols_default <- list(dv = "dv", id = "id", idv = "time", pred = "pred")
+   sim_cols <- replace_list_elements(sim_cols_default, sim_cols)
    if (software_type == "nonmem") {
-    if (is.null(obs_columns$dv)) { obs_columns$dv <- "DV" }
-    if (is.null(obs_columns$idv)) { obs_columns$idv <- "TIME" }
-    if (is.null(obs_columns$id)) { obs_columns$id <- "ID" }
-    if (is.null(obs_columns$pred)) { obs_columns$pred <- "PRED" }
-    if (is.null(sim_columns$dv)) { sim_columns$dv <- "DV" }
-    if (is.null(sim_columns$idv)) { sim_columns$idv <- "TIME" }
-    if (is.null(sim_columns$id)) { sim_columns$id <- "ID" }
-    if (is.null(sim_columns$pred)) { sim_columns$pred <- "PRED" }
+    if (is.null(obs_cols$dv)) { obs_cols$dv <- "DV" }
+    if (is.null(obs_cols$idv)) { obs_cols$idv <- "TIME" }
+    if (is.null(obs_cols$id)) { obs_cols$id <- "ID" }
+    if (is.null(obs_cols$pred)) { obs_cols$pred <- "PRED" }
+    if (is.null(sim_cols$dv)) { sim_cols$dv <- "DV" }
+    if (is.null(sim_cols$idv)) { sim_cols$idv <- "TIME" }
+    if (is.null(sim_cols$id)) { sim_cols$id <- "ID" }
+    if (is.null(sim_cols$pred)) { sim_cols$pred <- "PRED" }
     if(!is.null(obs)) {
       if("MDV" %in% colnames(obs)) {
         obs <- obs[obs$MDV == 0,]
@@ -123,19 +115,17 @@ vpc <- function(sim = NULL,
       }
     }
   } else {
-    if(is.null(obs_columns$dv)) { obs_columns$dv = "dv" }
-    if(is.null(sim_columns$dv)) { sim_columns$dv = "dv" }
-    if(is.null(obs_columns$idv)) { obs_columns$idv = "time" }
-    if(is.null(sim_columns$idv)) { sim_columns$idv = "time" }
-    if(is.null(obs_columns$id)) { obs_columns$id = "id" }
-    if(is.null(sim_columns$id)) { sim_columns$id = "id" }
-    if(is.null(obs_columns$pred)) { obs_columns$pred = "pred" }
-    if(is.null(sim_columns$pred)) { sim_columns$pred = "pred" }      
+    if(is.null(obs_cols$dv)) { obs_cols$dv = "dv" }
+    if(is.null(sim_cols$dv)) { sim_cols$dv = "dv" }
+    if(is.null(obs_cols$idv)) { obs_cols$idv = "time" }
+    if(is.null(sim_cols$idv)) { sim_cols$idv = "time" }
+    if(is.null(obs_cols$id)) { obs_cols$id = "id" }
+    if(is.null(sim_cols$id)) { sim_cols$id = "id" }
+    if(is.null(obs_cols$pred)) { obs_cols$pred = "pred" }
+    if(is.null(sim_cols$pred)) { sim_cols$pred = "pred" }      
   }
   if (!is.null(show)) { # non-default plot options
-    not_found <- names(show)[!(names(show) %in% names(show_use))]
-    show <- show[names(show) != not_found]
-    show_use <- list (
+    show_default <- list (
       obs_dv = FALSE,
       obs_ci = TRUE,
       obs_median = TRUE,
@@ -143,8 +133,8 @@ vpc <- function(sim = NULL,
       sim_median_ci = TRUE,
       pi = FALSE,
       pi_ci = TRUE,
-      pi_as_area = FALSE)  
-    show_use[(names(show_use) %in% names(show))] <- show
+      pi_as_area = FALSE)      
+    show <- replace_list_elements(show_default, show)
     if (length(not_found) > 0) {
       warning(paste0("Specified plotting option(s) '", paste(not_found, collapse="', '"), "' not available and will be ignored."))
     }
@@ -167,9 +157,9 @@ vpc <- function(sim = NULL,
   }
   if (class(bins) != "numeric") {
     if(!is.null(obs)) {
-      bins <- auto_bin(obs, bins, n_bins, x=obs_columns$idv)  
+      bins <- auto_bin(obs, bins, n_bins, x=obs_cols$idv)  
     } else { # get from sim
-      bins <- auto_bin(sim, bins, n_bins, x=sim_columns$idv)            
+      bins <- auto_bin(sim, bins, n_bins, x=sim_cols$idv)            
     }
     if (is.null(bins)) {
       stop("Binning unsuccessful, try increasing the number of bins.")
@@ -197,14 +187,14 @@ vpc <- function(sim = NULL,
     }
   }
   if (!is.null(obs)) {  
-    obs <- format_vpc_input_data(obs, obs_columns, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
+    obs <- format_vpc_input_data(obs, obs_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
     if (pred_corr) {
       obs <- obs %>% group_by(strat, bin) %>% mutate(pred_bin = mean(pred))
       obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
     }
   }  
   if (!is.null(sim)) {  
-    sim <- format_vpc_input_data(sim, sim_columns, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
+    sim <- format_vpc_input_data(sim, sim_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
     sim$sim <- add_sim_index_number(sim, id = "id")    
     if (pred_corr) {
       sim <- sim %>% group_by(strat, bin) %>% mutate(pred_bin = mean(pred))
@@ -261,10 +251,10 @@ vpc <- function(sim = NULL,
     vpc_theme <- create_vpc_theme()
   }
   if(is.null(xlab)) {
-    xlab <- obs_columns$idv
+    xlab <- obs_cols$idv
   }
   if(is.null(ylab)) {
-    ylab <- obs_columns$dv
+    ylab <- obs_cols$dv
   }
   if (!is.null(stratify_original)) {
     if (length(stratify) == 2) {
@@ -276,10 +266,10 @@ vpc <- function(sim = NULL,
   }  
   if (!is.null(sim)) {
     pl <- ggplot(vpc_dat, aes(x=bin_mid)) 
-    if(show_use$sim_median) {
+    if(show$sim_median) {
       pl <- pl + geom_line(aes(y=q50.med), colour=vpc_theme$sim_median_color, linetype=vpc_theme$sim_median_linetype, size=vpc_theme$sim_median_size)           
     }
-    if(show_use$pi_as_area) {
+    if(show$pi_as_area) {
       if (smooth) {
         pl <- pl +
           geom_ribbon(aes(x=bin_mid, y=q50.med, ymin=q5.med, ymax=q95.med), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill) 
@@ -288,7 +278,7 @@ vpc <- function(sim = NULL,
           geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.med, ymin=q5.med, ymax=q95.med), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_color) 
       }       
     } else {
-      if(show_use$sim_median_ci) {
+      if(show$sim_median_ci) {
         if (smooth) {
           pl <- pl +
             geom_ribbon(aes(x=bin_mid, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill) 
@@ -297,12 +287,12 @@ vpc <- function(sim = NULL,
             geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_color) 
         }       
       }
-      if (show_use$pi) {
+      if (show$pi) {
         pl <- pl + 
           geom_line(aes(x=bin_mid, y=q5.med), colour=vpc_theme$sim_pi_color, linetype=vpc_theme$sim_pi_linetype, size=vpc_theme$sim_pi_size) +
           geom_line(aes(x=bin_mid, y=q95.med), colour=vpc_theme$sim_pi_color, linetype=vpc_theme$sim_pi_linetype, size=vpc_theme$sim_pi_size)       
       }
-      if (show_use$pi_ci) {
+      if (show$pi_ci) {
         if (smooth) {
           pl <- pl + 
             geom_ribbon(aes(x=bin_mid, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill) +
@@ -327,16 +317,16 @@ vpc <- function(sim = NULL,
     }
   }
   if(!is.null(obs)) {
-    if (show_use$obs_median) {
+    if (show$obs_median) {
       pl <- pl +
         geom_line(data=aggr_obs, aes(x=bin_mid, y=obs50), linetype=vpc_theme$obs_median_linetype, colour=vpc_theme$obs_median_color, size=vpc_theme$obs_median_size)       
     }
-    if(show_use$obs_ci) {
+    if(show$obs_ci) {
       pl <- pl +
         geom_line(data=aggr_obs, aes(x=bin_mid, y=obs5), linetype=vpc_theme$obs_ci_linetype, colour=vpc_theme$obs_ci_color, size=vpc_theme$obs_ci_size) +
         geom_line(data=aggr_obs, aes(x=bin_mid, y=obs95), linetype=vpc_theme$obs_ci_linetype, colour=vpc_theme$obs_ci_color, size=vpc_theme$obs_ci_size) 
     }
-    if (show_use$obs_dv) {
+    if (show$obs_dv) {
       pl <- pl + geom_point(data=obs, aes(x=idv, y = dv), size=vpc_theme$obs_size, colour=vpc_theme$obs_color)
     }    
   }
