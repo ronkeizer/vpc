@@ -135,9 +135,6 @@ vpc <- function(sim = NULL,
       pi_ci = TRUE,
       pi_as_area = FALSE)      
     show <- replace_list_elements(show_default, show)
-    if (length(not_found) > 0) {
-      warning(paste0("Specified plotting option(s) '", paste(not_found, collapse="', '"), "' not available and will be ignored."))
-    }
   }
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
