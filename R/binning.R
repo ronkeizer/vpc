@@ -10,15 +10,15 @@
 #' @details
 #' This function calculates bin separators (e.g. for use in a vpc) based on nadirs in the density functions for the indenpendent variable
 
-auto_bin <- function (dat, type="kmeans", n_bins = 8, x="time") {
+auto_bin <- function (dat, type="kmeans", n_bins = 8) {
   all_bins <- list()
   l_bins <- c()
   if(type %in% c("jenks", "kmeans", "pretty", "quantile", "hclust", "sd", "bclust", "fisher")) {
     suppressWarnings({
       if(class(n_bins) != "numeric" | is.null(n_bins)) {
-        bins <- classIntervals(dat[[x]], style = type)                
+        bins <- classIntervals(dat[["idv"]], style = type)                
       } else {
-        bins <- classIntervals(dat[[x]], n = n_bins-1, style = type)        
+        bins <- classIntervals(dat[["idv"]], n = n_bins-1, style = type)        
       }      
     })
     return(bins$brks)      
@@ -30,10 +30,10 @@ auto_bin <- function (dat, type="kmeans", n_bins = 8, x="time") {
   n_bins <- n_bins + 1 # bin_separators
   if(type != "time" & type != "data") {
     if (type == "density" || type == "auto") {
-      bws <- diff(range(dat[[x]])) * seq(from=0.01, to = .25, by=0.01)
+      bws <- diff(range(dat[["idv"]])) * seq(from=0.01, to = .25, by=0.01)
       for (i in seq(bws)) {
-        d <- density(dat[[x]], bw=bws[i])
-        all_bins[[i]] <- c(0, d$x[find_nadirs(d$y)], max(dat[[x]])*1.01)
+        d <- density(dat[["idv"]], bw=bws[i])
+        all_bins[[i]] <- c(0, d$x[find_nadirs(d$y)], max(dat[["idv"]])*1.01)
         l_bins[i] <- length(all_bins[[i]])
       }     
       return(all_bins[[order(abs(l_bins - n_bins))[1]]]) # return closest to requested bins
@@ -41,16 +41,16 @@ auto_bin <- function (dat, type="kmeans", n_bins = 8, x="time") {
     stop("Specified binning method not recognized!")
   } else {
     if (type == "time") {
-      tmp <- levels(cut(x = unique(dat[[x]]), breaks = n_bins, right = TRUE))
+      tmp <- levels(cut(x = unique(dat[["idv"]]), breaks = n_bins, right = TRUE))
       tmp <- gsub("\\(", "", tmp)
       tmp <- gsub("\\]", "", tmp)
       tmp2 <- unlist(strsplit(tmp, ","))
       sel <- 1:(length(tmp2)/2)*2 - 1
-      bins <- c(as.num(tmp2[sel]), max(dat[[x]])*1.001)
+      bins <- c(as.num(tmp2[sel]), max(dat[["idv"]])*1.001)
       return(bins)
     }
     if (type == "data") {
-      sorted <- sort(dat[[x]])
+      sorted <- sort(dat[["idv"]])
       tmp <- levels(cut(x = 1:length(sorted), breaks = n_bins, right = TRUE))
       tmp <- gsub("\\(", "", tmp)
       tmp <- gsub("\\]", "", tmp)
@@ -58,7 +58,7 @@ auto_bin <- function (dat, type="kmeans", n_bins = 8, x="time") {
       sel <- 1:(length(tmp2)/2)*2 - 1
       idx <- as.num(tmp2[sel])
       idx[idx < 0] <- 0
-      bins <- c(sorted[idx], max(dat[[x]])*1.001)
+      bins <- c(sorted[idx], max(dat[["idv"]])*1.001)
       return(bins)    
     }    
   }

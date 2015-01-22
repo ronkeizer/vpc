@@ -1,5 +1,5 @@
 format_vpc_input_data <- function(dat, cols, lloq, uloq, strat, bins, log_y, log_y_min, what = "observed") {
-  if(cols$id %in% colnames(dat)) {
+  if(cols[["id"]] %in% colnames(dat)) {
     if ("id" %in% colnames(dat) &! cols$id == "id") {
       colnames(dat)[match("id", colnames(dat))] <- "id.old"
     }
@@ -35,6 +35,5 @@ format_vpc_input_data <- function(dat, cols, lloq, uloq, strat, bins, log_y, log
     dat$dv[dat$dv < log_y_min] <- log_y_min 
   }
   dat <- add_stratification(dat, strat)
-  dat <- bin_data(dat, bins, "idv")  
   return(dat)
 }

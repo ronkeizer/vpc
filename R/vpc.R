@@ -81,23 +81,22 @@ vpc <- function(sim = NULL,
                 vpc_theme = NULL,
                 ggplot_theme = NULL,
                 facet = "wrap") {
-  
+
    software_type <- guess_software(software, obs)
-   
    # column names
    obs_cols_default <- list(dv = "dv", id = "id", idv = "time", pred = "pred")
    obs_cols <- replace_list_elements(obs_cols_default, obs_cols)
    sim_cols_default <- list(dv = "dv", id = "id", idv = "time", pred = "pred")
    sim_cols <- replace_list_elements(sim_cols_default, sim_cols)
    if (software_type == "nonmem") {
-    if (is.null(obs_cols$dv)) { obs_cols$dv <- "DV" }
-    if (is.null(obs_cols$idv)) { obs_cols$idv <- "TIME" }
-    if (is.null(obs_cols$id)) { obs_cols$id <- "ID" }
-    if (is.null(obs_cols$pred)) { obs_cols$pred <- "PRED" }
-    if (is.null(sim_cols$dv)) { sim_cols$dv <- "DV" }
-    if (is.null(sim_cols$idv)) { sim_cols$idv <- "TIME" }
-    if (is.null(sim_cols$id)) { sim_cols$id <- "ID" }
-    if (is.null(sim_cols$pred)) { sim_cols$pred <- "PRED" }
+      obs_cols$dv <- "DV" 
+      obs_cols$idv <- "TIME" 
+      obs_cols$id <- "ID" 
+      obs_cols$pred <- "PRED" 
+      sim_cols$dv <- "DV" 
+      sim_cols$idv <- "TIME" 
+      sim_cols$id <- "ID" 
+      sim_cols$pred <- "PRED" 
     if(!is.null(obs)) {
       if("MDV" %in% colnames(obs)) {
         obs <- obs[obs$MDV == 0,]
@@ -124,7 +123,9 @@ vpc <- function(sim = NULL,
     if(is.null(obs_cols$pred)) { obs_cols$pred = "pred" }
     if(is.null(sim_cols$pred)) { sim_cols$pred = "pred" }      
   }
-  if (!is.null(show)) { # non-default plot options
+  obs <- format_vpc_input_data(obs, obs_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
+  sim <- format_vpc_input_data(sim, sim_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
+  
     show_default <- list (
       obs_dv = FALSE,
       obs_ci = TRUE,
@@ -133,9 +134,8 @@ vpc <- function(sim = NULL,
       sim_median_ci = TRUE,
       pi = FALSE,
       pi_ci = TRUE,
-      pi_as_area = FALSE)      
+      pi_as_area = FALSE)
     show <- replace_list_elements(show_default, show)
-  }
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }
@@ -154,14 +154,17 @@ vpc <- function(sim = NULL,
   }
   if (class(bins) != "numeric") {
     if(!is.null(obs)) {
-      bins <- auto_bin(obs, bins, n_bins, x=obs_cols$idv)  
+      bins <- auto_bin(obs, bins, n_bins)  
     } else { # get from sim
-      bins <- auto_bin(sim, bins, n_bins, x=sim_cols$idv)            
+      bins <- auto_bin(sim, bins, n_bins)            
     }
     if (is.null(bins)) {
       stop("Binning unsuccessful, try increasing the number of bins.")
     }
   }
+    obs <- bin_data(obs, bins, "idv") 
+    sim <- bin_data(sim, bins, "idv")  
+    
   if (pred_corr) {
     if (!is.null(obs) & !obs_pred %in% names(obs)) {
       warning("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...")      
@@ -184,14 +187,12 @@ vpc <- function(sim = NULL,
     }
   }
   if (!is.null(obs)) {  
-    obs <- format_vpc_input_data(obs, obs_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
     if (pred_corr) {
       obs <- obs %>% group_by(strat, bin) %>% mutate(pred_bin = mean(pred))
       obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
     }
   }  
   if (!is.null(sim)) {  
-    sim <- format_vpc_input_data(sim, sim_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
     sim$sim <- add_sim_index_number(sim, id = "id")    
     if (pred_corr) {
       sim <- sim %>% group_by(strat, bin) %>% mutate(pred_bin = mean(pred))
