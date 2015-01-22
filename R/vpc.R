@@ -6,12 +6,8 @@
 #' @param bins either "auto" or a numeric vector specifying the bin separators.  
 #' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.  
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
-#' @param obs_dv variable in data.frame for observed dependent value. "dv" by default
-#' @param sim_dv variable in data.frame for simulated dependent value. "sdv" by default
-#' @param obs_idv variable in data.frame for observed independent value. "time" by default
-#' @param sim_idv variable in data.frame for simulated independent value. "time" by default
-#' @param obs_id variable in data.frame for observed individual. "id" by default
-#' @param sim_id variable in data.frame for simulated individual. "id" by default
+#' @param obs_columns observation dataset column names
+#' @param sim_columns simulation dataset column names
 #' @param obs_pred variable in data.frame for population predicted value. "pred" by default
 #' @param sim_pred variable in data.frame for population predicted value. "pred" by default
 #' @param show what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci) 
@@ -62,16 +58,9 @@ vpc <- function(sim = NULL,
                 obs = NULL, 
                 bins = "jenks",
                 n_bins = "auto",
-                obs_dv = NULL,
-                sim_dv =  NULL,
-                obs_idv = NULL,
-                sim_idv = NULL,
-                obs_id = NULL,
-                sim_id = NULL,
-                obs_pred = NULL,
-                sim_pred = NULL,
+                obs_cols = NULL,
+                sim_cols = NULL,
                 software = "auto",
-                plot = TRUE,
                 show = NULL,                
                 legend_pos = NULL,
                 plot = FALSE,
@@ -94,16 +83,29 @@ vpc <- function(sim = NULL,
                 facet = "wrap") {
   
    software_type <- guess_software(software, obs)
-
-  if (software_type == "nonmem") {
-    if (is.null(obs_dv)) { obs_dv <- "DV" }
-    if (is.null(obs_idv)) { obs_idv <- "TIME" }
-    if (is.null(obs_id)) { obs_id <- "ID" }
-    if (is.null(obs_pred)) { obs_pred <- "PRED" }
-    if (is.null(sim_dv)) { sim_dv <- "DV" }
-    if (is.null(sim_idv)) { sim_idv <- "TIME" }
-    if (is.null(sim_id)) { sim_id <- "ID" }
-    if (is.null(sim_pred)) { sim_pred <- "PRED" }
+   
+   # column names
+   obs_columns <- list(dv = "dv", id = "id", idv = "time", pred = "pred")    
+   if (!is.null(obs_cols)) { 
+     obs_columns[(names(obs_columns) %in% names(obs_cols))] <- obs_cols
+   } else {
+     obs_columns <- obs_cols     
+   }
+   sim_columns <- list(dv = "dv", id = "id", idv = "time", pred = "pred")    
+   if (!is.null(sim_columns)) { 
+     sim_columns[(names(sim_columns) %in% names(sim_cols))] <- sim_cols
+   } else {
+     sim_columns <- sim_columns     
+   }   
+   if (software_type == "nonmem") {
+    if (is.null(obs_columns$dv)) { obs_columns$dv <- "DV" }
+    if (is.null(obs_columns$idv)) { obs_columns$idv <- "TIME" }
+    if (is.null(obs_columns$id)) { obs_columns$id <- "ID" }
+    if (is.null(obs_columns$pred)) { obs_columns$pred <- "PRED" }
+    if (is.null(sim_columns$dv)) { sim_columns$dv <- "DV" }
+    if (is.null(sim_columns$idv)) { sim_columns$idv <- "TIME" }
+    if (is.null(sim_columns$id)) { sim_columns$id <- "ID" }
+    if (is.null(sim_columns$pred)) { sim_columns$pred <- "PRED" }
     if(!is.null(obs)) {
       if("MDV" %in% colnames(obs)) {
         obs <- obs[obs$MDV == 0,]
@@ -121,14 +123,14 @@ vpc <- function(sim = NULL,
       }
     }
   } else {
-    if(is.null(obs_dv)) { obs_dv = "dv" }
-    if(is.null(sim_dv)) { sim_dv = "dv" }
-    if(is.null(obs_idv)) { obs_idv = "time" }
-    if(is.null(sim_idv)) { sim_idv = "time" }
-    if(is.null(obs_id)) { obs_id = "id" }
-    if(is.null(sim_id)) { sim_id = "id" }
-    if(is.null(obs_pred)) { obs_pred = "pred" }
-    if(is.null(sim_pred)) { sim_pred = "pred" }      
+    if(is.null(obs_columns$dv)) { obs_columns$dv = "dv" }
+    if(is.null(sim_columns$dv)) { sim_columns$dv = "dv" }
+    if(is.null(obs_columns$idv)) { obs_columns$idv = "time" }
+    if(is.null(sim_columns$idv)) { sim_columns$idv = "time" }
+    if(is.null(obs_columns$id)) { obs_columns$id = "id" }
+    if(is.null(sim_columns$id)) { sim_columns$id = "id" }
+    if(is.null(obs_columns$pred)) { obs_columns$pred = "pred" }
+    if(is.null(sim_columns$pred)) { sim_columns$pred = "pred" }      
   }
   if (!is.null(show)) { # non-default plot options
     not_found <- names(show)[!(names(show) %in% names(show_use))]
@@ -165,9 +167,9 @@ vpc <- function(sim = NULL,
   }
   if (class(bins) != "numeric") {
     if(!is.null(obs)) {
-      bins <- auto_bin(obs, bins, n_bins, x=obs_idv)  
+      bins <- auto_bin(obs, bins, n_bins, x=obs_columns$idv)  
     } else { # get from sim
-      bins <- auto_bin(sim, bins, n_bins, x=obs_idv)            
+      bins <- auto_bin(sim, bins, n_bins, x=sim_columns$idv)            
     }
     if (is.null(bins)) {
       stop("Binning unsuccessful, try increasing the number of bins.")
@@ -195,14 +197,14 @@ vpc <- function(sim = NULL,
     }
   }
   if (!is.null(obs)) {  
-    obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
+    obs <- format_vpc_input_data(obs, obs_columns, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
     if (pred_corr) {
       obs <- obs %>% group_by(strat, bin) %>% mutate(pred_bin = mean(pred))
       obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
     }
-  }
+  }  
   if (!is.null(sim)) {  
-    sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
+    sim <- format_vpc_input_data(sim, sim_columns, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
     sim$sim <- add_sim_index_number(sim, id = "id")    
     if (pred_corr) {
       sim <- sim %>% group_by(strat, bin) %>% mutate(pred_bin = mean(pred))
@@ -259,10 +261,10 @@ vpc <- function(sim = NULL,
     vpc_theme <- create_vpc_theme()
   }
   if(is.null(xlab)) {
-    xlab <- obs_idv
+    xlab <- obs_columns$idv
   }
   if(is.null(ylab)) {
-    ylab <- obs_dv
+    ylab <- obs_columns$dv
   }
   if (!is.null(stratify_original)) {
     if (length(stratify) == 2) {
