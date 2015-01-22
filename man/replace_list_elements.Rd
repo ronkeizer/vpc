@@ -22,7 +22,7 @@ Finds and replaces list elements by name and throws an error if an
 }
 \examples{
 \dontrun{
-list <- list(dv = "dv", idv = "idv")
+list <- list(ipred = "ipred", dv = "dv", idv = "idv", "pred" = "pred")
 replacement <- list(dv = "conc", idv = "time")
 list <- replace_list_elements(list, replacement)
 }
