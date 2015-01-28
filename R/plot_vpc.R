@@ -74,7 +74,7 @@ plot_vpc <- function(db) {
       pl <- pl + scale_y_log10() 
     }
     if (!is.null(stratify)) {
-      if (length(stratify_original) == 1) {
+      if (length(db$stratify_original) == 1) {
         if (!is.null(stratify_color)) {
           if (facet == "wrap") {
             pl <- pl + facet_wrap(~ strat1)      
