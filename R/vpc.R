@@ -94,7 +94,6 @@ vpc <- function(sim = NULL,
    }
    software_type <- guess_software(software, obs)
    # column names
-
    show_default <- list (
      obs_dv = FALSE,
      obs_ci = TRUE,
@@ -124,26 +123,19 @@ vpc <- function(sim = NULL,
      sim_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
    }
    
-   if(!is.null(obs_cols)) {
-     obs_cols <- replace_list_elements(obs_cols_default, obs_cols)
-   }
-   if(!is.null(sim_cols)) {
-     sim_cols <- replace_list_elements(sim_cols_default, sim_cols)
-     
-   }
+   obs_cols <- replace_list_elements(obs_cols_default, obs_cols)
+   sim_cols <- replace_list_elements(sim_cols_default, sim_cols)
    
-    if(!is.null(obs)) {
+   if(!is.null(obs)) {
       obs <- filter_dv(obs)
-    }
-    if(!is.null(sim)) {  
+   }
+   if(!is.null(sim)) {  
      sim <- filter_dv(sim)
-    }
+   }
  
-  
   obs <- format_vpc_input_data(obs, obs_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
   sim <- format_vpc_input_data(sim, sim_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
   
-
   stratify_original <- stratify
   if(!is.null(stratify_color)) {
     if (is.null(stratify)) {
