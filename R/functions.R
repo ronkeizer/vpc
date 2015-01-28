@@ -19,22 +19,6 @@ add_step <- function(dat = ., vars) {
     newdat %>% arrange(bin, -step)    
 }
 
-add_stratification <- function (dat, strat) {
-  if(is.null(strat)) {
-    dat$strat <- 1
-  } else {
-    dat$strat <- ""
-    for(i in seq(strat)) {
-      if(i > 1) { 
-        dat$strat <- paste0(dat$strat, ", ")
-      }
-      dat$strat <- paste0(dat$strat, strat[i], "=", dat[,strat[i]])
-    }
-  }  
-  dat$strat <- as.factor(dat$strat)
-  return(dat)
-}
-
 as.num <- function(x) { as.numeric(as.character(x)) }
 
 add_sim_index_number <- function (sim, id = "id") { # for multiple simulations in a single dataframe, add an index number for every simulation

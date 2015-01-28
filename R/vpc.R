@@ -105,22 +105,28 @@ vpc <- function(sim = NULL,
     pi_as_area = FALSE)
   show <- replace_list_elements(show_default, show)
   
-  if (software_type == "nonmem") {
-    obs_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
-    sim_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
-    
-    if(!is.null(obs)) {
-      old_class <- class(obs)
-      class(obs) <- c("nonmem", old_class)
-    }
-    if(!is.null(sim)) {
-      old_class <- class(sim)
-      class(sim) <- c("nonmem", old_class)
-    }
+  software_types <- c("nonmem", "phoenix") 
+  if(software_type %in% software_types) {
+    if (software_type == "nonmem") {
+      obs_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
+      sim_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
+      
+      if(!is.null(obs)) {
+        old_class <- class(obs)
+        class(obs) <- c("nonmem", old_class)
+      }
+      if(!is.null(sim)) {
+        old_class <- class(sim)
+        class(sim) <- c("nonmem", old_class)
+      }
+    } 
+    if (software_type == "phoenix") {
+      obs_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
+      sim_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
+    }    
   } else {
-    # assumes phoenix dataset
-    obs_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
-    sim_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
+    obs_cols_default <- list(dv = "dv", id = "id", idv = "time", pred = "pred")
+    sim_cols_default <- list(dv = "dv", id = "id", idv = "time", pred = "pred")    
   }
   
   obs_cols <- replace_list_elements(obs_cols_default, obs_cols)
