@@ -59,15 +59,17 @@ vpc_tte <- function(sim = NULL,
                     obs = NULL, 
                     rtte = FALSE,
                     events = NULL,
-                    obs_dv = "dv",
-                    sim_dv =  "sdv",
-                    obs_idv = "time",
-                    sim_idv = "time",
-                    obs_id = "id",
-                    sim_id = "id",
+                    software = "auto",
+                    obs_cols = NULL,
+                    sim_cols = NULL,
+                    # obs_dv = "dv",
+                    # sim_dv =  "sdv",
+                    # obs_idv = "time",
+                    # sim_idv = "time",
+                    # obs_id = "id",
+                    # sim_id = "id",
                     dense_grid = "auto",
                     pi_med = FALSE, 
-                    nonmem = "auto",
                     reverse_prob = FALSE,
                     stratify = NULL,
                     stratify_color = NULL,
@@ -81,17 +83,7 @@ vpc_tte <- function(sim = NULL,
                     ggplot_theme = NULL,
                     facet = "wrap",
                     show_warnings = FALSE) {
-  if (nonmem == "auto") {
-    if(sum(c("ID","TIME") %in% colnames(obs)) == 2) { # most likely, data is from NONMEM
-      nonmem <- TRUE
-    } else {
-      nonmem <- FALSE
-    }        
-  } else {
-    if(class(nonmem) != "logical") {
-      nonmem <- FALSE
-    }
-  } 
+  software_type <- guess_software(software, obs)
   if(is.null(obs) && is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }
@@ -108,34 +100,41 @@ vpc_tte <- function(sim = NULL,
       stratify <- c(stratify, stratify_color)
     }
   }
-  if (nonmem) {
-    obs_dv = "dv"
-    obs_idv = "time"
-    obs_id = "id"
-    sim_dv = "dv"
-    sim_idv = "time"
-    sim_id = "id"
-    rtte_flag <- "rtte"
-    if(!is.null(obs)) {
-      if("MDV" %in% colnames(obs)) {
-        obs <- obs[obs$MDV == 0,]
+
+  software_types <- c("nonmem", "phoenix") 
+  if(software_type %in% software_types) {
+    if (software_type == "nonmem") {
+      obs_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
+      sim_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
+      
+      if(!is.null(obs)) {
+        old_class <- class(obs)
+        class(obs) <- c("nonmem", old_class)
       }
-      if("EVID" %in% colnames(obs)) {
-        obs <- obs[obs$EVID == 0,]
-      }      
-    }
-    if(!is.null(sim)) {
-      if("MDV" %in% colnames(sim)) {
-        sim <- sim[sim$MDV == 0,]
+      if(!is.null(sim)) {
+        old_class <- class(sim)
+        class(sim) <- c("nonmem", old_class)
       }
-      if("EVID" %in% colnames(obs)) {
-        sim <- sim[sim$EVID == 0,]
-      }
-    }
-    colnames(obs) <- tolower(colnames(obs))
-    colnames(sim) <- tolower(colnames(sim))
+    } 
+    if (software_type == "phoenix") {
+      obs_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
+      sim_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
+    }    
+  } else {
+    obs_cols_default <- list(dv = "dv", id = "id", idv = "time", pred = "pred")
+    sim_cols_default <- list(dv = "dv", id = "id", idv = "time", pred = "pred")    
   }
   
+  obs_cols <- replace_list_elements(obs_cols_default, obs_cols)
+  sim_cols <- replace_list_elements(sim_cols_default, sim_cols)
+
+  if(!is.null(obs)) {
+    obs <- filter_dv(obs)
+  }
+  if(!is.null(sim)) {  
+    sim <- filter_dv(sim)
+  }
+
   if(!is.null(stratify)) {
     if(rtte) {
       if (length(stratify) > 1) {
@@ -152,12 +151,12 @@ vpc_tte <- function(sim = NULL,
 
   # format obs data
   if(!is.null(obs)) {
-    if (length(obs[[obs_id]]) == 0) {
+    if (length(obs[[obs_cols$id]]) == 0) {
       warning("Warning: no ID column found, assuming 1 row per ID!")
       obs$id <- 1:length(obs[,1])
     }
-    obs$time <- obs[[obs_idv]]
-    obs$dv <- obs[[obs_dv]]
+    obs$time <- obs[[obs_cols$idv]]
+    obs$dv <- obs[[obs_cols$dv]]
     if (rtte) {
       obs <- relative_times(obs)    
       obs <- obs %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0)) 
@@ -187,19 +186,27 @@ vpc_tte <- function(sim = NULL,
     
   if(!is.null(sim)) {
     # format sim data and compute KM curve CI for simulations
-    sim$time <- sim[[sim_idv]]
-    sim$sim <- add_sim_index_number(sim)
-    n_sim <- length(unique(sim$sim))        
-    if (dense_grid == "auto") { # crude test if dense grid
-      rel_length <- length(sim[,1])/length(obs[,1])
-      if (rel_length > n_sim * 5) {
-        dense_grid <- TRUE
-      } else {
-        dense_grid <- FALSE
-      }
+    sim$id <- sim[[sim_cols$id]]
+    sim$dv <- sim[[sim_cols$dv]]    
+    sim$time <- sim[[sim_cols$idv]]
+    
+    # add sim index number
+    sim$sim <- add_sim_index_number(sim, id = sim_cols$id)
+        
+    # set last_observation and repeat_obs per sim&id
+    sim <- sim %>% group_by(sim, id) %>% mutate(last_obs = 1*(1:length(time) == length(time)))  
+    sim <- sim %>% group_by(sim, id) %>% mutate(repeat_obs = 1*(cumsum(dv) > 1))  
+
+    # filter out stuff
+    sim <- sim[(sim$dv == 1 & sim$last_obs == 0) | (sim$last_obs == 1 & sim$repeat_obs == 0),]
+    if (!rtte) {
+      sim <- sim[sim$repeat_obs == 0,]
     }
+    sim$sim_id <- paste0(sim$sim, "_", sim$id, "_", sim$time) # remove duplicate observations rows per id
+    sim <- sim[!duplicated(sim$sim_id),]
+
+    n_sim <- length(unique(sim$sim))        
     all <- c()
-#    bins_sim <- 
     tmp_bins <- unique(c(0, sort(unique(sim$time)), max(sim$time)))     
     for (i in 1:n_sim) {
       tmp <- sim %>% dplyr::filter(sim == i)
