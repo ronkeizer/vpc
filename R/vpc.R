@@ -86,53 +86,53 @@ vpc <- function(sim = NULL,
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }
-
-   if(!is.null(psn_folder)) {
-     obs <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
-     sim <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="simulation.1.npctab")[1]))
-     software = "nonmem"
-   }
-   software_type <- guess_software(software, obs)
-   # column names
-   show_default <- list (
-     obs_dv = FALSE,
-     obs_ci = TRUE,
-     obs_median = TRUE,
-     sim_median = FALSE,
-     sim_median_ci = TRUE,
-     pi = FALSE,
-     pi_ci = TRUE,
-     pi_as_area = FALSE)
-   show <- replace_list_elements(show_default, show)
-   
-   if (software_type == "nonmem") {
-     obs_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
-     sim_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
-     
-      if(!is.null(obs)) {
-        old_class <- class(obs)
-        class(obs) <- c("nonmem", old_class)
-      }
-      if(!is.null(sim)) {
-        old_class <- class(sim)
-        class(sim) <- c("nonmem", old_class)
-      }
-   } else {
-     # assumes phoenix dataset
-     obs_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
-     sim_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
-   }
-   
-   obs_cols <- replace_list_elements(obs_cols_default, obs_cols)
-   sim_cols <- replace_list_elements(sim_cols_default, sim_cols)
-   
-   if(!is.null(obs)) {
-      obs <- filter_dv(obs)
-   }
-   if(!is.null(sim)) {  
-     sim <- filter_dv(sim)
-   }
- 
+  
+  if(!is.null(psn_folder)) {
+    obs <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
+    sim <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="simulation.1.npctab")[1]))
+    software = "nonmem"
+  }
+  software_type <- guess_software(software, obs)
+  # column names
+  show_default <- list (
+    obs_dv = FALSE,
+    obs_ci = TRUE,
+    obs_median = TRUE,
+    sim_median = FALSE,
+    sim_median_ci = TRUE,
+    pi = FALSE,
+    pi_ci = TRUE,
+    pi_as_area = FALSE)
+  show <- replace_list_elements(show_default, show)
+  
+  if (software_type == "nonmem") {
+    obs_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
+    sim_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
+    
+    if(!is.null(obs)) {
+      old_class <- class(obs)
+      class(obs) <- c("nonmem", old_class)
+    }
+    if(!is.null(sim)) {
+      old_class <- class(sim)
+      class(sim) <- c("nonmem", old_class)
+    }
+  } else {
+    # assumes phoenix dataset
+    obs_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
+    sim_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
+  }
+  
+  obs_cols <- replace_list_elements(obs_cols_default, obs_cols)
+  sim_cols <- replace_list_elements(sim_cols_default, sim_cols)
+  
+  if(!is.null(obs)) {
+    obs <- filter_dv(obs)
+  }
+  if(!is.null(sim)) {  
+    sim <- filter_dv(sim)
+  }
+  
   obs <- format_vpc_input_data(obs, obs_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
   sim <- format_vpc_input_data(sim, sim_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
   
@@ -159,9 +159,10 @@ vpc <- function(sim = NULL,
       stop("Binning unsuccessful, try increasing the number of bins.")
     }
   }
-    obs <- bin_data(obs, bins, "idv") 
-    sim <- bin_data(sim, bins, "idv")  
-    
+  bins <- unique(bins)
+  obs <- bin_data(obs, bins, "idv") 
+  sim <- bin_data(sim, bins, "idv")  
+  
   if (pred_corr) {
     if (!is.null(obs) & !obs_pred %in% names(obs)) {
       warning("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...")      
@@ -224,7 +225,7 @@ vpc <- function(sim = NULL,
                            "bin_mid")
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
-#    vpc_dat$bin_mid <- ((vpc_dat$bin_min + vpc_dat$bin_max) / 2)[vpc_dat$bin]
+    #    vpc_dat$bin_mid <- ((vpc_dat$bin_min + vpc_dat$bin_max) / 2)[vpc_dat$bin]
   } else {
     vpc_dat <- NULL
   }
@@ -238,7 +239,7 @@ vpc <- function(sim = NULL,
     colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95", "bin_mid")
     aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
     aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
-#    aggr_obs$bin_mid <- ((aggr_obs$bin_min + aggr_obs$bin_max)/2) [aggr_obs$bin]    
+    #    aggr_obs$bin_mid <- ((aggr_obs$bin_min + aggr_obs$bin_max)/2) [aggr_obs$bin]    
   } else {
     aggr_obs <- NULL
   }
@@ -261,23 +262,23 @@ vpc <- function(sim = NULL,
   }  
   # plotting starts here
   vpc_db <- list(sim = sim,
-             vpc_dat = vpc_dat,
-             vpc_theme = vpc_theme,
-             show = show,
-             smooth = smooth,
-             stratify = stratify,
-             stratify_color = stratify_color,
-             aggr_obs = aggr_obs,
-             obs = obs,
-             bins = bins,
-             xlab = xlab,
-             ylab = ylab,
-             log_y = log_y,
-             facet = facet,
-             title = title,
-             theme = theme,
-             ggplot_theme = ggplot_theme,
-             plot = plot)
+                 vpc_dat = vpc_dat,
+                 vpc_theme = vpc_theme,
+                 show = show,
+                 smooth = smooth,
+                 stratify = stratify,
+                 stratify_color = stratify_color,
+                 aggr_obs = aggr_obs,
+                 obs = obs,
+                 bins = bins,
+                 xlab = xlab,
+                 ylab = ylab,
+                 log_y = log_y,
+                 facet = facet,
+                 title = title,
+                 theme = theme,
+                 ggplot_theme = ggplot_theme,
+                 plot = plot)
   pl <- plot_vpc(vpc_db)
   return(pl)
 }
