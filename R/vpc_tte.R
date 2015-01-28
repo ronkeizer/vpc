@@ -167,7 +167,7 @@ vpc_tte <- function(sim = NULL,
     }
   
     # add stratification column and comput KM curve for observations
-    obs <- add_stratification(obs, tolower(stratify))
+    obs <- add_stratification(obs, stratify)
     obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob)
 
     # get bins
@@ -209,7 +209,7 @@ vpc_tte <- function(sim = NULL,
       if (rtte) {
         tmp <- tmp %>% dplyr::group_by(id) %>% dplyr::mutate(rtte = cumsum(dv != 0))       
       }
-      tmp2 <- add_stratification(tmp %>% dplyr::arrange(id, time), tolower(stratify))
+      tmp2 <- add_stratification(tmp %>% dplyr::arrange(id, time), stratify)
       tmp3 <- compute_kaplan(tmp2, strat = "strat", reverse_prob = reverse_prob)
       tmp3[,c("bin", "bin_min", "bin_max", "bin_mid")] <- 0 
       tmp3$bin <- cut(tmp3$time, breaks = tmp_bins, labels = FALSE, right = TRUE)
