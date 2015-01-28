@@ -59,6 +59,8 @@ vpc_tte <- function(sim = NULL,
                     obs = NULL, 
                     rtte = FALSE,
                     events = NULL,
+                    bins = FALSE,
+                    n_bins = 10,
                     software = "auto",
                     obs_cols = NULL,
                     sim_cols = NULL,
@@ -167,20 +169,11 @@ vpc_tte <- function(sim = NULL,
     } else {
       obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob)
     }
-
-    # get bins
-    obs_strat <- as.character(unique(obs$strat))
-    bins <- list() 
-    for (i in seq(obs_strat)) {
-      bins[[obs_strat[i]]] <- sort(unique(obs[as.character(obs$strat) == obs_strat[i],]$time))
-    }    
   } else { # get bins from sim
-    obs_strat <- as.character(unique(sim$strat))
-    bins <- list() 
-    for (i in seq(obs_strat)) {
-      bins[[obs_strat[i]]] <- sort(unique(sim[as.character(sim$strat) == obs_strat[i],]$time))
-    }    
     obs_km <- NULL
+  }
+  if(!is.null(kmmc) & (class(bins) == "logical" && bins == FALSE)) {
+    warning("With KMMC-type plots, binning of simulated data is recommended. See documentation for the 'bins' argument for more information.")
   }
     
   if(!is.null(sim)) {
@@ -206,7 +199,25 @@ vpc_tte <- function(sim = NULL,
 
     n_sim <- length(unique(sim$sim))        
     all <- c()
-    tmp_bins <- unique(c(0, sort(unique(sim$time)), max(sim$time)))     
+    tmp_bins <- unique(c(0, sort(unique(sim$time)), max(sim$time))) 
+    if(!(class(bins) == "logical" && bins == FALSE)) {
+      if(class(bins) == "logical" && bins == TRUE) { 
+        bins <- "time" 
+      } 
+      if(class(bins) == "character") {
+        if (bins == "obs") {
+          tmp_bins <- unique(c(0, sort(unique(obs$time)), max(obs$time))) 
+        } else {
+          if (!(bins %in% c("time","data"))) {
+            warning(paste0("Note: bining method ", bins," might be slow. Consider using method 'time', or specify 'bins' as numeric vector"))
+          }
+          tmp_bins <- unique(c(0, auto_bin(sim %>% mutate(idv=time), type=bins, n_bins = n_bins-1), max(sim$time)))
+        }
+      }
+      if(class(bins) == "numeric") {
+        tmp_bins <- unique(c(0, bins, max(obs$time))) 
+      }
+    }
     for (i in 1:n_sim) {
       tmp <- sim %>% dplyr::filter(sim == i)
       if (rtte) {
@@ -275,7 +286,7 @@ vpc_tte <- function(sim = NULL,
     }
     if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
       vpc_theme <- create_vpc_theme()
-    }    
+    }
     pl <- ggplot(sim_km, aes(x=bin_mid, y=qmed, group=strat))       
     if (smooth) {
       if (!is.null(stratify_color)) {
@@ -365,6 +376,10 @@ vpc_tte <- function(sim = NULL,
       }
     }
   }
+  if(!(class(bins) == "logical" && bins == FALSE)) {
+    bdat <- data.frame(cbind(x=tmp_bins, y=NA))
+    pl <- pl + geom_rug(data=bdat, sides = "t", aes(x = x, y=y, group=NA), colour=vpc_theme$bin_separators_color)
+  }
   if (!is.null(title)) {
     pl <- pl + ggtitle(title)  
   }
@@ -383,7 +398,11 @@ vpc_tte <- function(sim = NULL,
   if(!is.null(ylab)) {
     pl <- pl + ylab(ylab)
   } else {
-    pl <- pl + ylab("Survival (%)")
+    if(is.null(kmmc)) {
+      pl <- pl + ylab("Survival (%)")
+    } else {
+      pl <- pl + ylab(paste0("Mean (", kmmc, ")"))
+    }
   }
   if(plot) {
     print(pl)
