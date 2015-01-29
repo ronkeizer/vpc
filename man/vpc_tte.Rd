@@ -5,12 +5,12 @@
 \title{VPC function for survival-type data}
 \usage{
 vpc_tte(sim = NULL, obs = NULL, rtte = FALSE, events = NULL,
-  obs_dv = "dv", sim_dv = "sdv", obs_idv = "time", sim_idv = "time",
-  obs_id = "id", sim_id = "id", dense_grid = "auto", pi_med = FALSE,
-  nonmem = "auto", reverse_prob = FALSE, stratify = NULL,
-  stratify_color = NULL, ci = c(0.05, 0.95), plot = FALSE, xlab = NULL,
-  ylab = NULL, title = NULL, smooth = FALSE, vpc_theme = NULL,
-  ggplot_theme = NULL, facet = "wrap", show_warnings = FALSE)
+  bins = FALSE, n_bins = 10, software = "auto", obs_cols = NULL,
+  sim_cols = NULL, kmmc = NULL, pi_med = FALSE, reverse_prob = FALSE,
+  stratify = NULL, stratify_color = NULL, ci = c(0.05, 0.95),
+  plot = FALSE, xlab = NULL, ylab = NULL, as_percentage = TRUE,
+  title = NULL, smooth = FALSE, vpc_theme = NULL, ggplot_theme = NULL,
+  facet = "wrap", show_warnings = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -21,23 +21,7 @@ vpc_tte(sim = NULL, obs = NULL, rtte = FALSE, events = NULL,
 
 \item{events}{numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events.}
 
-\item{obs_dv}{variable in data.frame for observed dependent value. "dv" by default}
-
-\item{sim_dv}{variable in data.frame for simulated dependent value. "sdv" by default}
-
-\item{obs_idv}{variable in data.frame for observed independent value. "time" by default}
-
-\item{sim_idv}{variable in data.frame for simulated independent value. "time" by default}
-
-\item{obs_id}{variable in data.frame for observed individual. "id" by default}
-
-\item{sim_id}{variable in data.frame for simulated individual. "id" by default}
-
-\item{dense_grid}{Was a dense grid used to simulate and should the vpc_tte function remove the non-event data? TRUE or FALSE. Either way should not affect plot, when points removed the plot will just be generated faster.}
-
 \item{pi_med}{plot the median of the simulated data? Default is FALSE.}
-
-\item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect.}
 
 \item{reverse_prob}{reverse the probability scale (i.e. plot 1-probability)}
 
@@ -64,6 +48,22 @@ vpc_tte(sim = NULL, obs = NULL, rtte = FALSE, events = NULL,
 \item{facet}{either "wrap", "columns", or "rows"}
 
 \item{show_warnings}{Default is FALSE}
+
+\item{obs_dv}{variable in data.frame for observed dependent value. "dv" by default}
+
+\item{sim_dv}{variable in data.frame for simulated dependent value. "sdv" by default}
+
+\item{obs_idv}{variable in data.frame for observed independent value. "time" by default}
+
+\item{sim_idv}{variable in data.frame for simulated independent value. "time" by default}
+
+\item{obs_id}{variable in data.frame for observed individual. "id" by default}
+
+\item{sim_id}{variable in data.frame for simulated individual. "id" by default}
+
+\item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect.}
+
+\item{dense_grid}{Was a dense grid used to simulate and should the vpc_tte function remove the non-event data? TRUE or FALSE. Either way should not affect plot, when points removed the plot will just be generated faster.}
 }
 \value{
 a list containing calculated VPC information, and a ggplot2 object

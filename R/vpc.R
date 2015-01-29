@@ -21,8 +21,8 @@
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.  
 #' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.  
-#' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.
-#' @param log_y Boolean indacting whether y-axis should be shown as logarithmic. Default is FALSE.
+#' @param plot Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.
+#' @param log_y Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.
 #' @param log_y_min minimal value when using log_y argument. Default is 1e-3.
 #' @param xlab ylab as numeric vector of size 2
 #' @param ylab ylab as numeric vector of size 2
@@ -31,6 +31,7 @@
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param ggplot_theme specify a custom ggplot2 theme
 #' @param facet either "wrap", "columns", or "rows" 
+#' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
 #' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
 #' @seealso \link{sim_data}, \link{vpc_cens}, \link{vpc_tte}
@@ -82,7 +83,8 @@ vpc <- function(sim = NULL,
                 smooth = TRUE,
                 vpc_theme = NULL,
                 ggplot_theme = NULL,
-                facet = "wrap") {
+                facet = "wrap",
+                vpcdb = FALSE) {
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }
@@ -286,6 +288,7 @@ vpc <- function(sim = NULL,
                  theme = theme,
                  ggplot_theme = ggplot_theme,
                  plot = plot)
+  if(vpcdb) return(vpc_db)
   pl <- plot_vpc(vpc_db)
   return(pl)
 }
