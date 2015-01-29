@@ -11,7 +11,7 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   pi = c(0.05, 0.95), ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
   log_y = FALSE, log_y_min = 0.001, xlab = NULL, ylab = NULL,
   title = NULL, smooth = TRUE, vpc_theme = NULL, ggplot_theme = NULL,
-  facet = "wrap")
+  facet = "wrap", vpcdb = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -32,7 +32,7 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{show}{what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
 
-\item{plot}{Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.}
+\item{plot}{Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.}
 
 \item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
 
@@ -50,7 +50,7 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{lloq}{Number or NULL indicating lower limit of quantification. Default is NULL.}
 
-\item{log_y}{Boolean indacting whether y-axis should be shown as logarithmic. Default is FALSE.}
+\item{log_y}{Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.}
 
 \item{log_y_min}{minimal value when using log_y argument. Default is 1e-3.}
 
@@ -67,6 +67,8 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 \item{ggplot_theme}{specify a custom ggplot2 theme}
 
 \item{facet}{either "wrap", "columns", or "rows"}
+
+\item{vpcdb}{Boolean whether to return the underlying vpcdb rather than the plot}
 
 \item{bins}{either "density", "time", or "data", or a numeric vector specifying the bin separators.}
 
