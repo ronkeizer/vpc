@@ -9,7 +9,7 @@ compute_kmmc <- function(dat, strat = NULL, reverse_prob = FALSE, kmmc = "DOSE")
       t <- unique(summid$time)
       km_fit <- data.frame(time = t[order(t)], surv=1)
       for (j in seq(km_fit$time)) {
-        km_fit$surv[j] <- mean(summid[summid$time <= km_fit$time[j],]$covt) 
+        km_fit$surv[j] <- mean(summid[summid$time >= km_fit$time[j],]$covt) 
       }      
       if(reverse_prob) {
         tmp <- rbind(tmp, data.frame(time = km_fit$time, surv = 1-km_fit$surv, strat = strats[i]))            
