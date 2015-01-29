@@ -73,7 +73,7 @@ vpc_tte <- function(sim = NULL,
                     plot = FALSE,
                     xlab = NULL, 
                     ylab = NULL,
-                    as_percentage = FALSE,
+                    as_percentage = TRUE,
                     title = NULL,
                     smooth = FALSE,
                     vpc_theme = NULL,
@@ -101,8 +101,8 @@ vpc_tte <- function(sim = NULL,
   software_types <- c("nonmem", "phoenix") 
   if(software_type %in% software_types) {
     if (software_type == "nonmem") {
-      obs_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
-      sim_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
+      obs_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", cens = "CENS")
+      sim_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", cens = "CENS")
       
       if(!is.null(obs)) {
         old_class <- class(obs)
@@ -114,12 +114,12 @@ vpc_tte <- function(sim = NULL,
       }
     } 
     if (software_type == "phoenix") {
-      obs_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
-      sim_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
+      obs_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", cens = "CENS")
+      sim_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", cens = "CENS")
     }    
   } else {
-    obs_cols_default <- list(dv = "dv", id = "id", idv = "time", pred = "pred")
-    sim_cols_default <- list(dv = "dv", id = "id", idv = "time", pred = "pred")    
+    obs_cols_default <- list(dv = "dv", id = "id", idv = "time", cens = "cens")
+    sim_cols_default <- list(dv = "dv", id = "id", idv = "time", cens = "cens")    
   }
   
   obs_cols <- replace_list_elements(obs_cols_default, obs_cols)
@@ -149,11 +149,24 @@ vpc_tte <- function(sim = NULL,
   # format obs data
   if(!is.null(obs)) {
     if (length(obs[[obs_cols$id]]) == 0) {
-      warning("Warning: no ID column found, assuming 1 row per ID!")
+      message("Warning: No ID column found, assuming 1 row per ID.")
       obs$id <- 1:length(obs[,1])
     }
     obs$time <- obs[[obs_cols$idv]]
     obs$dv <- obs[[obs_cols$dv]]
+    if(max(obs$dv) > 1) { # guessing DV definition if not just 0/1
+      if(max(obs$dv) == 2) { # common approach in NONMEM, 2 = censored
+        obs[obs$dv != 1,]$dv <- 0
+        message("Warning: Expected observed dependent variable to contain only 0 (censored, or no event observed) or 1 (event observed). Setting all observations != 1 to 0.")
+      } else {
+        obs[obs$dv != 1,]$dv <- 1 # some people use DV to indicate the event time. 
+        message("Warning: Expected observed dependent variable to contain only 0 (censored, or no event observed) or 1 (event observed). Setting all observations != 1 to 1.")
+      }
+    }
+    if(obs_cols$cens %in% colnames(obs)) { # some people use a 'cens' column to indicate censoring
+     message("Detected extra column with censoring information in observation data, assuming 1=censored event, 0=observed event.")
+     obs[obs[[obs_cols$cens]] == 1,]$dv <- 0
+    }
     if (rtte) {
       obs <- relative_times(obs)    
       obs <- obs %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0)) 
@@ -173,7 +186,7 @@ vpc_tte <- function(sim = NULL,
     obs_km <- NULL
   }
   if(!is.null(kmmc) & (class(bins) == "logical" && bins == FALSE)) {
-    warning("With KMMC-type plots, binning of simulated data is recommended. See documentation for the 'bins' argument for more information.")
+    message("Tip: with KMMC-type plots, binning of simulated data is recommended. See documentation for the 'bins' argument for more information.")
   }
     
   if(!is.null(sim)) {
@@ -181,6 +194,19 @@ vpc_tte <- function(sim = NULL,
     sim$id <- sim[[sim_cols$id]]
     sim$dv <- sim[[sim_cols$dv]]    
     sim$time <- sim[[sim_cols$idv]]
+    if(max(sim$dv) > 2) { # guessing DV definition if not just 0/1
+      if(max(sim$dv) == 2) { # common approach in NONMEM, 2 = censored
+        sim[sim$dv != 1,]$dv <- 0
+        message("Warning: Expected simulated dependent variable to contain only 0 (censored, or no event simerved) or 1 (event simerved). Setting all simulated observations != 1 to 0.")
+      } else {
+        sim[sim$dv != 1,]$dv <- 1 # some people use DV to indicate the event time. 
+        message("Warning: Expected simulated dependent variable to contain only 0 (censored, or no event simerved) or 1 (event simerved). Setting all simulated observations != 1 to 1.")
+      }
+    }
+    if(sim_cols$cens %in% names(sim$cens)) { # some people use a 'cens' column to indicate censoring
+      cat("Detected extra column with censoring information in simulation data.")
+      sim[sim[[sim_cols$cens]] == 1,]$dv <- 0
+    }
     
     # add sim index number
     sim$sim <- add_sim_index_number(sim, id = sim_cols$id)
@@ -209,7 +235,7 @@ vpc_tte <- function(sim = NULL,
           tmp_bins <- unique(c(0, sort(unique(obs$time)), max(obs$time))) 
         } else {
           if (!(bins %in% c("time","data"))) {
-            warning(paste0("Note: bining method ", bins," might be slow. Consider using method 'time', or specify 'bins' as numeric vector"))
+            message(paste0("Note: bining method ", bins," might be slow. Consider using method 'time', or specify 'bins' as numeric vector"))
           }
           tmp_bins <- unique(c(0, auto_bin(sim %>% mutate(idv=time), type=bins, n_bins = n_bins-1), max(sim$time)))
         }
@@ -326,7 +352,7 @@ vpc_tte <- function(sim = NULL,
         geom_step <- geom_line
       }
       if (show_warnings) {
-        warning ("Warning, some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).")        
+        message("Warning: some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).")        
       }
       if (!is.null(stratify_color)) {
         pl <- pl + 
@@ -399,7 +425,13 @@ vpc_tte <- function(sim = NULL,
     pl <- pl + ylab(ylab)
   } else {
     if(is.null(kmmc)) {
-      pl <- pl + ylab("Survival (%)")
+      if(as_percentage) {
+        pl <- pl + 
+          scale_y_continuous(labels = percent) +
+          ylab("Survival (%)")        
+      } else {
+        pl <- pl + ylab("Survival")
+      }
     } else {
       pl <- pl + ylab(paste0("Mean (", kmmc, ")"))
     }
