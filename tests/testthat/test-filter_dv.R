@@ -12,6 +12,8 @@ class(nonmem_evid)     <- c("nonmem", "data.frame")
 class(nonmem)          <- c("nonmem", "data.frame")
 class(nonmem_filtered) <- c("nonmem", "data.frame")
 class(nonmem_df)       <- c("nonmem", "data.frame")
+class(nonmem_filtered_mdv) <- c("nonmem", "data.frame")
+class(nonmem_filtered_evid) <- c("nonmem", "data.frame")
 
 test_that("filtering values for nonmem works properly", {
   expect_equal(filter_dv(nonmem_mdv), nonmem_filtered_mdv)
@@ -19,3 +21,4 @@ test_that("filtering values for nonmem works properly", {
   expect_equal(filter_dv(nonmem), nonmem_filtered)
   expect_equal(filter_dv(nonmem_df), nonmem_df)
 })
+
