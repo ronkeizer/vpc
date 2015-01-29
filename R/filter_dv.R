@@ -1,4 +1,4 @@
-filter_dv<- function(x, ...) {
+filter_dv <- function(x, ...) {
   available_methods <- c("phx", "nonmem")
   if(sum(available_methods %in% class(x)) > 0)  {
     UseMethod("filter_dv", x)    

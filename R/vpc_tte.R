@@ -148,6 +148,7 @@ vpc_tte <- function(sim = NULL,
 
   # format obs data
   if(!is.null(obs)) {
+    obs$id <- obs[[obs_cols$id]]
     if (length(obs[[obs_cols$id]]) == 0) {
       message("Warning: No ID column found, assuming 1 row per ID.")
       obs$id <- 1:length(obs[,1])
@@ -196,7 +197,7 @@ vpc_tte <- function(sim = NULL,
     sim$time <- sim[[sim_cols$idv]]
     if(max(sim$dv) > 2) { # guessing DV definition if not just 0/1
       if(max(sim$dv) == 2) { # common approach in NONMEM, 2 = censored
-        sim[sim$dv != 1,]$dv <- 0
+        sim[sim$dv != 1,]$dv <- 1
         message("Warning: Expected simulated dependent variable to contain only 0 (censored, or no event simerved) or 1 (event simerved). Setting all simulated observations != 1 to 0.")
       } else {
         sim[sim$dv != 1,]$dv <- 1 # some people use DV to indicate the event time. 
@@ -213,16 +214,17 @@ vpc_tte <- function(sim = NULL,
         
     # set last_observation and repeat_obs per sim&id
     sim <- sim %>% group_by(sim, id) %>% mutate(last_obs = 1*(1:length(time) == length(time)))  
-    sim <- sim %>% group_by(sim, id) %>% mutate(repeat_obs = 1*(cumsum(dv) > 1))  
+    sim <- sim %>% group_by(sim, id) %>% mutate(repeat_obs = 1*(cumsum(dv) > 1 || (cumsum(dv) == 1 && dv==0)))  
 
     # filter out stuff
-    sim <- sim[(sim$dv == 1 & sim$last_obs == 0) | (sim$last_obs == 1 & sim$repeat_obs == 0),]
     if (!rtte) {
-      sim <- sim[sim$repeat_obs == 0,]
+      sim <- sim[(sim$dv == 1 & sim$last_obs == 0) | (sim$last_obs == 1 & sim$repeat_obs == 0),]
+      sim$sim_id <- paste0(sim$sim, "_", sim$id) # remove duplicate observations rows per id
+      sim <- sim[!duplicated(sim$sim_id),]  
     }
-    sim$sim_id <- paste0(sim$sim, "_", sim$id, "_", sim$time) # remove duplicate observations rows per id
-    sim <- sim[!duplicated(sim$sim_id),]
-
+    sim$sim_id_time <- paste0(sim$sim, "_", sim$id, "_", sim$time) # remove duplicate observations rows per id
+    sim <- sim[!duplicated(sim$sim_id_time),]      
+    
     n_sim <- length(unique(sim$sim))        
     all <- c()
     tmp_bins <- unique(c(0, sort(unique(sim$time)), max(sim$time))) 
