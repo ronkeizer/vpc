@@ -1,13 +1,13 @@
 Package: vpc
 Title: Create visual predictive checks in R
-Version: 0.1
+Version: 0.1.1
 Author: Ron Keizer <ronkeizer@gmail.com>
 Maintainer: Ron Keizer <ronkeizer@gmail.com>
 Description: Create visual predictive checks in R, a commonly used diagnostic
     plot in pharmacometrics. Create it completely within the R environment, so
     without the use of PsN and Xpose.
 Depends: 
-    R (>= 2.14.0),
+    R (>= 3.0.2),
     dplyr,
     reshape2,
     ggplot2,
