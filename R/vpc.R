@@ -140,7 +140,6 @@ vpc <- function(sim = NULL,
   if(!is.null(sim)) {  
     sim <- filter_dv(sim)
   }
-  
   obs <- format_vpc_input_data(obs, obs_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
   sim <- format_vpc_input_data(sim, sim_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
   
@@ -172,24 +171,24 @@ vpc <- function(sim = NULL,
   sim <- bin_data(sim, bins, "idv")  
   
   if (pred_corr) {
-    if (!is.null(obs) & !obs_pred %in% names(obs)) {
+    if (!is.null(obs) & !obs_cols$pred %in% names(obs)) {
       warning("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...")      
-      if (!sim_pred %in% names(sim)) {
+      if (!sim_cols$pred %in% names(sim)) {
         stop("Error: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
       } else {
-        obs[[obs_pred]] <- sim[1:length(obs[,1]), sim_pred]
+        obs[[obs_cols$pred]] <- sim[1:length(obs[,1]), sim_cols$pred]
         warning ("OK")
       }
     } else {
-      if (!sim_pred %in% names(sim)) {
+      if (!sim_cols$pred %in% names(sim)) {
         stop("Warning: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
       }      
     }
     if(!is.null(obs)) {
-      obs$pred <- obs[[obs_pred]]      
+      obs$pred <- obs[[obs_cols$pred]]      
     }
     if(!is.null(sim)) {
-      sim$pred <- sim[[sim_pred]]      
+      sim$pred <- sim[[sim_cols$pred]]      
     }
   }
   if (!is.null(obs)) {  
