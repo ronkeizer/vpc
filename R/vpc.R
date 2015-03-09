@@ -84,7 +84,8 @@ vpc <- function(sim = NULL,
                 vpc_theme = NULL,
                 ggplot_theme = NULL,
                 facet = "wrap",
-                vpcdb = FALSE) {
+                vpcdb = FALSE,
+                verbose = FALSE) {
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }
@@ -142,12 +143,12 @@ vpc <- function(sim = NULL,
   sim_cols <- replace_list_elements(sim_cols_default, sim_cols)
   
   if(!is.null(obs)) {
-    obs <- filter_dv(obs)
-    obs <- format_vpc_input_data(obs, obs_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
+    obs <- filter_dv(obs, verbose)
+    obs <- format_vpc_input_data(obs, obs_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "observed", verbose)
   }
   if(!is.null(sim)) {  
-    sim <- filter_dv(sim)
-    sim <- format_vpc_input_data(sim, sim_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
+    sim <- filter_dv(sim, verbose)
+    sim <- format_vpc_input_data(sim, sim_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated", verbose)
   }
 
   stratify_original <- stratify

@@ -94,7 +94,7 @@ _Note: The output from the `vpc()` functions are ggplot2-objects, and they can e
 Pred-correction, and plotting of data:
 
 ```{r, eval = eval_all, fig.width=5, fig.height=5}
-vpc (sim = sim, obs = obs, pred_corr = TRUE, plot_obs_dv = TRUE)
+vpc (sim = sim, obs = obs, pred_corr = TRUE, show=list(obs_dv = TRUE, obs_ci = TRUE))
 ```
 
 With more explicit use of options, and saving the object:
@@ -111,7 +111,7 @@ vpc(sim = sim,
            pi = c(0.05, 0.95),                          # prediction interval simulated data to show
            ci = c(0.05, 0.95),                          # confidence intervals to show
            pred_corr = FALSE,                           # perform prediction-correction?
-           plot_obs_dv = TRUE,                              # plot observations?
+           show = list(obs_dv = TRUE),                              # plot observations?
            facet = "rows",                              # wrap stratifications, or as "row" or "column"
            ylab = "Concentration", 
             xlab = "Time (hrs)")

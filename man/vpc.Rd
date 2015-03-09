@@ -11,7 +11,7 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   pi = c(0.05, 0.95), ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
   log_y = FALSE, log_y_min = 0.001, xlab = NULL, ylab = NULL,
   title = NULL, smooth = TRUE, vpc_theme = NULL, ggplot_theme = NULL,
-  facet = "wrap", vpcdb = FALSE)
+  facet = "wrap", vpcdb = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}

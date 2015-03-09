@@ -4,13 +4,14 @@
 #' @param type auto-binning type: "density", "time", or "data"
 #' @param n_bins number of bins to use. For "density" the function might not return a solution with the exact number of bins.
 #' @param column name of independent variable
+#' @param verbose show warnings and other messages (TRUE or FALSE)
 #' @return A vector of bin separators
 #' @export auto_bin
 #' @seealso \code{\link{vpc}}
 #' @details
 #' This function calculates bin separators (e.g. for use in a vpc) based on nadirs in the density functions for the indenpendent variable
 
-auto_bin <- function (dat, type="kmeans", n_bins = 8) {
+auto_bin <- function (dat, type="kmeans", n_bins = 8, verbose = TRUE) {
   all_bins <- list()
   l_bins <- c()
   if(type %in% c("jenks", "kmeans", "pretty", "quantile", "hclust", "sd", "bclust", "fisher")) {
@@ -24,7 +25,7 @@ auto_bin <- function (dat, type="kmeans", n_bins = 8) {
     return(bins$brks)      
   } 
   if (n_bins == "auto") {
-    warning("Automatic optimization of bin number is not available for this binning method, reverting to 8 bins.")
+    msg("Automatic optimization of bin number is not available for this binning method, reverting to 8 bins.", verbose)
     n_bins <- 8
   }
   n_bins <- n_bins + 1 # bin_separators

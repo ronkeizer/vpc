@@ -1,4 +1,4 @@
-add_stratification <- function (dat, strat) {
+add_stratification <- function (dat, strat, verbose = FALSE) {
   if(is.null(strat)) {
     dat$strat <- 1
   } else {
@@ -12,7 +12,7 @@ add_stratification <- function (dat, strat) {
       }      
     } else {
       dat$strat <- 1      
-      warning("Specified stratification column name not found, not performing stratification.")
+      msg("Specified stratification column name not found, not performing stratification.", verbose)
     }
   }  
   dat$strat <- as.factor(dat$strat)

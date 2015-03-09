@@ -1,4 +1,4 @@
-format_vpc_input_data <- function(dat, cols, lloq, uloq, strat, bins, log_y, log_y_min, what = "observed") {
+format_vpc_input_data <- function(dat, cols, lloq, uloq, strat, bins, log_y, log_y_min, what = "observed", verbose = FALSE) {
   if(cols[["id"]] %in% colnames(dat)) {
     if ("id" %in% colnames(dat) &! cols$id == "id") {
       colnames(dat)[match("id", colnames(dat))] <- "id.old"
@@ -6,8 +6,7 @@ format_vpc_input_data <- function(dat, cols, lloq, uloq, strat, bins, log_y, log
     colnames(dat)[match(cols$id, colnames(dat))] <- "id"    
   }
   if(is.na(match("id", colnames(dat)))[1]) {
-    cat (paste0("No column for id indicator found in ", what, " data, stopping!"))
-    stop()
+    stop (paste0("No column for id indicator found in ", what, " data, can't continue!"))
   }  
   if(cols$dv %in% colnames(dat)) {
     if ("dv" %in% colnames(dat) &! cols$dv == "dv") {
@@ -16,8 +15,7 @@ format_vpc_input_data <- function(dat, cols, lloq, uloq, strat, bins, log_y, log
     colnames(dat)[match(cols$dv, colnames(dat))] <- "dv"    
   }  
   if(is.na(match("dv", colnames(dat)))[1]) {
-    cat (paste0("No column for dependent variable found in ", what, " data, stopping!"))
-    stop()
+    stop (paste0("No column for dependent variable found in ", what, " data, can't continue!"))
   }  
   if(cols$idv %in% colnames(dat)) {
     if ("idv" %in% colnames(dat) &! cols$idv == "idv") {
@@ -26,8 +24,7 @@ format_vpc_input_data <- function(dat, cols, lloq, uloq, strat, bins, log_y, log
     colnames(dat)[match(cols$idv, colnames(dat))] <- "idv"    
   }
   if(is.na(match("idv", colnames(dat)))[1]) {
-    cat (paste0("No column for indepentent variable found in ", what, " data, stopping!"))
-    stop()
+    stop (paste0("No column for indepentent variable found in ", what, " data, can't continue!"))
   }  
   if (!is.null(uloq)) { dat$dv[dat$dv > uloq] <- uloq }
   if (!is.null(lloq)) { dat$dv[dat$dv < lloq] <- lloq }
