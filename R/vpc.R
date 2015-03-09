@@ -90,11 +90,19 @@ vpc <- function(sim = NULL,
   }
   
   if(!is.null(psn_folder)) {
-    obs <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
-    sim <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="simulation.1.npctab")[1]))
+    if(!is.null(obs)) {
+      obs <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
+    }
+    if(!is.null(sim)) {
+      sim <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="simulation.1.npctab")[1]))
+    }
     software = "nonmem"
   }
-  software_type <- guess_software(software, obs)
+  if (!is.null(obs)) {
+    software_type <- guess_software(software, obs)
+  } else {
+    software_type <- guess_software(software, sim)
+  }
   # column names
   show_default <- list (
     obs_dv = FALSE,
@@ -112,7 +120,6 @@ vpc <- function(sim = NULL,
     if (software_type == "nonmem") {
       obs_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
       sim_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
-      
       if(!is.null(obs)) {
         old_class <- class(obs)
         class(obs) <- c("nonmem", old_class)
@@ -136,13 +143,13 @@ vpc <- function(sim = NULL,
   
   if(!is.null(obs)) {
     obs <- filter_dv(obs)
+    obs <- format_vpc_input_data(obs, obs_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
   }
   if(!is.null(sim)) {  
     sim <- filter_dv(sim)
+    sim <- format_vpc_input_data(sim, sim_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
   }
-  obs <- format_vpc_input_data(obs, obs_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
-  sim <- format_vpc_input_data(sim, sim_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
-  
+
   stratify_original <- stratify
   if(!is.null(stratify_color)) {
     if (is.null(stratify)) {
@@ -167,9 +174,13 @@ vpc <- function(sim = NULL,
     }
   }
   bins <- unique(bins)
-  obs <- bin_data(obs, bins, "idv") 
-  sim <- bin_data(sim, bins, "idv")  
-  
+  if(!is.null(obs)) {
+    obs <- bin_data(obs, bins, "idv") 
+  }
+  if(!is.null(sim)) {
+    sim <- bin_data(sim, bins, "idv")  
+  }
+
   if (pred_corr) {
     if (!is.null(obs) & !obs_cols$pred %in% names(obs)) {
       warning("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...")      
