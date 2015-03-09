@@ -11,10 +11,15 @@
 #' @details
 #' This function calculates bin separators (e.g. for use in a vpc) based on nadirs in the density functions for the indenpendent variable
 
-auto_bin <- function (dat, type="kmeans", n_bins = 8, verbose = TRUE) {
+auto_bin <- function (dat, type="kmeans", n_bins = 8, verbose = FALSE) {
   all_bins <- list()
   l_bins <- c()
-  if(type %in% c("jenks", "kmeans", "pretty", "quantile", "hclust", "sd", "bclust", "fisher")) {
+  if (is.null(type) || type == "none") {
+    msg("No binning performed.", verbose)
+    return(unique(dat[["idv"]]))    
+  }
+  # use R's native binning approaches?
+  if(!is.null(type) && type %in% c("jenks", "kmeans", "pretty", "quantile", "hclust", "sd", "bclust", "fisher")) {
     suppressWarnings({
       if(class(n_bins) != "numeric" | is.null(n_bins)) {
         bins <- classIntervals(dat[["idv"]], style = type)                
@@ -23,7 +28,7 @@ auto_bin <- function (dat, type="kmeans", n_bins = 8, verbose = TRUE) {
       }      
     })
     return(bins$brks)      
-  } 
+  }
   if (n_bins == "auto") {
     msg("Automatic optimization of bin number is not available for this binning method, reverting to 8 bins.", verbose)
     n_bins <- 8

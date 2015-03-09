@@ -70,7 +70,7 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{vpcdb}{Boolean whether to return the underlying vpcdb rather than the plot}
 
-\item{bins}{either "density", "time", or "data", or a numeric vector specifying the bin separators.}
+\item{bins}{either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.}
 
 \item{obs_pred}{variable in data.frame for population predicted value. "pred" by default}
 

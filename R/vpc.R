@@ -5,7 +5,7 @@
 #' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
 #' @param bins either "auto" or a numeric vector specifying the bin separators.  
-#' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.  
+#' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.  
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
 #' @param obs_cols observation dataset column names
 #' @param sim_cols simulation dataset column names
@@ -172,7 +172,7 @@ vpc <- function(sim = NULL,
       bins <- auto_bin(sim, bins, n_bins)            
     }
     if (is.null(bins)) {
-      stop("Binning unsuccessful, try increasing the number of bins.")
+      msg("Automatic binning unsuccessful, try increasing the number of bins, or specify vector of bin separators manually.", verbose)
     }
   }
   bins <- unique(bins)
@@ -185,12 +185,12 @@ vpc <- function(sim = NULL,
 
   if (pred_corr) {
     if (!is.null(obs) & !obs_cols$pred %in% names(obs)) {
-      warning("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...")      
+      msg("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...", verbose)      
       if (!sim_cols$pred %in% names(sim)) {
         stop("Error: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
       } else {
         obs[[obs_cols$pred]] <- sim[1:length(obs[,1]), sim_cols$pred]
-        warning ("OK")
+        msg ("OK", verbose)
       }
     } else {
       if (!sim_cols$pred %in% names(sim)) {
