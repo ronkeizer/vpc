@@ -113,7 +113,8 @@ vpc <- function(sim = NULL,
     sim_median_ci = TRUE,
     pi = FALSE,
     pi_ci = TRUE,
-    pi_as_area = FALSE)
+    pi_as_area = FALSE,
+    bin_sep = TRUE)
   show <- replace_list_elements(show_default, show)
   
   software_types <- c("nonmem", "phoenix") 
