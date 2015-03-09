@@ -21,7 +21,7 @@ The VPC is the most widely used diagnostic tool in pharmacometrics (see e.g. [he
 ## Installation
 
 ```{r, warning=FALSE, message=FALSE, error=FALSE}
-    eval_all <- FALSE
+    eval_all <- TRUE
     # library("devtools")
     # install_github("ronkeizer/vpc")
     library(vpc)
@@ -102,10 +102,12 @@ With more explicit use of options, and saving the object:
 ```{r, eval = eval_all, fig.width=4, fig.height=4}
 vpc(sim = sim, 
            obs = obs,                                   # supply simulation and observation dataframes
-           obs_dv = "dv",                               # these column names are the default,
-           obs_idv = "time",                            #   update these if different.
-           sim_dv = "sdv",
-           sim_idv = "time",
+           obs_cols = list(
+             dv = "dv",                               # these column names are the default,
+             idv = "time"),                            #   update these if different.
+           sim_cols = list(
+             dv = "sdv",
+             idv = "time"),
            bins = c(0, 2, 4, 6, 8, 10, 16, 25),             # specify bin separators manually
            stratify = c("sex"),                         # multiple stratifications possible, just supply as vector
            pi = c(0.05, 0.95),                          # prediction interval simulated data to show

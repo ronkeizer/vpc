@@ -189,7 +189,8 @@ vpc <- function(sim = NULL,
       if (!sim_cols$pred %in% names(sim)) {
         stop("Error: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
       } else {
-        obs[[obs_cols$pred]] <- sim[1:length(obs[,1]), sim_cols$pred]
+        obs <- obs %>% ungroup() 
+        obs[[obs_cols$pred]] <- unlist(sim[1:length(obs$id), sim_cols$pred])
         msg ("OK", verbose)
       }
     } else {
@@ -198,7 +199,7 @@ vpc <- function(sim = NULL,
       }      
     }
     if(!is.null(obs)) {
-      obs$pred <- obs[[obs_cols$pred]]      
+      obs %>% mutate(pred = obs[[obs_cols$pred]])      
     }
     if(!is.null(sim)) {
       sim$pred <- sim[[sim_cols$pred]]      
@@ -206,7 +207,7 @@ vpc <- function(sim = NULL,
   }
   if (!is.null(obs)) {  
     if (pred_corr) {
-      obs <- obs %>% group_by(strat, bin) %>% mutate(pred_bin = mean(pred))
+      obs <- obs %>% group_by(strat, bin) %>% mutate(pred_bin = mean(as.num(pred)))
       obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
     }
   }  
