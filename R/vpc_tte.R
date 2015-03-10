@@ -3,7 +3,8 @@
 #' Creates a VPC plot from observed and simulation survival data
 #' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
-#' @param rtte repeated time-to-event data? Deafult is FALSE (single-event TTE)
+#' @param rtte repeated time-to-event data? Deafult is FALSE (treat as single-event TTE)
+#' @param rtte_calc_diff recalculate time (T/F)? When simulating in NONMEM, you will probably need to set this to TRUE to recalculate the TIME to relative times between events (unless you output the time difference between events and specify that as independent variable to the vpc_tte() funciton.
 #' @param events numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events. 
 #' @param pi_med plot the median of the simulated data? Default is FALSE.
 #' @param obs_dv variable in data.frame for observed dependent value. "dv" by default
@@ -59,6 +60,7 @@ vpc_tte <- function(sim = NULL,
                     obs = NULL, 
                     psn_folder = NULL,
                     rtte = FALSE,
+                    rtte_calc_diff = TRUE,
                     events = NULL,
                     bins = FALSE,
                     n_bins = 10,
@@ -113,6 +115,7 @@ vpc_tte <- function(sim = NULL,
     class(sim) <- c(software_type, old_class)
   }
 
+  ## remove EVID != 0 / MDV != 0
   if(!is.null(obs)) {
     obs <- filter_dv(obs, verbose)
   }
@@ -160,7 +163,9 @@ vpc_tte <- function(sim = NULL,
       obs[obs$cens == 1,]$dv <- 0
     }
     if (rtte) {
-      obs <- relative_times(obs)    
+      if(rtte_calc_diff) {
+        obs <- relative_times(obs)
+      }
       obs <- obs %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0)) 
       stratify <- c(stratify, "rtte")
     } else {
@@ -183,9 +188,13 @@ vpc_tte <- function(sim = NULL,
     
   if(!is.null(sim)) {
     # format sim data and compute KM curve CI for simulations
-    sim$id <- sim[[cols$sim$id]]
-    sim$dv <- sim[[cols$sim$dv]]    
-    sim$time <- sim[[cols$sim$idv]]
+    if (all(c(cols$sim$idv, cols$sim$id, cols$sim$dv) %in% names(sim))) {
+      sim$id <- sim[[cols$sim$id]]
+      sim$dv <- sim[[cols$sim$dv]]    
+      sim$time <- sim[[cols$sim$idv]]
+    } else {
+      stop("Not all required variables were found, please check column definitions for id, dv and time.")  
+    }
     if(max(sim$dv) > 2) { # guessing DV definition if not just 0/1
       if(max(sim$dv) == 2) { # common approach in NONMEM, 2 = censored
         sim[sim$dv != 1,]$dv <- 1
@@ -203,20 +212,22 @@ vpc_tte <- function(sim = NULL,
     
     # add sim index number
     sim$sim <- add_sim_index_number(sim, id = cols$sim$id)
-        
+      
     # set last_observation and repeat_obs per sim&id
-    sim <- sim %>% group_by(sim, id) %>% mutate(last_obs = 1*(1:length(time) == length(time)))  
-    sim <- sim %>% group_by(sim, id) %>% mutate(repeat_obs = 1*(cumsum(dv) > 1 || (cumsum(dv) == 1 && dv==0)))  
+    sim <- sim %>% group_by(sim, id) %>% mutate(last_obs = 1*(1:length(time) == length(time)), repeat_obs = 1*(cumsum(dv) > 1))  
 
-    # filter out stuff
-    if (!rtte) {
-      sim <- sim[(sim$dv == 1 & sim$last_obs == 0) | (sim$last_obs == 1 & sim$repeat_obs == 0),]
-      sim$sim_id <- paste0(sim$sim, "_", sim$id) # remove duplicate observations rows per id
+    # filter out stuff and recalculate rtte times
+    sim <- sim[sim$dv == 1 | (sim$last_obs == 1 & sim$dv == 0),]
+    if(rtte) {
+      sim <- sim %>% dplyr::group_by(sim, id) %>% dplyr::mutate(rtte = cumsum(dv != 0)) %>% arrange(sim, id)       
+      if(rtte_calc_diff) {
+        sim <- relative_times(sim, simulation=TRUE)
+      }
+    } else {
+      sim$sim_id <- paste0(sim$sim, "_", sim$id) # remove duplicate observations rows per id to filter out repeated obs
       sim <- sim[!duplicated(sim$sim_id),]  
     }
-    sim$sim_id_time <- paste0(sim$sim, "_", sim$id, "_", sim$time) # remove duplicate observations rows per id
-    sim <- sim[!duplicated(sim$sim_id_time),]      
-    
+
     n_sim <- length(unique(sim$sim))        
     all <- c()
     tmp_bins <- unique(c(0, sort(unique(sim$time)), max(sim$time))) 
@@ -240,9 +251,6 @@ vpc_tte <- function(sim = NULL,
     }
     for (i in 1:n_sim) {
       tmp <- sim %>% dplyr::filter(sim == i)
-      if (rtte) {
-        tmp <- tmp %>% dplyr::group_by(id) %>% dplyr::mutate(rtte = cumsum(dv != 0))       
-      }
       tmp2 <- add_stratification(tmp %>% dplyr::arrange(id, time), stratify)
       if(!is.null(kmmc) && kmmc %in% names(obs)) {
         tmp3 <- compute_kmmc(tmp2, strat = "strat", reverse_prob = reverse_prob, kmmc = kmmc)
@@ -264,7 +272,7 @@ vpc_tte <- function(sim = NULL,
   } else {
     sim_km <- NULL
   }
-  
+
   if (rtte) {
     if(!is.null(sim)) {
       sim_km$rtte <- as.num(gsub(".*rtte=(\\d.*).*", "\\1", sim_km$strat, perl = TRUE))
@@ -329,7 +337,7 @@ vpc_tte <- function(sim = NULL,
       pl <- pl + geom_line_custom(linetype="dashed")
     }
   } else {
-    pl <- pl + geom_step(data = obs_km)
+    pl <- ggplot(obs_km)       
   }
   if (!is.null(obs)) {  
     show_obs <- TRUE
@@ -356,7 +364,7 @@ vpc_tte <- function(sim = NULL,
     }
   }
   if (!is.null(stratify)) {
-    if (length(stratify_original) == 1) {
+    if (length(stratify_original) == 1 | rtte) {
       if (!is.null(stratify_color)) {
           if (facet == "wrap") {
             pl <- pl + facet_wrap(~ strat1)      

@@ -2,7 +2,7 @@ add_stratification <- function (dat, strat, verbose = FALSE) {
   if(is.null(strat)) {
     dat$strat <- 1
   } else {
-    if (strat %in% colnames(dat)) {
+    if (all(strat %in% colnames(dat))) {
       dat$strat <- ""
       for(i in seq(strat)) {
         if(i > 1) { 

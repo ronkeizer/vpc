@@ -20,7 +20,13 @@ The VPC is the most widely used diagnostic tool in pharmacometrics (see e.g. [he
 
 ## Installation
 
-```{r, warning=FALSE, message=FALSE, error=FALSE}
+```{r, eval=FALSE, warning=FALSE, message=FALSE, error=FALSE}
+library(devtools)
+install_github("ronkeizer/vpc")
+library(vpc)
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
     eval_all <- TRUE
     # library("devtools")
     # install_github("ronkeizer/vpc")
@@ -99,7 +105,7 @@ vpc (sim = sim, obs = obs, pred_corr = TRUE, show=list(obs_dv = TRUE, obs_ci = T
 
 With more explicit use of options, and saving the object:
 
-```{r, eval = eval_all, fig.width=4, fig.height=4}
+```{r, eval = eval_all, fig.width=4, fig.height=6}
 vpc(sim = sim, 
            obs = obs,                                   # supply simulation and observation dataframes
            obs_cols = list(
@@ -184,6 +190,10 @@ data(rtte_sim_nm)
 
 Treat RTTE as TTE, no stratification:
 ```{r, eval = eval_all, fig.width=4, fig.height=4}
+files <- paste0("~/git/vpc/R/", dir("~/git/vpc/R", "*.R"))
+for (i in seq(files)) {
+  source(files[i])
+}
 vpc_tte(sim = rtte_sim_nm,          
         obs = rtte_obs_nm, 
         rtte = FALSE, 
@@ -205,14 +215,14 @@ Stratified for event number (RTTE) and study arm:
 ```{r, eval = eval_all, fig.width=6, fig.height=6}
 vpc_tte(sim = rtte_sim_nm, 
         obs = rtte_obs_nm,
-        rtte = TRUE, events = c(1:3),
-        stratify = c("drug"),
+        rtte = TRUE, rtte_calc_diff = TRUE, events = c(1:3),
+        stratify=c("drug"),
         sim_cols = list(dv = "dv", idv="t"), 
-        obs_cols = list(idv = "dt"))
+        obs_cols = list(idv = "t"), verbose=TRUE)
 ```
 
 ### Kaplan-Meier Mean Covariate plots (KMMC)
-```{r, eval = eval_all, fig.width=6, fig.height=6}
+```{r, eval = eval_all, fig.width=4, fig.height=4}
 vpc_tte(sim = rtte_sim_nm, 
         obs = rtte_obs_nm,
         rtte = FALSE,

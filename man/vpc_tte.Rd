@@ -5,19 +5,22 @@
 \title{VPC function for survival-type data}
 \usage{
 vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
-  events = NULL, bins = FALSE, n_bins = 10, software = "auto",
-  obs_cols = NULL, sim_cols = NULL, kmmc = NULL, pi_med = FALSE,
-  reverse_prob = FALSE, stratify = NULL, stratify_color = NULL,
-  ci = c(0.05, 0.95), plot = FALSE, xlab = NULL, ylab = NULL,
-  as_percentage = TRUE, title = NULL, smooth = FALSE, vpc_theme = NULL,
-  ggplot_theme = NULL, facet = "wrap", verbose = FALSE)
+  rtte_calc_diff = TRUE, events = NULL, bins = FALSE, n_bins = 10,
+  software = "auto", obs_cols = NULL, sim_cols = NULL, kmmc = NULL,
+  pi_med = FALSE, reverse_prob = FALSE, stratify = NULL,
+  stratify_color = NULL, ci = c(0.05, 0.95), plot = FALSE, xlab = NULL,
+  ylab = NULL, as_percentage = TRUE, title = NULL, smooth = FALSE,
+  vpc_theme = NULL, ggplot_theme = NULL, facet = "wrap",
+  verbose = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
 \item{obs}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{rtte}{repeated time-to-event data? Deafult is FALSE (single-event TTE)}
+\item{rtte}{repeated time-to-event data? Deafult is FALSE (treat as single-event TTE)}
+
+\item{rtte_calc_diff}{recalculate time (T/F)? When simulating in NONMEM, you will probably need to set this to TRUE to recalculate the TIME to relative times between events (unless you output the time difference between events and specify that as independent variable to the vpc_tte() funciton.}
 
 \item{events}{numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events.}
 
