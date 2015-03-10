@@ -7,10 +7,8 @@
 #' @param bins either "auto" or a numeric vector specifying the bin separators.  
 #' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.  
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
-#' @param obs_cols observation dataset column names
-#' @param sim_cols simulation dataset column names
-#' @param obs_pred variable in data.frame for population predicted value. "pred" by default
-#' @param sim_pred variable in data.frame for population predicted value. "pred" by default
+#' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
+#' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param show what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci) 
 #' @param software name of software platform using (eg nonmem, phoenix)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
@@ -89,7 +87,6 @@ vpc <- function(sim = NULL,
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }
-  
   if(!is.null(psn_folder)) {
     if(!is.null(obs)) {
       obs <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
@@ -104,52 +101,21 @@ vpc <- function(sim = NULL,
   } else {
     software_type <- guess_software(software, sim)
   }
-  # column names
-  show_default <- list (
-    obs_dv = FALSE,
-    obs_ci = TRUE,
-    obs_median = TRUE,
-    sim_median = FALSE,
-    sim_median_ci = TRUE,
-    pi = FALSE,
-    pi_ci = TRUE,
-    pi_as_area = FALSE,
-    bin_sep = TRUE)
+
+  ## define what to show in plot
   show <- replace_list_elements(show_default, show)
   
-  software_types <- c("nonmem", "phoenix") 
-  if(software_type %in% software_types) {
-    if (software_type == "nonmem") {
-      obs_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
-      sim_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
-      if(!is.null(obs)) {
-        old_class <- class(obs)
-        class(obs) <- c("nonmem", old_class)
-      }
-      if(!is.null(sim)) {
-        old_class <- class(sim)
-        class(sim) <- c("nonmem", old_class)
-      }
-    } 
-    if (software_type == "phoenix") {
-      obs_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
-      sim_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")
-    }    
-  } else {
-    obs_cols_default <- list(dv = "dv", id = "id", idv = "time", pred = "pred")
-    sim_cols_default <- list(dv = "dv", id = "id", idv = "time", pred = "pred")    
-  }
+  ## define column names
+  cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
   
-  obs_cols <- replace_list_elements(obs_cols_default, obs_cols)
-  sim_cols <- replace_list_elements(sim_cols_default, sim_cols)
-  
+  ## parse data into specific format
   if(!is.null(obs)) {
     obs <- filter_dv(obs, verbose)
-    obs <- format_vpc_input_data(obs, obs_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "observed", verbose)
+    obs <- format_vpc_input_data(obs, cols$obs, lloq, uloq, stratify, bins, log_y, log_y_min, "observed", verbose)
   }
   if(!is.null(sim)) {  
     sim <- filter_dv(sim, verbose)
-    sim <- format_vpc_input_data(sim, sim_cols, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated", verbose)
+    sim <- format_vpc_input_data(sim, cols$sim, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated", verbose)
   }
 
   stratify_original <- stratify
@@ -184,13 +150,13 @@ vpc <- function(sim = NULL,
   }
 
   if (pred_corr) {
-    if (!is.null(obs) & !obs_cols$pred %in% names(obs)) {
+    if (!is.null(obs) & !cols$obs$pred %in% names(obs)) {
       msg("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...", verbose)      
-      if (!sim_cols$pred %in% names(sim)) {
+      if (!cols$obs$pred %in% names(sim)) {
         stop("Error: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
       } else {
         obs <- obs %>% ungroup() 
-        obs[[obs_cols$pred]] <- unlist(sim[1:length(obs$id), sim_cols$pred])
+        obs[[cols$obs$pred]] <- unlist(sim[1:length(obs$id), cols$sim$pred])
         msg ("OK", verbose)
       }
     } else {
@@ -199,10 +165,10 @@ vpc <- function(sim = NULL,
       }      
     }
     if(!is.null(obs)) {
-      obs %>% mutate(pred = obs[[obs_cols$pred]])      
+      obs$pred = obs[[cols$obs$pred]]
     }
     if(!is.null(sim)) {
-      sim$pred <- sim[[sim_cols$pred]]      
+      sim$pred <- sim[[cols$sim$pred]]      
     }
   }
   if (!is.null(obs)) {  
@@ -268,10 +234,10 @@ vpc <- function(sim = NULL,
     vpc_theme <- create_vpc_theme()
   }
   if(is.null(xlab)) {
-    xlab <- obs_cols$idv
+    xlab <- cols$obs$idv
   }
   if(is.null(ylab)) {
-    ylab <- obs_cols$dv
+    ylab <- cols$obs$dv
   }
   if (!is.null(stratify_original)) {
     if (length(stratify) == 2) {

@@ -17,7 +17,7 @@ plot_vpc <- function(db) {
         if(show$sim_median_ci) {
           if (smooth) {
             pl <- pl +
-              geom_ribbon(aes(x=bin_mid, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill) 
+              geom_ribbon(aes(x=bin_mid, y=q50.med, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill) 
           } else {
             pl <- pl +
               geom_rect(aes(xmin=bin_min, xmax=bin_max, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_color) 

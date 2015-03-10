@@ -4,13 +4,13 @@
 \alias{vpc_cens}
 \title{VPC function for left- or right-censored data (e.g. BLOQ data)}
 \usage{
-vpc_cens(sim = NULL, obs = NULL, bins = "jenks", n_bins = 8,
-  obs_dv = NULL, sim_dv = NULL, obs_idv = NULL, sim_idv = NULL,
-  obs_id = NULL, sim_id = NULL, nonmem = "auto", stratify = NULL,
+vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
+  n_bins = 8, obs_cols = NULL, sim_cols = NULL, software = "auto",
+  show = NULL, legend_pos = NULL, stratify = NULL,
   stratify_color = NULL, ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
   plot = FALSE, xlab = NULL, ylab = NULL, plot_sim_med = FALSE,
   title = NULL, smooth = TRUE, vpc_theme = NULL, ggplot_theme = NULL,
-  facet = "wrap")
+  facet = "wrap", vpcdb = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -21,19 +21,13 @@ vpc_cens(sim = NULL, obs = NULL, bins = "jenks", n_bins = 8,
 
 \item{n_bins}{number of bins}
 
-\item{obs_dv}{variable in data.frame for observed dependent value. "dv" by default}
+\item{obs_cols}{observation dataset column names (list elements: "dv", "idv", "id", "pred")}
 
-\item{sim_dv}{variable in data.frame for simulated dependent value. "sdv" by default}
+\item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred")}
 
-\item{obs_idv}{variable in data.frame for observed independent value. "time" by default}
+\item{software}{name of software platform using (eg nonmem, phoenix)}
 
-\item{sim_idv}{variable in data.frame for simulated independent value. "time" by default}
-
-\item{obs_id}{variable in data.frame for observed individual. "id" by default}
-
-\item{sim_id}{variable in data.frame for simulated individual. "id" by default}
-
-\item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED).  Default is "auto" for autodetect}
+\item{show}{what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
 
 \item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
 

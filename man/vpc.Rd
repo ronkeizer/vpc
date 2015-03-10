@@ -24,9 +24,9 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{n_bins}{when using the "auto" binning method, what number of bins to aim for}
 
-\item{obs_cols}{observation dataset column names}
+\item{obs_cols}{observation dataset column names (list elements: "dv", "idv", "id", "pred")}
 
-\item{sim_cols}{simulation dataset column names}
+\item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred")}
 
 \item{software}{name of software platform using (eg nonmem, phoenix)}
 
@@ -71,10 +71,6 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 \item{vpcdb}{Boolean whether to return the underlying vpcdb rather than the plot}
 
 \item{bins}{either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.}
-
-\item{obs_pred}{variable in data.frame for population predicted value. "pred" by default}
-
-\item{sim_pred}{variable in data.frame for population predicted value. "pred" by default}
 }
 \value{
 a list containing calculated VPC information, and a ggplot2 object
