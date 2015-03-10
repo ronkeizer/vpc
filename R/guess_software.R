@@ -12,7 +12,7 @@ guess_software <- function(software, x) {
   
   # nonmem typically will have MDV and DV
   software <- "other"  
-  if(all(c("MDV", "DV") %in% names(x)) || all(c("EVID", "DV") %in% names(x))) {
+  if(all(c("ID", "TIME") %in% names(x)) || all(c("ID", "DV") %in% names(x)) || all(c("MDV", "DV") %in% names(x)) || all(c("EVID", "DV") %in% names(x))) {
     software <- "nonmem"
   } 
   if("COBS" %in% names(x)) {

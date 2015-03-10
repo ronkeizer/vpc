@@ -5,7 +5,6 @@
 #' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.  
-#' @param type either "lloq" (default) or "uloq".
 #' @param n_bins number of bins
 #' @param obs_dv variable in data.frame for observed dependent value. "dv" by default
 #' @param sim_dv variable in data.frame for simulated dependent value. "sdv" by default
@@ -31,20 +30,17 @@
 #' @seealso \link{vpc}
 vpc_cat  <- function(sim = NULL, 
                      obs = NULL, 
+                     psn_folder = NULL,
                      bins = "jenks",
                      n_bins = "auto",
-                     type = "bloq",
-                     obs_dv = NULL,
-                     sim_dv =  NULL,
-                     obs_idv = NULL,
-                     sim_idv = NULL,
-                     obs_id = NULL,
-                     sim_id = NULL,
-                     nonmem = "auto",
+                     obs_cols = NULL,
+                     sim_cols = NULL,
+                     software = "auto",
+                     show = NULL,                
+                     legend_pos = NULL,
                      ci = c(0.05, 0.95),
                      uloq = NULL, 
                      lloq = NULL, 
-                     plot = FALSE,
                      xlab = NULL, 
                      plot_sim_med = FALSE,
                      ylab = NULL,
@@ -52,72 +48,64 @@ vpc_cat  <- function(sim = NULL,
                      smooth = TRUE,
                      vpc_theme = NULL,
                      ggplot_theme = NULL,
-                     facet = "wrap") {
-  if (nonmem == "auto") {
-    if(sum(c("ID","TIME") %in% colnames(obs)) == 2) { # most likely, data is from NONMEM
-      nonmem <- TRUE
-    } else {
-      nonmem <- FALSE
-    }        
-  } else {
-    if(class(nonmem) != "logical") {
-      nonmem <- FALSE
-    }
-  } 
-  if (nonmem) {
-    if (is.null(obs_dv)) { obs_dv <- "DV" }
-    if (is.null(obs_idv)) { obs_idv <- "TIME" }
-    if (is.null(obs_id)) { obs_id <- "ID" }
-    if (is.null(sim_dv)) { sim_dv <- "DV" }
-    if (is.null(sim_idv)) { sim_idv <- "TIME" }
-    if (is.null(sim_id)) { sim_id <- "ID" }    
-    if(!is.null(obs)) {
-      if("MDV" %in% colnames(obs)) {
-        obs <- obs[obs$MDV == 0,]
-      }
-      if("EVID" %in% colnames(obs)) {
-        obs <- obs[obs$EVID == 0,]
-      }      
-    }
-    if(!is.null(sim)) {  
-      if("MDV" %in% colnames(sim)) {
-        sim <- sim[sim$MDV == 0,]
-      }
-      if("EVID" %in% colnames(obs)) {
-        sim <- sim[sim$EVID == 0,]
-      }
-    }
-  } else {
-    if(is.null(obs_dv)) { obs_dv = "dv" }
-    if(is.null(sim_dv)) { sim_dv = "dv" }
-    if(is.null(obs_idv)) { obs_idv = "time" }
-    if(is.null(sim_idv)) { sim_idv = "time" }
-    if(is.null(obs_id)) { obs_id = "id" }
-    if(is.null(sim_id)) { sim_id = "id" }
-  }
+                     facet = "wrap",
+                     plot = TRUE,
+                     vpcdb = FALSE) {
+
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }
-  if (class(bins) != "numeric") {
+  if(!is.null(psn_folder)) {
     if(!is.null(obs)) {
-      bins <- auto_bin(obs, bins, n_bins, x=obs_idv)      
-    } else { # get from sim
-      bins <- auto_bin(sim, bins, n_bins, x=obs_idv)            
+      obs <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
     }
-    if (is.null(bins)) {
-      stop("Binning unsuccessful, try increasing the number of bins.")
+    if(!is.null(sim)) {
+      sim <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="simulation.1.npctab")[1]))
     }
+    software = "nonmem"
   }
-  log_y <- FALSE # dummy, required for format_vpc_input_data function
-  log_y_min <- 0
-  stratify <- NULL
-  if (!is.null(obs)) {  
-    obs <- format_vpc_input_data(obs, obs_dv, obs_idv, obs_id, lloq, uloq, stratify, bins, log_y, log_y_min, "observed")
+  if (!is.null(obs)) {
+    software_type <- guess_software(software, obs)
+  } else {
+    software_type <- guess_software(software, sim)
   }
-  if (!is.null(sim)) {  
-    sim <- format_vpc_input_data(sim, sim_dv, sim_idv, sim_id, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated")
+
+  ## define what to show in plot
+  show <- replace_list_elements(show_default, show)
+  
+  ## define column names
+  cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
+  
+  ## parse data into specific format
+  if(!is.null(obs)) {
+    obs <- filter_dv(obs, verbose)
+    obs <- format_vpc_input_data(obs, cols$obs, lloq, uloq, strat = NULL, bins, FALSE, 0, "observed", verbose)
+  }
+  if(!is.null(sim)) {  
+    sim <- filter_dv(sim, verbose)
+    sim <- format_vpc_input_data(sim, cols$sim, lloq, uloq, strat = NULL, bins, FALSE, 0, "simulated", verbose)
     sim$sim <- add_sim_index_number(sim, id = "id")    
   }
+  
+  if (class(bins) != "numeric") {
+    if(!is.null(obs)) {
+      bins <- auto_bin(obs, bins, n_bins)  
+    } else { # get from sim
+      bins <- auto_bin(sim, bins, n_bins)            
+    }
+    if (is.null(bins)) {
+      msg("Automatic binning unsuccessful, try increasing the number of bins, or specify vector of bin separators manually.", verbose)
+    }
+  }
+  bins <- unique(bins)
+  if(!is.null(obs)) {
+    obs <- bin_data(obs, bins, "idv") 
+  }
+  if(!is.null(sim)) {
+    sim <- bin_data(sim, bins, "idv")  
+  }
+  
+  ## parsing 
   fact_perc <- function(x, fact) { sum(x == fact) / length(x) } # below lloq, default     
   obs$dv <- as.factor(obs$dv) 
   lev <- levels(obs$dv)  
@@ -143,7 +131,7 @@ vpc_cat  <- function(sim = NULL,
                                 tmp4 %>% dplyr::summarize(mean(mn_idv))
                                 ))
     vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
-    colnames(vpc_dat) <- c("strat", "bin", "prob_low", "prob_med", "prob_up", "bin_mid")  
+    colnames(vpc_dat) <- c("strat", "bin", "q50.low","q50.med","q50.up", "bin_mid")  
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
 #    vpc_dat$bin_mid <- (vpc_dat$bin_min + vpc_dat$bin_max) / 2    
@@ -167,121 +155,46 @@ vpc_cat  <- function(sim = NULL,
     tmp2$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(tmp2$strat)) )[tmp2$bin]
     tmp2$bin_max <- rep(bins[2:length(bins)], length(unique(tmp2$strat)) )[tmp2$bin]  
     aggr_obs <- tmp2
-    colnames(aggr_obs)[4] <- "prob"
+    colnames(aggr_obs)[4] <- "obs50"
   } else {
     aggr_obs <- NULL
   }
-#   if (!is.null(stratify_original)) {
-#     if (length(stratify) == 2) {
-#       vpc_dat$strat1 <- unlist(strsplit(as.character(vpc_dat$strat), ", "))[(1:length(vpc_dat$strat)*2)-1]
-#       vpc_dat$strat2 <- unlist(strsplit(as.character(vpc_dat$strat), ", "))[(1:length(vpc_dat$strat)*2)]
-#       aggr_obs$strat1 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)-1]
-#       aggr_obs$strat2 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)]   
-#     }
-#   }
   if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
     vpc_theme <- create_vpc_theme()
   }
-  if (!is.null(sim)) {
-    pl <- ggplot(vpc_dat, aes(x=bin_mid, y=dv)) 
-    if(plot_sim_med) {
-      geom_line(aes(y=prob_med), linetype='dashed')       
-    }
-    if (smooth) {
-      pl <- pl + 
-        geom_ribbon(aes(x=bin_mid, y=prob_low, ymin=prob_low, ymax=prob_up), fill=vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha) 
-    } else {
-      pl <- pl + 
-        geom_rect(aes(xmin=bin_min, xmax=bin_max, x=bin_mid, y=prob_low, ymin=prob_low, ymax=prob_up), fill=vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha) 
-    }
-  } else {
-    if (!is.null(stratify_color)) {
-      if (length(stratify) == 2) {
-        pl <- ggplot(aggr_obs, aes(y=dv, colour=as.factor(strat2)))         
-      } else {
-        pl <- ggplot(aggr_obs, aes(y=dv, colour=as.factor(strat)))           
-      }
-      pl <- pl + scale_colour_discrete(name="")
-    } else {
-      pl <- ggplot(aggr_obs, aes(y=dv))        
-    }    
-  }
-  if (!is.null(obs)) {
-    pl <- pl +
-      geom_line(data=aggr_obs, aes(x=bin_mid, y=prob), linetype='solid') 
-  }
-  bdat <- data.frame(cbind(x=bins, y=NA))
-  pl <- pl + 
-    geom_rug(data=bdat, sides = "t", aes(x = x, y=y), colour="#333333")
-#   if (!is.null(stratify)) {
-#     if (length(stratify_original) == 1) {
-#       if (!is.null(stratify_color)) {
-#         if (facet == "wrap") {
-#           pl <- pl + facet_wrap(~ strat1)      
-#         } else {
-#           if(length(grep("row", facet))>0) {
-#             pl <- pl + facet_grid(strat1 ~ .)                
-#           } else {
-#             pl <- pl + facet_grid(. ~ strat1)                
-#           }
-#         } 
-#       } else { 
-#         if (facet == "wrap") {
-#           pl <- pl + facet_wrap(~ strat)      
-#         } else {
-#           if(length(grep("row", facet))>0) {
-#             pl <- pl + facet_grid(strat ~ .)                
-#           } else {
-#             pl <- pl + facet_grid(. ~ strat)                
-#           }
-#         }         
-#       } 
-#     } else { # 2 grid-stratification 
-#       if ("strat1" %in% c(colnames(vpc_dat), colnames(aggr_obs))) {
-#         if(length(grep("row", facet))>0) {
-#           pl <- pl + facet_grid(strat1 ~ strat2)                
-#         } else {
-#           pl <- pl + facet_grid(strat2 ~ strat1)                
-#         }        
-#       } else { # only color stratification
-#         if ("strat" %in% c(colnames(vpc_dat), colnames(aggr_obs))) {
-#           # color stratification only
-#         } else {          
-#           stop ("Stratification unsuccesful.")          
-#         }
-#       }
-#     }
-#   }
-  if (facet == "wrap") {  
-    pl <- pl + facet_wrap(~ strat)                
-  } else {
-    if(length(grep("row", facet))>0) {
-      pl <- pl + facet_grid(strat ~ .)                
-    } else { 
-      pl <- pl + facet_grid(. ~ strat)                
-    }    
-  }
-  if (!is.null(title)) {
-    pl <- pl + ggtitle(title)  
-  }
-  if (!is.null(ggplot_theme)) {  
-    pl <- pl + ggplot_theme()    
-  } else {
-    pl <- pl + theme_plain() 
-  }
-  if(!is.null(xlab)) {
-    pl <- pl + xlab(xlab)
-  } else {
-    pl <- pl + xlab(obs_idv)
-  }
-  if(!is.null(ylab)) {
-    pl <- pl + ylab(ylab)
-  } else {
-    pl <- pl + ylab("Probability")
-  }
+  
+  ## plotting starts here
+  show$median_ci = FALSE
+  show$obs_dv = FALSE
+  show$obs_ci = FALSE
+  show$sim_median = TRUE
+  show$sim_median_ci = TRUE
+  show$pi_as_area = FALSE
+  show$pi_ci = FALSE
+  show$pi = FALSE
+  vpc_db <- list(sim = sim,
+                 vpc_dat = vpc_dat,
+                 vpc_theme = vpc_theme,
+                 show = show,
+                 smooth = smooth,
+                 stratify = "strat",
+                 stratify_original = "strat",
+                 stratify_color = NULL,
+                 aggr_obs = aggr_obs,
+                 obs = obs,
+                 bins = bins,
+                 xlab = xlab,
+                 ylab = ylab,
+                 log_y = FALSE,
+                 facet = facet,
+                 title = title,
+                 theme = theme,
+                 ggplot_theme = ggplot_theme,
+                 plot = plot)
+  if(vpcdb) return(vpc_db)
+  pl <- plot_vpc(vpc_db)
   pl <- pl + ylim(c(0,1))
   if (plot) {
     print(pl)    
   }
-  return(pl)
 }

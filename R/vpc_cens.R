@@ -101,7 +101,7 @@ vpc_cens <- function(sim = NULL,
   } else {
     software_type <- guess_software(software, sim)
   }
-  
+
   ## define what to show in plot
   show <- replace_list_elements(show_default, show)
   
@@ -179,11 +179,9 @@ vpc_cens <- function(sim = NULL,
   if(!is.null(obs)) {
     tmp <- obs %>% group_by(strat,bin)
     aggr_obs <- data.frame(cbind(tmp %>% dplyr::summarize(loq_perc(dv)),
-                                 tmp %>% dplyr::summarize(loq_perc(dv)),
-                                 tmp %>% dplyr::summarize(loq_perc(dv)),
                                  tmp %>% dplyr::summarize(mean(idv))))
     aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
-    colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95")    
+    colnames(aggr_obs) <- c("strat", "bin", "obs50")
     colnames(aggr_obs)[length(aggr_obs[1,])] <- c("bin_mid")
     aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
     aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
@@ -203,14 +201,15 @@ vpc_cens <- function(sim = NULL,
     vpc_theme <- create_vpc_theme()
   }
   
+  ## plotting starts here
   show$median_ci = FALSE
   show$obs_dv = FALSE
+  show$obs_ci = FALSE
   show$sim_median = TRUE
   show$sim_median_ci = TRUE
   show$pi_as_area = FALSE
   show$pi_ci = FALSE
   show$pi = FALSE
-  # plotting starts here
   vpc_db <- list(sim = sim,
                  vpc_dat = vpc_dat,
                  vpc_theme = vpc_theme,
@@ -233,103 +232,4 @@ vpc_cens <- function(sim = NULL,
   if(vpcdb) return(vpc_db)
   pl <- plot_vpc(vpc_db)
   return(pl)
-#   
-#   if (!is.null(sim)) {
-#     pl <- ggplot(vpc_dat, aes(x=bin_mid, y=dv)) 
-#     if(plot_sim_med) {
-#       geom_line(aes(y=ploq_med), linetype='dashed') 
-#     }
-#     if (smooth) {
-#       pl <- pl + 
-#         geom_ribbon(aes(x=bin_mid, y=ploq_low, ymin=ploq_low, ymax=ploq_up), fill=vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha) 
-#     } else {
-#       pl <- pl + 
-#         geom_rect(aes(xmin=bin_min, xmax=bin_max, x=bin_mid, y=ploq_low, ymin=ploq_low, ymax=ploq_up), fill=vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha) 
-#     }
-#   } else {
-#     if (!is.null(stratify_color)) {
-#       if (length(stratify) == 2) {
-#         pl <- ggplot(aggr_obs, aes(y=dv, colour=as.factor(strat2)))         
-#       } else {
-#         pl <- ggplot(aggr_obs, aes(y=dv, colour=as.factor(strat)))           
-#       }
-#       pl <- pl + scale_colour_discrete(name="")
-#     } else {
-#       pl <- ggplot(aggr_obs, aes(y=dv))        
-#     }
-#     
-#   }
-#   if (!is.null(obs)) {
-#     pl <- pl +
-#       geom_line(data=aggr_obs, aes(x=bin_mid, y=ploq_med), linetype='solid') 
-# #       geom_line(data=aggr_obs, aes(x=bin_mid, y=ploq_low), linetype='dotted') +
-# #       geom_line(data=aggr_obs, aes(x=bin_mid, y=ploq_up), linetype='dotted')    
-#   }
-#   bdat <- data.frame(cbind(x=bins, y=NA))
-#   pl <- pl + 
-#     geom_rug(data=bdat, sides = "t", aes(x = x, y=y), colour="#333333")
-#   if (!is.null(stratify)) {
-#     if (length(stratify_original) == 1) {
-#       if (!is.null(stratify_color)) {
-#         if (facet == "wrap") {
-#           pl <- pl + facet_wrap(~ strat1)      
-#         } else {
-#           if(length(grep("row", facet))>0) {
-#             pl <- pl + facet_grid(strat1 ~ .)                
-#           } else {
-#             pl <- pl + facet_grid(. ~ strat1)                
-#           }
-#         } 
-#       } else { 
-#         if (facet == "wrap") {
-#           pl <- pl + facet_wrap(~ strat)      
-#         } else {
-#           if(length(grep("row", facet))>0) {
-#             pl <- pl + facet_grid(strat ~ .)                
-#           } else {
-#             pl <- pl + facet_grid(. ~ strat)                
-#           }
-#         }         
-#       } 
-#     } else { # 2 grid-stratification 
-#       if ("strat1" %in% c(colnames(vpc_dat), colnames(aggr_obs))) {
-#         if(length(grep("row", facet))>0) {
-#           pl <- pl + facet_grid(strat1 ~ strat2)                
-#         } else {
-#           pl <- pl + facet_grid(strat2 ~ strat1)                
-#         }        
-#       } else { # only color stratification
-#         if ("strat" %in% c(colnames(vpc_dat), colnames(aggr_obs))) {
-#           # color stratification only
-#         } else {          
-#           stop ("Stratification unsuccesful.")          
-#         }
-#       }
-#     }
-#   }
-#   if (!is.null(title)) {
-#     pl <- pl + ggtitle(title)  
-#   }
-#   if (!is.null(ggplot_theme)) {  
-#     pl <- pl + ggplot_theme()    
-#   } else {
-#     if (!is.null(theme)) {
-#       pl <- pl + theme_plain()
-#     } 
-#   }
-#   if(!is.null(xlab)) {
-#     pl <- pl + xlab(xlab)
-#   } else {
-#     pl <- pl + xlab(obs_idv)
-#   }
-#   if(!is.null(ylab)) {
-#     pl <- pl + ylab(ylab)
-#   } else {
-#     pl <- pl + ylab(paste("Fraction", type))
-#   }
-#   pl <- pl + ylim(c(0, 1))
-#   if (plot) {
-#     print(pl)    
-#   }
-#   return(pl)
 }

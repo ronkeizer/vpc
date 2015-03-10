@@ -164,7 +164,7 @@ VPCs can also be made for categorical data. These show the probability of observ
 obs_cat <- read_table_nm(file="~/git/vpc/inst/extdata/sdtab45")
 sim_cat <- read_table_nm(file="~/git/vpc/inst/extdata/simtab45")
 vpc_cat (sim = sim_cat, obs = obs_cat, 
-          obs_dv = "SMXH", sim_dv = "SMXH") 
+         obs_cols = list(dv = "SMXH"), sim_cols = list(dv = "SMXH")) 
 ```
 
 ### Time-to-event data
@@ -187,7 +187,7 @@ Treat RTTE as TTE, no stratification:
 vpc_tte(sim = rtte_sim_nm,          
         obs = rtte_obs_nm, 
         rtte = FALSE, 
-        sim_dv = "dv", obs_idv = "dt", sim_idv = "t")
+        sim_cols(dv = "dv", idv="t"), obs_cols(idv = "dt"))
 ```
 
 Stratified for covariate and study arm:
@@ -208,4 +208,6 @@ vpc_tte(sim = rtte_sim_nm,
         sim_dv = "dv", obs_idv = "t", sim_idv = "t")
 ```
 
+
+### Kaplan-Meier Mean Covariate plots (KMMC)
 

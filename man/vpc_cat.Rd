@@ -4,12 +4,12 @@
 \alias{vpc_cat}
 \title{VPC function for categorical}
 \usage{
-vpc_cat(sim = NULL, obs = NULL, bins = "jenks", n_bins = "auto",
-  type = "bloq", obs_dv = NULL, sim_dv = NULL, obs_idv = NULL,
-  sim_idv = NULL, obs_id = NULL, sim_id = NULL, nonmem = "auto",
-  ci = c(0.05, 0.95), uloq = NULL, lloq = NULL, plot = FALSE,
-  xlab = NULL, plot_sim_med = FALSE, ylab = NULL, title = NULL,
-  smooth = TRUE, vpc_theme = NULL, ggplot_theme = NULL, facet = "wrap")
+vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
+  n_bins = "auto", obs_cols = NULL, sim_cols = NULL, software = "auto",
+  show = NULL, legend_pos = NULL, ci = c(0.05, 0.95), uloq = NULL,
+  lloq = NULL, xlab = NULL, plot_sim_med = FALSE, ylab = NULL,
+  title = NULL, smooth = TRUE, vpc_theme = NULL, ggplot_theme = NULL,
+  facet = "wrap", plot = TRUE, vpcdb = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -20,29 +20,11 @@ vpc_cat(sim = NULL, obs = NULL, bins = "jenks", n_bins = "auto",
 
 \item{n_bins}{number of bins}
 
-\item{type}{either "lloq" (default) or "uloq".}
-
-\item{obs_dv}{variable in data.frame for observed dependent value. "dv" by default}
-
-\item{sim_dv}{variable in data.frame for simulated dependent value. "sdv" by default}
-
-\item{obs_idv}{variable in data.frame for observed independent value. "time" by default}
-
-\item{sim_idv}{variable in data.frame for simulated independent value. "time" by default}
-
-\item{obs_id}{variable in data.frame for observed individual. "id" by default}
-
-\item{sim_id}{variable in data.frame for simulated individual. "id" by default}
-
-\item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED).  Default is "auto" for autodetect}
-
 \item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
 
 \item{uloq}{Number or NULL indicating upper limit of quantification. Default is NULL.}
 
 \item{lloq}{Number or NULL indicating lower limit of quantification. Default is NULL.}
-
-\item{plot}{Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.}
 
 \item{xlab}{ylab as numeric vector of size 2}
 
@@ -59,6 +41,22 @@ vpc_cat(sim = NULL, obs = NULL, bins = "jenks", n_bins = "auto",
 \item{ggplot_theme}{specify a custom ggplot2 theme}
 
 \item{facet}{either "wrap", "columns", or "rows"}
+
+\item{plot}{Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.}
+
+\item{obs_dv}{variable in data.frame for observed dependent value. "dv" by default}
+
+\item{sim_dv}{variable in data.frame for simulated dependent value. "sdv" by default}
+
+\item{obs_idv}{variable in data.frame for observed independent value. "time" by default}
+
+\item{sim_idv}{variable in data.frame for simulated independent value. "time" by default}
+
+\item{obs_id}{variable in data.frame for observed individual. "id" by default}
+
+\item{sim_id}{variable in data.frame for simulated individual. "id" by default}
+
+\item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED).  Default is "auto" for autodetect}
 }
 \value{
 a list containing calculated VPC information, and a ggplot2 object
