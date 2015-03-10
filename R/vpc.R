@@ -107,6 +107,14 @@ vpc <- function(sim = NULL,
   
   ## define column names
   cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
+  if(!is.null(obs)) {
+    old_class <- class(obs)
+    class(obs) <- c(software_type, old_class)
+  }
+  if(!is.null(sim)) {
+    old_class <- class(sim)
+    class(sim) <- c(software_type, old_class)
+  }
   
   ## parse data into specific format
   if(!is.null(obs)) {

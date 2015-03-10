@@ -26,7 +26,7 @@
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param ggplot_theme specify a custom ggplot2 theme
 #' @param facet either "wrap", "columns", or "rows" 
-#' @param show_warnings Default is FALSE
+#' @param verbose TRUE or FALSE (default)
 #' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
 #' @seealso \link{vpc}
@@ -57,6 +57,7 @@
 #'         sim_dv = "dv", obs_idv = "t", sim_idv = "t")
 vpc_tte <- function(sim = NULL, 
                     obs = NULL, 
+                    psn_folder = NULL,
                     rtte = FALSE,
                     events = NULL,
                     bins = FALSE,
@@ -79,59 +80,48 @@ vpc_tte <- function(sim = NULL,
                     vpc_theme = NULL,
                     ggplot_theme = NULL,
                     facet = "wrap",
-                    show_warnings = FALSE) {
-  software_type <- guess_software(software, obs)
-  if(is.null(obs) && is.null(sim)) {
+                    verbose = FALSE) {
+  if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }
-  stratify_original <- stratify
-  if(!is.null(stratify_color)) {
-    if (is.null(stratify)) {
-      stratify <- stratify_color
+  if(!is.null(psn_folder)) {
+    if(!is.null(obs)) {
+      obs <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
     }
-    if (length(stratify_color) > 1) {
-      stop("Error: please specify only 1 stratification variable for color!")      
+    if(!is.null(sim)) {
+      sim <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="simulation.1.npctab")[1]))
     }
-    if (!stratify_color %in% stratify) {
-      stratify_original <- stratify
-      stratify <- c(stratify, stratify_color)
-    }
+    software = "nonmem"
   }
-
-  software_types <- c("nonmem", "phoenix") 
-  if(software_type %in% software_types) {
-    if (software_type == "nonmem") {
-      obs_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", cens = "CENS")
-      sim_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", cens = "CENS")
-      
-      if(!is.null(obs)) {
-        old_class <- class(obs)
-        class(obs) <- c("nonmem", old_class)
-      }
-      if(!is.null(sim)) {
-        old_class <- class(sim)
-        class(sim) <- c("nonmem", old_class)
-      }
-    } 
-    if (software_type == "phoenix") {
-      obs_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", cens = "CENS")
-      sim_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", cens = "CENS")
-    }    
+  if (!is.null(obs)) {
+    software_type <- guess_software(software, obs)
   } else {
-    obs_cols_default <- list(dv = "dv", id = "id", idv = "time", cens = "cens")
-    sim_cols_default <- list(dv = "dv", id = "id", idv = "time", cens = "cens")    
+    software_type <- guess_software(software, sim)
   }
   
-  obs_cols <- replace_list_elements(obs_cols_default, obs_cols)
-  sim_cols <- replace_list_elements(sim_cols_default, sim_cols)
+  ## define what to show in plot
+  show <- replace_list_elements(show_default, show)
+  
+  ## define column names
+  cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
+  if(!is.null(obs)) {
+    old_class <- class(obs)
+    class(obs) <- c(software_type, old_class)
+  }
+  if(!is.null(sim)) {
+    old_class <- class(sim)
+    class(sim) <- c(software_type, old_class)
+  }
 
   if(!is.null(obs)) {
-    obs <- filter_dv(obs)
+    obs <- filter_dv(obs, verbose)
   }
   if(!is.null(sim)) {  
-    sim <- filter_dv(sim)
+    sim <- filter_dv(sim, verbose)
   }
-
+  
+  ## stratification
+  stratify_original <- stratify
   if(!is.null(stratify)) {
     if(rtte) {
       if (length(stratify) > 1) {
@@ -146,27 +136,28 @@ vpc_tte <- function(sim = NULL,
     }    
   }
 
-  # format obs data
+  ## format obs data
   if(!is.null(obs)) {
-    obs$id <- obs[[obs_cols$id]]
-    if (length(obs[[obs_cols$id]]) == 0) {
-      message("Warning: No ID column found, assuming 1 row per ID.")
+    obs$id <- obs[[cols$obs$id]]
+    if (length(obs[[cols$obs$id]]) == 0) {
+      msg("Warning: No ID column found, assuming 1 row per ID.", verbose)
       obs$id <- 1:length(obs[,1])
     }
-    obs$time <- obs[[obs_cols$idv]]
-    obs$dv <- obs[[obs_cols$dv]]
+    obs$time <- obs[[cols$obs$idv]]
+    obs$dv <- obs[[cols$obs$dv]]
     if(max(obs$dv) > 1) { # guessing DV definition if not just 0/1
       if(max(obs$dv) == 2) { # common approach in NONMEM, 2 = censored
         obs[obs$dv != 1,]$dv <- 0
-        message("Warning: Expected observed dependent variable to contain only 0 (censored, or no event observed) or 1 (event observed). Setting all observations != 1 to 0.")
+        msg("Warning: vpc_tte() expected the observed dependent variable to contain only 0 (censored, or no event observed) or 1 (event observed). Setting all observations != 1 to 0.", verbose)
       } else {
         obs[obs$dv != 1,]$dv <- 1 # some people use DV to indicate the event time. 
-        message("Warning: Expected observed dependent variable to contain only 0 (censored, or no event observed) or 1 (event observed). Setting all observations != 1 to 1.")
+        msg("Warning: vpc_tte() expected the dependent variable to contain only 0 (censored, or no event observed) or 1 (event observed). Setting all observations != 1 to 1.", verbose)
       }
     }
-    if(obs_cols$cens %in% colnames(obs)) { # some people use a 'cens' column to indicate censoring
-     message("Detected extra column with censoring information in observation data, assuming 1=censored event, 0=observed event.")
-     obs[obs[[obs_cols$cens]] == 1,]$dv <- 0
+    if("cens" %in% tolower(colnames(obs))) { # some people use a 'cens' column to indicate censoring
+      colnames(obs)[match("cens", tolower(colnames(obs)))] <- "cens"
+      msg("Detected extra column with censoring information in observation data, assuming 1=censored event, 0=observed event.", verbose)
+      obs[obs$cens == 1,]$dv <- 0
     }
     if (rtte) {
       obs <- relative_times(obs)    
@@ -175,7 +166,7 @@ vpc_tte <- function(sim = NULL,
     } else {
       obs$rtte <- 1
     }
-  
+    
     # add stratification column and comput KM curve for observations
     obs <- add_stratification(obs, stratify)
     if(!is.null(kmmc) && kmmc %in% names(obs)) {
@@ -187,30 +178,31 @@ vpc_tte <- function(sim = NULL,
     obs_km <- NULL
   }
   if(!is.null(kmmc) & (class(bins) == "logical" && bins == FALSE)) {
-    message("Tip: with KMMC-type plots, binning of simulated data is recommended. See documentation for the 'bins' argument for more information.")
+    msg("Tip: with KMMC-type plots, binning of simulated data is recommended. See documentation for the 'bins' argument for more information.", msg)
   }
     
   if(!is.null(sim)) {
     # format sim data and compute KM curve CI for simulations
-    sim$id <- sim[[sim_cols$id]]
-    sim$dv <- sim[[sim_cols$dv]]    
-    sim$time <- sim[[sim_cols$idv]]
+    sim$id <- sim[[cols$sim$id]]
+    sim$dv <- sim[[cols$sim$dv]]    
+    sim$time <- sim[[cols$sim$idv]]
     if(max(sim$dv) > 2) { # guessing DV definition if not just 0/1
       if(max(sim$dv) == 2) { # common approach in NONMEM, 2 = censored
         sim[sim$dv != 1,]$dv <- 1
-        message("Warning: Expected simulated dependent variable to contain only 0 (censored, or no event simerved) or 1 (event simerved). Setting all simulated observations != 1 to 0.")
+        msg("Warning: Expected simulated dependent variable to contain only 0 (censored, or no event simerved) or 1 (event simerved). Setting all simulated observations != 1 to 0.", msg)
       } else {
         sim[sim$dv != 1,]$dv <- 1 # some people use DV to indicate the event time. 
-        message("Warning: Expected simulated dependent variable to contain only 0 (censored, or no event simerved) or 1 (event simerved). Setting all simulated observations != 1 to 1.")
+        msg("Warning: Expected simulated dependent variable to contain only 0 (censored, or no event simerved) or 1 (event simerved). Setting all simulated observations != 1 to 1.", msg)
       }
     }
-    if(sim_cols$cens %in% names(sim$cens)) { # some people use a 'cens' column to indicate censoring
+    if("cens" %in% tolower(names(sim$cens))) { # some people use a 'cens' column to indicate censoring
       cat("Detected extra column with censoring information in simulation data.")
-      sim[sim[[sim_cols$cens]] == 1,]$dv <- 0
+      colnames(sim)[match("cens", tolower(colnames(sim)))] <- "cens"
+      sim[sim$cens == 1,]$dv <- 0
     }
     
     # add sim index number
-    sim$sim <- add_sim_index_number(sim, id = sim_cols$id)
+    sim$sim <- add_sim_index_number(sim, id = cols$sim$id)
         
     # set last_observation and repeat_obs per sim&id
     sim <- sim %>% group_by(sim, id) %>% mutate(last_obs = 1*(1:length(time) == length(time)))  
@@ -237,7 +229,7 @@ vpc_tte <- function(sim = NULL,
           tmp_bins <- unique(c(0, sort(unique(obs$time)), max(obs$time))) 
         } else {
           if (!(bins %in% c("time","data"))) {
-            message(paste0("Note: bining method ", bins," might be slow. Consider using method 'time', or specify 'bins' as numeric vector"))
+            msg(paste0("Note: bining method ", bins," might be slow. Consider using method 'time', or specify 'bins' as numeric vector"), verbose)
           }
           tmp_bins <- unique(c(0, auto_bin(sim %>% mutate(idv=time), type=bins, n_bins = n_bins-1), max(sim$time)))
         }
@@ -353,9 +345,7 @@ vpc_tte <- function(sim = NULL,
       if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use 
         geom_step <- geom_line
       }
-      if (show_warnings) {
-        message("Warning: some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).")        
-      }
+      msg("Warning: some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).", verbose)        
       if (!is.null(stratify_color)) {
         pl <- pl + 
           geom_step(data = obs_km, aes(x=time, y=surv, colour=strat_color)) +         
@@ -427,9 +417,10 @@ vpc_tte <- function(sim = NULL,
     pl <- pl + ylab(ylab)
   } else {
     if(is.null(kmmc)) {
-      if(as_percentage) {
+      if(as_percentage && is.null(kmmc)) {
+        percent <- seq(from=0, to=100, by=25)
         pl <- pl + 
-          scale_y_continuous(labels = percent) +
+          scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1), labels = percent) +
           ylab("Survival (%)")        
       } else {
         pl <- pl + ylab("Survival")

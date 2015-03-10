@@ -4,14 +4,6 @@ define_data_columns <- function(sim, obs, sim_cols, obs_cols, software_type) {
     if (software_type == "nonmem") {
       obs_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
       sim_cols_default <- list(dv = "DV", id = "ID", idv = "TIME", pred = "PRED")
-      if(!is.null(obs)) {
-        old_class <- class(obs)
-        class(obs) <- c("nonmem", old_class)
-      }
-      if(!is.null(sim)) {
-        old_class <- class(sim)
-        class(sim) <- c("nonmem", old_class)
-      }
     } 
     if (software_type == "phoenix") {
       obs_cols_default <- list(dv = "COBS", id = "ID", idv = "TIME", pred = "PRED")

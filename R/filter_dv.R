@@ -20,9 +20,7 @@ filter_dv.nonmem <- function(x, verbose=FALSE, ...) {
     x <- x[x[["EVID"]] == 0,]
   } 
   if("MDV" %in% names(x)) {
-    if(exists("verbose") && verbose) {
-      msg("Filtering rows where MDV not 0", verbose) 
-    }
+    msg("Filtering rows where MDV not 0", verbose) 
     x <- x[x[["MDV"]] == 0,]
   } 
   if(sum(c("EVID", "MDV") %in% names(x)) == 0) {

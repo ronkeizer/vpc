@@ -9,7 +9,7 @@ vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   show = NULL, legend_pos = NULL, ci = c(0.05, 0.95), uloq = NULL,
   lloq = NULL, xlab = NULL, plot_sim_med = FALSE, ylab = NULL,
   title = NULL, smooth = TRUE, vpc_theme = NULL, ggplot_theme = NULL,
-  facet = "wrap", plot = TRUE, vpcdb = FALSE)
+  facet = "wrap", plot = TRUE, vpcdb = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
