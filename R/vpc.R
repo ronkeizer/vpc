@@ -102,6 +102,18 @@ vpc <- function(sim = NULL,
     software_type <- guess_software(software, sim)
   }
 
+ show_default <- list (
+     obs_dv = FALSE,
+     obs_ci = TRUE,
+     obs_median = TRUE,
+     sim_median = FALSE,
+     sim_median_ci = TRUE,
+     pi = FALSE,
+     pi_ci = TRUE,
+     pi_as_area = FALSE,
+     bin_sep = TRUE)
+
+
   ## define what to show in plot
   show <- replace_list_elements(show_default, show)
   
