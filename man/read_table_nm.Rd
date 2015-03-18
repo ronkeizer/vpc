@@ -4,7 +4,7 @@
 \alias{read_table_nm}
 \title{Read table file simulated with NONMEM}
 \usage{
-read_table_nm(file, perl = NULL)
+read_table_nm(file, sed = TRUE, perl = NULL)
 }
 \arguments{
 \item{file}{The file to be read}

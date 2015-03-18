@@ -20,7 +20,7 @@ read_table_nm <- function(file, perl = NULL) {
         return(data.frame(apply(tab_fr, 2, as.numeric)))
       }
     } else {
-      cat ("Tip: NONMEM tables can be read much faster when 'NOTITLE FORMAT=,1PE11.4' is used in $TABLE")
+      cat ("Tip: NONMEM tables can be read much faster when 'NOTITLE FORMAT=,1PE11.4' is used in $TABLE\n")
       if(is.null(perl)) { 
         perl <- FALSE
         chk <- try(system("perl -v", intern = TRUE, ignore.stderr = TRUE), silent = TRUE)
@@ -29,10 +29,11 @@ read_table_nm <- function(file, perl = NULL) {
         }
       }
       if (perl) {
+        cat("Using Perl to pre-parse data...\n")
         cmd <- paste0("perl -e 'open (IN, \"<", file, "\"); my $i = 0; my $cols = 0; while (my $line = <IN>) { if ($line =~ m/[a-df-z]/i) { unless($line =~ m/^TABLE NO/ || $cols == 1) { print $line; $cols = 1; } } else { print $line } } ; close(IN);'")
         tab <- read.table(pipe(cmd), header=T);            
       } else {
-        cat("Warning: Perl not found either, resorting to slowest method for reading tables.")
+        cat("Warning: Perl not found either, resorting to slowest method for reading tables.\n")
         tab <- readLines (file)      
         del_rows <- c(grep("TABLE", tab), grep ("TABLE", tab)[-1] + 1)
         if(length(del_rows) > 0) {
