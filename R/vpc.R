@@ -102,20 +102,8 @@ vpc <- function(sim = NULL,
     software_type <- guess_software(software, sim)
   }
 
- SHOW_DEFAULT <- list (
-     obs_dv = FALSE,
-     obs_ci = TRUE,
-     obs_median = TRUE,
-     sim_median = FALSE,
-     sim_median_ci = TRUE,
-     pi = FALSE,
-     pi_ci = TRUE,
-     pi_as_area = FALSE,
-     bin_sep = TRUE)
-
-
   ## define what to show in plot
-  show <- replace_list_elements(SHOW_DEFAULT, show)
+  show <- replace_list_elements(show_default, show)
   
   ## define column names
   cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
