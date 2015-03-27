@@ -6,7 +6,7 @@ Maintainer: Ron Keizer <ronkeizer@gmail.com>
 Description: Create visual predictive checks in R, a commonly used diagnostic
     plot in pharmacometrics. Create it completely within the R environment, so
     without the use of PsN and Xpose.
-Depends: 
+Depends:
     R (>= 3.0.2),
     dplyr,
     reshape2,
@@ -15,12 +15,12 @@ Depends:
     survival,
     classInt,
     data.table
-Imports: 
+Imports:
     magrittr
 License: GPL-2
 LazyData: true
 URL: https://github.com/ronkeizer/vpc
-Suggests: 
+Suggests:
     knitr,
     testthat
 VignetteBuilder: knitr

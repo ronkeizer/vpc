@@ -226,9 +226,9 @@ vpc <- function(sim = NULL,
   }
   if(!is.null(obs)) {
     tmp1 <- obs %>% group_by(strat,bin)
-    aggr_obs <- data.frame(cbind(tmp1 %>% summarise(quantile(dv, 0.05)),
+    aggr_obs <- data.frame(cbind(tmp1 %>% summarise(quantile(dv, pi[1])),
                                  tmp1 %>% summarise(quantile(dv, 0.5 )),
-                                 tmp1 %>% summarise(quantile(dv, 0.95)),
+                                 tmp1 %>% summarise(quantile(dv, pi[2])),
                                  tmp1 %>% summarise(mean(idv))))
     aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
     colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95", "bin_mid")
