@@ -7,7 +7,10 @@ compute_kaplan <- function(dat, strat = NULL, reverse_prob = FALSE) {
       if(reverse_prob) {
         tmp <- rbind(tmp, data.frame(time = km_fit$time, surv = 1-km_fit$surv, strat = strats[i]))            
       } else {
-        tmp <- rbind(tmp, data.frame(time = km_fit$time, surv = km_fit$surv, strat = strats[i]))          
+        tmp <- rbind(tmp, 
+                     rbind(data.frame(time=0, surv=1, strat = strats[i]),
+                           data.frame(time = km_fit$time, surv = km_fit$surv, strat = strats[i]))
+        )
       }
     }
     return(tmp)      

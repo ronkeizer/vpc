@@ -125,6 +125,18 @@ vpc_tte <- function(sim = NULL,
   
   ## stratification
   stratify_original <- stratify
+  if(!is.null(stratify_color)) {
+    if (is.null(stratify)) {
+      stratify <- stratify_color
+    }
+    if (length(stratify_color) > 1) {
+      stop("Error: please specify only 1 stratification variable for color!")      
+    }
+    if (!stratify_color %in% stratify) {
+      stratify_original <- stratify
+      stratify <- c(stratify, stratify_color)
+    }
+  }
   if(!is.null(stratify)) {
     if(rtte) {
       if (length(stratify) > 1) {
