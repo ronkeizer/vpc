@@ -98,7 +98,9 @@ vpc_tte <- function(sim = NULL,
   show_default <- list( obs = TRUE,
                         pi = TRUE,
                         pi_med = FALSE,
-                        sim_km = FALSE)
+                        sim_km = FALSE,
+                        obs_cens = TRUE)
+
   show <- replace_list_elements(show_default, show)
   
   ## define column names
@@ -309,6 +311,10 @@ vpc_tte <- function(sim = NULL,
       } 
     }
   }
+
+  if(show$obs_cens) {
+    cens_dat <- obs[obs$dv == 0 & obs$time > 0,]
+  }
   
   if (smooth) {
     geom_line_custom <- geom_line
@@ -372,6 +378,14 @@ vpc_tte <- function(sim = NULL,
         obs_km$strat_color <- obs_km$strat  
       }
     }    
+    if (show$obs_cens) {
+      cens_dat$y <- 1
+      for (j in 1:length(cens_dat[,1])) {
+         tmp <- obs_km[obs_km$strat == cens_dat$strat[j],]
+         cens_dat$y[j] <- rev(tmp$surv[(cens_dat$time[j] - tmp$time) > 0])[1]
+      }
+      pl <- pl + geom_point(data=cens_dat, aes(x=time, y=y), shape="|", size=2.5)
+    }
     if (show$obs) {
       chk_tbl <- obs_km %>% group_by(strat) %>% dplyr::summarize(t = length(time))
       if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use 
@@ -380,10 +394,10 @@ vpc_tte <- function(sim = NULL,
       msg("Warning: some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).", verbose)        
       if (!is.null(stratify_color)) {
         pl <- pl + 
-          geom_step(data = obs_km, aes(x=time, y=surv, colour=strat_color)) +         
+          geom_step(data = obs_km, aes(x=time, y=surv, colour=strat_color), size=1) +         
           scale_colour_discrete(name="")
       } else {
-        pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv, group=strat))         
+        pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv, group=strat), size=1)         
       }
     }
   }
