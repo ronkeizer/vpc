@@ -6,13 +6,6 @@
 #' @param rtte repeated time-to-event data? Deafult is FALSE (treat as single-event TTE)
 #' @param rtte_calc_diff recalculate time (T/F)? When simulating in NONMEM, you will probably need to set this to TRUE to recalculate the TIME to relative times between events (unless you output the time difference between events and specify that as independent variable to the vpc_tte() funciton.
 #' @param events numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events. 
-#' @param pi_med plot the median of the simulated data? Default is FALSE.
-#' @param obs_dv variable in data.frame for observed dependent value. "dv" by default
-#' @param sim_dv variable in data.frame for simulated dependent value. "sdv" by default
-#' @param obs_idv variable in data.frame for observed independent value. "time" by default
-#' @param sim_idv variable in data.frame for simulated independent value. "time" by default
-#' @param obs_id variable in data.frame for observed individual. "id" by default
-#' @param sim_id variable in data.frame for simulated individual. "id" by default
 #' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect.
 #' @param dense_grid Was a dense grid used to simulate and should the vpc_tte function remove the non-event data? TRUE or FALSE. Either way should not affect plot, when points removed the plot will just be generated faster.
 #' @param reverse_prob reverse the probability scale (i.e. plot 1-probability)
@@ -68,7 +61,6 @@ vpc_tte <- function(sim = NULL,
                     obs_cols = NULL,
                     sim_cols = NULL,
                     kmmc = NULL,
-                    pi_med = FALSE, 
                     reverse_prob = FALSE,
                     stratify = NULL,
                     stratify_color = NULL,
@@ -76,6 +68,7 @@ vpc_tte <- function(sim = NULL,
                     plot = FALSE,
                     xlab = NULL, 
                     ylab = NULL,
+                    show = list(),
                     as_percentage = TRUE,
                     title = NULL,
                     smooth = FALSE,
@@ -102,6 +95,10 @@ vpc_tte <- function(sim = NULL,
   }
   
   ## define what to show in plot
+  show_default <- list( obs = TRUE,
+                        pi = TRUE,
+                        pi_med = FALSE,
+                        sim_km = FALSE)
   show <- replace_list_elements(show_default, show)
   
   ## define column names
@@ -273,12 +270,18 @@ vpc_tte <- function(sim = NULL,
       } else {
         tmp3 <- compute_kaplan(tmp2, strat = "strat", reverse_prob = reverse_prob)  
       }
-      tmp3[,c("bin", "bin_min", "bin_max", "bin_mid")] <- 0 
-      tmp3$bin <- cut(tmp3$time, breaks = tmp_bins, labels = FALSE, right = TRUE)
-      tmp3$bin_min <- tmp_bins[tmp3$bin] 
-      tmp3$bin_max <- tmp_bins[tmp3$bin+1] 
-      tmp3$bin_mid <- (tmp3$bin_min + tmp3$bin_max) / 2      
-      all <- rbind(all, cbind(i, tmp3))
+      tmp3$time_strat <- paste0(tmp3$time, "_", tmp3$strat)
+      tmp4 <- expand.grid(time = c(0, unique(sim$t)), surv=NA, strat=unique(tmp3$strat))
+      tmp4$time_strat <- paste0(tmp4$time, "_", tmp4$strat)
+      tmp4[match(tmp3$time_strat, tmp4$time_strat),]$surv <- tmp3$surv
+      tmp4 <- tmp4 %>% arrange(strat, time)
+      tmp4$surv <- locf(tmp4$surv)
+      tmp4[,c("bin", "bin_min", "bin_max", "bin_mid")] <- 0 
+      tmp4$bin <- cut(tmp4$time, breaks = tmp_bins, labels = FALSE, right = TRUE)
+      tmp4$bin_min <- tmp_bins[tmp4$bin] 
+      tmp4$bin_max <- tmp_bins[tmp4$bin+1] 
+      tmp4$bin_mid <- (tmp4$bin_min + tmp4$bin_max) / 2      
+      all <- rbind(all, cbind(i, tmp4))
     }
     sim_km <- all %>% 
       dplyr::group_by (strat, bin) %>% 
@@ -332,31 +335,36 @@ vpc_tte <- function(sim = NULL,
       vpc_theme <- create_vpc_theme()
     }
     pl <- ggplot(sim_km, aes(x=bin_mid, y=qmed, group=strat))       
-    if (smooth) {
-      if (!is.null(stratify_color)) {
-        pl <- pl + 
-          geom_ribbon(aes(min = qmin, max=qmax, y=qmed, fill=strat_color), alpha=vpc_theme$sim_median_alpha) +
-          scale_fill_discrete(name="")
+    if(show$sim_km) {
+      all$strat_sim <- paste0(all$strat, "_", all$i)
+      pl <- pl + geom_line(data = all, aes(x=bin_mid, y=surv, group=strat_sim), colour=rgb(0,0,0,0.1))
+    }
+    if (show$pi) {
+      if (smooth) {
+        if (!is.null(stratify_color)) {
+          pl <- pl + 
+            geom_ribbon(aes(min = qmin, max=qmax, y=qmed, fill=strat_color), alpha=vpc_theme$sim_median_alpha) +
+            scale_fill_discrete(name="")
+        } else {
+          pl <- pl + geom_ribbon(aes(min = qmin, max=qmax, y=qmed), fill = vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha)        
+        }
       } else {
-        pl <- pl + geom_ribbon(aes(min = qmin, max=qmax, y=qmed), fill = vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha)        
-      }
-    } else {
-      if (!is.null(stratify_color)) {
-        pl <- pl + 
-          geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax, fill=strat_color), alpha=vpc_theme$sim_median_alpha) +
-          scale_fill_discrete(name="")
-      } else {
-        pl <- pl + geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)           
+        if (!is.null(stratify_color)) {
+          pl <- pl + 
+            geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax, fill=strat_color), alpha=vpc_theme$sim_median_alpha) +
+            scale_fill_discrete(name="")
+        } else {
+          pl <- pl + geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)           
+        }
       }
     }
-    if (pi_med) {
+    if (show$pi_med) {
       pl <- pl + geom_line_custom(linetype="dashed")
     }
   } else {
     pl <- ggplot(obs_km)       
   }
   if (!is.null(obs)) {  
-    show_obs <- TRUE
     if(!is.null(stratify_color)) {
       if (length(stratify) == 2) {
         obs_km$strat_color <- obs_km$strat2
@@ -364,7 +372,7 @@ vpc_tte <- function(sim = NULL,
         obs_km$strat_color <- obs_km$strat  
       }
     }    
-    if (show_obs) {
+    if (show$obs) {
       chk_tbl <- obs_km %>% group_by(strat) %>% dplyr::summarize(t = length(time))
       if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use 
         geom_step <- geom_line

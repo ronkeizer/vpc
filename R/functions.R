@@ -10,6 +10,11 @@ add_noise <- function(x, ruv = list(proportional = 0, additive = 0, exponential 
   x * (1 + rnorm(length(x), 0, ruv$proportional)) +  rnorm(length(x), 0, ruv$additive) * exp(rnorm(length(x), 0, ruv$exponential)) 
 } 
 
+locf <- function(S) {
+  L <- !is.na(S)
+  c(S[L][1], S[L])[cumsum(L)+1]
+}
+
 add_step <- function(dat = ., vars) {
     dat$step <- 0
     tmp <- dat[-1,]
