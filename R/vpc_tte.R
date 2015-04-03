@@ -217,14 +217,15 @@ vpc_tte <- function(sim = NULL,
       }
     }
     if(max(sim$dv) == 1) {
-      sim[sim$dv > 0  & sim$dv < 1,]$dv <- 0 
+      if (sum(sim$dv > 0 & sim$dv < 1) > 0) {
+        sim[sim$dv > 0  & sim$dv < 1,]$dv <- 0 
+      }
     }
     if("cens" %in% tolower(names(sim$cens))) { # some people use a 'cens' column to indicate censoring
       cat("Detected extra column with censoring information in simulation data.")
       colnames(sim)[match("cens", tolower(colnames(sim)))] <- "cens"
       sim[sim$cens == 1,]$dv <- 0
     }
-    
     # add sim index number
     sim$sim <- add_sim_index_number(sim, id = cols$sim$id)
       
