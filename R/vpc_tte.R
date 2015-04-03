@@ -216,6 +216,9 @@ vpc_tte <- function(sim = NULL,
         msg("Warning: Expected simulated dependent variable to contain only 0 (censored, or no event simerved) or 1 (event simerved). Setting all simulated observations != 1 to 1.", msg)
       }
     }
+    if(max(sim$dv) == 1) {
+      sim[sim$dv > 0  & sim$dv < 1,]$dv <- 0 
+    }
     if("cens" %in% tolower(names(sim$cens))) { # some people use a 'cens' column to indicate censoring
       cat("Detected extra column with censoring information in simulation data.")
       colnames(sim)[match("cens", tolower(colnames(sim)))] <- "cens"
@@ -262,6 +265,7 @@ vpc_tte <- function(sim = NULL,
       }
     }
     for (i in 1:n_sim) {
+      browser()
       tmp <- sim %>% dplyr::filter(sim == i)
       tmp2 <- add_stratification(tmp %>% dplyr::arrange(id, time), stratify)
       if(!is.null(kmmc) && kmmc %in% names(obs)) {
