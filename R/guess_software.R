@@ -3,7 +3,7 @@
 # @param x analysis data from software
 # dont document for Roxygen as internal function
 guess_software <- function(software, x) {
-  options <-  c("auto", "nonmem", "phoenix")
+  options <-  c("auto", "nonmem", "phoenix", "PKPDsim")
   software <- tolower(software)
   if(!software %in% options) {
     stop(paste("Please define one of the following software types:", paste(options, collapse=", ")))
@@ -17,6 +17,9 @@ guess_software <- function(software, x) {
   } 
   if("COBS" %in% names(x)) {
     software <- "phoenix"
+  }
+  if("PKPDsim" %in% class(x)) {
+    software <- "PKPDsim"
   }
   return(software)
 }
