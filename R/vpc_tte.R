@@ -343,7 +343,8 @@ vpc_tte <- function(sim = NULL,
     pl <- ggplot(sim_km, aes(x=bin_mid, y=qmed, group=strat))       
     if(show$sim_km) {
       all$strat_sim <- paste0(all$strat, "_", all$i)
-      pl <- pl + geom_line(data = all, aes(x=bin_mid, y=surv, group=strat_sim), colour=rgb(0,0,0,0.1))
+      transp <- min(.1, 20*(1/length(unique(all$i))))
+      pl <- pl + geom_step(data = all, aes(x=bin_mid, y=surv, group=strat_sim), colour=rgb(0.2,.53,0.796, transp))
     }
     if (show$pi) {
       if (smooth) {
