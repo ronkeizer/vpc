@@ -127,7 +127,23 @@ vpc(sim = sim,
 
 _Note: If you imported the data from NONMEM, the VPC function will automatically detect column names from NONMEM, such as ID, TIME, DV. If you simulated data in R or got the data from a different software, you will probably have to change the variable names for the dependent and independent variable, and the individual index._
 
-Colors, fills, transparency (alpha), and linetypes and sizes can be changed easily using the `vpc_theme` argument and function. More general plot theming can be accomplished by supplying a ggplot2 theme to the `ggplot_theme` argument.
+Using the `show` argument, you can instruct the `vpc` function what plot elements to show. The defaults are:
+
+```{r, eval=F, echo=T}
+  obs_dv = FALSE        # the observed data
+  obs_ci = TRUE         # the confidence interval of the observed data
+  obs_median = TRUE     # the median of the observed data
+  sim_median = FALSE    # the median of the simulated data
+  sim_median_ci = TRUE  # the confidence interval around the median of the simulated data
+  pi = FALSE            # the prediction interval quantiles
+  pi_ci = TRUE          # the confidence interval around the prediction interval quantiles
+  pi_as_area = FALSE    # show the PI as area instead of two lines
+  bin_sep = TRUE        # show the bin separaters (as geom_rug)
+```
+
+For more information about these elements of the VPC, and e.g. the difference between confidence intervals and prediction intervals, and why it is usually important to show both, please have a look at e.g. [this tutorial about VPCs](http://page-meeting.org/pdf_assets/8694-Karlsson_Holford_VPC_Tutorial_hires.pdf).
+
+Additionally, colors, fills, transparency (alpha), and linetypes and sizes can be changed easily using the `vpc_theme` argument and function. More general plot theming can be accomplished by supplying a ggplot2 theme to the `ggplot_theme` argument.
 
 ```{r, eval = eval_all, fig.width=4, fig.height=4}
 vpc(sim, obs,
@@ -201,12 +217,15 @@ vpc_tte(sim = rtte_sim_nm,
         obs_cols = list(idv = "dt"))
 ```
 
-Stratified for covariate and study arm:
+Stratified for covariate and study arm, and binned and smooth:
 ```{r, eval = eval_all, fig.width=6, fig.height=6}
 vpc_tte(sim = rtte_sim_nm, 
         obs = rtte_obs_nm, 
         stratify = c("sex","drug"), 
         rtte = FALSE, 
+        bins = "kmeans",
+        n_bins = 20,
+        smooth = TRUE,
         sim_cols = list(dv = "dv", idv="t"), 
         obs_cols = list(idv = "dt"))
 ```
@@ -217,6 +236,9 @@ vpc_tte(sim = rtte_sim_nm,
         obs = rtte_obs_nm,
         rtte = TRUE, rtte_calc_diff = TRUE, events = c(1:3),
         stratify=c("drug"),
+        bins = "time",
+        n_bins = 20,
+        smooth = TRUE,
         sim_cols = list(dv = "dv", idv="t"), 
         obs_cols = list(idv = "t"), verbose=TRUE)
 ```
