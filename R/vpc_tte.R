@@ -265,7 +265,6 @@ vpc_tte <- function(sim = NULL,
       }
     }
     for (i in 1:n_sim) {
-      browser()
       tmp <- sim %>% dplyr::filter(sim == i)
       tmp2 <- add_stratification(tmp %>% dplyr::arrange(id, time), stratify)
       if(!is.null(kmmc) && kmmc %in% names(obs)) {
