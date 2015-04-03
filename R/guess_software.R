@@ -7,14 +7,14 @@ guess_software <- function(software, x) {
   software <- tolower(software)
   if(!software %in% options) {
     stop(paste("Please define one of the following software types:", paste(options, collapse=", ")))
-  }   
+  }
   if(software == "nonmem" | software == "phoenix") return(software)
-  
+
   # nonmem typically will have MDV and DV
-  software <- "other"  
+  software <- "other"
   if(all(c("ID", "TIME") %in% names(x)) || all(c("ID", "DV") %in% names(x)) || all(c("MDV", "DV") %in% names(x)) || all(c("EVID", "DV") %in% names(x))) {
     software <- "nonmem"
-  } 
+  }
   if("COBS" %in% names(x)) {
     software <- "phoenix"
   }
