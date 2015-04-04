@@ -234,6 +234,7 @@ Stratified for event number (RTTE) and study arm:
 ```{r, eval = eval_all, fig.width=6, fig.height=6}
 vpc_tte(sim = rtte_sim_nm, 
         obs = rtte_obs_nm,
+#        show = list(obs_cens = FALSE),
         rtte = TRUE, rtte_calc_diff = TRUE, events = c(1:3),
         stratify=c("drug"),
         bins = "time",

@@ -313,7 +313,7 @@ vpc_tte <- function(sim = NULL,
   }
 
   if(show$obs_cens) {
-    cens_dat <- obs[obs$dv == 0 & obs$time > 0,]
+    cens_dat <- data.frame(obs[obs$dv == 0 & obs$time > 0,])
   }
   
   if (smooth) {
@@ -382,10 +382,13 @@ vpc_tte <- function(sim = NULL,
     if (show$obs_cens) {
       cens_dat$y <- 1
       for (j in 1:length(cens_dat[,1])) {
-         tmp <- obs_km[obs_km$strat == cens_dat$strat[j],]
+         tmp <- obs_km[as.character(obs_km$strat) == as.character(cens_dat$strat[j]),]
          cens_dat$y[j] <- rev(tmp$surv[(cens_dat$time[j] - tmp$time) > 0])[1]
       }
-      pl <- pl + geom_point(data=cens_dat, aes(x=time, y=y), shape="|", size=2.5)
+      cens_dat <- cens_dat[!is.na(cens_dat$y),]
+      if(length(cens_dat)>0) {
+        pl <- pl + geom_point(data=cens_dat, aes(x=time, y=y), shape="|", size=2.5)
+      }
     }
     if (show$obs) {
       chk_tbl <- obs_km %>% group_by(strat) %>% dplyr::summarize(t = length(time))
