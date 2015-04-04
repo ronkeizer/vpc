@@ -7,4 +7,15 @@ show_default <- list (
   pi = FALSE,
   pi_ci = TRUE,
   pi_as_area = FALSE,
-  bin_sep = TRUE)
+  bin_sep = TRUE
+)
+
+show_default_tte <- list( 
+  obs = TRUE,
+  pi = TRUE,
+  pi_med = FALSE,
+  sim_km = FALSE,
+  obs_cens = TRUE,
+  bin_sep = FALSE 
+)
+

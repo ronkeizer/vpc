@@ -94,14 +94,7 @@ vpc_tte <- function(sim = NULL,
     software_type <- guess_software(software, sim)
   }
   
-  ## define what to show in plot
-  show_default <- list( obs = TRUE,
-                        pi = TRUE,
-                        pi_med = FALSE,
-                        sim_km = FALSE,
-                        obs_cens = TRUE)
-
-  show <- replace_list_elements(show_default, show)
+  show <- replace_list_elements(show_default_tte, show)
   
   ## define column names
   cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
@@ -327,6 +320,8 @@ vpc_tte <- function(sim = NULL,
       sim_km$strat2 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)]
       obs_km$strat1 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)-1]
       obs_km$strat2 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)]        
+      cens_dat$strat1 <- unlist(strsplit(as.character(cens_dat$strat), ", "))[(1:length(cens_dat$strat)*2)-1]
+      cens_dat$strat2 <- unlist(strsplit(as.character(cens_dat$strat), ", "))[(1:length(cens_dat$strat)*2)]          
     }
   }  
   if (!is.null(sim)) {  
@@ -381,9 +376,17 @@ vpc_tte <- function(sim = NULL,
     }    
     if (show$obs_cens) {
       cens_dat$y <- 1
+      cens_dat$strat1 <- NA
+      cens_dat$strat2 <- NA      
       for (j in 1:length(cens_dat[,1])) {
          tmp <- obs_km[as.character(obs_km$strat) == as.character(cens_dat$strat[j]),]
          cens_dat$y[j] <- rev(tmp$surv[(cens_dat$time[j] - tmp$time) > 0])[1]
+         if ("strat1" %in% names(tmp)) {
+           cens_dat$strat1[j] <- rev(tmp$strat1[(cens_dat$time[j] - tmp$time) > 0])[1]           
+         }
+         if ("strat2" %in% names(tmp)) {
+           cens_dat$strat2[j] <- rev(tmp$strat2[(cens_dat$time[j] - tmp$time) > 0])[1]                  
+         }
       }
       cens_dat <- cens_dat[!is.na(cens_dat$y),]
       if(length(cens_dat)>0) {
@@ -398,10 +401,10 @@ vpc_tte <- function(sim = NULL,
       msg("Warning: some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).", verbose)        
       if (!is.null(stratify_color)) {
         pl <- pl + 
-          geom_step(data = obs_km, aes(x=time, y=surv, colour=strat_color), size=1) +         
+          geom_step(data = obs_km, aes(x=time, y=surv, colour=strat_color), size=.8) +         
           scale_colour_discrete(name="")
       } else {
-        pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv, group=strat), size=1)         
+        pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv, group=strat), size=.8)         
       }
     }
   }
@@ -444,9 +447,11 @@ vpc_tte <- function(sim = NULL,
       }
     }
   }
-  if(!(class(bins) == "logical" && bins == FALSE)) {
-    bdat <- data.frame(cbind(x=tmp_bins, y=NA))
-    pl <- pl + geom_rug(data=bdat, sides = "t", aes(x = x, y=y, group=NA), colour=vpc_theme$bin_separators_color)
+  if (show$bin_sep) {
+    if(!(class(bins) == "logical" && bins == FALSE)) {
+      bdat <- data.frame(cbind(x=tmp_bins, y=NA))
+      pl <- pl + geom_rug(data=bdat, sides = "t", aes(x = x, y=y, group=NA), colour=vpc_theme$bin_separators_color)
+    }    
   }
   if (!is.null(title)) {
     pl <- pl + ggtitle(title)  
