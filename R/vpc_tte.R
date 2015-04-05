@@ -229,7 +229,7 @@ vpc_tte <- function(sim = NULL,
     # filter out stuff and recalculate rtte times
     sim <- sim[sim$dv == 1 | (sim$last_obs == 1 & sim$dv == 0),]
     if(rtte) {
-      sim <- sim %>% dplyr::group_by(sim, id) %>% dplyr::arrange(sim, id, t) %>% dplyr::mutate(rtte = 1:length(dv)) %>% arrange(sim, id)       
+      sim <- sim %>% dplyr::group_by(sim, id) %>% dplyr::arrange(sim, id, t) %>% dplyr::mutate(rtte = 1:length(dv)) %>% dplyr::arrange(sim, id)       
       if(rtte_calc_diff) {
         sim <- relative_times(sim, simulation=TRUE)
       }
@@ -271,7 +271,7 @@ vpc_tte <- function(sim = NULL,
       tmp4 <- expand.grid(time = c(0, unique(sim$t)), surv=NA, strat=unique(tmp3$strat))
       tmp4$time_strat <- paste0(tmp4$time, "_", tmp4$strat)
       tmp4[match(tmp3$time_strat, tmp4$time_strat),]$surv <- tmp3$surv
-      tmp4 <- tmp4 %>% arrange(strat, time)
+      tmp4 <- tmp4 %>% dplyr::arrange(strat, time)
       tmp4$surv <- locf(tmp4$surv)
       tmp4[,c("bin", "bin_min", "bin_max", "bin_mid")] <- 0 
       tmp4$bin <- cut(tmp4$time, breaks = tmp_bins, labels = FALSE, right = TRUE)
