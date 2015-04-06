@@ -104,14 +104,7 @@ vpc_tte <- function(sim = NULL,
     software_type <- guess_software(software, sim)
   }
   
-  ## define what to show in plot
-  show_default <- list( obs = TRUE,
-                        pi = TRUE,
-                        pi_med = FALSE,
-                        sim_km = FALSE,
-                        obs_cens = TRUE)
-
-  show <- replace_list_elements(show_default, show)
+  show <- replace_list_elements(show_default_tte, show)
   
   ## define column names
   cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
@@ -187,7 +180,9 @@ vpc_tte <- function(sim = NULL,
       if(rtte_calc_diff) {
         obs <- relative_times(obs)
       }
-      obs <- obs %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0)) 
+      obs <- obs %>% dplyr::group_by(id) %>% dplyr::arrange(id, t) %>% dplyr::mutate(rtte = 1:length(dv)) 
+#       obs %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0)) 
+#       obs[obs$dv == 0,]$rtte <- obs[obs$dv == 0,]$rtte + 1 # these censored points actually "belong" to the next rtte strata
       stratify <- c(stratify, "rtte")
     } else {
       obs$rtte <- 1
@@ -239,12 +234,12 @@ vpc_tte <- function(sim = NULL,
     sim$sim <- add_sim_index_number(sim, id = cols$sim$id)
       
     # set last_observation and repeat_obs per sim&id
-    sim <- sim %>% group_by(sim, id) %>% mutate(last_obs = 1*(1:length(time) == length(time)), repeat_obs = 1*(cumsum(dv) > 1))  
+    sim <- sim %>% dplyr::group_by(sim, id) %>% dplyr::mutate(last_obs = 1*(1:length(time) == length(time)), repeat_obs = 1*(cumsum(dv) > 1))  
 
     # filter out stuff and recalculate rtte times
     sim <- sim[sim$dv == 1 | (sim$last_obs == 1 & sim$dv == 0),]
     if(rtte) {
-      sim <- sim %>% dplyr::group_by(sim, id) %>% dplyr::mutate(rtte = cumsum(dv != 0)) %>% arrange(sim, id)       
+      sim <- sim %>% dplyr::group_by(sim, id) %>% dplyr::arrange(sim, id, t) %>% dplyr::mutate(rtte = 1:length(dv)) %>% dplyr::arrange(sim, id)       
       if(rtte_calc_diff) {
         sim <- relative_times(sim, simulation=TRUE)
       }
@@ -286,7 +281,7 @@ vpc_tte <- function(sim = NULL,
       tmp4 <- expand.grid(time = c(0, unique(sim$t)), surv=NA, strat=unique(tmp3$strat))
       tmp4$time_strat <- paste0(tmp4$time, "_", tmp4$strat)
       tmp4[match(tmp3$time_strat, tmp4$time_strat),]$surv <- tmp3$surv
-      tmp4 <- tmp4 %>% arrange(strat, time)
+      tmp4 <- tmp4 %>% dplyr::arrange(strat, time)
       tmp4$surv <- locf(tmp4$surv)
       tmp4[,c("bin", "bin_min", "bin_max", "bin_mid")] <- 0 
       tmp4$bin <- cut(tmp4$time, breaks = tmp_bins, labels = FALSE, right = TRUE)
@@ -337,6 +332,8 @@ vpc_tte <- function(sim = NULL,
       sim_km$strat2 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)]
       obs_km$strat1 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)-1]
       obs_km$strat2 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)]        
+      cens_dat$strat1 <- unlist(strsplit(as.character(cens_dat$strat), ", "))[(1:length(cens_dat$strat)*2)-1]
+      cens_dat$strat2 <- unlist(strsplit(as.character(cens_dat$strat), ", "))[(1:length(cens_dat$strat)*2)]          
     }
   }  
   if (!is.null(sim)) {  
@@ -391,9 +388,17 @@ vpc_tte <- function(sim = NULL,
     }    
     if (show$obs_cens) {
       cens_dat$y <- 1
+      cens_dat$strat1 <- NA
+      cens_dat$strat2 <- NA      
       for (j in 1:length(cens_dat[,1])) {
          tmp <- obs_km[as.character(obs_km$strat) == as.character(cens_dat$strat[j]),]
          cens_dat$y[j] <- rev(tmp$surv[(cens_dat$time[j] - tmp$time) > 0])[1]
+         if ("strat1" %in% names(tmp)) {
+           cens_dat$strat1[j] <- rev(tmp$strat1[(cens_dat$time[j] - tmp$time) > 0])[1]           
+         }
+         if ("strat2" %in% names(tmp)) {
+           cens_dat$strat2[j] <- rev(tmp$strat2[(cens_dat$time[j] - tmp$time) > 0])[1]                  
+         }
       }
       cens_dat <- cens_dat[!is.na(cens_dat$y),]
       if(length(cens_dat)>0) {
@@ -408,10 +413,10 @@ vpc_tte <- function(sim = NULL,
       msg("Warning: some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).", verbose)        
       if (!is.null(stratify_color)) {
         pl <- pl + 
-          geom_step(data = obs_km, aes(x=time, y=surv, colour=strat_color), size=1) +         
+          geom_step(data = obs_km, aes(x=time, y=surv, colour=strat_color), size=.8) +         
           scale_colour_discrete(name="")
       } else {
-        pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv, group=strat), size=1)         
+        pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv, group=strat), size=.8)         
       }
     }
   }
@@ -454,9 +459,11 @@ vpc_tte <- function(sim = NULL,
       }
     }
   }
-  if(!(class(bins) == "logical" && bins == FALSE)) {
-    bdat <- data.frame(cbind(x=tmp_bins, y=NA))
-    pl <- pl + geom_rug(data=bdat, sides = "t", aes(x = x, y=y, group=NA), colour=vpc_theme$bin_separators_color)
+  if (show$bin_sep) {
+    if(!(class(bins) == "logical" && bins == FALSE)) {
+      bdat <- data.frame(cbind(x=tmp_bins, y=NA))
+      pl <- pl + geom_rug(data=bdat, sides = "t", aes(x = x, y=y, group=NA), colour=vpc_theme$bin_separators_color)
+    }    
   }
   if (!is.null(title)) {
     pl <- pl + ggtitle(title)  

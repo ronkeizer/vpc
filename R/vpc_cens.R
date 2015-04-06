@@ -71,7 +71,8 @@ vpc_cens <- function(sim = NULL,
                      vpc_theme = NULL,
                      ggplot_theme = NULL,
                      facet = "wrap",
-                     vpcdb = FALSE) {
+                     vpcdb = FALSE,
+                     verbose = FALSE) {
   if (is.null(uloq) & is.null(lloq)) {
     stop("You have to specify either a lower limit of quantification (lloq=...) or an upper limit (uloq=...).") 
   }
@@ -124,6 +125,8 @@ vpc_cens <- function(sim = NULL,
   if(!is.null(sim)) {  
     sim <- filter_dv(sim, verbose)
     sim <- format_vpc_input_data(sim, cols$sim, lloq, uloq, stratify, bins, FALSE, 0, "simulated", verbose)
+    # add sim index number
+    sim$sim <- add_sim_index_number(sim)  
   }
   
   stratify_original <- stratify

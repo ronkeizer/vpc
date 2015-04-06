@@ -11,12 +11,11 @@ vignette: >
 The VPC is the most widely used diagnostic tool in pharmacometrics (see e.g. [here](http://page-meeting.org/default.asp?abstract=1434)), and is commonly created using [PsN](http://psn.sourceforge.net) and [Xpose](http://xpose.sourceforge.net), using NONMEM as the simulation engine. The aim of the current R library is to provide an improved tool that is:
 
 - a single-step process for creating a VPC in R, without the need for PsN or Xpose. 
-  - allows changing of vpc parameters such as binning / stratification upon creation of the plot, not in a separate pre-processing step.
+  - allows changing of vpc parameters such as binning and stratification upon creation of the plot, not in a separate pre-processing step.
   - easier debugging than PsN+Xpose, all data parsing and plotting in one R package
-- more flexible regarding input (use simulated data from R, NONMEM, Monolix, Stan, or any other simulation tool)
+- more flexible regarding input (use simulated data from NONMEM, Monolix, Stan, R::PKPDsim, or any other simulation tool)
 - easier to customize, e.g. request any prediction / confidence interval or binning strategy upon plotting.
 - easier to extend: the output is a ggplot object which can be themed and extended
-- faster
 
 ## Installation
 
