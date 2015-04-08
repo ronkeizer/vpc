@@ -7,9 +7,7 @@ test_that("software type returned properly", {
   expect_equal(guess_software("NONmem", nonmem_df), "nonmem")
   expect_equal(guess_software("nonmem", phx_df), "nonmem")
   expect_equal(guess_software("auto", nonmem_df), "nonmem")
-  expect_equal(guess_software("auto", phx_df), "phoenix")
-
-  
+  expect_equal(guess_software("auto", phx_df), "phoenix")  
 })
 
 test_that("expectation throws error if input not a named software type", {

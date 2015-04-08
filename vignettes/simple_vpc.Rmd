@@ -1,0 +1,49 @@
+---
+title: "simple vpc"
+author: "devin"
+date: "January 30, 2015"
+output: html_document
+---
+
+A VPC example using the built in simple_
+
+```{r}
+suppressMessages(library(vpc))
+evalall <- FALSE
+
+
+```
+
+```{r, eval=evalall}
+vpc(simple_data$sim, simple_data$obs)
+
+
+```
+
+Can also easily stratify.
+
+```{r, eval=evalall}
+vpc(simple_data$sim, simple_data$obs, stratify = c("ISM"))
+
+```
+
+saving as a plot object
+```{r, eval=evalall}
+p <- vpc(simple_data$sim, simple_data$obs, stratify = c("ISM"))
+
+
+```
+
+Given is a ggplot object can just call the object to print it to the screen
+```{r, eval=evalall}
+p 
+
+```
+
+Can also override with additional theme elements or lines etc
+```{r, eval=evalall}
+p + PKPDmisc::base_theme()
+
+p + geom_vline(xintercept = 3, color = "red")
+```
+

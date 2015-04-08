@@ -34,21 +34,21 @@
 #' vpc_tte(sim = rtte_sim_nm, 
 #'         obs = rtte_obs_nm, 
 #'         rtte = FALSE, 
-#'         sim_dv = "dv", obs_idv = "t", sim_idv = "t")
+#'         sim_cols=list(dv = "dv", idv = "t"), obs_cols=list(idv = "t"))
 #' 
 #' # stratified for covariate and study arm
 #' vpc_tte(sim = rtte_sim_nm, 
 #'         obs = rtte_obs_nm, 
 #'         stratify = c("sex","drug"), 
 #'         rtte = FALSE,
-#'         sim_dv = "dv", obs_idv = "t", sim_idv = "t")
+#'         sim_cols=list(dv = "dv", idv = "t"), obs_cols=list(idv = "t"))
 #' 
 #' # stratified per event number (we'll only look at first 3 events) and stratify per arm
 #' vpc_tte(sim = rtte_sim_nm, 
 #'         obs = rtte_obs_nm,
 #'         rtte = TRUE, events = c(1:3),
 #'         stratify = c("drug"), 
-#'         sim_dv = "dv", obs_idv = "t", sim_idv = "t")
+#'         sim_cols=list(dv = "dv", idv = "t"), obs_cols=list(idv = "t"))
 vpc_tte <- function(sim = NULL, 
                     obs = NULL, 
                     psn_folder = NULL,
