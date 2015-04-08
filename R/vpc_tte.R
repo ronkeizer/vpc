@@ -79,12 +79,12 @@ vpc_tte <- function(sim = NULL,
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }
-  if(is.null(kmmc)) {
+  if(!is.null(kmmc)) {
     if(!kmmc %in% names(obs)) {
       stop(paste0("Specified covariate ", kmmc, " not found among column names in observed data."))
     }
   } 
-  if(is.null(kmmc)) {
+  if(!is.null(kmmc)) {
     if(!kmmc %in% names(sim)) {
       stop(paste0("Specified covariate ", kmmc, " not found among column names in simulated data."))
     }
