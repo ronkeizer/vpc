@@ -220,6 +220,9 @@ vpc_tte <- function(sim = NULL,
         msg("Warning: Expected simulated dependent variable to contain only 0 (censored, or no event simerved) or 1 (event simerved). Setting all simulated observations != 1 to 1.", msg)
       }
     }
+    if("nonmem" %in% class(sim)) { # necessary due to a bug in NONMEM simulation
+      sim <- sim[!(sim$time ==0 & sim$dv == 1),]
+    }
     if(max(sim$dv) == 1) {
       if (sum(sim$dv > 0 & sim$dv < 1) > 0) {
         sim[sim$dv > 0  & sim$dv < 1,]$dv <- 0 
