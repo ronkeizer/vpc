@@ -105,6 +105,20 @@ vpc_tte <- function(sim = NULL,
   }
   
   show <- replace_list_elements(show_default_tte, show)
+
+  ## redefine strat column in case of "strat"
+  if(!is.null(stratify)) {
+    if(stratify == "strat") {
+      obs$strat_orig = obs$strat
+      stratify <- "strat_orig"
+    }
+  } 
+  if(!is.null(stratify_color)) {
+    if(stratify_color == "strat") {
+      obs$strat_orig = obs$strat
+      stratify_color <- "strat_orig"
+    }
+  }   
   
   ## define column names
   cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
@@ -160,8 +174,8 @@ vpc_tte <- function(sim = NULL,
       msg("Warning: No ID column found, assuming 1 row per ID.", verbose)
       obs$id <- 1:length(obs[,1])
     }
-    obs$time <- obs[[cols$obs$idv]]
-    obs$dv <- obs[[cols$obs$dv]]
+    obs$time <- as.num(obs[[cols$obs$idv]])
+    obs$dv <- as.num(obs[[cols$obs$dv]])
     if(max(obs$dv) > 1) { # guessing DV definition if not just 0/1
       if(max(obs$dv) == 2) { # common approach in NONMEM, 2 = censored
         obs[obs$dv != 1,]$dv <- 0
@@ -390,22 +404,24 @@ vpc_tte <- function(sim = NULL,
       }
     }    
     if (show$obs_cens) {
-      cens_dat$y <- 1
-      cens_dat$strat1 <- NA
-      cens_dat$strat2 <- NA      
-      for (j in 1:length(cens_dat[,1])) {
-         tmp <- obs_km[as.character(obs_km$strat) == as.character(cens_dat$strat[j]),]
-         cens_dat$y[j] <- rev(tmp$surv[(cens_dat$time[j] - tmp$time) > 0])[1]
-         if ("strat1" %in% names(tmp)) {
-           cens_dat$strat1[j] <- rev(tmp$strat1[(cens_dat$time[j] - tmp$time) > 0])[1]           
-         }
-         if ("strat2" %in% names(tmp)) {
-           cens_dat$strat2[j] <- rev(tmp$strat2[(cens_dat$time[j] - tmp$time) > 0])[1]                  
-         }
-      }
-      cens_dat <- cens_dat[!is.na(cens_dat$y),]
-      if(length(cens_dat)>0) {
-        pl <- pl + geom_point(data=cens_dat, aes(x=time, y=y), shape="|", size=2.5)
+      if(nrow(cens_dat)>0) {
+        cens_dat$y <- 1
+        cens_dat$strat1 <- NA
+        cens_dat$strat2 <- NA      
+        for (j in 1:length(cens_dat[,1])) {
+          tmp <- obs_km[as.character(obs_km$strat) == as.character(cens_dat$strat[j]),]
+          cens_dat$y[j] <- rev(tmp$surv[(cens_dat$time[j] - tmp$time) > 0])[1]
+          if ("strat1" %in% names(tmp)) {
+            cens_dat$strat1[j] <- rev(tmp$strat1[(cens_dat$time[j] - tmp$time) > 0])[1]           
+          }
+          if ("strat2" %in% names(tmp)) {
+            cens_dat$strat2[j] <- rev(tmp$strat2[(cens_dat$time[j] - tmp$time) > 0])[1]                  
+          }
+        }
+        cens_dat <- cens_dat[!is.na(cens_dat$y),]
+        if(nrow(cens_dat)>0) {
+          pl <- pl + geom_point(data=cens_dat, aes(x=time, y=y), shape="|", size=2.5)
+        }        
       }
     }
     if (show$obs) {
