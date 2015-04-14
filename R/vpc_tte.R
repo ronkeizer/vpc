@@ -211,6 +211,9 @@ vpc_tte <- function(sim = NULL,
       obs_km <- compute_kmmc(obs, strat = "strat", reverse_prob = reverse_prob, kmmc=kmmc)
     } else {
       if(show$obs_ci) {
+        if(length(ci) == 2 && (round(ci[1],3) != round((1-ci[2]),3))) {
+          stop("Sorry, only symmetric confidence intervals can be computed. Please adjust the ci argument.")
+        }
         obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob, ci = ci)        
       } else {
         obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob)  
