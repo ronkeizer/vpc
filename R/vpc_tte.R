@@ -104,6 +104,9 @@ vpc_tte <- function(sim = NULL,
     software_type <- guess_software(software, sim)
   }
   
+  if(is.null(sim)) {
+    show_default_tte$obs_ci <- TRUE 
+  }
   show <- replace_list_elements(show_default_tte, show)
 
   ## redefine strat column in case of "strat"
@@ -207,7 +210,11 @@ vpc_tte <- function(sim = NULL,
     if(!is.null(kmmc) && kmmc %in% names(obs)) {
       obs_km <- compute_kmmc(obs, strat = "strat", reverse_prob = reverse_prob, kmmc=kmmc)
     } else {
-      obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob)
+      if(show$obs_ci) {
+        obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob, ci = ci)        
+      } else {
+        obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob)  
+      }
     }
   } else { # get bins from sim
     obs_km <- NULL
@@ -422,6 +429,13 @@ vpc_tte <- function(sim = NULL,
         if(nrow(cens_dat)>0) {
           pl <- pl + geom_point(data=cens_dat, aes(x=time, y=y), shape="|", size=2.5)
         }        
+      }
+    }
+    if(show$obs_ci) {
+      if (!is.null(stratify_color)) {        
+        pl <- pl + geom_ribbon(data=obs_km, aes(x=time, ymin=lower, ymax=upper, group=strat_color), fill=rgb(0.5,0.5,0.5,0.2))
+      } else {
+        pl <- pl + geom_ribbon(data=obs_km, aes(x=time, ymin=lower, ymax=upper, group=strat), fill=rgb(0.5,0.5,0.5,0.2))        
       }
     }
     if (show$obs) {

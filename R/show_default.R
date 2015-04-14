@@ -14,6 +14,7 @@ show_default_tte <- list(
   obs = TRUE,
   pi = TRUE,
   pi_med = FALSE,
+  obs_ci = FALSE,
   sim_km = FALSE,
   obs_cens = TRUE,
   bin_sep = FALSE 
