@@ -197,7 +197,7 @@ vpc_tte <- function(sim = NULL,
       if(rtte_calc_diff) {
         obs <- relative_times(obs)
       }
-      obs <- obs %>% dplyr::group_by(id) %>% dplyr::arrange(id, t) %>% dplyr::mutate(rtte = 1:length(dv)) 
+      obs <- obs %>% dplyr::group_by(id) %>% dplyr::arrange(id, time) %>% dplyr::mutate(rtte = 1:length(dv)) 
 #       obs %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0)) 
 #       obs[obs$dv == 0,]$rtte <- obs[obs$dv == 0,]$rtte + 1 # these censored points actually "belong" to the next rtte strata
       stratify <- c(stratify, "rtte")
@@ -266,7 +266,7 @@ vpc_tte <- function(sim = NULL,
     # filter out stuff and recalculate rtte times
     sim <- sim[sim$dv == 1 | (sim$last_obs == 1 & sim$dv == 0),]
     if(rtte) {
-      sim <- sim %>% dplyr::group_by(sim, id) %>% dplyr::arrange(sim, id, t) %>% dplyr::mutate(rtte = 1:length(dv)) %>% dplyr::arrange(sim, id)       
+      sim <- sim %>% dplyr::group_by(sim, id) %>% dplyr::arrange(sim, id, time) %>% dplyr::mutate(rtte = 1:length(dv)) %>% dplyr::arrange(sim, id)       
       if(rtte_calc_diff) {
         sim <- relative_times(sim, simulation=TRUE)
       }
