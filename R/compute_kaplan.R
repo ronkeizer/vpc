@@ -1,4 +1,4 @@
-compute_kaplan <- function(dat, strat = "strat", reverse_prob = FALSE, ci = NULL) {
+compute_kaplan <- function(dat, strat = "strat", reverse_prob = FALSE, ci = NULL, rtte_whole_population) {
     if(length(dat[[strat]]) == 0) {
       dat$strat <- 1
     }
@@ -14,7 +14,14 @@ compute_kaplan <- function(dat, strat = "strat", reverse_prob = FALSE, ci = NULL
       ci = 0.95
     }
     for (i in seq(strats)) {
-      km_fit <- survfit(Surv(time = time, dv != 0) ~ 1, data = dat[dat[[strat]] == strats[i],], conf.int = ci)
+      tmp1 <- dat[dat[[strat]] == strats[i],]
+      if(length(grep( "rtte", strats[1])) > 0  & i > 1) {
+        for (j in 1:i) {
+          tmp_j <- dat[dat[[strat]] == strats[j] & dat$dv == 0,]     
+          tmp1 <- rbind(tmp1, tmp_j)
+        }
+      }
+      km_fit <- survfit(Surv(time = time, dv != 0) ~ 1, data = tmp1, conf.int = ci)
       km_dat <- data.frame(time = km_fit$time, surv = km_fit$surv, strat = strats[i])
       if(include_ci) {        
         km_dat <- data.frame(cbind(km_dat, lower=km_fit$lower, upper=km_fit$upper)) 
