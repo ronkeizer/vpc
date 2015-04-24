@@ -11,7 +11,7 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
   ci = c(0.05, 0.95), plot = FALSE, xlab = NULL, ylab = NULL,
   show = list(), as_percentage = TRUE, title = NULL, smooth = FALSE,
   vpc_theme = NULL, ggplot_theme = NULL, facet = "wrap",
-  verbose = FALSE)
+  verbose = FALSE, vpcdb = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -49,6 +49,8 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
 \item{facet}{either "wrap", "columns", or "rows"}
 
 \item{verbose}{TRUE or FALSE (default)}
+
+\item{vpcdb}{Boolean whether to return the underlying vpcdb rather than the plot}
 
 \item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect.}
 

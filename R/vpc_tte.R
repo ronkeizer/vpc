@@ -21,6 +21,7 @@
 #' @param ggplot_theme specify a custom ggplot2 theme
 #' @param facet either "wrap", "columns", or "rows" 
 #' @param verbose TRUE or FALSE (default)
+#' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
 #' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
 #' @seealso \link{vpc}
@@ -75,7 +76,8 @@ vpc_tte <- function(sim = NULL,
                     vpc_theme = NULL,
                     ggplot_theme = NULL,
                     facet = "wrap",
-                    verbose = FALSE) {
+                    verbose = FALSE,
+                    vpcdb = FALSE) {
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }
@@ -189,8 +191,8 @@ vpc_tte <- function(sim = NULL,
       }
     }
     if("cens" %in% tolower(colnames(obs))) { # some people use a 'cens' column to indicate censoring
+      msg(paste0("Detected column '",colnames(obs)[match("cens", tolower(colnames(obs)))],"' with censoring information in observation data, assuming 1=censored event, 0=observed event. Please transpose data if assumption not correct."), TRUE)
       colnames(obs)[match("cens", tolower(colnames(obs)))] <- "cens"
-      msg("Detected extra column with censoring information in observation data, assuming 1=censored event, 0=observed event.", verbose)
       obs[obs$cens == 1,]$dv <- 0
     }
     if (rtte) {
@@ -532,6 +534,26 @@ vpc_tte <- function(sim = NULL,
       pl <- pl + ylab(paste0("Mean (", kmmc, ")"))
     }
   }
+  # plotting starts here
+  vpc_db <- list(sim = sim,
+                 sim_km = sim_km,
+                 obs = obs,
+                 obs_km = obs_km,
+                 vpc_theme = vpc_theme,
+                 show = show,
+                 smooth = smooth,
+                 stratify = stratify,
+                 stratify_original = stratify_original,
+                 stratify_color = stratify_color,
+                 bins = bins,
+                 xlab = xlab,
+                 ylab = ylab,
+                 facet = facet,
+                 title = title,
+                 theme = theme,
+                 ggplot_theme = ggplot_theme,
+                 plot = plot)
+  if(vpcdb) return(vpc_db)
   if(plot) {
     print(pl)
   }
