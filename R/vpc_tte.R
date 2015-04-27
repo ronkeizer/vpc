@@ -111,6 +111,16 @@ vpc_tte <- function(sim = NULL,
   }
   show <- replace_list_elements(show_default_tte, show)
 
+  ## checking whether stratification columns are available
+  if(!is.null(stratify)) {
+    check_stratification_columns_available(obs, stratify, "observation")
+    check_stratification_columns_available(sim, stratify, "simulation")
+  }
+  if(!is.null(stratify_color)) {
+    check_stratification_columns_available(obs, stratify_color, "observation")
+    check_stratification_columns_available(sim, stratify_color, "simulation")
+  }
+  
   ## redefine strat column in case of "strat"
   if(!is.null(stratify)) {
     if(stratify == "strat") {

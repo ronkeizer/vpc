@@ -129,7 +129,17 @@ vpc <- function(sim = NULL,
     old_class <- class(sim)
     class(sim) <- c(software_type, old_class)
   }
-
+  
+  ## checking whether stratification columns are available
+  if(!is.null(stratify)) {
+    check_stratification_columns_available(obs, stratify, "observation")
+    check_stratification_columns_available(sim, stratify, "simulation")
+  }
+  if(!is.null(stratify_color)) {
+    check_stratification_columns_available(obs, stratify_color, "observation")
+    check_stratification_columns_available(sim, stratify_color, "simulation")
+  }
+  
   ## parse data into specific format
   if(!is.null(obs)) {
     obs <- filter_dv(obs, verbose)

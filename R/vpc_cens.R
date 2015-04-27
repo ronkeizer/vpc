@@ -103,6 +103,16 @@ vpc_cens <- function(sim = NULL,
     software_type <- guess_software(software, sim)
   }
 
+  ## checking whether stratification columns are available
+  if(!is.null(stratify)) {
+    check_stratification_columns_available(obs, stratify, "observation")
+    check_stratification_columns_available(sim, stratify, "simulation")
+  }
+  if(!is.null(stratify_color)) {
+    check_stratification_columns_available(obs, stratify_color, "observation")
+    check_stratification_columns_available(sim, stratify_color, "simulation")
+  }
+  
   ## define what to show in plot
   show <- replace_list_elements(show_default, show)
   
