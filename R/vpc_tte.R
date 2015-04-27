@@ -307,9 +307,11 @@ vpc_tte <- function(sim = NULL,
         tmp3 <- compute_kaplan(tmp2, strat = "strat", reverse_prob = reverse_prob)  
       }
       tmp3$time_strat <- paste0(tmp3$time, "_", tmp3$strat)
-      tmp4 <- expand.grid(time = c(0, unique(sim$t)), surv=NA, strat=unique(tmp3$strat))
+      tmp4 <- expand.grid(time = c(0, unique(sim$t)), surv=NA, lower=NA, upper=NA, strat=unique(tmp3$strat))
       tmp4$time_strat <- paste0(tmp4$time, "_", tmp4$strat)
       tmp4[match(tmp3$time_strat, tmp4$time_strat),]$surv <- tmp3$surv
+#       tmp4[match(tmp3$time_strat, tmp4$time_strat),]$lower <- tmp3$lower
+#       tmp4[match(tmp3$time_strat, tmp4$time_strat),]$upper <- tmp3$upper
       tmp4 <- tmp4 %>% dplyr::arrange(strat, time)
       tmp4$surv <- locf(tmp4$surv)
       tmp4[,c("bin", "bin_min", "bin_max", "bin_mid")] <- 0 
@@ -321,8 +323,14 @@ vpc_tte <- function(sim = NULL,
     }
     sim_km <- all %>% 
       dplyr::group_by (strat, bin) %>% 
-      dplyr::summarize (bin_mid = head(bin_mid,1), bin_min = head(bin_min,1), bin_max = head(bin_max,1), 
-                 qmin = quantile(surv, 0.05), qmax = quantile(surv, 0.95), qmed = median(surv),
+      dplyr::summarize (bin_mid = head(bin_mid,1), 
+                        bin_min = head(bin_min,1), 
+                        bin_max = head(bin_max,1), 
+                        qmin = quantile(surv, 0.05), 
+                        qmax = quantile(surv, 0.95), 
+                        qmed = median(surv),
+#                         lower_med = median(lower, 0.05), 
+#                         upper_med = median(upper, 0.05),
                  step = 0)
   } else {
     sim_km <- NULL
