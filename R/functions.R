@@ -10,6 +10,15 @@ add_noise <- function(x, ruv = list(proportional = 0, additive = 0, exponential 
   x * (1 + rnorm(length(x), 0, ruv$proportional)) +  rnorm(length(x), 0, ruv$additive) * exp(rnorm(length(x), 0, ruv$exponential)) 
 } 
 
+add_recurs <- function(x, n, max) {
+  x <- x + n
+  n <- n + 1
+  if (n <= max) {
+    x <- add_recurs(x, n, max)
+  }
+  x
+}
+
 locf <- function(S) {
   L <- !is.na(S)
   c(S[L][1], S[L])[cumsum(L)+1]
