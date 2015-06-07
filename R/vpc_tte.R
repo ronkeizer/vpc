@@ -78,7 +78,7 @@ vpc_tte <- function(sim = NULL,
                     facet = "wrap",
                     verbose = FALSE,
                     vpcdb = FALSE) {
-  require(ggplot2)
+  require(ggplot2, quietly=TRUE)
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }
@@ -124,7 +124,7 @@ vpc_tte <- function(sim = NULL,
   
   ## redefine strat column in case of "strat"
   if(!is.null(stratify)) {
-    if(stratify == "strat") {
+    if(stratify[1] == "strat") {
       obs$strat_orig = obs$strat
       stratify <- "strat_orig"
     }
