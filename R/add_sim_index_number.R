@@ -1,3 +1,8 @@
+#' Add sim index number
+#' 
+#' @description Add simulation index number to simulation when not present
+#' @param sim a data.frame containing the simulation data
+#' @param id character specifying the column name in the data.frame
 #' @export
 add_sim_index_number <- function (sim, id = "id") { # for multiple simulations in a single dataframe, add an index number for every simulation
   sim[[id]] <- as.num(sim[[id]])

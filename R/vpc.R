@@ -30,15 +30,15 @@
 #' @param ggplot_theme specify a custom ggplot2 theme
 #' @param facet either "wrap", "columns", or "rows"
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
-#' @return a list containing calculated VPC information, and a ggplot2 object
+#' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 #' @export
 #' @seealso \link{sim_data}, \link{vpc_cens}, \link{vpc_tte}
 #' @examples
 #' obs <- Theoph
 #' colnames(obs) <- c("id", "wt", "dose", "time", "dv")
 #' obs <- obs %>%   # create a dummy covariate to show stratification
-#'  group_by(id) %>%
-#'  mutate(sex = round(runif(1)))
+#'  dplyr::group_by(id) %>%
+#'  dplyr::mutate(sex = round(runif(1)))
 #'
 #' sim <- sim_data(obs, # the design of the dataset
 #'                 model = function(x) { # the model

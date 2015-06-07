@@ -7,18 +7,29 @@
 vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   n_bins = "auto", obs_cols = NULL, sim_cols = NULL, software = "auto",
   show = NULL, legend_pos = NULL, ci = c(0.05, 0.95), uloq = NULL,
-  lloq = NULL, xlab = NULL, plot_sim_med = FALSE, ylab = NULL,
-  title = NULL, smooth = TRUE, vpc_theme = NULL, ggplot_theme = NULL,
-  facet = "wrap", plot = TRUE, vpcdb = FALSE, verbose = FALSE)
+  lloq = NULL, xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
+  stratify = NULL, stratify_color = NULL, vpc_theme = NULL,
+  ggplot_theme = NULL, facet = "wrap", plot = TRUE, vpcdb = FALSE,
+  verbose = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
 \item{obs}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{bins}{either "density", "time", or "data", or a numeric vector specifying the bin separators.}
+\item{psn_folder}{instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder}
 
-\item{n_bins}{number of bins}
+\item{bins}{either "auto" or a numeric vector specifying the bin separators.}
+
+\item{n_bins}{when using the "auto" binning method, what number of bins to aim for}
+
+\item{obs_cols}{observation dataset column names (list elements: "dv", "idv", "id", "pred")}
+
+\item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred")}
+
+\item{software}{name of software platform using (eg nonmem, phoenix)}
+
+\item{show}{what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
 
 \item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
 
@@ -28,13 +39,15 @@ vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{xlab}{ylab as numeric vector of size 2}
 
-\item{plot_sim_med}{Plot the simulated median? Default is FALSE}
-
 \item{ylab}{ylab as numeric vector of size 2}
 
 \item{title}{title}
 
 \item{smooth}{"smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.}
+
+\item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
+
+\item{stratify_color}{variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.}
 
 \item{vpc_theme}{theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()}
 
@@ -42,24 +55,28 @@ vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{facet}{either "wrap", "columns", or "rows"}
 
-\item{plot}{Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.}
+\item{plot}{Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.}
 
-\item{obs_dv}{variable in data.frame for observed dependent value. "dv" by default}
+\item{vpcdb}{Boolean whether to return the underlying vpcdb rather than the plot}
 
-\item{sim_dv}{variable in data.frame for simulated dependent value. "sdv" by default}
+\item{bins}{either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.}
 
-\item{obs_idv}{variable in data.frame for observed independent value. "time" by default}
+\item{pred_corr}{perform prediction-correction?}
 
-\item{sim_idv}{variable in data.frame for simulated independent value. "time" by default}
+\item{pred_corr_lower_bnd}{lower bound for the prediction-correction}
 
-\item{obs_id}{variable in data.frame for observed individual. "id" by default}
+\item{pi}{simulated prediction interval to plot. Default is c(0.05, 0.95),}
 
-\item{sim_id}{variable in data.frame for simulated individual. "id" by default}
+\item{log_y}{Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.}
 
-\item{nonmem}{should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED).  Default is "auto" for autodetect}
+\item{log_y_min}{minimal value when using log_y argument. Default is 1e-3.}
+
+\item{uloq}{Number or NULL indicating upper limit of quantification. Default is NULL.}
+
+\item{lloq}{Number or NULL indicating lower limit of quantification. Default is NULL.}
 }
 \value{
-a list containing calculated VPC information, and a ggplot2 object
+a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 }
 \description{
 Creates a VPC plot from observed and simulation data

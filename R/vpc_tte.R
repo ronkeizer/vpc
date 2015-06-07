@@ -78,6 +78,7 @@ vpc_tte <- function(sim = NULL,
                     facet = "wrap",
                     verbose = FALSE,
                     vpcdb = FALSE) {
+  require(ggplot2)
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }

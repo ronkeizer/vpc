@@ -21,7 +21,7 @@ compute_kaplan <- function(dat, strat = "strat", reverse_prob = FALSE, ci = NULL
           tmp1 <- rbind(tmp1, tmp_j)
         }
       }
-      km_fit <- survfit(Surv(time = time, dv != 0) ~ 1, data = tmp1, conf.int = ci)
+      km_fit <- survival::survfit(survival::Surv(time = time, dv != 0) ~ 1, data = tmp1, conf.int = ci)
       km_dat <- data.frame(time = km_fit$time, surv = km_fit$surv, strat = strats[i])
       if(include_ci) {        
         km_dat <- data.frame(cbind(km_dat, lower=km_fit$lower, upper=km_fit$upper)) 

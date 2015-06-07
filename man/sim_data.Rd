@@ -41,8 +41,8 @@ This function generates the simulated dependent values for use in the VPC plotti
 obs <- Theoph
 colnames(obs) <- c("id", "wt", "dose", "time", "dv")
 obs <- obs \%>\%   # create a dummy covariate to show stratification
- group_by(id) \%>\%
- mutate(sex = round(runif(1)))
+ dplyr::group_by(id) \%>\%
+ dplyr::mutate(sex = round(runif(1)))
 
 sim <- sim_data(obs, # the design of the dataset
                 model = function(x) { # the model

@@ -4,28 +4,36 @@
 #' sim, 
 #' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
-#' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.  
-#' @param n_bins number of bins
-#' @param obs_dv variable in data.frame for observed dependent value. "dv" by default
-#' @param sim_dv variable in data.frame for simulated dependent value. "sdv" by default
-#' @param obs_idv variable in data.frame for observed independent value. "time" by default
-#' @param sim_idv variable in data.frame for simulated independent value. "time" by default
-#' @param obs_id variable in data.frame for observed individual. "id" by default
-#' @param sim_id variable in data.frame for simulated individual. "id" by default
-#' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED).  Default is "auto" for autodetect
+#' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
+#' @param bins either "auto" or a numeric vector specifying the bin separators.
+#' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
+#' @param n_bins when using the "auto" binning method, what number of bins to aim for
+#' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
+#' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
+#' @param show what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
+#' @param software name of software platform using (eg nonmem, phoenix)
+#' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
+#' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
+#' @param pred_corr perform prediction-correction?
+#' @param pred_corr_lower_bnd lower bound for the prediction-correction
+#' @param pi simulated prediction interval to plot. Default is c(0.05, 0.95),
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
-#' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.  
-#' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.  
-#' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.
-#' @param plot_sim_med Plot the simulated median? Default is FALSE
+#' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.
+#' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.
+#' @param plot Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.
+#' @param log_y Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.
+#' @param log_y_min minimal value when using log_y argument. Default is 1e-3.
 #' @param xlab ylab as numeric vector of size 2
 #' @param ylab ylab as numeric vector of size 2
 #' @param title title
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param ggplot_theme specify a custom ggplot2 theme
-#' @param facet either "wrap", "columns", or "rows" 
-#' @return a list containing calculated VPC information, and a ggplot2 object
+#' @param facet either "wrap", "columns", or "rows"
+#' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
+#' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.  
+#' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.  
+#' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 #' @export
 #' @seealso \link{vpc}
 vpc_cat  <- function(sim = NULL, 
@@ -42,10 +50,11 @@ vpc_cat  <- function(sim = NULL,
                      uloq = NULL, 
                      lloq = NULL, 
                      xlab = NULL, 
-                     plot_sim_med = FALSE,
                      ylab = NULL,
                      title = NULL,
                      smooth = TRUE,
+                     stratify = NULL,
+                     stratify_color = NULL,
                      vpc_theme = NULL,
                      ggplot_theme = NULL,
                      facet = "wrap",

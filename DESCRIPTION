@@ -8,15 +8,15 @@ Description: Create visual predictive checks in R, a commonly used diagnostic
     without the use of PsN and Xpose.
 Depends:
     R (>= 3.0.2),
+    classInt
+Imports:
+    magrittr,
     dplyr,
     reshape2,
     ggplot2,
     MASS,
     survival,
-    classInt,
     data.table
-Imports:
-    magrittr
 License: GPL-2
 LazyData: true
 URL: https://github.com/ronkeizer/vpc

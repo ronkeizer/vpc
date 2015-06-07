@@ -73,7 +73,7 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 \item{bins}{either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.}
 }
 \value{
-a list containing calculated VPC information, and a ggplot2 object
+a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 }
 \description{
 Creates a VPC plot from observed and simulation data
@@ -82,8 +82,8 @@ Creates a VPC plot from observed and simulation data
 obs <- Theoph
 colnames(obs) <- c("id", "wt", "dose", "time", "dv")
 obs <- obs \%>\%   # create a dummy covariate to show stratification
- group_by(id) \%>\%
- mutate(sex = round(runif(1)))
+ dplyr::group_by(id) \%>\%
+ dplyr::mutate(sex = round(runif(1)))
 
 sim <- sim_data(obs, # the design of the dataset
                 model = function(x) { # the model

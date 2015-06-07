@@ -14,7 +14,7 @@ filter_dv.phx <- function(x, dv, verbose = FALSE, ...) {
 }
 
 
-filter_dv.nonmem <- function(x, verbose=FALSE, ...) {
+filter_dv.nonmem <- function(x, verbose = FALSE, ...) {
   if ("EVID" %in% names(x)){
     msg("Filtering rows where EVID not 0", verbose)
     x <- x[x[["EVID"]] == 0,]
