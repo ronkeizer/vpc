@@ -14,8 +14,6 @@ auto_bin(dat, type = "kmeans", n_bins = 8, verbose = FALSE)
 \item{n_bins}{number of bins to use. For "density" the function might not return a solution with the exact number of bins.}
 
 \item{verbose}{show warnings and other messages (TRUE or FALSE)}
-
-\item{column}{name of independent variable}
 }
 \value{
 A vector of bin separators

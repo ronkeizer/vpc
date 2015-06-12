@@ -6,16 +6,17 @@
 \usage{
 vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   n_bins = 8, obs_cols = NULL, sim_cols = NULL, software = "auto",
-  show = NULL, legend_pos = NULL, stratify = NULL,
-  stratify_color = NULL, ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
-  plot = FALSE, xlab = NULL, ylab = NULL, plot_sim_med = FALSE,
-  title = NULL, smooth = TRUE, vpc_theme = NULL, ggplot_theme = NULL,
-  facet = "wrap", vpcdb = FALSE, verbose = FALSE)
+  show = NULL, stratify = NULL, stratify_color = NULL, ci = c(0.05,
+  0.95), uloq = NULL, lloq = NULL, plot = FALSE, xlab = NULL,
+  ylab = NULL, title = NULL, smooth = TRUE, vpc_theme = NULL,
+  ggplot_theme = NULL, facet = "wrap", vpcdb = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
 \item{obs}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+
+\item{psn_folder}{instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder}
 
 \item{bins}{either "density", "time", or "data", or a numeric vector specifying the bin separators.}
 
@@ -54,6 +55,10 @@ vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 \item{ggplot_theme}{specify a custom ggplot2 theme}
 
 \item{facet}{either "wrap", "columns", or "rows"}
+
+\item{vpcdb}{boolean whether to return the underlying vpcdb rather than the plot}
+
+\item{verbose}{show debugging information (TRUE or FALSE)}
 }
 \value{
 a list containing calculated VPC information, and a ggplot2 object
@@ -63,11 +68,12 @@ Creates a VPC plot from observed and simulation data
 sim,
 }
 \examples{
+library(dplyr)
 obs <- Theoph
 colnames(obs) <- c("id", "wt", "dose", "time", "dv")
 obs <- obs \%>\%   # create a dummy covariate to show stratification
- dplyr::group_by(id) \%>\%
- dplyr::mutate(sex = round(runif(1)))
+ group_by(id) \%>\%
+ mutate(sex = round(runif(1)))
 
 sim <- sim_data(obs, # the design of the dataset
                 model = function(x) { # the model

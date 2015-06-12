@@ -26,10 +26,9 @@ library(vpc)
 ```
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, error=FALSE}
-    eval_all <- FALSE
+    eval_all <- TRUE
     # library("devtools")
     # install_github("ronkeizer/vpc")
-    library(vpc)
 ```
    
 ## How to use

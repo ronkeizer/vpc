@@ -5,7 +5,6 @@
 #' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
-#' @param bins either "auto" or a numeric vector specifying the bin separators.
 #' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
 #' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
@@ -14,15 +13,10 @@
 #' @param software name of software platform using (eg nonmem, phoenix)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
-#' @param pred_corr perform prediction-correction?
-#' @param pred_corr_lower_bnd lower bound for the prediction-correction
-#' @param pi simulated prediction interval to plot. Default is c(0.05, 0.95),
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.
 #' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.
 #' @param plot Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.
-#' @param log_y Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.
-#' @param log_y_min minimal value when using log_y argument. Default is 1e-3.
 #' @param xlab ylab as numeric vector of size 2
 #' @param ylab ylab as numeric vector of size 2
 #' @param title title
@@ -30,9 +24,8 @@
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param ggplot_theme specify a custom ggplot2 theme
 #' @param facet either "wrap", "columns", or "rows"
-#' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
-#' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.  
-#' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.  
+#' @param vpcdb boolean whether to return the underlying vpcdb rather than the plot
+#' @param verbose show debugging information (TRUE or FALSE)
 #' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 #' @export
 #' @seealso \link{vpc}
@@ -45,7 +38,6 @@ vpc_cat  <- function(sim = NULL,
                      sim_cols = NULL,
                      software = "auto",
                      show = NULL,                
-                     legend_pos = NULL,
                      ci = c(0.05, 0.95),
                      uloq = NULL, 
                      lloq = NULL, 
@@ -141,22 +133,22 @@ vpc_cat  <- function(sim = NULL,
     tmp1 <- sim %>% group_by(sim, bin)
     for (i in seq(lev)) {
       if (i == 1) {
-        aggr_sim <- tmp1 %>% dplyr::summarize(fact_perc(dv, lev[i]))
+        aggr_sim <- tmp1 %>% summarize(fact_perc(dv, lev[i]))
       } else {
-        aggr_sim <- cbind(aggr_sim, tmp1 %>% dplyr::summarize(fact_perc(dv, lev[i])) )           
+        aggr_sim <- cbind(aggr_sim, tmp1 %>% summarize(fact_perc(dv, lev[i])) )           
       }
     } 
-    aggr_sim <- cbind(aggr_sim, tmp1 %>% dplyr::summarize(mean(idv)))
+    aggr_sim <- cbind(aggr_sim, tmp1 %>% summarize(mean(idv)))
     aggr_sim <- data.frame(aggr_sim)
     aggr_sim <- aggr_sim[,-grep("(bin.|sim.)", colnames(aggr_sim))]
     colnames(aggr_sim) <- c("sim", "bin", paste0("fact_", lev), "mn_idv") 
     tmp3 <- reshape2::melt(aggr_sim, id=c("sim", "bin", "mn_idv"))
     tmp3$strat <- rep(lev, each = length(aggr_sim[,1]))
     tmp4 <- tmp3 %>% group_by(strat, bin)    
-    vpc_dat <- data.frame(cbind(tmp4 %>% dplyr::summarize(quantile(value, ci[1])),
-                                tmp4 %>% dplyr::summarize(quantile(value, 0.5)),
-                                tmp4 %>% dplyr::summarize(quantile(value, ci[2])),
-                                tmp4 %>% dplyr::summarize(mean(mn_idv))
+    vpc_dat <- data.frame(cbind(tmp4 %>% summarize(quantile(value, ci[1])),
+                                tmp4 %>% summarize(quantile(value, 0.5)),
+                                tmp4 %>% summarize(quantile(value, ci[2])),
+                                tmp4 %>% summarize(mean(mn_idv))
                                 ))
     vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
     colnames(vpc_dat) <- c("strat", "bin", "q50.low","q50.med","q50.up", "bin_mid")  
@@ -170,12 +162,12 @@ vpc_cat  <- function(sim = NULL,
     tmp <- obs %>% group_by(bin)
     for (i in seq(lev)) {
       if (i == 1) {
-        aggr_obs <- tmp %>% dplyr::summarize(fact_perc(dv, lev[i]))
+        aggr_obs <- tmp %>% summarize(fact_perc(dv, lev[i]))
       } else {
-        aggr_obs <- cbind(aggr_obs, tmp %>% dplyr::summarize(fact_perc(dv, lev[i])) )           
+        aggr_obs <- cbind(aggr_obs, tmp %>% summarize(fact_perc(dv, lev[i])) )           
       }
     }     
-    tmp1 <- data.frame(cbind(aggr_obs, data.frame(tmp %>% dplyr::summarize(mean(idv)))))
+    tmp1 <- data.frame(cbind(aggr_obs, data.frame(tmp %>% summarize(mean(idv)))))
     tmp1 <- tmp1[,-grep("(bin.|strat.|sim.)", colnames(tmp1))]
     colnames(tmp1) <- c("bin", paste0("fact_", lev), "bin_mid")    
     tmp2 <- reshape2::melt(tmp1, id=c("bin", "bin_mid"))

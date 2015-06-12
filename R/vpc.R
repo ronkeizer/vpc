@@ -4,7 +4,6 @@
 #' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
-#' @param bins either "auto" or a numeric vector specifying the bin separators.
 #' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
 #' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
@@ -30,15 +29,17 @@
 #' @param ggplot_theme specify a custom ggplot2 theme
 #' @param facet either "wrap", "columns", or "rows"
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
+#' @param verbose show debugging information (TRUE or FALSE)
 #' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 #' @export
 #' @seealso \link{sim_data}, \link{vpc_cens}, \link{vpc_tte}
 #' @examples
+#' library(dplyr)
 #' obs <- Theoph
 #' colnames(obs) <- c("id", "wt", "dose", "time", "dv")
 #' obs <- obs %>%   # create a dummy covariate to show stratification
-#'  dplyr::group_by(id) %>%
-#'  dplyr::mutate(sex = round(runif(1)))
+#'  group_by(id) %>%
+#'  mutate(sex = round(runif(1)))
 #'
 #' sim <- sim_data(obs, # the design of the dataset
 #'                 model = function(x) { # the model
@@ -63,7 +64,6 @@ vpc <- function(sim = NULL,
                 sim_cols = NULL,
                 software = "auto",
                 show = NULL,
-                legend_pos = NULL,
                 plot = FALSE,
                 stratify = NULL,
                 stratify_color = NULL,
@@ -106,12 +106,12 @@ vpc <- function(sim = NULL,
   if (software_type == "PKPDsim") {
     if (!is.null(obs)) {
       if("obs" %in% obs$comp) {
-        obs <- obs %>% dplyr::filter(comp == "obs")
+        obs <- obs %>% filter(comp == "obs")
       }
     }
     if (!is.null(sim)) {
       if("obs" %in% sim$comp) {
-        sim <- sim %>% dplyr::filter(comp == "obs")
+        sim <- sim %>% filter(comp == "obs")
       }
     }
   }
@@ -218,24 +218,24 @@ vpc <- function(sim = NULL,
   }
   if (!is.null(sim)) {
     tmp1 <- sim %>% group_by(strat, sim, bin)
-    aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarize(quantile(dv, pi[1])),
-                                 tmp1 %>% dplyr::summarize(quantile(dv, 0.5 )),
-                                 tmp1 %>% dplyr::summarize(quantile(dv, pi[2])),
-                                 tmp1 %>% dplyr::summarize(mean(idv))))
+    aggr_sim <- data.frame(cbind(tmp1 %>% summarize(quantile(dv, pi[1])),
+                                 tmp1 %>% summarize(quantile(dv, 0.5 )),
+                                 tmp1 %>% summarize(quantile(dv, pi[2])),
+                                 tmp1 %>% summarize(mean(idv))))
     aggr_sim <- aggr_sim[,-grep("(bin.|strat.|sim.)", colnames(aggr_sim))]
     colnames(aggr_sim)[grep("quantile", colnames(aggr_sim))] <- c("q5", "q50", "q95")
     colnames(aggr_sim)[length(aggr_sim[1,])] <- "mn_idv"
     tmp <- aggr_sim %>% group_by(strat, bin)
-    vpc_dat <- data.frame(cbind(tmp %>% dplyr::summarize(quantile(q5, ci[1])),
-                                tmp %>% dplyr::summarize(quantile(q5, 0.5)),
-                                tmp %>% dplyr::summarize(quantile(q5, ci[2])),
-                                tmp %>% dplyr::summarize(quantile(q50, ci[1])),
-                                tmp %>% dplyr::summarize(quantile(q50, 0.5)),
-                                tmp %>% dplyr::summarize(quantile(q50, ci[2])),
-                                tmp %>% dplyr::summarize(quantile(q95, ci[1])),
-                                tmp %>% dplyr::summarize(quantile(q95, 0.5)),
-                                tmp %>% dplyr::summarize(quantile(q95, ci[2])),
-                                tmp %>% dplyr::summarize(mean(mn_idv))))
+    vpc_dat <- data.frame(cbind(tmp %>% summarize(quantile(q5, ci[1])),
+                                tmp %>% summarize(quantile(q5, 0.5)),
+                                tmp %>% summarize(quantile(q5, ci[2])),
+                                tmp %>% summarize(quantile(q50, ci[1])),
+                                tmp %>% summarize(quantile(q50, 0.5)),
+                                tmp %>% summarize(quantile(q50, ci[2])),
+                                tmp %>% summarize(quantile(q95, ci[1])),
+                                tmp %>% summarize(quantile(q95, 0.5)),
+                                tmp %>% summarize(quantile(q95, ci[2])),
+                                tmp %>% summarize(mean(mn_idv))))
     vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
     colnames(vpc_dat) <- c("strat", "bin",
                            "q5.low","q5.med","q5.up",

@@ -6,8 +6,8 @@
 \usage{
 vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   n_bins = "auto", obs_cols = NULL, sim_cols = NULL, software = "auto",
-  show = NULL, legend_pos = NULL, ci = c(0.05, 0.95), uloq = NULL,
-  lloq = NULL, xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
+  show = NULL, ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
+  xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
   stratify = NULL, stratify_color = NULL, vpc_theme = NULL,
   ggplot_theme = NULL, facet = "wrap", plot = TRUE, vpcdb = FALSE,
   verbose = FALSE)
@@ -19,7 +19,7 @@ vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{psn_folder}{instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder}
 
-\item{bins}{either "auto" or a numeric vector specifying the bin separators.}
+\item{bins}{either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.}
 
 \item{n_bins}{when using the "auto" binning method, what number of bins to aim for}
 
@@ -57,23 +57,9 @@ vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{plot}{Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.}
 
-\item{vpcdb}{Boolean whether to return the underlying vpcdb rather than the plot}
+\item{vpcdb}{boolean whether to return the underlying vpcdb rather than the plot}
 
-\item{bins}{either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.}
-
-\item{pred_corr}{perform prediction-correction?}
-
-\item{pred_corr_lower_bnd}{lower bound for the prediction-correction}
-
-\item{pi}{simulated prediction interval to plot. Default is c(0.05, 0.95),}
-
-\item{log_y}{Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.}
-
-\item{log_y_min}{minimal value when using log_y argument. Default is 1e-3.}
-
-\item{uloq}{Number or NULL indicating upper limit of quantification. Default is NULL.}
-
-\item{lloq}{Number or NULL indicating lower limit of quantification. Default is NULL.}
+\item{verbose}{show debugging information (TRUE or FALSE)}
 }
 \value{
 a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)

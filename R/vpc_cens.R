@@ -4,6 +4,7 @@
 #' sim, 
 #' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
 #' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.  
 #' @param n_bins number of bins
 #' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
@@ -23,15 +24,18 @@
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param ggplot_theme specify a custom ggplot2 theme
 #' @param facet either "wrap", "columns", or "rows" 
+#' @param vpcdb boolean whether to return the underlying vpcdb rather than the plot
+#' @param verbose show debugging information (TRUE or FALSE)
 #' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
 #' @seealso \link{vpc}
 #' @examples
+#' library(dplyr)
 #' obs <- Theoph
 #' colnames(obs) <- c("id", "wt", "dose", "time", "dv")
 #' obs <- obs %>%   # create a dummy covariate to show stratification
-#'  dplyr::group_by(id) %>%  
-#'  dplyr::mutate(sex = round(runif(1)))
+#'  group_by(id) %>%  
+#'  mutate(sex = round(runif(1)))
 #' 
 #' sim <- sim_data(obs, # the design of the dataset
 #'                 model = function(x) { # the model
@@ -56,7 +60,6 @@ vpc_cens <- function(sim = NULL,
                      sim_cols = NULL,
                      software = "auto",
                      show = NULL,                
-                     legend_pos = NULL,
                      stratify = NULL,
                      stratify_color = NULL,
                      ci = c(0.05, 0.95),
@@ -65,7 +68,6 @@ vpc_cens <- function(sim = NULL,
                      plot = FALSE,
                      xlab = NULL, 
                      ylab = NULL,
-                     plot_sim_med = FALSE,
                      title = NULL,
                      smooth = TRUE,
                      vpc_theme = NULL,
@@ -179,15 +181,15 @@ vpc_cens <- function(sim = NULL,
   ## Parsing data to get the quantiles for the VPC
   if (!is.null(sim)) {
     tmp1 <- sim %>% group_by(strat, sim, bin)
-    aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarize(loq_perc(dv)),
-                                 tmp1 %>% dplyr::summarize(mean(idv))))
+    aggr_sim <- data.frame(cbind(tmp1 %>% summarize(loq_perc(dv)),
+                                 tmp1 %>% summarize(mean(idv))))
     colnames(aggr_sim)[grep("loq_perc", colnames(aggr_sim))] <- "ploq"
     colnames(aggr_sim)[length(aggr_sim[1,])] <- c("mn_idv")
     tmp <- aggr_sim %>% group_by(strat, bin)    
-    vpc_dat <- data.frame(cbind(tmp %>% dplyr::summarize(quantile(ploq, ci[1])),
-                                tmp %>% dplyr::summarize(quantile(ploq, 0.5)),
-                                tmp %>% dplyr::summarize(quantile(ploq, ci[2])),
-                                tmp %>% dplyr::summarize(mean(mn_idv))
+    vpc_dat <- data.frame(cbind(tmp %>% summarize(quantile(ploq, ci[1])),
+                                tmp %>% summarize(quantile(ploq, 0.5)),
+                                tmp %>% summarize(quantile(ploq, ci[2])),
+                                tmp %>% summarize(mean(mn_idv))
                                 ))
     vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
     colnames(vpc_dat) <- c("strat", "bin", "q50.low","q50.med","q50.up", "bin_mid")  
@@ -199,8 +201,8 @@ vpc_cens <- function(sim = NULL,
   }
   if(!is.null(obs)) {
     tmp <- obs %>% group_by(strat,bin)
-    aggr_obs <- data.frame(cbind(tmp %>% dplyr::summarize(loq_perc(dv)),
-                                 tmp %>% dplyr::summarize(mean(idv))))
+    aggr_obs <- data.frame(cbind(tmp %>% summarize(loq_perc(dv)),
+                                 tmp %>% summarize(mean(idv))))
     aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
     colnames(aggr_obs) <- c("strat", "bin", "obs50")
     colnames(aggr_obs)[length(aggr_obs[1,])] <- c("bin_mid")

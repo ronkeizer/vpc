@@ -3,7 +3,6 @@
 #' @param dat data frame
 #' @param type auto-binning type: "density", "time", or "data"
 #' @param n_bins number of bins to use. For "density" the function might not return a solution with the exact number of bins.
-#' @param column name of independent variable
 #' @param verbose show warnings and other messages (TRUE or FALSE)
 #' @return A vector of bin separators
 #' @export auto_bin

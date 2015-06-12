@@ -3,16 +3,23 @@
 #' Creates a VPC plot from observed and simulation survival data
 #' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
+#' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.  
+#' @param n_bins number of bins
+#' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
+#' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
+#' @param software name of software platform using (eg nonmem, phoenix)
+#' @param show what to show in VPC (obs_ci, obs_median, sim_median, sim_median_ci) 
 #' @param rtte repeated time-to-event data? Deafult is FALSE (treat as single-event TTE)
 #' @param rtte_calc_diff recalculate time (T/F)? When simulating in NONMEM, you will probably need to set this to TRUE to recalculate the TIME to relative times between events (unless you output the time difference between events and specify that as independent variable to the vpc_tte() funciton.
+#' @param kmmc either NULL (for regular TTE vpc, default), or a variable name for a KMMC plot (e.g. "WT")
 #' @param events numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events. 
-#' @param nonmem should variable names standard to NONMEM be used (i.e. ID, TIME, DV, PRED). Default is "auto" for autodetect.
-#' @param dense_grid Was a dense grid used to simulate and should the vpc_tte function remove the non-event data? TRUE or FALSE. Either way should not affect plot, when points removed the plot will just be generated faster.
 #' @param reverse_prob reverse the probability scale (i.e. plot 1-probability)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied. If stratify_color is also specified, only 1 additional stratification can be specified.
 #' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.
+#' @param as_percentage Show y-scale from 0-100 percent? TRUE by default, if FALSE then scale from 0-1.
 #' @param xlab ylab as numeric vector of size 2
 #' @param ylab ylab as numeric vector of size 2
 #' @param title title
@@ -78,7 +85,6 @@ vpc_tte <- function(sim = NULL,
                     facet = "wrap",
                     verbose = FALSE,
                     vpcdb = FALSE) {
-  require(ggplot2, quietly=TRUE)
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }
@@ -210,7 +216,7 @@ vpc_tte <- function(sim = NULL,
       if(rtte_calc_diff) {
         obs <- relative_times(obs)
       }
-      obs <- obs %>% dplyr::group_by(id) %>% dplyr::arrange(id, time) %>% dplyr::mutate(rtte = 1:length(dv)) 
+      obs <- obs %>% group_by(id) %>% arrange(id, time) %>% mutate(rtte = 1:length(dv)) 
 #       obs %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0)) 
 #       obs[obs$dv == 0,]$rtte <- obs[obs$dv == 0,]$rtte + 1 # these censored points actually "belong" to the next rtte strata
       stratify <- c(stratify, "rtte")
@@ -274,12 +280,12 @@ vpc_tte <- function(sim = NULL,
     sim$sim <- add_sim_index_number(sim, id = cols$sim$id)
       
     # set last_observation and repeat_obs per sim&id
-    sim <- sim %>% dplyr::group_by(sim, id) %>% dplyr::mutate(last_obs = 1*(1:length(time) == length(time)), repeat_obs = 1*(cumsum(dv) > 1))  
+    sim <- sim %>% group_by(sim, id) %>% mutate(last_obs = 1*(1:length(time) == length(time)), repeat_obs = 1*(cumsum(dv) > 1))  
 
     # filter out stuff and recalculate rtte times
     sim <- sim[sim$dv == 1 | (sim$last_obs == 1 & sim$dv == 0),]
     if(rtte) {
-      sim <- sim %>% dplyr::group_by(sim, id) %>% dplyr::arrange(sim, id, time) %>% dplyr::mutate(rtte = 1:length(dv)) %>% dplyr::arrange(sim, id)       
+      sim <- sim %>% group_by(sim, id) %>% arrange(sim, id, time) %>% mutate(rtte = 1:length(dv)) %>% arrange(sim, id)       
       if(rtte_calc_diff) {
         sim <- relative_times(sim, simulation=TRUE)
       }
@@ -310,8 +316,8 @@ vpc_tte <- function(sim = NULL,
       }
     }
     for (i in 1:n_sim) {
-      tmp <- sim %>% dplyr::filter(sim == i)
-      tmp2 <- add_stratification(tmp %>% dplyr::arrange(id, time), stratify)
+      tmp <- sim %>% filter(sim == i)
+      tmp2 <- add_stratification(tmp %>% arrange(id, time), stratify)
       if(!is.null(kmmc) && kmmc %in% names(obs)) {
         tmp3 <- compute_kmmc(tmp2, strat = "strat", reverse_prob = reverse_prob, kmmc = kmmc)
       } else {
@@ -323,7 +329,7 @@ vpc_tte <- function(sim = NULL,
       tmp4[match(tmp3$time_strat, tmp4$time_strat),]$surv <- tmp3$surv
 #       tmp4[match(tmp3$time_strat, tmp4$time_strat),]$lower <- tmp3$lower
 #       tmp4[match(tmp3$time_strat, tmp4$time_strat),]$upper <- tmp3$upper
-      tmp4 <- tmp4 %>% dplyr::arrange(strat, time)
+      tmp4 <- tmp4 %>% arrange(strat, time)
       tmp4$surv <- locf(tmp4$surv)
       tmp4[,c("bin", "bin_min", "bin_max", "bin_mid")] <- 0 
       tmp4$bin <- cut(tmp4$time, breaks = tmp_bins, labels = FALSE, right = TRUE)
@@ -333,8 +339,8 @@ vpc_tte <- function(sim = NULL,
       all <- rbind(all, cbind(i, tmp4))
     }
     sim_km <- all %>% 
-      dplyr::group_by (strat, bin) %>% 
-      dplyr::summarize (bin_mid = head(bin_mid,1), 
+      group_by (strat, bin) %>% 
+      summarize (bin_mid = head(bin_mid,1), 
                         bin_min = head(bin_min,1), 
                         bin_max = head(bin_max,1), 
                         qmin = quantile(surv, 0.05), 
@@ -370,9 +376,9 @@ vpc_tte <- function(sim = NULL,
   }
   
   if (smooth) {
-    geom_line_custom <- geom_line
+    geom_line_custom <- ggplot2::geom_line
   } else {
-    geom_line_custom <- geom_step
+    geom_line_custom <- ggplot2::geom_step
   }
   if (!is.null(stratify_original)) {
     if (length(stratify) == 2) {
@@ -463,7 +469,7 @@ vpc_tte <- function(sim = NULL,
       }
     }
     if (show$obs) {
-      chk_tbl <- obs_km %>% group_by(strat) %>% dplyr::summarize(t = length(time))
+      chk_tbl <- obs_km %>% group_by(strat) %>% summarize(t = length(time))
       if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use 
         geom_step <- geom_line
       }

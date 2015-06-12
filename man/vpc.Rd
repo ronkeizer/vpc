@@ -6,12 +6,12 @@
 \usage{
 vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   n_bins = "auto", obs_cols = NULL, sim_cols = NULL, software = "auto",
-  show = NULL, legend_pos = NULL, plot = FALSE, stratify = NULL,
-  stratify_color = NULL, pred_corr = FALSE, pred_corr_lower_bnd = 0,
-  pi = c(0.05, 0.95), ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
-  log_y = FALSE, log_y_min = 0.001, xlab = NULL, ylab = NULL,
-  title = NULL, smooth = TRUE, vpc_theme = NULL, ggplot_theme = NULL,
-  facet = "wrap", vpcdb = FALSE, verbose = FALSE)
+  show = NULL, plot = FALSE, stratify = NULL, stratify_color = NULL,
+  pred_corr = FALSE, pred_corr_lower_bnd = 0, pi = c(0.05, 0.95),
+  ci = c(0.05, 0.95), uloq = NULL, lloq = NULL, log_y = FALSE,
+  log_y_min = 0.001, xlab = NULL, ylab = NULL, title = NULL,
+  smooth = TRUE, vpc_theme = NULL, ggplot_theme = NULL, facet = "wrap",
+  vpcdb = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -20,7 +20,7 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{psn_folder}{instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder}
 
-\item{bins}{either "auto" or a numeric vector specifying the bin separators.}
+\item{bins}{either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.}
 
 \item{n_bins}{when using the "auto" binning method, what number of bins to aim for}
 
@@ -70,7 +70,7 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{vpcdb}{Boolean whether to return the underlying vpcdb rather than the plot}
 
-\item{bins}{either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.}
+\item{verbose}{show debugging information (TRUE or FALSE)}
 }
 \value{
 a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
@@ -79,11 +79,12 @@ a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 obj
 Creates a VPC plot from observed and simulation data
 }
 \examples{
+library(dplyr)
 obs <- Theoph
 colnames(obs) <- c("id", "wt", "dose", "time", "dv")
 obs <- obs \%>\%   # create a dummy covariate to show stratification
- dplyr::group_by(id) \%>\%
- dplyr::mutate(sex = round(runif(1)))
+ group_by(id) \%>\%
+ mutate(sex = round(runif(1)))
 
 sim <- sim_data(obs, # the design of the dataset
                 model = function(x) { # the model

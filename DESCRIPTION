@@ -8,9 +8,9 @@ Description: Create visual predictive checks in R, a commonly used diagnostic
     without the use of PsN and Xpose.
 Depends:
     R (>= 3.0.2),
+    magrittr,
     classInt
 Imports:
-    magrittr,
     dplyr,
     reshape2,
     ggplot2,

@@ -56,12 +56,12 @@ sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)),
     param <- par_values
   }
   sim_des <- do.call("rbind", replicate(n, design, simplify = FALSE))
-  sim_des$sim  <- rep(1:n, each=length(design[,1]))
+  sim_des$sim  <- rep(1:n, each=nrow(design[,1]))
   sim_des$join <- paste(sim_des$sim, sim_des$id, sep="_")
   param$join   <- paste(param$sim, param$id, sep="_")
   tmp <- tbl_df(merge(sim_des, param,
                       by.x="join", by.y="join"))
-  tmp_pred <- cbind(design, matrix(rep(theta, each=length(design[,1])), ncol=length(theta)))
+  tmp_pred <- cbind(design, matrix(rep(theta, each=nrow(design[,1])), ncol=length(theta)))
   colnames(tmp_pred)[length(tmp_pred)-length(par_names)+1:3] <- par_names
   tmp$dv <- add_noise(model(tmp), ruv = error)  
   tmp$pred <- model(tmp_pred)
@@ -80,18 +80,18 @@ sim_data_tte <- function (fit, t_cens = NULL, n = 100) {
     dv = 1
   )
   tmp <- do.call("rbind", replicate(n, tmp.single, simplify = FALSE))
-  tmp$sim  <- rep(1:n, each=length(tmp.single[,1]))
+  tmp$sim  <- rep(1:n, each=nrow(tmp.single[,1]))
   if (!fit$dist %in% c("exponential", "weibull")) {
     cat (paste("Simulation of ", fit$dist, "distribution not yet implemented, sorry."))
     return()
   }
   if (fit$dist == "exponential") {
-    tmp$t = rweibull(length(dat[,1]) * n, shape = 1, scale = tmp$par)
+    tmp$t = rweibull(nrow(dat[,1]) * n, shape = 1, scale = tmp$par)
     # or using: tmp$t = rexp(length(design$id), 1/tmp$par) 
   } 
   if (fit$dist == "weibull") {
     # annoyinly, the survreg and rweibull mix up the shape/scale parameter names and also take the inverse!!!
-    tmp$t = rweibull(length(dat[,1]) * n, shape = 1/fit$scale, scale = tmp$par)
+    tmp$t = rweibull(nrow(dat[,1]) * n, shape = 1/fit$scale, scale = tmp$par)
   }
   if (sum(tmp$t > t_cens) > 0) {  
     tmp[tmp$t > t_cens,]$t <- t_cens
