@@ -180,7 +180,7 @@ vpc_cens(sim, obs, lloq = 5)
 
 VPCs can also be made for categorical data. These show the probability of observing a specific discrete outcome (or count), and plot this versus the simulated probability, shown as a confidence interval.
 
-```{r, eval = eval_all}
+```{r, eval = FALSE}
 if(file.exists(paste0(system.file(package="vpc"), "/extdata/sdtab45"))) {
   obs_cat <- read_table_nm(file=paste0(system.file(package="vpc"), "/extdata/sdtab45"))
   sim_cat <- read_table_nm(file=paste0(system.file(package="vpc"), "/extdata/simtab45"))
