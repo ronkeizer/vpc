@@ -9,11 +9,11 @@ Description: Create visual predictive checks in R, a commonly used diagnostic
 Depends:
     R (>= 3.0.2),
     magrittr,
+    ggplot2,
     classInt
 Imports:
     dplyr,
     reshape2,
-    ggplot2,
     MASS,
     survival,
     data.table

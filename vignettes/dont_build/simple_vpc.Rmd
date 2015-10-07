@@ -3,6 +3,10 @@ title: "simple vpc"
 author: "devin"
 date: "January 30, 2015"
 output: html_document
+vignette: >
+  %\VignetteIndexEntry{Creating visual predictive checks in R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\usepackage[utf8]{inputenc}
 ---
 
 A VPC example using the built in simple_
