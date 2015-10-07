@@ -7,6 +7,7 @@
 #' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
 #' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.  
 #' @param n_bins number of bins
+#' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param show what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci) 
@@ -56,6 +57,7 @@ vpc_cens <- function(sim = NULL,
                      psn_folder = NULL,
                      bins = "jenks",
                      n_bins = 8,
+                     bin_mid = "mean",
                      obs_cols = NULL,
                      sim_cols = NULL,
                      software = "auto",
@@ -195,7 +197,9 @@ vpc_cens <- function(sim = NULL,
     colnames(vpc_dat) <- c("strat", "bin", "q50.low","q50.med","q50.up", "bin_mid")  
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
-#    vpc_dat$bin_mid <- (vpc_dat$bin_min + vpc_dat$bin_max) / 2    
+    if(bin_mid == "middle") {
+      vpc_dat$bin_mid <- apply(cbind(vpc_dat$bin_min, vpc_dat$bin_max), 1, mean)
+    }
   } else {
     vpc_dat <- NULL
   }
@@ -208,7 +212,9 @@ vpc_cens <- function(sim = NULL,
     colnames(aggr_obs)[length(aggr_obs[1,])] <- c("bin_mid")
     aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
     aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
-    # aggr_obs$bin_mid <- (aggr_obs$bin_min + aggr_obs$bin_max)/2     
+    if(bin_mid == "middle") {
+      aggr_obs$bin_mid <- apply(cbind(aggr_obs$bin_min, aggr_obs$bin_max), 1, mean)
+    }
   } else {
     aggr_obs <- NULL
   }

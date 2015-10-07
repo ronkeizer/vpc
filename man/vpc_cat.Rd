@@ -5,9 +5,9 @@
 \title{VPC function for categorical}
 \usage{
 vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
-  n_bins = "auto", obs_cols = NULL, sim_cols = NULL, software = "auto",
-  show = NULL, ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
-  xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
+  n_bins = "auto", bin_mid = "mean", obs_cols = NULL, sim_cols = NULL,
+  software = "auto", show = NULL, ci = c(0.05, 0.95), uloq = NULL,
+  lloq = NULL, xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
   stratify = NULL, stratify_color = NULL, vpc_theme = NULL,
   ggplot_theme = NULL, facet = "wrap", plot = TRUE, vpcdb = FALSE,
   verbose = FALSE)
@@ -22,6 +22,8 @@ vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 \item{bins}{either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.}
 
 \item{n_bins}{when using the "auto" binning method, what number of bins to aim for}
+
+\item{bin_mid}{either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.}
 
 \item{obs_cols}{observation dataset column names (list elements: "dv", "idv", "id", "pred")}
 

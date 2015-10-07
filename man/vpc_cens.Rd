@@ -5,11 +5,12 @@
 \title{VPC function for left- or right-censored data (e.g. BLOQ data)}
 \usage{
 vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
-  n_bins = 8, obs_cols = NULL, sim_cols = NULL, software = "auto",
-  show = NULL, stratify = NULL, stratify_color = NULL, ci = c(0.05,
-  0.95), uloq = NULL, lloq = NULL, plot = FALSE, xlab = NULL,
-  ylab = NULL, title = NULL, smooth = TRUE, vpc_theme = NULL,
-  ggplot_theme = NULL, facet = "wrap", vpcdb = FALSE, verbose = FALSE)
+  n_bins = 8, bin_mid = "mean", obs_cols = NULL, sim_cols = NULL,
+  software = "auto", show = NULL, stratify = NULL,
+  stratify_color = NULL, ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
+  plot = FALSE, xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
+  vpc_theme = NULL, ggplot_theme = NULL, facet = "wrap", vpcdb = FALSE,
+  verbose = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -21,6 +22,8 @@ vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 \item{bins}{either "density", "time", or "data", or a numeric vector specifying the bin separators.}
 
 \item{n_bins}{number of bins}
+
+\item{bin_mid}{either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.}
 
 \item{obs_cols}{observation dataset column names (list elements: "dv", "idv", "id", "pred")}
 

@@ -7,6 +7,7 @@
 #' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
 #' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
+#' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param show what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
@@ -34,6 +35,7 @@ vpc_cat  <- function(sim = NULL,
                      psn_folder = NULL,
                      bins = "jenks",
                      n_bins = "auto",
+                     bin_mid = "mean",
                      obs_cols = NULL,
                      sim_cols = NULL,
                      software = "auto",
@@ -154,7 +156,9 @@ vpc_cat  <- function(sim = NULL,
     colnames(vpc_dat) <- c("strat", "bin", "q50.low","q50.med","q50.up", "bin_mid")  
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
-#    vpc_dat$bin_mid <- (vpc_dat$bin_min + vpc_dat$bin_max) / 2    
+    if(bin_mid == "middle") {
+      vpc_dat$bin_mid <- apply(cbind(vpc_dat$bin_min, vpc_dat$bin_max), 1, mean)
+    }
   } else {
     vpc_dat <- NULL
   }
@@ -174,6 +178,9 @@ vpc_cat  <- function(sim = NULL,
     tmp2$strat <- rep(lev, each=length(aggr_obs[,1]))
     tmp2$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(tmp2$strat)) )[tmp2$bin]
     tmp2$bin_max <- rep(bins[2:length(bins)], length(unique(tmp2$strat)) )[tmp2$bin]  
+    if(bin_mid == "middle") {
+      tmp2$bin_mid <- apply(cbind(tmp2$bin_min, tmp2$bin_max), 1, mean)
+    }
     aggr_obs <- tmp2
     colnames(aggr_obs)[4] <- "obs50"
   } else {

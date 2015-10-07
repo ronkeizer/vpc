@@ -6,6 +6,7 @@
 #' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
 #' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
+#' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param show what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
@@ -60,6 +61,7 @@ vpc <- function(sim = NULL,
                 psn_folder = NULL,
                 bins = "jenks",
                 n_bins = "auto",
+                bin_mid = "mean",
                 obs_cols = NULL,
                 sim_cols = NULL,
                 software = "auto",
@@ -244,7 +246,9 @@ vpc <- function(sim = NULL,
                            "bin_mid")
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
-    #    vpc_dat$bin_mid <- ((vpc_dat$bin_min + vpc_dat$bin_max) / 2)[vpc_dat$bin]
+    if(bin_mid == "middle") {
+      vpc_dat$bin_mid <- apply(cbind(vpc_dat$bin_min, vpc_dat$bin_max), 1, mean)
+    }
   } else {
     vpc_dat <- NULL
   }
@@ -258,7 +262,9 @@ vpc <- function(sim = NULL,
     colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95", "bin_mid")
     aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
     aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
-    #    aggr_obs$bin_mid <- ((aggr_obs$bin_min + aggr_obs$bin_max)/2) [aggr_obs$bin]
+    if(bin_mid == "middle") {
+      aggr_obs$bin_mid <- apply(cbind(aggr_obs$bin_min, aggr_obs$bin_max), 1, mean)
+    }
   } else {
     aggr_obs <- NULL
   }

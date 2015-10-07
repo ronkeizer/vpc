@@ -5,13 +5,13 @@
 \title{VPC function}
 \usage{
 vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
-  n_bins = "auto", obs_cols = NULL, sim_cols = NULL, software = "auto",
-  show = NULL, plot = FALSE, stratify = NULL, stratify_color = NULL,
-  pred_corr = FALSE, pred_corr_lower_bnd = 0, pi = c(0.05, 0.95),
-  ci = c(0.05, 0.95), uloq = NULL, lloq = NULL, log_y = FALSE,
-  log_y_min = 0.001, xlab = NULL, ylab = NULL, title = NULL,
-  smooth = TRUE, vpc_theme = NULL, ggplot_theme = NULL, facet = "wrap",
-  vpcdb = FALSE, verbose = FALSE)
+  n_bins = "auto", bin_mid = "mean", obs_cols = NULL, sim_cols = NULL,
+  software = "auto", show = NULL, plot = FALSE, stratify = NULL,
+  stratify_color = NULL, pred_corr = FALSE, pred_corr_lower_bnd = 0,
+  pi = c(0.05, 0.95), ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
+  log_y = FALSE, log_y_min = 0.001, xlab = NULL, ylab = NULL,
+  title = NULL, smooth = TRUE, vpc_theme = NULL, ggplot_theme = NULL,
+  facet = "wrap", vpcdb = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -23,6 +23,8 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 \item{bins}{either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.}
 
 \item{n_bins}{when using the "auto" binning method, what number of bins to aim for}
+
+\item{bin_mid}{either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.}
 
 \item{obs_cols}{observation dataset column names (list elements: "dv", "idv", "id", "pred")}
 
