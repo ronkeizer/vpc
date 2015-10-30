@@ -16,7 +16,7 @@ Imports:
     reshape2,
     MASS,
     survival,
-    data.table
+    readr
 License: GPL-2
 LazyData: true
 URL: https://github.com/ronkeizer/vpc

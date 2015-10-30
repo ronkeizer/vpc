@@ -37,7 +37,6 @@ Options:
 ## Installation
 
     library("devtools")
-    install.packages("data.table", repo="http://cran.cnr.Berkeley.edu")
     install_github("ronkeizer/vpc")
     library(vpc)
     ?vpc
