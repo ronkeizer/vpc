@@ -131,7 +131,7 @@ vpc <- function(sim = NULL,
     old_class <- class(sim)
     class(sim) <- c(software_type, old_class)
   }
-  
+
   ## checking whether stratification columns are available
   if(!is.null(stratify)) {
     check_stratification_columns_available(obs, stratify, "observation")
@@ -141,7 +141,7 @@ vpc <- function(sim = NULL,
     check_stratification_columns_available(obs, stratify_color, "observation")
     check_stratification_columns_available(sim, stratify_color, "simulation")
   }
-  
+
   ## parse data into specific format
   if(!is.null(obs)) {
     obs <- filter_dv(obs, verbose)
@@ -207,14 +207,14 @@ vpc <- function(sim = NULL,
   }
   if (!is.null(obs)) {
     if (pred_corr) {
-      obs <- obs %>% group_by(strat, bin) %>% mutate(pred_bin = mean(as.num(pred)))
+      obs <- obs %>% group_by(strat, bin) %>% mutate(pred_bin = median(as.num(pred)))
       obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
     }
   }
   if (!is.null(sim)) {
     sim$sim <- add_sim_index_number(sim, id = "id")
     if (pred_corr) {
-      sim <- sim %>% group_by(strat, bin) %>% mutate(pred_bin = mean(pred))
+      sim <- sim %>% group_by(strat, bin) %>% mutate(pred_bin = median(pred))
       sim[sim$pred != 0,]$dv <- pred_corr_lower_bnd + (sim[sim$pred != 0,]$dv - pred_corr_lower_bnd) * (sim[sim$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (sim[sim$pred != 0,]$pred - pred_corr_lower_bnd)
     }
   }
