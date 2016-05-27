@@ -25,6 +25,7 @@
 #' @param xlab ylab as numeric vector of size 2
 #' @param ylab ylab as numeric vector of size 2
 #' @param title title
+#' @param facet_names show facet names (e.g. "SEX=1" when TRUE) or just the value of the facet
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param ggplot_theme specify a custom ggplot2 theme
@@ -80,6 +81,7 @@ vpc <- function(sim = NULL,
                 xlab = NULL,
                 ylab = NULL,
                 title = NULL,
+                facet_names = TRUE,
                 smooth = TRUE,
                 vpc_theme = NULL,
                 ggplot_theme = NULL,
@@ -207,37 +209,37 @@ vpc <- function(sim = NULL,
   }
   if (!is.null(obs)) {
     if (pred_corr) {
-      obs <- obs %>% group_by(strat, bin) %>% mutate(pred_bin = median(as.num(pred)))
+      obs <- obs %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(as.num(pred)))
       obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
     }
   }
   if (!is.null(sim)) {
     sim$sim <- add_sim_index_number(sim, id = "id")
     if (pred_corr) {
-      sim <- sim %>% group_by(strat, bin) %>% mutate(pred_bin = median(pred))
+      sim <- sim %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(pred))
       sim[sim$pred != 0,]$dv <- pred_corr_lower_bnd + (sim[sim$pred != 0,]$dv - pred_corr_lower_bnd) * (sim[sim$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (sim[sim$pred != 0,]$pred - pred_corr_lower_bnd)
     }
   }
   if (!is.null(sim)) {
-    tmp1 <- sim %>% group_by(strat, sim, bin)
-    aggr_sim <- data.frame(cbind(tmp1 %>% summarize(quantile(dv, pi[1])),
-                                 tmp1 %>% summarize(quantile(dv, 0.5 )),
-                                 tmp1 %>% summarize(quantile(dv, pi[2])),
-                                 tmp1 %>% summarize(mean(idv))))
+    tmp1 <- sim %>% dplyr::group_by(strat, sim, bin)
+    aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarize(quantile(dv, pi[1])),
+                                 tmp1 %>% dplyr::summarize(quantile(dv, 0.5 )),
+                                 tmp1 %>% dplyr::summarize(quantile(dv, pi[2])),
+                                 tmp1 %>% dplyr::summarize(mean(idv))))
     aggr_sim <- aggr_sim[,-grep("(bin.|strat.|sim.)", colnames(aggr_sim))]
     colnames(aggr_sim)[grep("quantile", colnames(aggr_sim))] <- c("q5", "q50", "q95")
     colnames(aggr_sim)[length(aggr_sim[1,])] <- "mn_idv"
     tmp <- aggr_sim %>% group_by(strat, bin)
-    vpc_dat <- data.frame(cbind(tmp %>% summarize(quantile(q5, ci[1])),
-                                tmp %>% summarize(quantile(q5, 0.5)),
-                                tmp %>% summarize(quantile(q5, ci[2])),
-                                tmp %>% summarize(quantile(q50, ci[1])),
-                                tmp %>% summarize(quantile(q50, 0.5)),
-                                tmp %>% summarize(quantile(q50, ci[2])),
-                                tmp %>% summarize(quantile(q95, ci[1])),
-                                tmp %>% summarize(quantile(q95, 0.5)),
-                                tmp %>% summarize(quantile(q95, ci[2])),
-                                tmp %>% summarize(mean(mn_idv))))
+    vpc_dat <- data.frame(cbind(tmp %>% dplyr::summarise(quantile(q5, ci[1])),
+                                tmp %>% dplyr::summarise(quantile(q5, 0.5)),
+                                tmp %>% dplyr::summarise(quantile(q5, ci[2])),
+                                tmp %>% dplyr::summarise(quantile(q50, ci[1])),
+                                tmp %>% dplyr::summarise(quantile(q50, 0.5)),
+                                tmp %>% dplyr::summarise(quantile(q50, ci[2])),
+                                tmp %>% dplyr::summarise(quantile(q95, ci[1])),
+                                tmp %>% dplyr::summarise(quantile(q95, 0.5)),
+                                tmp %>% dplyr::summarise(quantile(q95, ci[2])),
+                                tmp %>% dplyr::summarise(mean(mn_idv))))
     vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
     colnames(vpc_dat) <- c("strat", "bin",
                            "q5.low","q5.med","q5.up",
@@ -254,10 +256,10 @@ vpc <- function(sim = NULL,
   }
   if(!is.null(obs)) {
     tmp1 <- obs %>% group_by(strat,bin)
-    aggr_obs <- data.frame(cbind(tmp1 %>% summarise(quantile(dv, pi[1])),
-                                 tmp1 %>% summarise(quantile(dv, 0.5 )),
-                                 tmp1 %>% summarise(quantile(dv, pi[2])),
-                                 tmp1 %>% summarise(mean(idv))))
+    aggr_obs <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile(dv, pi[1])),
+                                 tmp1 %>% dplyr::summarise(quantile(dv, 0.5 )),
+                                 tmp1 %>% dplyr::summarise(quantile(dv, pi[2])),
+                                 tmp1 %>% dplyr::summarise(mean(idv))))
     aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
     colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95", "bin_mid")
     aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
@@ -285,7 +287,7 @@ vpc <- function(sim = NULL,
       aggr_obs$strat2 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)]
     }
   }
-  # plotting starts here
+  # data combined and handed off to separate plotting function
   vpc_db <- list(sim = sim,
                  vpc_dat = vpc_dat,
                  vpc_theme = vpc_theme,
@@ -305,6 +307,14 @@ vpc <- function(sim = NULL,
                  theme = theme,
                  ggplot_theme = ggplot_theme,
                  plot = plot)
+  if(facet_names == FALSE) {
+    datasets <- c("vpc_dat", "obs", "sim", "aggr_obs")
+    for(i in seq(datasets)) {
+      for(j in seq(vpc_db$stratify)) {
+        vpc_db[[datasets[i]]]$strat <- as.factor(gsub(paste0(vpc_db$stratify[j],"="), "", vpc_db[[datasets[i]]]$strat))
+      }
+    }
+  }
   if(vpcdb) return(vpc_db)
   pl <- plot_vpc(vpc_db)
   return(pl)

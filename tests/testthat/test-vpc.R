@@ -1,3 +1,5 @@
+library(vpc)
+
 context("vpc")
 
 tmp <- simple_data
@@ -20,3 +22,15 @@ test_that("vpc_cat parsed data correctly", {
 test_that("vpc_cat plot succeeded", {
   expect_equal(class(plot_vpc(obj)), c("gg", "ggplot"))
 })  
+
+
+# ## snippet to show labeling 
+# library(vpc)
+# tmp <- simple_data
+# vpc(sim = tmp$sim, obs = tmp$obs, stratify = c("ISM")) + 
+#   theme(axis.text  = element_text(size = 12), # the numbers at the ticks
+#         axis.title = element_text(size = 14,face="bold"), # the axis labels
+#         strip.text.x = element_text(size = 8, colour = "orange")) # the strips
+# 
+# vpc(sim = tmp$sim, obs = tmp$obs, stratify = c("ISM"), facet_names = FALSE)
+# 
