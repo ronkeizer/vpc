@@ -405,7 +405,7 @@ vpc_tte <- function(sim = NULL,
     if(show$sim_km) {
       all$strat_sim <- paste0(all$strat, "_", all$i)
       transp <- min(.1, 20*(1/length(unique(all$i))))
-      pl <- pl + geom_step(data = all, aes(x=bin_mid, y=surv, group=strat_sim), colour=rgb(0.2,.53,0.796, transp))
+      pl <- pl + geom_step(data = all, aes(x=bin_mid, y=surv, group=strat_sim), colour=grDevices::rgb(0.2,.53,0.796, transp))
     }
     if (show$pi) {
       if (smooth) {
@@ -463,9 +463,9 @@ vpc_tte <- function(sim = NULL,
     }
     if(show$obs_ci) {
       if (!is.null(stratify_color)) {        
-        pl <- pl + geom_ribbon(data=obs_km, aes(x=time, ymin=lower, ymax=upper, group=strat_color), fill=rgb(0.5,0.5,0.5,0.2))
+        pl <- pl + geom_ribbon(data=obs_km, aes(x=time, ymin=lower, ymax=upper, group=strat_color), fill=grDevices::rgb(0.5,0.5,0.5,0.2))
       } else {
-        pl <- pl + geom_ribbon(data=obs_km, aes(x=time, ymin=lower, ymax=upper, group=strat), fill=rgb(0.5,0.5,0.5,0.2))        
+        pl <- pl + geom_ribbon(data=obs_km, aes(x=time, ymin=lower, ymax=upper, group=strat), fill=grDevices::rgb(0.5,0.5,0.5,0.2))        
       }
     }
     if (show$obs) {

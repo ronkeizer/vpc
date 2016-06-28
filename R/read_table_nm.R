@@ -16,7 +16,6 @@
 #' @param nonmem_tab logical value indicading to the function whether the file is a
 #' table or a nonmem additional output file.
 #'
-#' @seealso \code{\link{parse_nonmem_model}}, \code{\link{import_qmd_info}}
 #' @return A \code{data.frame}
 #' @examples
 #' \dontrun{

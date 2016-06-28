@@ -37,7 +37,4 @@ a single \code{data.frame}.
 data <- read_table_nm(file = '../models/pk/sdtab101')
 }
 }
-\seealso{
-\code{\link{parse_nonmem_model}}, \code{\link{import_qmd_info}}
-}
 

@@ -5,3 +5,5 @@
 inst/doc
 *.sublime-workspace
 *.sublime-project
+._.DS_Store
+.DS_Store

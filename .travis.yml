@@ -7,3 +7,5 @@ r_binary_packages:
  - dplyr
  - ggplot2
  - testthat
+ - rmarkdown
+ - classInt
