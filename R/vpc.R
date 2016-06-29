@@ -88,17 +88,17 @@ vpc <- function(sim = NULL,
                 facet = "wrap",
                 vpcdb = FALSE,
                 verbose = FALSE) {
-  if(is.null(obs) & is.null(sim)) {
-    stop("At least a simulation or an observation dataset are required to create a plot!")
-  }
   if(!is.null(psn_folder)) {
-    if(!is.null(obs)) {
+    if(is.null(obs)) {
       obs <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
     }
-    if(!is.null(sim)) {
+    if(is.null(sim)) {
       sim <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="simulation.1.npctab")[1]))
     }
-    software = "nonmem"
+    software <- "nonmem"
+  }
+  if(is.null(obs) & is.null(sim)) {
+    stop("At least a simulation or an observation dataset are required to create a plot!")
   }
   if (!is.null(obs)) {
     software_type <- guess_software(software, obs)
