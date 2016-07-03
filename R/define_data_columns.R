@@ -11,7 +11,7 @@ define_data_columns <- function(sim, obs, sim_cols, obs_cols, software_type) {
     }
     if (software_type == "PKPDsim") {
       obs_cols_default <- list(dv = "y", id = "id", idv = "t")
-      sim_cols_default <- list(dv = "y", id = "id", idv = "t")
+      sim_cols_default <- list(dv = "y", id = "id", idv = "t", pred="pred")
     }
   } else {
     obs_cols_default <- list(dv = "dv", id = "id", idv = "time", pred = "pred")

@@ -32,7 +32,7 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{software}{name of software platform using (eg nonmem, phoenix)}
 
-\item{show}{what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
+\item{show}{what to show in VPC (obs_dv, obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
 
 \item{plot}{Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.}
 

@@ -9,7 +9,7 @@
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
-#' @param show what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
+#' @param show what to show in VPC (obs_dv, obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
 #' @param software name of software platform using (eg nonmem, phoenix)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
@@ -90,15 +90,24 @@ vpc <- function(sim = NULL,
                 verbose = FALSE) {
   if(!is.null(psn_folder)) {
     if(is.null(obs)) {
+      if(verbose) {
+        message("Reading oberved data...")
+      }
       obs <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
     }
     if(is.null(sim)) {
+      if(verbose) {
+        message("Reading simulated data...")
+      }
       sim <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="simulation.1.npctab")[1]))
     }
     software <- "nonmem"
   }
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
+  }
+  if(verbose) {
+    message("Configuring and initializing...")
   }
   if (!is.null(obs)) {
     software_type <- guess_software(software, obs)
@@ -136,20 +145,32 @@ vpc <- function(sim = NULL,
 
   ## checking whether stratification columns are available
   if(!is.null(stratify)) {
+    if(verbose) {
+      message("Stratifying oberved data...")
+    }
     check_stratification_columns_available(obs, stratify, "observation")
     check_stratification_columns_available(sim, stratify, "simulation")
   }
   if(!is.null(stratify_color)) {
+    if(verbose) {
+      message("Stratifying simulated data...")
+    }
     check_stratification_columns_available(obs, stratify_color, "observation")
     check_stratification_columns_available(sim, stratify_color, "simulation")
   }
 
   ## parse data into specific format
   if(!is.null(obs)) {
+    if(verbose) {
+      message("Parsing observed data...")
+    }
     obs <- filter_dv(obs, verbose)
     obs <- format_vpc_input_data(obs, cols$obs, lloq, uloq, stratify, bins, log_y, log_y_min, "observed", verbose)
   }
   if(!is.null(sim)) {
+    if(verbose) {
+      message("Parsing simulated data...")
+    }
     sim <- filter_dv(sim, verbose)
     sim <- format_vpc_input_data(sim, cols$sim, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated", verbose)
   }
@@ -178,6 +199,9 @@ vpc <- function(sim = NULL,
     }
   }
   bins <- unique(bins)
+  if(verbose) {
+    message(paste0("Binning: ", paste(bins, collapse=' ')))
+  }
   if(!is.null(obs)) {
     obs <- bin_data(obs, bins, "idv")
   }
@@ -196,7 +220,7 @@ vpc <- function(sim = NULL,
         msg ("OK", verbose)
       }
     } else {
-      if (!sim_cols$pred %in% names(sim)) {
+      if (!cols$sim$pred %in% names(sim)) {
         stop("Warning: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
       }
     }
@@ -209,6 +233,9 @@ vpc <- function(sim = NULL,
   }
   if (!is.null(obs)) {
     if (pred_corr) {
+      if(verbose) {
+          message("Performing prediction-correction on observed data...")
+      }
       obs <- obs %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(as.num(pred)))
       obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
     }
@@ -216,11 +243,17 @@ vpc <- function(sim = NULL,
   if (!is.null(sim)) {
     sim$sim <- add_sim_index_number(sim, id = "id")
     if (pred_corr) {
+      if(verbose) {
+          message("Performing prediction-correction on simulated data...")
+      }
       sim <- sim %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(pred))
       sim[sim$pred != 0,]$dv <- pred_corr_lower_bnd + (sim[sim$pred != 0,]$dv - pred_corr_lower_bnd) * (sim[sim$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (sim[sim$pred != 0,]$pred - pred_corr_lower_bnd)
     }
   }
   if (!is.null(sim)) {
+    if(verbose) {
+      message("Calculating statistics for simulated data...")
+    }
     tmp1 <- sim %>% dplyr::group_by(strat, sim, bin)
     aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarize(quantile(dv, pi[1])),
                                  tmp1 %>% dplyr::summarize(quantile(dv, 0.5 )),
@@ -255,6 +288,9 @@ vpc <- function(sim = NULL,
     vpc_dat <- NULL
   }
   if(!is.null(obs)) {
+    if(verbose) {
+      message("Calculating statistics for observed data...")
+    }
     tmp1 <- obs %>% group_by(strat,bin)
     aggr_obs <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile(dv, pi[1])),
                                  tmp1 %>% dplyr::summarise(quantile(dv, 0.5 )),
@@ -288,6 +324,9 @@ vpc <- function(sim = NULL,
     }
   }
   # data combined and handed off to separate plotting function
+  if(verbose) {
+    message("Creating plot...")
+  }
   vpc_db <- list(sim = sim,
                  vpc_dat = vpc_dat,
                  vpc_theme = vpc_theme,
