@@ -1,15 +1,16 @@
 [![Build Status](https://travis-ci.org/ronkeizer/vpc.svg?branch=master)](https://travis-ci.org/ronkeizer/vpc)
+[![codecov](https://codecov.io/gh/ronkeizer/vpc/branch/master/graph/badge.svg)](https://codecov.io/gh/ronkeizer/vpc)
 
 vpc
 ===
 
-Create visual predictive checks, a commonly used diagnostic plot in pharmacometrics, in R 
+Create visual predictive checks, a commonly used diagnostic plot in pharmacometrics, in R
 
 ## Rationale
 
 The VPC is a widely used diagnostic tool in pharmacometrics (see e.g. [here](http://page-meeting.org/default.asp?abstract=1434)), most commonly created using [PsN](http://psn.sourceforge.net) and [Xpose](http://xpose.sourceforge.net), using NONMEM as the simulation engine. The aim of the current library is to provide an improved tool that is:
 
-- a single-step process for creating a VPC in R (not using Xpose or PsN). 
+- a single-step process for creating a VPC in R (not using Xpose or PsN).
   - e.g. allows changing of vpc parameters such as binning / stratification upon creation of the plot, not in a separate pre-processing step.
   - easier debugging than PsN+Xpose, all data parsing and plotting in one R function
 - more flexible regarding input (use simulated data from R, NONMEM, Monolix, Stan, or any other simulation tool)
@@ -40,8 +41,8 @@ Options:
     install_github("ronkeizer/vpc")
     library(vpc)
     ?vpc
-  
-_NOte: The `data.table` package is installed manually here before the `vpc` package since it often doesn't install automatically. If there are any addtional packages that do not install automatically, use install.package with a proper repository to do so._ 
+
+_NOte: The `data.table` package is installed manually here before the `vpc` package since it often doesn't install automatically. If there are any addtional packages that do not install automatically, use install.package with a proper repository to do so._
 
 ## How to use
 
