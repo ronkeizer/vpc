@@ -16,7 +16,6 @@ test_that("diffs captured properly", {
 })
 
 test_that("expectation throws error if input not a named software type", {
-  expect_error(check_stratification_columns_available(mock_dat, some_exist), 
-               "The following specified stratification columns were NOT found in observation data: \nGENDER\n")
+  expect_error(check_stratification_columns_available(mock_dat, some_exist)) 
   expect_true(check_stratification_columns_available(mock_dat, all_correct))
 })
