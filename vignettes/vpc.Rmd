@@ -49,7 +49,6 @@ In the first example, we'll use a dataset that's available in R by default (Theo
 
 ```{r, eval = eval_all, warning=FALSE, message=FALSE, error=FALSE}
     library(dplyr)
-    library(vpc)
 
     ## Load the theophylline PK dataset
     obs <- Theoph
