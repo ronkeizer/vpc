@@ -2,7 +2,7 @@ language: R
 sudo: required
 warnings_are_errors: false
 global:
-  - R_CHECK_ARGS="--no-build-vignettes --no-manual"
+  - R_CHECK_ARGS="--no-build-vignettes --no-examples --no-manual"
 
 r_binary_packages:
   - MASS
