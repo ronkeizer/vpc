@@ -59,7 +59,8 @@ new_vpc_theme <- function (update = NULL) {
   ), class = "vpc_theme")
   n <- names(tmp)
   if(is.null(update)) {
-    stop(paste0("Please specify a list with plot elements to update. Available elements: \n  - ", paste(n, collapse="\n  - ")))
+#    stop(paste0("Please specify a list with plot elements to update. Available elements: \n  - ", paste(n, collapse="\n  - ")))
+    return(tmp)
   }
   if(!is.null(update) & length(names(update)) > 0) {
     for(i in seq(names(update))) {
