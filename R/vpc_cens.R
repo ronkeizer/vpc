@@ -30,7 +30,7 @@
 #' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
 #' @seealso \link{vpc}
-vpc_cens <- function(sim = NULL, 
+vpc_cens <- function(sim = NULL,
                      obs = NULL,
                      psn_folder = NULL,
                      bins = "jenks",
@@ -205,7 +205,7 @@ vpc_cens <- function(sim = NULL,
     }
   }
   if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
-    vpc_theme <- create_vpc_theme()
+    vpc_theme <- new_vpc_theme()
   }
 
   ## plotting starts here

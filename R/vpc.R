@@ -285,7 +285,7 @@ vpc <- function(sim = NULL,
     aggr_obs <- NULL
   }
   if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
-    vpc_theme <- create_vpc_theme()
+    vpc_theme <- new_vpc_theme()
   }
   if(is.null(xlab)) {
     xlab <- cols$obs$idv

@@ -1,7 +1,7 @@
 #' VPC function for categorical
-#' 
+#'
 #' Creates a VPC plot from observed and simulation data
-#' sim, 
+#' sim,
 #' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
@@ -30,8 +30,8 @@
 #' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 #' @export
 #' @seealso \link{vpc}
-vpc_cat  <- function(sim = NULL, 
-                     obs = NULL, 
+vpc_cat  <- function(sim = NULL,
+                     obs = NULL,
                      psn_folder = NULL,
                      bins = "jenks",
                      n_bins = "auto",
@@ -39,11 +39,11 @@ vpc_cat  <- function(sim = NULL,
                      obs_cols = NULL,
                      sim_cols = NULL,
                      software = "auto",
-                     show = NULL,                
+                     show = NULL,
                      ci = c(0.05, 0.95),
-                     uloq = NULL, 
-                     lloq = NULL, 
-                     xlab = NULL, 
+                     uloq = NULL,
+                     lloq = NULL,
+                     xlab = NULL,
                      ylab = NULL,
                      title = NULL,
                      smooth = TRUE,
@@ -76,7 +76,7 @@ vpc_cat  <- function(sim = NULL,
 
   ## define what to show in plot
   show <- replace_list_elements(show_default, show)
-  
+
   ## checking whether stratification columns are available
   if(!is.null(stratify)) {
     check_stratification_columns_available(obs, stratify, "observation")
@@ -86,7 +86,7 @@ vpc_cat  <- function(sim = NULL,
     check_stratification_columns_available(obs, stratify_color, "observation")
     check_stratification_columns_available(sim, stratify_color, "simulation")
   }
-  
+
   ## define column names
   cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
   if(!is.null(obs)) {
@@ -97,23 +97,23 @@ vpc_cat  <- function(sim = NULL,
     old_class <- class(sim)
     class(sim) <- c(software_type, old_class)
   }
-  
+
   ## parse data into specific format
   if(!is.null(obs)) {
     obs <- filter_dv(obs, verbose)
     obs <- format_vpc_input_data(obs, cols$obs, lloq, uloq, strat = NULL, bins, FALSE, 0, "observed", verbose)
   }
-  if(!is.null(sim)) {  
+  if(!is.null(sim)) {
     sim <- filter_dv(sim, verbose)
     sim <- format_vpc_input_data(sim, cols$sim, lloq, uloq, strat = NULL, bins, FALSE, 0, "simulated", verbose)
-    sim$sim <- add_sim_index_number(sim, id = "id")    
+    sim$sim <- add_sim_index_number(sim, id = "id")
   }
-  
+
   if (class(bins) != "numeric") {
     if(!is.null(obs)) {
-      bins <- auto_bin(obs, bins, n_bins)  
+      bins <- auto_bin(obs, bins, n_bins)
     } else { # get from sim
-      bins <- auto_bin(sim, bins, n_bins)            
+      bins <- auto_bin(sim, bins, n_bins)
     }
     if (is.null(bins)) {
       msg("Automatic binning unsuccessful, try increasing the number of bins, or specify vector of bin separators manually.", verbose)
@@ -121,39 +121,39 @@ vpc_cat  <- function(sim = NULL,
   }
   bins <- unique(bins)
   if(!is.null(obs)) {
-    obs <- bin_data(obs, bins, "idv") 
+    obs <- bin_data(obs, bins, "idv")
   }
   if(!is.null(sim)) {
-    sim <- bin_data(sim, bins, "idv")  
+    sim <- bin_data(sim, bins, "idv")
   }
-  
-  ## parsing 
-  fact_perc <- function(x, fact) { sum(x == fact) / length(x) } # below lloq, default     
-  obs$dv <- as.factor(obs$dv) 
-  lev <- levels(obs$dv)  
+
+  ## parsing
+  fact_perc <- function(x, fact) { sum(x == fact) / length(x) } # below lloq, default
+  obs$dv <- as.factor(obs$dv)
+  lev <- levels(obs$dv)
   if (!is.null(sim)) {
     tmp1 <- sim %>% group_by(sim, bin)
     for (i in seq(lev)) {
       if (i == 1) {
         aggr_sim <- tmp1 %>% summarize(fact_perc(dv, lev[i]))
       } else {
-        aggr_sim <- cbind(aggr_sim, tmp1 %>% summarize(fact_perc(dv, lev[i])) )           
+        aggr_sim <- cbind(aggr_sim, tmp1 %>% summarize(fact_perc(dv, lev[i])) )
       }
-    } 
+    }
     aggr_sim <- cbind(aggr_sim, tmp1 %>% summarize(mean(idv)))
     aggr_sim <- data.frame(aggr_sim)
     aggr_sim <- aggr_sim[,-grep("(bin.|sim.)", colnames(aggr_sim))]
-    colnames(aggr_sim) <- c("sim", "bin", paste0("fact_", lev), "mn_idv") 
+    colnames(aggr_sim) <- c("sim", "bin", paste0("fact_", lev), "mn_idv")
     tmp3 <- reshape2::melt(aggr_sim, id=c("sim", "bin", "mn_idv"))
     tmp3$strat <- rep(lev, each = length(aggr_sim[,1]))
-    tmp4 <- tmp3 %>% group_by(strat, bin)    
+    tmp4 <- tmp3 %>% group_by(strat, bin)
     vpc_dat <- data.frame(cbind(tmp4 %>% summarize(quantile(value, ci[1])),
                                 tmp4 %>% summarize(quantile(value, 0.5)),
                                 tmp4 %>% summarize(quantile(value, ci[2])),
                                 tmp4 %>% summarize(mean(mn_idv))
                                 ))
     vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
-    colnames(vpc_dat) <- c("strat", "bin", "q50.low","q50.med","q50.up", "bin_mid")  
+    colnames(vpc_dat) <- c("strat", "bin", "q50.low","q50.med","q50.up", "bin_mid")
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     if(bin_mid == "middle") {
@@ -168,16 +168,16 @@ vpc_cat  <- function(sim = NULL,
       if (i == 1) {
         aggr_obs <- tmp %>% summarize(fact_perc(dv, lev[i]))
       } else {
-        aggr_obs <- cbind(aggr_obs, tmp %>% summarize(fact_perc(dv, lev[i])) )           
+        aggr_obs <- cbind(aggr_obs, tmp %>% summarize(fact_perc(dv, lev[i])) )
       }
-    }     
+    }
     tmp1 <- data.frame(cbind(aggr_obs, data.frame(tmp %>% summarize(mean(idv)))))
     tmp1 <- tmp1[,-grep("(bin.|strat.|sim.)", colnames(tmp1))]
-    colnames(tmp1) <- c("bin", paste0("fact_", lev), "bin_mid")    
+    colnames(tmp1) <- c("bin", paste0("fact_", lev), "bin_mid")
     tmp2 <- reshape2::melt(tmp1, id=c("bin", "bin_mid"))
     tmp2$strat <- rep(lev, each=length(aggr_obs[,1]))
     tmp2$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(tmp2$strat)) )[tmp2$bin]
-    tmp2$bin_max <- rep(bins[2:length(bins)], length(unique(tmp2$strat)) )[tmp2$bin]  
+    tmp2$bin_max <- rep(bins[2:length(bins)], length(unique(tmp2$strat)) )[tmp2$bin]
     if(bin_mid == "middle") {
       tmp2$bin_mid <- apply(cbind(tmp2$bin_min, tmp2$bin_max), 1, mean)
     }
@@ -187,9 +187,9 @@ vpc_cat  <- function(sim = NULL,
     aggr_obs <- NULL
   }
   if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
-    vpc_theme <- create_vpc_theme()
+    vpc_theme <- new_vpc_theme()
   }
-  
+
   ## plotting starts here
   show$median_ci = FALSE
   show$obs_dv = FALSE
@@ -222,6 +222,6 @@ vpc_cat  <- function(sim = NULL,
   pl <- plot_vpc(vpc_db)
   pl <- pl + ylim(c(0,1))
   if (plot) {
-    print(pl)    
+    print(pl)
   }
 }
