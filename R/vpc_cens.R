@@ -1,22 +1,22 @@
 #' VPC function for left- or right-censored data (e.g. BLOQ data)
-#' 
+#'
 #' Creates a VPC plot from observed and simulation data
-#' sim, 
+#' sim,
 #' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
-#' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.  
+#' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.
 #' @param n_bins number of bins
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
-#' @param show what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci) 
+#' @param show what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
 #' @param software name of software platform using (eg nonmem, phoenix)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
-#' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.  
-#' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.  
+#' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.
+#' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.
 #' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.
 #' @param xlab ylab as numeric vector of size 2
 #' @param ylab ylab as numeric vector of size 2
@@ -24,36 +24,14 @@
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param ggplot_theme specify a custom ggplot2 theme
-#' @param facet either "wrap", "columns", or "rows" 
+#' @param facet either "wrap", "columns", or "rows"
 #' @param vpcdb boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
 #' @seealso \link{vpc}
-#' @examples
-#' library(dplyr)
-#' obs <- Theoph
-#' colnames(obs) <- c("id", "wt", "dose", "time", "dv")
-#' obs <- obs %>%   # create a dummy covariate to show stratification
-#'  group_by(id) %>%  
-#'  mutate(sex = round(runif(1)))
-#' 
-#' sim <- sim_data(obs, # the design of the dataset
-#'                 model = function(x) { # the model
-#'                   pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka, 
-#'                                 ke = x$ke, cl = x$cl * x$wt, 
-#'                                 ruv = list(additive = 0.1))
-#'                 }, 
-#'                 theta = c(2.774, 0.0718, .0361),             # parameter values
-#'                 omega_mat = c(0.08854,                       # specified as lower triangle 
-#'                               0.02421, 0.02241,              # note: assumed every th has iiv,
-#'                               0.008069, 0.008639, 0.02862),  #  set to 0 if no iiv. 
-#'                 par_names = c("ka", "ke", "cl"),             # link the parameters in the model  
-#'                 n = 500)                                     #   to the thetas/omegas
-#' 
-#' vpc_loq <- vpc_cens(sim, obs, lloq = 5)
 vpc_cens <- function(sim = NULL, 
-                     obs = NULL, 
+                     obs = NULL,
                      psn_folder = NULL,
                      bins = "jenks",
                      n_bins = 8,
@@ -61,14 +39,14 @@ vpc_cens <- function(sim = NULL,
                      obs_cols = NULL,
                      sim_cols = NULL,
                      software = "auto",
-                     show = NULL,                
+                     show = NULL,
                      stratify = NULL,
                      stratify_color = NULL,
                      ci = c(0.05, 0.95),
-                     uloq = NULL, 
-                     lloq = NULL, 
+                     uloq = NULL,
+                     lloq = NULL,
                      plot = FALSE,
-                     xlab = NULL, 
+                     xlab = NULL,
                      ylab = NULL,
                      title = NULL,
                      smooth = TRUE,
@@ -78,10 +56,10 @@ vpc_cens <- function(sim = NULL,
                      vpcdb = FALSE,
                      verbose = FALSE) {
   if (is.null(uloq) & is.null(lloq)) {
-    stop("You have to specify either a lower limit of quantification (lloq=...) or an upper limit (uloq=...).") 
+    stop("You have to specify either a lower limit of quantification (lloq=...) or an upper limit (uloq=...).")
   }
   if (!is.null(uloq) & !is.null(lloq)) {
-    stop("You have to specify either a lower limit of quantification (lloq=...) or an upper limit (uloq=...), but you can't specify both.") 
+    stop("You have to specify either a lower limit of quantification (lloq=...) or an upper limit (uloq=...), but you can't specify both.")
   }
   if (is.null(lloq)) {
     type <- "right-censored"
@@ -116,10 +94,10 @@ vpc_cens <- function(sim = NULL,
     check_stratification_columns_available(obs, stratify_color, "observation")
     check_stratification_columns_available(sim, stratify_color, "simulation")
   }
-  
+
   ## define what to show in plot
   show <- replace_list_elements(show_default, show)
-  
+
   ## define column names
   cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
   if(!is.null(obs)) {
@@ -130,26 +108,26 @@ vpc_cens <- function(sim = NULL,
     old_class <- class(sim)
     class(sim) <- c(software_type, old_class)
   }
-  
+
   ## parse data into specific format
   if(!is.null(obs)) {
     obs <- filter_dv(obs, verbose)
     obs <- format_vpc_input_data(obs, cols$obs, lloq, uloq, stratify, bins, FALSE, 0, "observed", verbose)
   }
-  if(!is.null(sim)) {  
+  if(!is.null(sim)) {
     sim <- filter_dv(sim, verbose)
     sim <- format_vpc_input_data(sim, cols$sim, lloq, uloq, stratify, bins, FALSE, 0, "simulated", verbose)
     # add sim index number
-    sim$sim <- add_sim_index_number(sim)  
+    sim$sim <- add_sim_index_number(sim)
   }
-  
+
   stratify_original <- stratify
   if(!is.null(stratify_color)) {
     if (is.null(stratify)) {
       stratify <- stratify_color
     }
     if (length(stratify_color) > 1) {
-      stop("Error: please specify only 1 stratification variable for color!")      
+      stop("Error: please specify only 1 stratification variable for color!")
     }
     if (!stratify_color %in% stratify) {
       stratify_original <- stratify
@@ -158,9 +136,9 @@ vpc_cens <- function(sim = NULL,
   }
   if (class(bins) != "numeric") {
     if(!is.null(obs)) {
-      bins <- auto_bin(obs, bins, n_bins)  
+      bins <- auto_bin(obs, bins, n_bins)
     } else { # get from sim
-      bins <- auto_bin(sim, bins, n_bins)            
+      bins <- auto_bin(sim, bins, n_bins)
     }
     if (is.null(bins)) {
       msg("Automatic binning unsuccessful, try increasing the number of bins, or specify vector of bin separators manually.", verbose)
@@ -168,18 +146,18 @@ vpc_cens <- function(sim = NULL,
   }
   bins <- unique(bins)
   if(!is.null(obs)) {
-    obs <- bin_data(obs, bins, "idv") 
+    obs <- bin_data(obs, bins, "idv")
   }
   if(!is.null(sim)) {
-    sim <- bin_data(sim, bins, "idv")  
+    sim <- bin_data(sim, bins, "idv")
   }
-  
+
   ## functions describing censoring %
-  loq_perc <- function(x) { sum(x <= lloq) / length(x) } # below lloq, default   
+  loq_perc <- function(x) { sum(x <= lloq) / length(x) } # below lloq, default
   if (is.null(lloq)) {
     loq_perc <- function(x) { sum(x >= uloq) / length(x) }
   }
-  
+
   ## Parsing data to get the quantiles for the VPC
   if (!is.null(sim)) {
     tmp1 <- sim %>% group_by(strat, sim, bin)
@@ -187,14 +165,14 @@ vpc_cens <- function(sim = NULL,
                                  tmp1 %>% summarize(mean(idv))))
     colnames(aggr_sim)[grep("loq_perc", colnames(aggr_sim))] <- "ploq"
     colnames(aggr_sim)[length(aggr_sim[1,])] <- c("mn_idv")
-    tmp <- aggr_sim %>% group_by(strat, bin)    
+    tmp <- aggr_sim %>% group_by(strat, bin)
     vpc_dat <- data.frame(cbind(tmp %>% summarize(quantile(ploq, ci[1])),
                                 tmp %>% summarize(quantile(ploq, 0.5)),
                                 tmp %>% summarize(quantile(ploq, ci[2])),
                                 tmp %>% summarize(mean(mn_idv))
                                 ))
     vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
-    colnames(vpc_dat) <- c("strat", "bin", "q50.low","q50.med","q50.up", "bin_mid")  
+    colnames(vpc_dat) <- c("strat", "bin", "q50.low","q50.med","q50.up", "bin_mid")
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     if(bin_mid == "middle") {
@@ -223,13 +201,13 @@ vpc_cens <- function(sim = NULL,
       vpc_dat$strat1 <- unlist(strsplit(as.character(vpc_dat$strat), ", "))[(1:length(vpc_dat$strat)*2)-1]
       vpc_dat$strat2 <- unlist(strsplit(as.character(vpc_dat$strat), ", "))[(1:length(vpc_dat$strat)*2)]
       aggr_obs$strat1 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)-1]
-      aggr_obs$strat2 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)]   
+      aggr_obs$strat2 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)]
     }
   }
   if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
     vpc_theme <- create_vpc_theme()
   }
-  
+
   ## plotting starts here
   show$median_ci = FALSE
   show$obs_dv = FALSE

@@ -35,28 +35,6 @@
 #' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 #' @export
 #' @seealso \link{sim_data}, \link{vpc_cens}, \link{vpc_tte}
-#' @examples
-#' library(dplyr)
-#' obs <- Theoph
-#' colnames(obs) <- c("id", "wt", "dose", "time", "dv")
-#' obs <- obs %>%   # create a dummy covariate to show stratification
-#'  group_by(id) %>%
-#'  mutate(sex = round(runif(1)))
-#'
-#' sim <- sim_data(obs, # the design of the dataset
-#'                 model = function(x) { # the model
-#'                   pk_oral_1cmt (t = x$time, dose=x$dose * x$wt, ka = x$ka,
-#'                                 ke = x$ke, cl = x$cl * x$wt,
-#'                                 ruv = list(additive = 0.1))
-#'                 },
-#'                 theta = c(2.774, 0.0718, .0361),             # parameter values
-#'                 omega_mat = c(0.08854,                       # specified as lower triangle
-#'                               0.02421, 0.02241,              # note: assumed every th has iiv,
-#'                               0.008069, 0.008639, 0.02862),  #  set to 0 if no iiv.
-#'                 par_names = c("ka", "ke", "cl"),             # link the parameters in the model
-#'                 n = 500)                                     #   to the thetas/omegas
-#'
-#' vpc_dat <- vpc(sim, obs, stratify = c("sex"))
 vpc <- function(sim = NULL,
                 obs = NULL,
                 psn_folder = NULL,
