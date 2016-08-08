@@ -1,3 +1,7 @@
+#' VPC plotting function
+#' 
+#' @param db object created using the `vpc` function
+#' @export
 plot_vpc <- function(db) {
   with(db, {
     if (!is.null(db$sim)) {
@@ -63,7 +67,7 @@ plot_vpc <- function(db) {
           geom_line(data=aggr_obs, aes(x=bin_mid, y=obs95), linetype=vpc_theme$obs_ci_linetype, colour=vpc_theme$obs_ci_color, size=vpc_theme$obs_ci_size)
       }
       if (show$obs_dv) {
-        pl <- pl + geom_point(data=obs, aes(x=idv, y = dv), size=vpc_theme$obs_size, colour=vpc_theme$obs_color)
+        pl <- pl + geom_point(data=obs, aes(x=idv, y = dv), size=vpc_theme$obs_size, colour=vpc_theme$obs_color, alpha = vpc_theme$obs_alpha, shape = vpc_theme$obs_shape)
       }
     }
     bdat <- data.frame(cbind(x=bins, y=NA))

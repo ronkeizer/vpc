@@ -31,7 +31,7 @@ vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{software}{name of software platform using (eg nonmem, phoenix)}
 
-\item{show}{what to show in VPC (obs_ci, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
+\item{show}{what to show in VPC (obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
 
 \item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
 

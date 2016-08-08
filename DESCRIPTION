@@ -11,6 +11,7 @@ Depends:
     classInt,
     magrittr
 Imports:
+    classInt,
     dplyr,
     reshape2,
     MASS,
