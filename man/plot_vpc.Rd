@@ -4,10 +4,28 @@
 \alias{plot_vpc}
 \title{VPC plotting function}
 \usage{
-plot_vpc(db)
+plot_vpc(db, show = NULL, vpc_theme = NULL, smooth = TRUE,
+  log_x = FALSE, log_y = FALSE, title = NULL, xlab = "Time",
+  ylab = "Dependent value", verbose = FALSE)
 }
 \arguments{
 \item{db}{object created using the `vpc` function}
+
+\item{show}{what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
+
+\item{vpc_theme}{theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()}
+
+\item{smooth}{"smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.}
+
+\item{log_x}{Boolean indicting whether x-axis should be shown as logarithmic. Default is FALSE.}
+
+\item{log_y}{Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.}
+
+\item{title}{title}
+
+\item{xlab}{ylab as numeric vector of size 2}
+
+\item{ylab}{ylab as numeric vector of size 2}
 }
 \description{
 VPC plotting function

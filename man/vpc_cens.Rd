@@ -9,8 +9,7 @@ vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   software = "auto", show = NULL, stratify = NULL,
   stratify_color = NULL, ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
   plot = FALSE, xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
-  vpc_theme = NULL, ggplot_theme = NULL, facet = "wrap", vpcdb = FALSE,
-  verbose = FALSE)
+  vpc_theme = NULL, facet = "wrap", vpcdb = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -54,8 +53,6 @@ vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 \item{smooth}{"smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.}
 
 \item{vpc_theme}{theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()}
-
-\item{ggplot_theme}{specify a custom ggplot2 theme}
 
 \item{facet}{either "wrap", "columns", or "rows"}
 

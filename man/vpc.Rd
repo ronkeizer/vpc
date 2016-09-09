@@ -6,12 +6,12 @@
 \usage{
 vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   n_bins = "auto", bin_mid = "mean", obs_cols = NULL, sim_cols = NULL,
-  software = "auto", show = NULL, plot = FALSE, stratify = NULL,
+  software = "auto", show = NULL, stratify = NULL,
   stratify_color = NULL, pred_corr = FALSE, pred_corr_lower_bnd = 0,
   pi = c(0.05, 0.95), ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
   log_y = FALSE, log_y_min = 0.001, xlab = NULL, ylab = NULL,
   title = NULL, facet_names = TRUE, smooth = TRUE, vpc_theme = NULL,
-  ggplot_theme = NULL, facet = "wrap", vpcdb = FALSE, verbose = FALSE)
+  facet = "wrap", vpcdb = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -33,8 +33,6 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 \item{software}{name of software platform using (eg nonmem, phoenix)}
 
 \item{show}{what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
-
-\item{plot}{Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.}
 
 \item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
 
@@ -67,8 +65,6 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 \item{smooth}{"smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.}
 
 \item{vpc_theme}{theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()}
-
-\item{ggplot_theme}{specify a custom ggplot2 theme}
 
 \item{facet}{either "wrap", "columns", or "rows"}
 

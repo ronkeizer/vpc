@@ -10,8 +10,7 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
   reverse_prob = FALSE, stratify = NULL, stratify_color = NULL,
   ci = c(0.05, 0.95), plot = FALSE, xlab = NULL, ylab = NULL,
   show = list(), as_percentage = TRUE, title = NULL, smooth = FALSE,
-  vpc_theme = NULL, ggplot_theme = NULL, facet = "wrap",
-  verbose = FALSE, vpcdb = FALSE)
+  vpc_theme = NULL, facet = "wrap", verbose = FALSE, vpcdb = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -61,8 +60,6 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
 \item{smooth}{"smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.}
 
 \item{vpc_theme}{theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()}
-
-\item{ggplot_theme}{specify a custom ggplot2 theme}
 
 \item{facet}{either "wrap", "columns", or "rows"}
 

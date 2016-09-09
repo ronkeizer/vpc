@@ -8,7 +8,7 @@ sim5  <- c(0.20, 0.00, 0.00, 0.00, 0.10, 0.40, 0.48, 0.50)
 sim95 <- c(0.35, 0.01, 0.01, 0.06, 0.26, 0.50, 0.52, 0.60)
 
 test_that("vpc_cense returned proper object", {
-  expect_true(all(c("obs", "sim", "aggr_obs", "vpc_dat", "show", "stratify", "bins") %in% names(obj)))
+  expect_true(all(c("obs", "sim", "aggr_obs", "vpc_dat", "stratify", "bins") %in% names(obj)))
 })
 
 test_that("vpc_cens parsed data correctly", {

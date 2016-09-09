@@ -23,7 +23,6 @@
 #' @param title title
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
-#' @param ggplot_theme specify a custom ggplot2 theme
 #' @param facet either "wrap", "columns", or "rows"
 #' @param vpcdb boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
@@ -51,7 +50,6 @@ vpc_cens <- function(sim = NULL,
                      title = NULL,
                      smooth = TRUE,
                      vpc_theme = NULL,
-                     ggplot_theme = NULL,
                      facet = "wrap",
                      vpcdb = FALSE,
                      verbose = FALSE) {
@@ -204,9 +202,6 @@ vpc_cens <- function(sim = NULL,
       aggr_obs$strat2 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)]
     }
   }
-  if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
-    vpc_theme <- new_vpc_theme()
-  }
 
   ## plotting starts here
   show$median_ci = FALSE
@@ -219,24 +214,25 @@ vpc_cens <- function(sim = NULL,
   show$pi = FALSE
   vpc_db <- list(sim = sim,
                  vpc_dat = vpc_dat,
-                 vpc_theme = vpc_theme,
-                 show = show,
-                 smooth = smooth,
                  stratify = stratify,
                  stratify_original = stratify_original,
                  stratify_color = stratify_color,
                  aggr_obs = aggr_obs,
                  obs = obs,
                  bins = bins,
-                 xlab = xlab,
-                 ylab = ylab,
-                 log_y = FALSE,
                  facet = facet,
-                 title = title,
-                 theme = theme,
-                 ggplot_theme = ggplot_theme,
-                 plot = plot)
-  if(vpcdb) return(vpc_db)
-  pl <- plot_vpc(vpc_db)
-  return(pl)
+                 type = "censored")
+  if(vpcdb) {
+    return(vpc_db)
+  } else {
+    pl <- plot_vpc(db = vpc_db,
+                   show = show, 
+                   vpc_theme = vpc_theme,
+                   smooth = smooth,
+                   log_y = FALSE,
+                   title = title,
+                   xlab = xlab,
+                   ylab = ylab)
+    return(pl)
+  }
 }

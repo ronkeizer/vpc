@@ -9,8 +9,7 @@ vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   software = "auto", show = NULL, ci = c(0.05, 0.95), uloq = NULL,
   lloq = NULL, xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
   stratify = NULL, stratify_color = NULL, vpc_theme = NULL,
-  ggplot_theme = NULL, facet = "wrap", plot = TRUE, vpcdb = FALSE,
-  verbose = FALSE)
+  facet = "wrap", plot = TRUE, vpcdb = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -52,8 +51,6 @@ vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 \item{stratify_color}{variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.}
 
 \item{vpc_theme}{theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()}
-
-\item{ggplot_theme}{specify a custom ggplot2 theme}
 
 \item{facet}{either "wrap", "columns", or "rows"}
 

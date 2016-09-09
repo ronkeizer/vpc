@@ -25,7 +25,6 @@
 #' @param title title
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
-#' @param ggplot_theme specify a custom ggplot2 theme
 #' @param facet either "wrap", "columns", or "rows"
 #' @param verbose TRUE or FALSE (default)
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
@@ -81,7 +80,6 @@ vpc_tte <- function(sim = NULL,
                     title = NULL,
                     smooth = FALSE,
                     vpc_theme = NULL,
-                    ggplot_theme = NULL,
                     facet = "wrap",
                     verbose = FALSE,
                     vpcdb = FALSE) {
@@ -114,9 +112,9 @@ vpc_tte <- function(sim = NULL,
   }
 
   if(is.null(sim)) {
-    show_default_tte$obs_ci <- TRUE
+    show_default$obs_ci <- TRUE
   }
-  show <- replace_list_elements(show_default_tte, show)
+  show <- replace_list_elements(show_default, show)
 
   ## checking whether stratification columns are available
   if(!is.null(stratify)) {
@@ -341,11 +339,11 @@ vpc_tte <- function(sim = NULL,
     sim_km <- all %>%
       group_by (strat, bin) %>%
       summarize (bin_mid = head(bin_mid,1),
-                        bin_min = head(bin_min,1),
-                        bin_max = head(bin_max,1),
-                        qmin = quantile(surv, 0.05),
-                        qmax = quantile(surv, 0.95),
-                        qmed = median(surv),
+                 bin_min = head(bin_min,1),
+                 bin_max = head(bin_max,1),
+                 qmin = quantile(surv, 0.05),
+                 qmax = quantile(surv, 0.95),
+                 qmed = median(surv),
 #                         lower_med = median(lower, 0.05),
 #                         upper_med = median(upper, 0.05),
                  step = 0)
@@ -371,6 +369,7 @@ vpc_tte <- function(sim = NULL,
     }
   }
 
+  cens_dat <- NULL
   if(show$obs_cens) {
     cens_dat <- data.frame(obs[obs$dv == 0 & obs$time > 0,])
   }
@@ -398,40 +397,8 @@ vpc_tte <- function(sim = NULL,
         sim_km$strat_color <- sim_km$strat
       }
     }
-    if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
-      vpc_theme <- new_vpc_theme()
-    }
-    pl <- ggplot(sim_km, aes(x=bin_mid, y=qmed, group=strat))
-    if(show$sim_km) {
-      all$strat_sim <- paste0(all$strat, "_", all$i)
-      transp <- min(.1, 20*(1/length(unique(all$i))))
-      pl <- pl + geom_step(data = all, aes(x=bin_mid, y=surv, group=strat_sim), colour=grDevices::rgb(0.2,.53,0.796, transp))
-    }
-    if (show$pi) {
-      if (smooth) {
-        if (!is.null(stratify_color)) {
-          pl <- pl +
-            geom_ribbon(aes(min = qmin, max=qmax, y=qmed, fill=strat_color), alpha=vpc_theme$sim_median_alpha) +
-            scale_fill_discrete(name="")
-        } else {
-          pl <- pl + geom_ribbon(aes(min = qmin, max=qmax, y=qmed), fill = vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha)
-        }
-      } else {
-        if (!is.null(stratify_color)) {
-          pl <- pl +
-            geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax, fill=strat_color), alpha=vpc_theme$sim_median_alpha) +
-            scale_fill_discrete(name="")
-        } else {
-          pl <- pl + geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)
-        }
-      }
-    }
-    if (show$pi_med) {
-      pl <- pl + geom_line_custom(linetype="dashed")
-    }
-  } else {
-    pl <- ggplot(obs_km)
   }
+
   if (!is.null(obs)) {
     if(!is.null(stratify_color)) {
       if (length(stratify) == 2) {
@@ -456,131 +423,37 @@ vpc_tte <- function(sim = NULL,
           }
         }
         cens_dat <- cens_dat[!is.na(cens_dat$y),]
-        if(nrow(cens_dat)>0) {
-          pl <- pl + geom_point(data=cens_dat, aes(x=time, y=y), shape="|", size=2.5)
-        }
-      }
-    }
-    if(show$obs_ci) {
-      if (!is.null(stratify_color)) {
-        pl <- pl + geom_ribbon(data=obs_km, aes(x=time, ymin=lower, ymax=upper, group=strat_color), fill=grDevices::rgb(0.5,0.5,0.5,0.2))
-      } else {
-        pl <- pl + geom_ribbon(data=obs_km, aes(x=time, ymin=lower, ymax=upper, group=strat), fill=grDevices::rgb(0.5,0.5,0.5,0.2))
-      }
-    }
-    if (show$obs) {
-      chk_tbl <- obs_km %>% group_by(strat) %>% summarize(t = length(time))
-      if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use
-        geom_step <- geom_line
-      }
-      msg("Warning: some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).", verbose)
-      if (!is.null(stratify_color)) {
-        pl <- pl +
-          geom_step(data = obs_km, aes(x=time, y=surv, colour=strat_color), size=.8) +
-          scale_colour_discrete(name="")
-      } else {
-        pl <- pl + geom_step(data = obs_km, aes(x=time, y=surv, group=strat), size=.8)
       }
     }
   }
-  if (!is.null(stratify)) {
-    if (length(stratify_original) == 1 | rtte) {
-      if (!is.null(stratify_color)) {
-          if (facet == "wrap") {
-            pl <- pl + facet_wrap(~ strat1)
-          } else {
-            if(length(grep("row", facet))>0) {
-              pl <- pl + facet_grid(strat1 ~ .)
-            } else {
-              pl <- pl + facet_grid(. ~ strat1)
-            }
-          }
-      } else {
-        if (facet == "wrap") {
-          pl <- pl + facet_wrap(~ strat)
-        } else {
-          if(length(grep("row", facet))>0) {
-            pl <- pl + facet_grid(strat ~ .)
-          } else {
-            pl <- pl + facet_grid(. ~ strat)
-          }
-        }
-      }
-    } else {
-      if ("strat1" %in% c(colnames(sim_km), colnames(obs_km))) {
-        if(length(grep("row", facet))>0) {
-          pl <- pl + facet_grid(strat1 ~ strat2)
-        } else {
-          pl <- pl + facet_grid(strat2 ~ strat1)
-        }
-      } else {
-        if ("strat" %in% c(colnames(sim_km), colnames(obs_km))) {
-          # color stratification only
-        } else {
-          stop ("Stratification unsuccesful.")
-        }
-      }
-    }
-  }
-  if (show$bin_sep) {
-    if(!(class(bins) == "logical" && bins == FALSE)) {
-      bdat <- data.frame(cbind(x=tmp_bins, y=NA))
-      pl <- pl + geom_rug(data=bdat, sides = "t", aes(x = x, y=y, group=NA), colour=vpc_theme$bin_separators_color)
-    }
-  }
-  if (!is.null(title)) {
-    pl <- pl + ggtitle(title)
-  }
-  if (!is.null(ggplot_theme)) {
-    pl <- pl + ggplot_theme()
-  } else {
-    if (!is.null(theme)) {
-      pl <- pl + theme_plain()
-    }
-  }
-  if(!is.null(xlab)) {
-    pl <- pl + xlab(xlab)
-  } else {
-    pl <- pl + xlab("Time")
-  }
-  if(!is.null(ylab)) {
-    pl <- pl + ylab(ylab)
-  } else {
-    if(is.null(kmmc)) {
-      if(as_percentage && is.null(kmmc)) {
-        percent <- seq(from=0, to=100, by=25)
-        pl <- pl +
-          scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1), labels = percent) +
-          ylab("Survival (%)")
-      } else {
-        pl <- pl + ylab("Survival")
-      }
-    } else {
-      pl <- pl + ylab(paste0("Mean (", kmmc, ")"))
-    }
-  }
+  show$obs_dv <- TRUE
+
   # plotting starts here
   vpc_db <- list(sim = sim,
                  sim_km = sim_km,
                  obs = obs,
                  obs_km = obs_km,
-                 vpc_theme = vpc_theme,
-                 show = show,
-                 smooth = smooth,
+                 all = all,
                  stratify = stratify,
                  stratify_original = stratify_original,
                  stratify_color = stratify_color,
                  bins = bins,
-                 xlab = xlab,
-                 ylab = ylab,
-                 facet = facet,
-                 title = title,
-                 theme = theme,
-                 ggplot_theme = ggplot_theme,
-                 plot = plot)
-  if(vpcdb) return(vpc_db)
-  if(plot) {
-    print(pl)
+                 facet = facet, 
+                 kmmc = kmmc,
+                 cens_dat = cens_dat,
+                 rtte = rtte,
+                 type = "time-to-event")
+  if(vpcdb) {
+    return(vpc_db)
+  } else {
+    pl <- plot_vpc(vpc_db,
+                   show = show, 
+                   vpc_theme = vpc_theme,
+                   smooth = smooth,
+                   log_y = FALSE,
+                   title = title,
+                   xlab = xlab,
+                   ylab = ylab)
+    return(pl)
   }
-  return(pl)
 }

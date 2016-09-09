@@ -6,7 +6,7 @@ tmp <- simple_data
 obj <- vpc(sim = tmp$sim, obs = tmp$obs, vpcdb=TRUE)
 
 test_that("vpc_cat returned proper object", {
-  expect_true(all(c("obs", "sim", "aggr_obs", "vpc_dat", "show", "stratify", "bins") %in% names(obj)))
+  expect_true(all(c("obs", "sim", "aggr_obs", "vpc_dat", "stratify", "bins") %in% names(obj)))
 })
 
 test_that("vpc_cat parsed data correctly", {

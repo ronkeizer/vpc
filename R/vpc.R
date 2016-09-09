@@ -19,7 +19,6 @@
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.
 #' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.
-#' @param plot Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.
 #' @param log_y Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.
 #' @param log_y_min minimal value when using log_y argument. Default is 1e-3.
 #' @param xlab ylab as numeric vector of size 2
@@ -28,7 +27,6 @@
 #' @param facet_names show facet names (e.g. "SEX=1" when TRUE) or just the value of the facet
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
-#' @param ggplot_theme specify a custom ggplot2 theme
 #' @param facet either "wrap", "columns", or "rows"
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
@@ -45,7 +43,6 @@ vpc <- function(sim = NULL,
                 sim_cols = NULL,
                 software = "auto",
                 show = NULL,
-                plot = FALSE,
                 stratify = NULL,
                 stratify_color = NULL,
                 pred_corr = FALSE,
@@ -62,7 +59,6 @@ vpc <- function(sim = NULL,
                 facet_names = TRUE,
                 smooth = TRUE,
                 vpc_theme = NULL,
-                ggplot_theme = NULL,
                 facet = "wrap",
                 vpcdb = FALSE,
                 verbose = FALSE) {
@@ -284,9 +280,6 @@ vpc <- function(sim = NULL,
   } else {
     aggr_obs <- NULL
   }
-  if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
-    vpc_theme <- new_vpc_theme()
-  }
   if(is.null(xlab)) {
     xlab <- cols$obs$idv
   }
@@ -307,8 +300,6 @@ vpc <- function(sim = NULL,
   }
   vpc_db <- list(sim = sim,
                  vpc_dat = vpc_dat,
-                 vpc_theme = vpc_theme,
-                 show = show,
                  smooth = smooth,
                  stratify = stratify,
                  stratify_original = stratify_original,
@@ -316,14 +307,8 @@ vpc <- function(sim = NULL,
                  aggr_obs = aggr_obs,
                  obs = obs,
                  bins = bins,
-                 xlab = xlab,
-                 ylab = ylab,
-                 log_y = log_y,
                  facet = facet,
-                 title = title,
-                 theme = theme,
-                 ggplot_theme = ggplot_theme,
-                 plot = plot)
+                 type = "continuous")
   if(facet_names == FALSE) {
     datasets <- c("vpc_dat", "obs", "sim", "aggr_obs")
     for(i in seq(datasets)) {
@@ -332,7 +317,17 @@ vpc <- function(sim = NULL,
       }
     }
   }
-  if(vpcdb) return(vpc_db)
-  pl <- plot_vpc(vpc_db)
-  return(pl)
+  if(vpcdb) {
+    return(vpc_db)
+  } else {
+    pl <- plot_vpc(vpc_db, 
+                   show = show, 
+                   vpc_theme = vpc_theme,
+                   smooth = smooth,
+                   log_y = log_y,
+                   title = title,
+                   xlab = xlab,
+                   ylab = ylab)
+    return(pl)
+  }
 }
