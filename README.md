@@ -15,7 +15,7 @@ Create visual predictive checks, a commonly used diagnostic plot in pharmacometr
 
 ## Documentation
 
-See [docs](https://ronkeizer1.gitbooks.io/vpc-documentation/content/)
+See [docs](http://vpc.ronkeizer.com)
 
 ## License
 
