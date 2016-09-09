@@ -35,19 +35,6 @@ add_step <- function(dat = ., vars) {
 
 as.num <- function(x) { as.numeric(as.character(x)) }
 
-draw_params_mvr <- function(ids, n_sim, theta, omega_mat, par_names = NULL) {
-  n_ids <- length(ids)
-  if (!is.null(par_names)) {
-    par <- data.frame(cbind(sim = rep(1:n_sim, each=n_ids),
-                            id = rep(ids, n_sim),
-                            rep(theta, each=n_sim*n_ids) * exp (MASS::mvrnorm(n=n_sim*n_ids, c(0,0,0), omega_mat))))
-    colnames(par) <- c("sim", "id", par_names)
-    return(par)
-  } else {
-    cat("Parameter names have to be supplied!")
-  }
-}
-
 convert_to_dense_grid <- function(dat, t = "t", id = "id", t_start = 0, t_step = 1, add = NULL) {
   t = seq(from=t_start, to=max(dat$t), by=t_step)
   tmp <- data.frame(cbind(id = rep(unique(dat$id), each = length(t)),

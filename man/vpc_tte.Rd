@@ -79,27 +79,27 @@ Creates a VPC plot from observed and simulation survival data
 \examples{
 ## Example for repeated) time-to-event data
 ## with NONMEM-like data (e.g. simulated using a dense grid)
-data(rtte_obs_nm) 
-data(rtte_sim_nm) 
+data(rtte_obs_nm)
+data(rtte_sim_nm)
 
 # treat RTTE as TTE, no stratification
-vpc_tte(sim = rtte_sim_nm, 
-        obs = rtte_obs_nm, 
-        rtte = FALSE, 
+vpc_tte(sim = rtte_sim_nm,
+        obs = rtte_obs_nm,
+        rtte = FALSE,
         sim_cols=list(dv = "dv", idv = "t"), obs_cols=list(idv = "t"))
 
 # stratified for covariate and study arm
-vpc_tte(sim = rtte_sim_nm, 
-        obs = rtte_obs_nm, 
-        stratify = c("sex","drug"), 
+vpc_tte(sim = rtte_sim_nm,
+        obs = rtte_obs_nm,
+        stratify = c("sex","drug"),
         rtte = FALSE,
         sim_cols=list(dv = "dv", idv = "t"), obs_cols=list(idv = "t"))
 
 # stratified per event number (we'll only look at first 3 events) and stratify per arm
-vpc_tte(sim = rtte_sim_nm, 
+vpc_tte(sim = rtte_sim_nm,
         obs = rtte_obs_nm,
         rtte = TRUE, events = c(1:3),
-        stratify = c("drug"), 
+        stratify = c("drug"),
         sim_cols=list(dv = "dv", idv = "t"), obs_cols=list(idv = "t"))
 }
 \seealso{

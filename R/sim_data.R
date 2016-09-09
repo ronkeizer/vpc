@@ -40,7 +40,7 @@ sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)),
   param$join   <- paste(param$sim, param$id, sep="_")
   tmp <- tbl_df(merge(sim_des, param,
                       by.x="join", by.y="join"))
-  tmp_pred <- cbind(design, matrix(rep(theta, each=nrow(design[,1])), ncol=length(theta)))
+  tmp_pred <- cbind(data.frame(design), matrix(rep(theta, each=nrow(design[,1])), ncol=length(theta)))
   colnames(tmp_pred)[length(tmp_pred)-length(par_names)+1:3] <- par_names
   tmp$dv <- add_noise(model(tmp), ruv = error)
   tmp$pred <- model(tmp_pred)
