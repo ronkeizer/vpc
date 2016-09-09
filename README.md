@@ -44,9 +44,9 @@ Options:
 
 _NOte: The `data.table` package is installed manually here before the `vpc` package since it often doesn't install automatically. If there are any addtional packages that do not install automatically, use install.package with a proper repository to do so._
 
-## How to use
+## Documentation
 
-See [vignette](http://ronkeizer.github.io/vpc/)
+See [docs](https://ronkeizer1.gitbooks.io/vpc-documentation/content/)
 
 ## License
 
