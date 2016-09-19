@@ -35,7 +35,7 @@ plot_vpc <- function(db,
     if (!is.null(db$sim)) {
       pl <- ggplot(db$vpc_dat, aes(x=bin_mid))
       if(show$sim_median) {
-        pl <- pl + geom_line(aes(y=q50.med), colour=db$vpc_theme$sim_median_color, linetype=vpc_theme$sim_median_linetype, size=vpc_theme$sim_median_size)
+        pl <- pl + geom_line(aes(y=q50.med), colour=vpc_theme$sim_median_color, linetype=vpc_theme$sim_median_linetype, size=vpc_theme$sim_median_size)
       }
       if(show$pi_as_area) {
         if (smooth) {

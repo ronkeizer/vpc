@@ -1,4 +1,5 @@
-#' replace list elements by name
+#' Replace list elements by name
+#' 
 #' @param list original list
 #' @param replacement replacement list
 #' @details
