@@ -77,14 +77,22 @@ vpc_cat  <- function(sim = NULL,
 
   ## checking whether stratification columns are available
   if(!is.null(stratify)) {
-    check_stratification_columns_available(obs, stratify, "observation")
-    check_stratification_columns_available(sim, stratify, "simulation")
+    if(!is.null(obs)) {
+      check_stratification_columns_available(obs, stratify, "observation")
+    }
+    if(!is.null(sim)) {
+      check_stratification_columns_available(sim, stratify, "simulation")
+    }
   }
   if(!is.null(stratify_color)) {
-    check_stratification_columns_available(obs, stratify_color, "observation")
-    check_stratification_columns_available(sim, stratify_color, "simulation")
+    if(!is.null(obs)) {
+      check_stratification_columns_available(obs, stratify_color, "observation")
+    }
+    if(!is.null(obs)) {
+      check_stratification_columns_available(sim, stratify_color, "simulation")
+    }
   }
-
+  
   ## define column names
   cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
   if(!is.null(obs)) {

@@ -26,6 +26,7 @@ plot_vpc <- function(db,
   }
 
   if(db$type != "time-to-event") {
+
     ################################################################
     ## VPC for continous, censored or categorical
     ## note: for now, tte-vpc is separated off, but need to unify
@@ -141,7 +142,6 @@ plot_vpc <- function(db,
             pl <- pl + facet_grid(strat2 ~ strat1)
           }
         } else { # only color stratification
-          browser()
           if ("strat" %in% c(colnames(db$vpc_dat), colnames(db$aggr_obs))) {
             # color stratification only
           } else {
@@ -161,47 +161,51 @@ plot_vpc <- function(db,
     ## VPC for time-to-event data
     ################################################################
       
+
+    show$pi_as_area <- TRUE
     pl <- ggplot(db$sim_km, aes(x=bin_mid, y=qmed, group=strat))
     if(show$sim_km) {
-      db$all$strat_sim <- paste0(db$all$strat, "_", all$i)
-      transp <- min(.1, 20*(1/length(unique(all$i))))
+      db$all$strat_sim <- paste0(db$all$strat, "_", db$all$i)
+      transp <- min(.1, 20*(1/length(unique(db$all$i))))
       pl <- pl + geom_step(data = db$all, aes(x=bin_mid, y=surv, group=strat_sim), colour=grDevices::rgb(0.2,.53,0.796, transp))
     }
-    if(show$pi) {
+    if(show$pi_as_area) {
       if (smooth) {
         if (!is.null(db$stratify_color)) {
           pl <- pl +
-            geom_ribbon(aes(min = qmin, max=qmax, y=qmed, fill=strat_color), alpha=vpc_theme$sim_median_alpha) +
+            geom_ribbon(data = db$sim_km, aes(min = qmin, max=qmax, y=qmed, fill=strat_color), alpha=vpc_theme$sim_median_alpha) +
             scale_fill_discrete(name="")
         } else {
-          pl <- pl + geom_ribbon(aes(min = qmin, max=qmax, y=qmed), fill = vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha)
+          pl <- pl + geom_ribbon(data = db$sim_km, aes(min = qmin, max=qmax, y=qmed), fill = vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha)
         }
       } else {
         if (!is.null(db$stratify_color)) {
           pl <- pl +
-            geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax, fill=strat_color), alpha=vpc_theme$sim_median_alpha) +
+            geom_rect(data = db$sim_km, aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax, fill=strat_color), alpha=vpc_theme$sim_median_alpha) +
             scale_fill_discrete(name="")
         } else {
-          pl <- pl + geom_rect(aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)
+          pl <- pl + geom_rect(data = db$sim_km, aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)
         }
       }
     } else {
-      pl <- ggplot(db$obs_km)
+      if(!is.null(db$obs)) {
+        pl <- ggplot(db$obs_km)
+      }
     }
-    if(nrow(db$cens_dat)>0) {
+    if(!is.null(db$cens_dat) && nrow(db$cens_dat)>0) {
       pl <- pl + geom_point(data=db$cens_dat, aes(x=time, y=y), shape="|", size=2.5)
     }
     if (show$sim_median) {
       pl <- pl + geom_line_custom(linetype="dashed")
     }
-    if(show$obs_ci) {
+    if(!is.null(db$obs) && show$obs_ci) {
       if (!is.null(db$stratify_color)) {
         pl <- pl + geom_ribbon(data=db$obs_km, aes(x=time, ymin=lower, ymax=upper, group=strat_color), fill=grDevices::rgb(0.5,0.5,0.5,0.2))
       } else {
         pl <- pl + geom_ribbon(data=db$obs_km, aes(x=time, ymin=lower, ymax=upper, group=strat), fill=grDevices::rgb(0.5,0.5,0.5,0.2))
       }
     }
-    if (show$obs_dv) {
+    if (!is.null(db$obs) && show$obs_dv) {
       chk_tbl <- db$obs_km %>% group_by(strat) %>% summarize(t = length(time))
       if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use
         geom_step <- geom_line

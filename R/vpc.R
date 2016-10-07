@@ -122,15 +122,23 @@ vpc <- function(sim = NULL,
     if(verbose) {
       message("Stratifying oberved data...")
     }
-    check_stratification_columns_available(obs, stratify, "observation")
-    check_stratification_columns_available(sim, stratify, "simulation")
+    if(!is.null(obs)) {
+      check_stratification_columns_available(obs, stratify, "observation")
+    }
+    if(!is.null(sim)) {
+      check_stratification_columns_available(sim, stratify, "simulation")
+    }
   }
   if(!is.null(stratify_color)) {
     if(verbose) {
       message("Stratifying simulated data...")
     }
-    check_stratification_columns_available(obs, stratify_color, "observation")
-    check_stratification_columns_available(sim, stratify_color, "simulation")
+    if(!is.null(obs)) {
+      check_stratification_columns_available(obs, stratify_color, "observation")
+    }
+    if(!is.null(sim)) {
+      check_stratification_columns_available(sim, stratify_color, "simulation")
+    }
   }
 
   ## parse data into specific format

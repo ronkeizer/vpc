@@ -118,24 +118,40 @@ vpc_tte <- function(sim = NULL,
 
   ## checking whether stratification columns are available
   if(!is.null(stratify)) {
-    check_stratification_columns_available(obs, stratify, "observation")
-    check_stratification_columns_available(sim, stratify, "simulation")
+    if(!is.null(obs)) {
+      check_stratification_columns_available(obs, stratify, "observation")
+    }
+    if(!is.null(sim)) {
+      check_stratification_columns_available(sim, stratify, "simulation")
+    }
   }
   if(!is.null(stratify_color)) {
-    check_stratification_columns_available(obs, stratify_color, "observation")
-    check_stratification_columns_available(sim, stratify_color, "simulation")
+    if(!is.null(obs)) {
+      check_stratification_columns_available(obs, stratify_color, "observation")
+    }
+    if(!is.null(obs)) {
+      check_stratification_columns_available(sim, stratify_color, "simulation")
+    }
   }
 
   ## redefine strat column in case of "strat"
-  if(!is.null(stratify)) {
+  if(!is.null(stratify) && !is.null(obs)) {
     if(stratify[1] == "strat") {
-      obs$strat_orig = obs$strat
+      if(!is.null(obs)) {
+        obs$strat_orig = obs$strat
+      } else if (!is.null(sim)){
+        sim$strat_orig = sim$strat
+      }
       stratify <- "strat_orig"
     }
   }
   if(!is.null(stratify_color)) {
     if(stratify_color == "strat") {
-      obs$strat_orig = obs$strat
+      if(!is.null(obs)) {
+        obs$strat_orig = obs$strat
+      } else if (!is.null(sim)) {
+        sim$strat_orig = sim$strat
+      }
       stratify_color <- "strat_orig"
     }
   }
@@ -334,7 +350,7 @@ vpc_tte <- function(sim = NULL,
       tmp4$bin_min <- tmp_bins[tmp4$bin]
       tmp4$bin_max <- tmp_bins[tmp4$bin+1]
       tmp4$bin_mid <- (tmp4$bin_min + tmp4$bin_max) / 2
-      all <- rbind(all, cbind(i, tmp4))
+      all <- rbind(all, cbind(i, tmp4)) ## RK: this can be done more efficient!
     }
     sim_km <- all %>%
       group_by (strat, bin) %>%
@@ -381,12 +397,18 @@ vpc_tte <- function(sim = NULL,
   }
   if (!is.null(stratify_original)) {
     if (length(stratify) == 2) {
-      sim_km$strat1 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)-1]
-      sim_km$strat2 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)]
-      obs_km$strat1 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)-1]
-      obs_km$strat2 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)]
-      cens_dat$strat1 <- unlist(strsplit(as.character(cens_dat$strat), ", "))[(1:length(cens_dat$strat)*2)-1]
-      cens_dat$strat2 <- unlist(strsplit(as.character(cens_dat$strat), ", "))[(1:length(cens_dat$strat)*2)]
+      if(!is.null(sim_km)) {
+        sim_km$strat1 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)-1]
+        sim_km$strat2 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)]
+      }
+      if(!is.null(obs_km)) {
+        obs_km$strat1 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)-1]
+        obs_km$strat2 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)]
+      }
+      if(!is.null(cens_dat)) {
+        cens_dat$strat1 <- unlist(strsplit(as.character(cens_dat$strat), ", "))[(1:length(cens_dat$strat)*2)-1]
+        cens_dat$strat2 <- unlist(strsplit(as.character(cens_dat$strat), ", "))[(1:length(cens_dat$strat)*2)]
+      }
     }
   }
   if (!is.null(sim)) {
@@ -426,7 +448,12 @@ vpc_tte <- function(sim = NULL,
       }
     }
   }
-  show$obs_dv <- TRUE
+  if(!is.null(obs)) {
+    show$obs_dv <- TRUE
+  } else {
+    show$obs_dv <- FALSE
+  }
+  show$pi <- TRUE
 
   # plotting starts here
   vpc_db <- list(sim = sim,
@@ -443,6 +470,12 @@ vpc_tte <- function(sim = NULL,
                  cens_dat = cens_dat,
                  rtte = rtte,
                  type = "time-to-event")
+  if(is.null(xlab)) {
+    xlab <- "Time (days)"
+  }
+  if(is.null(ylab)) {
+    ylab <- ""
+  }
   if(vpcdb) {
     return(vpc_db)
   } else {

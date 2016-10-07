@@ -23,3 +23,7 @@ test_that("vpc_cat plot succeeded", {
   expect_equal(class(plot_vpc(obj)), c("gg", "ggplot"))
 })  
 
+## without obs:
+obj2 <- vpc(sim = tmp$sim, vpcdb=TRUE)
+plot_vpc(obj2)
+expect_equal(class(plot_vpc(obj2)), c("gg", "ggplot"))
