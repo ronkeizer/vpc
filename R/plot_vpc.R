@@ -200,9 +200,9 @@ plot_vpc <- function(db,
     }
     if(!is.null(db$obs) && show$obs_ci) {
       if (!is.null(db$stratify_color)) {
-        pl <- pl + geom_ribbon(data=db$obs_km, aes(x=time, ymin=lower, ymax=upper, group=strat_color), fill=grDevices::rgb(0.5,0.5,0.5,0.2))
+        pl <- pl + geom_ribbon(data=db$obs_km, aes(x=time, ymin=lower, ymax=upper, group=strat_color), fill=vpc_theme$obs_ci_fill)
       } else {
-        pl <- pl + geom_ribbon(data=db$obs_km, aes(x=time, ymin=lower, ymax=upper, group=strat), fill=grDevices::rgb(0.5,0.5,0.5,0.2))
+        pl <- pl + geom_ribbon(data=db$obs_km, aes(x=time, ymin=lower, ymax=upper, group=strat), fill=vpc_theme$obs_ci_fill)
       }
     }
     if (!is.null(db$obs) && show$obs_dv) {

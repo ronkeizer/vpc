@@ -1,10 +1,12 @@
 context("vpc_tte")
 library(vpc)
 
-obj <- vpc_tte(sim = rtte_sim_nm,  # stratified for covariate and study arm
+obj <- vpc_tte(sim = rtte_sim_nm[1:500000,],  # stratified for covariate and study arm
                obs = rtte_obs_nm, 
                stratify = c("sex","drug"), 
                rtte = FALSE,
+               show = list(obs_ci = TRUE),
+               vpc_theme = new_vpc_theme(list(obs_ci_fill = rgb(0.5,0,0,.7))),
                sim_cols = list(dv = "dv", idv = "t"), 
                obs_cols = list(idv = "t"))
 

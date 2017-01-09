@@ -41,6 +41,7 @@ new_vpc_theme <- function (update = NULL) {
                    
     obs_ci_color = "#000000",
     obs_ci_linetype = "dashed",
+    obs_ci_fill = grDevices::rgb(0.5,0.5,0.5,0.2), ## only for TTE
     obs_ci_size = .5,    
                    
     sim_pi_fill = "#3388cc",
