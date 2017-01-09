@@ -1,4 +1,4 @@
-compute_kaplan <- function(dat, strat = "strat", reverse_prob = FALSE, ci = NULL, rtte_whole_population) {
+compute_kaplan <- function(dat, strat = "strat", reverse_prob = FALSE, ci = NULL) {
     if(length(dat[[strat]]) == 0) {
       dat$strat <- 1
     }
@@ -39,5 +39,6 @@ compute_kaplan <- function(dat, strat = "strat", reverse_prob = FALSE, ci = NULL
       }
       tmp <- rbind(tmp, rbind(first_rec, km_dat))                   
     }
+    tmp$qmed <- tmp$surv
     return(tmp)      
 }

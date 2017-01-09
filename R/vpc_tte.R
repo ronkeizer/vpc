@@ -75,7 +75,7 @@ vpc_tte <- function(sim = NULL,
                     plot = FALSE,
                     xlab = NULL,
                     ylab = NULL,
-                    show = list(),
+                    show = NULL,
                     as_percentage = TRUE,
                     title = NULL,
                     smooth = FALSE,
@@ -114,8 +114,10 @@ vpc_tte <- function(sim = NULL,
   if(is.null(sim)) {
     show_default$obs_ci <- TRUE
   }
+  
+  ## define what to show in plot
   show <- replace_list_elements(show_default, show)
-
+  
   ## checking whether stratification columns are available
   if(!is.null(stratify)) {
     if(!is.null(obs)) {
@@ -230,7 +232,10 @@ vpc_tte <- function(sim = NULL,
       if(rtte_calc_diff) {
         obs <- relative_times(obs)
       }
-      obs <- obs %>% group_by(id) %>% arrange(id, time) %>% mutate(rtte = 1:length(dv))
+      obs <- obs %>% 
+        dplyr::group_by(id) %>% 
+        dplyr::arrange(id, time) %>% 
+        dplyr::mutate(rtte = 1:length(dv))
 #       obs %>% group_by(id) %>% mutate(rtte = cumsum(dv != 0))
 #       obs[obs$dv == 0,]$rtte <- obs[obs$dv == 0,]$rtte + 1 # these censored points actually "belong" to the next rtte strata
       stratify <- c(stratify, "rtte")
@@ -294,12 +299,17 @@ vpc_tte <- function(sim = NULL,
     sim$sim <- add_sim_index_number(sim, id = cols$sim$id)
 
     # set last_observation and repeat_obs per sim&id
-    sim <- sim %>% group_by(sim, id) %>% mutate(last_obs = 1*(1:length(time) == length(time)), repeat_obs = 1*(cumsum(dv) > 1))
+    sim <- sim %>% 
+      dplyr::group_by(sim, id) %>% 
+      dplyr::mutate(last_obs = 1*(1:length(time) == length(time)), repeat_obs = 1*(cumsum(dv) > 1))
 
     # filter out stuff and recalculate rtte times
     sim <- sim[sim$dv == 1 | (sim$last_obs == 1 & sim$dv == 0),]
     if(rtte) {
-      sim <- sim %>% group_by(sim, id) %>% arrange(sim, id, time) %>% mutate(rtte = 1:length(dv)) %>% arrange(sim, id)
+      sim <- sim %>% 
+        dplyr::group_by(sim, id) %>% 
+        dplyr::arrange(sim, id, time) %>% mutate(rtte = 1:length(dv)) %>% 
+        dplyr::arrange(sim, id)
       if(rtte_calc_diff) {
         sim <- relative_times(sim, simulation=TRUE)
       }
@@ -330,8 +340,9 @@ vpc_tte <- function(sim = NULL,
       }
     }
     for (i in 1:n_sim) {
-      tmp <- sim %>% filter(sim == i)
-      tmp2 <- add_stratification(tmp %>% arrange(id, time), stratify)
+      tmp <- sim %>% dplyr::filter(sim == i)
+      tmp2 <- add_stratification(tmp %>% 
+                                   dplyr::arrange(id, time), stratify)
       if(!is.null(kmmc) && kmmc %in% names(obs)) {
         tmp3 <- compute_kmmc(tmp2, strat = "strat", reverse_prob = reverse_prob, kmmc = kmmc)
       } else {
@@ -343,7 +354,8 @@ vpc_tte <- function(sim = NULL,
       tmp4[match(tmp3$time_strat, tmp4$time_strat),]$surv <- tmp3$surv
 #       tmp4[match(tmp3$time_strat, tmp4$time_strat),]$lower <- tmp3$lower
 #       tmp4[match(tmp3$time_strat, tmp4$time_strat),]$upper <- tmp3$upper
-      tmp4 <- tmp4 %>% arrange(strat, time)
+      tmp4 <- tmp4 %>% 
+        dplyr::arrange(strat, time)
       tmp4$surv <- locf(tmp4$surv)
       tmp4[,c("bin", "bin_min", "bin_max", "bin_mid")] <- 0
       tmp4$bin <- cut(tmp4$time, breaks = tmp_bins, labels = FALSE, right = TRUE)
@@ -353,8 +365,8 @@ vpc_tte <- function(sim = NULL,
       all <- rbind(all, cbind(i, tmp4)) ## RK: this can be done more efficient!
     }
     sim_km <- all %>%
-      group_by (strat, bin) %>%
-      summarize (bin_mid = head(bin_mid,1),
+      dplyr::group_by (strat, bin) %>%
+      dplyr::summarize (bin_mid = head(bin_mid,1),
                  bin_min = head(bin_min,1),
                  bin_max = head(bin_max,1),
                  qmin = quantile(surv, 0.05),
@@ -371,7 +383,8 @@ vpc_tte <- function(sim = NULL,
     if(!is.null(sim)) {
       sim_km$rtte <- as.num(gsub(".*rtte=(\\d.*).*", "\\1", sim_km$strat, perl = TRUE))
       if (!is.null(events)) {
-        sim_km <- sim_km %>% filter(rtte %in% events)
+        sim_km <- sim_km %>% 
+          dplyr::filter(rtte %in% events)
         # redefine strat factors, since otherwise empty panels will be shown
         sim_km$strat <- factor(sim_km$strat, levels = unique(sim_km$strat))
       }
@@ -379,7 +392,8 @@ vpc_tte <- function(sim = NULL,
     if(!is.null(obs)) {
       obs_km$rtte <- as.num(gsub(".*rtte=(\\d.*).*", "\\1", obs_km$strat, perl = TRUE))
       if (!is.null(events)) {
-        obs_km <- obs_km %>% filter(rtte %in% events)
+        obs_km <- obs_km %>% 
+          dplyr::filter(rtte %in% events)
         obs_km$strat <- factor(obs_km$strat, levels = unique(obs_km$strat))
       }
     }

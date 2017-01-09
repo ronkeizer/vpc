@@ -206,7 +206,9 @@ plot_vpc <- function(db,
       }
     }
     if (!is.null(db$obs) && show$obs_dv) {
-      chk_tbl <- db$obs_km %>% group_by(strat) %>% summarize(t = length(time))
+      chk_tbl <- db$obs_km %>% 
+        dplyr::group_by(strat) %>% 
+        dplyr::summarize(t = length(time))
       if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use
         geom_step <- geom_line
       }
