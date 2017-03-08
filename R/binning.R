@@ -21,9 +21,9 @@ auto_bin <- function (dat, type="kmeans", n_bins = 8, verbose = FALSE) {
   if(!is.null(type) && type %in% c("jenks", "kmeans", "pretty", "quantile", "hclust", "sd", "bclust", "fisher")) {
     suppressWarnings({
       if(class(n_bins) != "numeric" | is.null(n_bins)) {
-        bins <- classIntervals(dat[["idv"]], style = type)                
+        bins <- classInt::classIntervals(dat[["idv"]], style = type)                
       } else {
-        bins <- classIntervals(dat[["idv"]], n = n_bins-1, style = type)        
+        bins <- classInt::classIntervals(dat[["idv"]], n = n_bins-1, style = type)        
       }      
     })
     return(bins$brks)      
