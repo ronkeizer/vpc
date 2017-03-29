@@ -108,7 +108,8 @@ plot_vpc <- function(db,
     }
     pl <- pl + xlab(xlab) + ylab(ylab)
     if (log_x) {
-      pl <- pl + scale_x_log10()
+      if(!idv_as_factor) pl <- pl + scale_x_log10()
+      else warning("log_x option has no effect when the IDV is a factor ")
     }
     if (log_y) {
       pl <- pl + scale_y_log10()
