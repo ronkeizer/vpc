@@ -29,8 +29,11 @@ auto_bin <- function (dat, type="kmeans", n_bins = 8, verbose = FALSE) {
     return(bins$brks)      
   }
   if (n_bins == "auto") {
-    msg("Automatic optimization of bin number is not available for this binning method, reverting to 8 bins.", verbose)
-    n_bins <- 8
+    if(type == "percentiles") n_bins <- min(max(3, ceiling(nrow(dat)/40)), 15)
+    else {
+      msg("Automatic optimization of bin number is not available for this binning method, reverting to 8 bins.", verbose)
+      n_bins <- 8
+    }
   }
   n_bins <- n_bins + 1 # bin_separators
   if(type != "time" & type != "data" & type != "percentiles") {
