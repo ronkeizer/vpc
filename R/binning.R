@@ -33,7 +33,7 @@ auto_bin <- function (dat, type="kmeans", n_bins = 8, verbose = FALSE) {
     n_bins <- 8
   }
   n_bins <- n_bins + 1 # bin_separators
-  if(type != "time" & type != "data") {
+  if(type != "time" & type != "data" & type != "percentiles") {
     if (type == "density" || type == "auto") {
       bws <- diff(range(dat[["idv"]])) * seq(from=0.01, to = .25, by=0.01)
       for (i in seq(bws)) {
@@ -66,7 +66,12 @@ auto_bin <- function (dat, type="kmeans", n_bins = 8, verbose = FALSE) {
       bins <- c(sorted[idx], max(dat[["idv"]])*1.001)
       return(bins)    
     }    
+    if (type == "percentiles") {
+      bins <- quantile(dat[["idv"]], probs = seq(0,1,length.out = n_bins))
+      return(bins)
+    }
   }
+
   return(paste0("Binning method ", type, " not implemented yet!"))
 }
 
@@ -83,8 +88,10 @@ find_nadirs <- function (x, thresh = 0) {
 #' @param x data
 #' @param bins numeric vector specifying bin separators
 #' @param idv variable in the data specifies the independent variable (e.g. "time")
+#' @param labeled whether a labeled factor instead of integers should be returned 
 #' @export
-bin_data <- function(x, bins = c(0, 3, 5, 7), idv = "time") {
-  x$bin <- cut(x[[idv]], bins, labels = FALSE, right=FALSE)
+bin_data <- function(x, bins = c(0, 3, 5, 7), idv = "time", labeled = F) {
+  if(!labeled) x$bin <- cut(x[[idv]], bins, labels = FALSE, right=FALSE)
+  else x$bin <- cut(x[[idv]], bins, right=FALSE)
   return(x)
 }

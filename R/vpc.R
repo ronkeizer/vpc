@@ -170,6 +170,7 @@ vpc <- function(sim = NULL,
       stratify <- c(stratify, stratify_color)
     }
   }
+  labeled_bins <- bins[1] == "percentiles"
   if (class(bins) != "numeric") {
     if(!is.null(obs)) {
       bins <- auto_bin(obs, bins, n_bins)
@@ -185,10 +186,10 @@ vpc <- function(sim = NULL,
     message(paste0("Binning: ", paste(bins, collapse=' ')))
   }
   if(!is.null(obs)) {
-    obs <- bin_data(obs, bins, "idv")
+    obs <- bin_data(obs, bins, "idv", labeled = labeled_bins)
   }
   if(!is.null(sim)) {
-    sim <- bin_data(sim, bins, "idv")
+    sim <- bin_data(sim, bins, "idv", labeled = labeled_bins)
   }
 
   if (pred_corr) {
