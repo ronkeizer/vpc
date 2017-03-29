@@ -24,7 +24,7 @@ plot_vpc <- function(db,
   if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
     vpc_theme <- new_vpc_theme()
   }
-
+  idv_as_factor <- is.factor(db$vpc_dat$bin)
   if(db$type != "time-to-event") {
 
     ################################################################
@@ -34,7 +34,8 @@ plot_vpc <- function(db,
     ################################################################
 
     if (!is.null(db$sim)) {
-      pl <- ggplot(db$vpc_dat, aes(x=bin_mid))
+      if(idv_as_factor) db$vpc_dat$bin_mid <- db$vpc_dat$bin
+      pl <- ggplot(db$vpc_dat, aes(x=bin_mid, group=1))
       if(show$sim_median) {
         pl <- pl + geom_line(aes(y=q50.med), colour=vpc_theme$sim_median_color, linetype=vpc_theme$sim_median_linetype, size=vpc_theme$sim_median_size)
       }
@@ -86,6 +87,7 @@ plot_vpc <- function(db,
       }
     }
     if(!is.null(db$obs)) {
+      if(idv_as_factor) db$aggr_obs$bin_mid <- db$aggr_obs$bin
       if (show$obs_median) {
         pl <- pl +
           geom_line(data=db$aggr_obs, aes(x=bin_mid, y=obs50), linetype=vpc_theme$obs_median_linetype, colour=vpc_theme$obs_median_color, size=vpc_theme$obs_median_size)       
@@ -100,7 +102,7 @@ plot_vpc <- function(db,
       }
     }
     bdat <- data.frame(cbind(x=db$bins, y=NA))
-    if(show$bin_sep) {
+    if(show$bin_sep && !idv_as_factor) {
       pl <- pl +
         geom_rug(data=bdat, sides = "t", aes(x = x, y=y), colour=vpc_theme$bin_separators_color)
     }
