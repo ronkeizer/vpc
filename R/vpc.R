@@ -95,11 +95,13 @@ vpc <- function(sim = NULL,
       if("obs" %in% obs$comp) {
         obs <- obs %>% filter(comp == "obs")
       }
+      obs <- data.frame(obs)
     }
     if (!is.null(sim)) {
       if("obs" %in% sim$comp) {
         sim <- sim %>% filter(comp == "obs")
       }
+      sim <- data.frame(sim)
     }
   }
 
