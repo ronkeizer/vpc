@@ -117,7 +117,7 @@ plot_vpc <- function(db,
           if (db$facet == "wrap") {
             pl <- pl + facet_wrap(~ strat1)
           } else {
-            if(length(grep("row", facet))>0) {
+            if(length(grep("row", db$facet))>0) {
               pl <- pl + facet_grid(strat1 ~ .)
             } else {
               pl <- pl + facet_grid(. ~ strat1)
@@ -127,7 +127,7 @@ plot_vpc <- function(db,
           if (db$facet == "wrap") {
             pl <- pl + facet_wrap(~ strat)
           } else {
-            if(length(grep("row", facet))>0) {
+            if(length(grep("row", db$facet))>0) {
               pl <- pl + facet_grid(strat ~ .)
             } else {
               pl <- pl + facet_grid(. ~ strat)
@@ -136,7 +136,7 @@ plot_vpc <- function(db,
         }
       } else { # 2 grid-stratification
         if ("strat1" %in% c(colnames(db$vpc_dat), colnames(db$aggr_obs))) {
-          if(length(grep("row", facet))>0) {
+          if(length(grep("row", db$facet))>0) {
             pl <- pl + facet_grid(strat1 ~ strat2)
           } else {
             pl <- pl + facet_grid(strat2 ~ strat1)
