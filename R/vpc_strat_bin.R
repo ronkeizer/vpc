@@ -1,10 +1,10 @@
 #' Create VPC plot with different binning settings for each stratification group
 #'
-#' \code{vpc_strat_bin} provides a quick and dirty workaround to create a VPC plot
-#' with different bin settings for each stratification group of data.
+#' \code{vpc_strat_bin} provides a workaround to create a VPC plot with
+#' different bin settings for each stratification group of data.
 #'
 #' To control the graph settings with ggplot2 syntax, you can set 
-#' \code{return_fig = FALSE}, edit each subplot in \code{return$glist} with ggplot2,
+#' \code{return_fig = FALSE}, edit each subplot in \code{plot_data$glist} with ggplot2,
 #' and apply \code{\link{combine_vps_strat}} function to create combined plot.
 #'
 #' @export
@@ -156,14 +156,25 @@ vpc_strat_bin <- function(sim = NULL,
 
 #' Combine a list of figures from vpc_strat_bin function
 #'
-#' \code{combine_vps_strat} combines a list of figures from \code{\link{vpc_strat_bin}} function
-#'
+#' \code{combine_vps_strat} combines a list of figures from 
+#' \code{\link{vpc_strat_bin}} function
+#' 
+#' You can control the subplot appearance by applying ggplot functions to each
+#' subplot items (\code{plot_data$glist[[1]]}, \code{plot_data$glist[[2]]}, ...)
 #'
 #' @export
 #' @param plot_data a list of figures and figure settings generated with 
 #' \code{\link{vpc_strat_bin}} function
 #' @return a combined figure
 #' @examples
+#' plot_data <- 
+#'   vpc_strat_bin(sim = simple_data$sim,
+#'                 obs = simple_data$obs,
+#'                 stratify = "ISM", 
+#'                 n_bins_list = c(4,8),
+#'                 return_fig = F)
+#'                 
+#' for (k in 1:2) plot_data$glist[[k]] <- plot_data$glist[[k]] + scale_y_log10()
 #' combine_vps_strat(plot_data)
 #'
 #'
@@ -172,6 +183,6 @@ combine_vps_strat <- function(plot_data){
     cowplot::plot_grid(plotlist = plot_data$glist, 
                        nrow = plot_data$nrow,
                        align= "hv")
-  
+
   return(plot)
 }
