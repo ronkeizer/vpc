@@ -11,18 +11,23 @@
 #' @param sim see \code{\link{vpc}} function
 #' @param obs see \code{\link{vpc}} function
 #' @param bins see \code{\link{vpc}} function
-#' @param bin_list a list to assign \code{bins} for each stratification group
+#' @param bin_list a list to assign \code{bins} for each stratification group. 
+#' Each element is applied starting from horizontal direction then vertical
+#' direction
 #' @param n_bins see \code{\link{vpc}} function
-#' @param n_bins_list a vector to assign \code{n_bins} for each stratification group
+#' @param n_bins_list a vector to assign \code{n_bins} for each stratification group.
+#' Each element is applied starting from horizontal direction then vertical
+#' direction
 #' @param stratify see \code{\link{vpc}} function. The name of the column cannot be 
 #' "strat" or "strat_for_title"
 #' @param strat_fig_dir set the direction of figure arrangement for two 
 #' stratification variables. If strat_fig_dir == 1 (default), first variable 
-#' will be spread for horizontal direction
+#' will be spread in the horizontal direction
 #' @param facet_names see \code{\link{vpc}} function
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @param xylab boolean indicting whether to show axis labels for individual subplots
-#' @param return_fig boolean whether to return a combined figure (TRUE, default) or a list object of individual plots (FALSE)
+#' @param return_fig boolean whether to return a combined figure (TRUE, default)
+#'  or a list object of individual plots (FALSE)
 #' @param ... other inputs passed on to \code{\link{vpc}} function
 #' @return a combined figure (return_fig==TRUE, default) or a list object of individual plots (return_fig==FALSE)
 #' @examples
@@ -77,25 +82,22 @@ vpc_strat_bin <- function(sim = NULL,
   ## Organize stratification properties
   n_strat1 <- select_(obs,stratify[1]) %>% unique() %>% nrow()
   
+  ### Change order of stratify elements depending on figure organization
   strat_vec_matrix <- 
-    obs$strat %>% unique() %>% sort() %>% matrix(nrow = n_strat1)
-  if(strat_fig_dir==1) strat_vec_matrix <- t(strat_vec_matrix)
+    obs$strat %>% unique() %>% sort() %>% matrix(nrow = n_strat1, byrow = TRUE)
+  if(strat_fig_dir==2) strat_vec_matrix <- t(strat_vec_matrix)
   strat_vec <- as.vector(strat_vec_matrix)
   
-  plot_data <- list()
-  plot_data$nrow <- n_strat1
-  
-  if (length(stratify)==1){
-    if (strat_fig_dir == 1) plot_data$nrow <- 1
-  }else if (length(stratify)==2){
-    n_strat2 <- select_(obs,stratify[2]) %>% unique() %>% nrow()
-    if (strat_fig_dir == 1) plot_data$nrow <- n_strat2
+  ### Specify size of subplot matrix for plot_grid
+  plot_data <- list(nrow=NULL,ncol=NULL)
+  if (strat_fig_dir == 1){
+    plot_data$ncol <- n_strat1
   }else{
-    stop("Number of stratification variables must be 1 or 2")
+    plot_data$nrow <- n_strat1
   }
   
-  ## Make sure #stratification categories and #n_bins_list or #bin_list are the same
   
+  ## Make sure #stratification categories and #n_bins_list or #bin_list are the same
   if(!is.null(bin_list) & length(bin_list)<length(strat_vec)){
     stop("#(Elements in bin_list) must be more than #(Stratification categories)")
   }
@@ -182,6 +184,7 @@ combine_vps_strat <- function(plot_data){
   plot <- 
     cowplot::plot_grid(plotlist = plot_data$glist, 
                        nrow = plot_data$nrow,
+                       ncol = plot_data$ncol,
                        align= "hv")
 
   return(plot)
