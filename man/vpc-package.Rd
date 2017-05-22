@@ -10,4 +10,3 @@ Create Visual Predictive Checks in R
 \author{
 Ron Keizer \email{ronkeizer@gmail.com}
 }
-

@@ -1,6 +1,6 @@
 Package: vpc
 Title: Create visual predictive checks in R
-Version: 0.1.1
+Version: 0.2.0
 Author: Ron Keizer <ronkeizer@gmail.com>
 Maintainer: Ron Keizer <ronkeizer@gmail.com>
 Description: Create visual predictive checks in R, a commonly used diagnostic
@@ -8,7 +8,6 @@ Description: Create visual predictive checks in R, a commonly used diagnostic
     without the use of PsN and Xpose.
 Depends:
     R (>= 3.0.2),
-    classInt,
     magrittr
 Imports:
     classInt,
@@ -25,4 +24,4 @@ Suggests:
     knitr,
     testthat
 VignetteBuilder: knitr
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

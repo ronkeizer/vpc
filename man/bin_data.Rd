@@ -16,4 +16,3 @@ bin_data(x, bins = c(0, 3, 5, 7), idv = "time")
 \description{
 Function to bin data based on a vector of bin separators, e.g. for use in VPC
 }
-

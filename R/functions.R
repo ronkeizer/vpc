@@ -30,7 +30,7 @@ add_step <- function(dat = ., vars) {
     tmp$step <- 1
     tmp[,vars] <- dat[-length(dat[,1]), vars]
     newdat <- data.frame(rbind(dat, tmp))
-    newdat %>% arrange(bin, -step)
+    newdat %>% dplyr::arrange(bin, -step)
 }
 
 as.num <- function(x) { as.numeric(as.character(x)) }
@@ -45,32 +45,32 @@ convert_to_dense_grid <- function(dat, t = "t", id = "id", t_start = 0, t_step =
   tmp$rtte <- 0
   tmp[match(id_t, paste0(tmp$id,"-",tmp$t)),]$rtte <- 1
   if (!is.null(add)) {
-    tmp2 <- merge(tmp, dat[,c("id", add)] %>% group_by(id) %>% do(.[1,]), by = "id", all.y = FALSE)
+    tmp2 <- merge(tmp, dat[,c("id", add)] %>% dplyr::group_by(id) %>% do(.[1,]), by = "id", all.y = FALSE)
   }
   return(tmp2)
 }
 
 relative_times <- function (dat, simulation = FALSE) {
   if (simulation) {
-    tmp <- dat %>% group_by(sim, id)
+    tmp <- dat %>% dplyr::group_by(sim, id)
   } else {
-    tmp <- dat %>% group_by(id)
+    tmp <- dat %>% dplyr::group_by(id)
   }
-  tmp2 <- tmp %>% arrange(time) %>% mutate(time = c(time[1], diff(time)))
+  tmp2 <- tmp %>% dplyr::arrange(time) %>% dplyr::mutate(time = c(time[1], diff(time)))
   if (simulation) {
-    return(tmp2 %>% arrange(sim, id, time))
+    return(tmp2 %>% dplyr::arrange(sim, id, time))
   } else {
-    return(tmp2 %>% arrange(id, time))
+    return(tmp2 %>% dplyr::arrange(id, time))
   }
 }
 
 convert_from_dense_grid <- function (dat) { # note: only for a single trial, requires a loop or ddply for multiple subproblems
-  tmp <- dat %>% group_by(id)
+  tmp <- dat %>% dplyr::group_by(id)
   if("rtte" %in% names(dat)) {
     tmp <- tmp %>% filter (rtte == 1)
   }
   #  filter (dv == 1 | time == max(time) )
   tmp2 <- rbind(tmp %>% filter(length(time) > 1) %>% mutate(time = time - c(0,time[1:(length(time)-1)])),
                 tmp %>% filter(length(time) == 1) )
-  return(tmp2 %>% arrange(id, time))
+  return(tmp2 %>% dplyr::arrange(id, time))
 }

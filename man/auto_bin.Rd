@@ -27,4 +27,3 @@ This function calculates bin separators (e.g. for use in a vpc) based on nadirs 
 \seealso{
 \code{\link{vpc}}
 }
-

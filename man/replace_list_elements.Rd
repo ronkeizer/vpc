@@ -27,4 +27,3 @@ replacement <- list(dv = "conc", idv = "time")
 list <- replace_list_elements(list, replacement)
 }
 }
-

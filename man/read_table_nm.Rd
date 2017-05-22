@@ -37,4 +37,3 @@ a single \code{data.frame}.
 data <- read_table_nm(file = '../models/pk/sdtab101')
 }
 }
-

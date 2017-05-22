@@ -28,4 +28,3 @@ A vector of predicted values, with or without added residual variability
 \description{
 Simulate PK data from a 1-compartment oral model
 }
-

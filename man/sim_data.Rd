@@ -40,4 +40,3 @@ This function generates the simulated dependent values for use in the VPC plotti
 \seealso{
 \code{\link{vpc}}
 }
-
