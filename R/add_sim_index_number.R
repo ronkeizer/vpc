@@ -16,5 +16,6 @@ add_sim_index_number <- function (sim, id = "id") { # for multiple simulations i
   for (i in 1:(length(idx)-1)) {
     sim$sim[(idx[i]+1) : (idx[i+1])] <- i 
   }
+  sim$sim[1]<-1
   return(sim$sim)
 }
