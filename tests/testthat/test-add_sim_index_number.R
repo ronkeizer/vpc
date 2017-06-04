@@ -23,4 +23,4 @@ s <- add_sim_index_number(sim)
 h <- hist(s)
 test_that("all simulated dataset-indices of equal length", {
   expect_equal(length(unique(h$counts)), 1)
-)  
+}) 
