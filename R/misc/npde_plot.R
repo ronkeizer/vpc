@@ -87,7 +87,7 @@ npde_vs_time <- function (sim,
   # plot(x)
   pl_dat <- cbind(obs[, match(c(obs_id, obs_idv, obs_dv), names(obs))], x["results"]["res"])
   colnames(pl_dat)[1:3] <- c("id", "idv", "dv")
-  #hist: ggplot(pl, aes(x=npde)) + geom_histogram() + theme_plain()
+  #hist: ggplot(pl, ggplot2::aes(x=npde)) + geom_histogram() + theme_plain()
   # plot(x)
   sim$sim <- add_sim_index_number(sim, id=sim_id)    
   n_sim <- length(unique(sim$sim))
@@ -115,14 +115,14 @@ npde_vs_time <- function (sim,
 
   pl <- ggplot(pl_dat) 
   if(smooth) {
-    pl <- pl + geom_ribbon(data = all_pi, aes(x=xmed, ymin=ymin, ymax=ymax, fill=fill, group=fill), linetype='dashed', alpha=0.2) 
+    pl <- pl + geom_ribbon(data = all_pi, ggplot2::aes(x=xmed, ymin=ymin, ymax=ymax, fill=fill, group=fill), linetype='dashed', alpha=0.2) 
   } else {
-    pl <- pl + geom_rect(data = all_pi, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill=fill), linetype='dashed', alpha=0.2) 
+    pl <- pl + geom_rect(data = all_pi, ggplot2::aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill=fill), linetype='dashed', alpha=0.2) 
   }
   
-  pl <- pl + geom_line(data = all_pi, aes(x=xmed, y=obs_med)) + 
-    geom_line(data = all_pi, aes(x=xmed, y=obs_min), linetype='dashed') + 
-    geom_line(data = all_pi, aes(x=xmed, y=obs_max), linetype='dashed') + 
+  pl <- pl + geom_line(data = all_pi, ggplot2::aes(x=xmed, y=obs_med)) + 
+    geom_line(data = all_pi, ggplot2::aes(x=xmed, y=obs_min), linetype='dashed') + 
+    geom_line(data = all_pi, ggplot2::aes(x=xmed, y=obs_max), linetype='dashed') + 
     geom_line(aes(x=idv, y=npde, group=id), alpha = 0.1) + 
     geom_point(aes(x=idv, y=npde), alpha=0.3) + 
     geom_hline(yintercept=c(-1.96, 0, 1.96), alpha=0.3, linetype='dotted')    
@@ -135,7 +135,7 @@ npde_vs_time <- function (sim,
   }
   bdat <- data.frame(cbind(x=bins, y=NA))
   pl <- pl + 
-    geom_rug(data=bdat, sides = "t", aes(x = x, y=y), colour="#333333")
+    geom_rug(data=bdat, sides = "t", ggplot2::aes(x = x, y=y), colour="#333333")
   if (!is.null(title)) {
     pl <- pl + ggtitle(title)  
   }

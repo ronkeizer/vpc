@@ -5,7 +5,7 @@ library(vpc)
 obs <- Theoph
 colnames(obs) <- c("id", "wt", "dose", "time", "dv")
 obs <- obs %>%
-  group_by(id) %>%
+  dplyr::group_by(id) %>%
   mutate(sex = round(runif(1))) # randomly assign a "sex" covariate
 sim <- sim_data(obs, # the design of the dataset
                 model = function(x) { # the model

@@ -5,7 +5,7 @@ compute_kmmc <- function(dat, strat = NULL, reverse_prob = FALSE, kmmc = "DOSE")
     strats <- unique(dat[[strat]])
     tmp <- c()
     for (i in seq(strats)) {
-      summid <- dat %>% dplyr::group_by(id) %>% dplyr::mutate(covt = mean(kmmc))
+      summid <- dat %>% dplyr::group_by_("id") %>% dplyr::mutate(covt = mean(kmmc))
       t <- unique(summid$time)
       km_fit <- data.frame(time = t[order(t)], surv=1)
       for (j in seq(km_fit$time)) {

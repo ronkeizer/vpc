@@ -93,13 +93,13 @@ vpc <- function(sim = NULL,
   if (software_type == "PKPDsim") {
     if (!is.null(obs)) {
       if("obs" %in% obs$comp) {
-        obs <- obs %>% filter(comp == "obs")
+        obs <- obs %>% dplyr::filter(comp == "obs")
       }
       obs <- data.frame(obs)
     }
     if (!is.null(sim)) {
       if("obs" %in% sim$comp) {
-        sim <- sim %>% filter(comp == "obs")
+        sim <- sim %>% dplyr::filter(comp == "obs")
       }
       sim <- data.frame(sim)
     }
@@ -199,7 +199,7 @@ vpc <- function(sim = NULL,
       if (!cols$obs$pred %in% names(sim)) {
         stop("Error: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
       } else {
-        obs <- obs %>% ungroup()
+        obs <- obs %>% dplyr::ungroup()
         obs[[cols$obs$pred]] <- unlist(sim[1:length(obs$id), cols$sim$pred])
         msg ("OK", verbose)
       }
@@ -239,14 +239,14 @@ vpc <- function(sim = NULL,
       message("Calculating statistics for simulated data...")
     }
     tmp1 <- sim %>% dplyr::group_by(strat, sim, bin)
-    aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarize(quantile(dv, pi[1])),
-                                 tmp1 %>% dplyr::summarize(quantile(dv, 0.5 )),
-                                 tmp1 %>% dplyr::summarize(quantile(dv, pi[2])),
-                                 tmp1 %>% dplyr::summarize(mean(idv))))
+    aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile(dv, pi[1])),
+                                 tmp1 %>% dplyr::summarise(quantile(dv, 0.5 )),
+                                 tmp1 %>% dplyr::summarise(quantile(dv, pi[2])),
+                                 tmp1 %>% dplyr::summarise(mean(idv))))
     aggr_sim <- aggr_sim[,-grep("(bin.|strat.|sim.)", colnames(aggr_sim))]
     colnames(aggr_sim)[grep("quantile", colnames(aggr_sim))] <- c("q5", "q50", "q95")
     colnames(aggr_sim)[length(aggr_sim[1,])] <- "mn_idv"
-    tmp <- aggr_sim %>% group_by(strat, bin)
+    tmp <- aggr_sim %>% dplyr::group_by(strat, bin)
     vpc_dat <- data.frame(cbind(tmp %>% dplyr::summarise(quantile(q5, ci[1])),
                                 tmp %>% dplyr::summarise(quantile(q5, 0.5)),
                                 tmp %>% dplyr::summarise(quantile(q5, ci[2])),
@@ -275,7 +275,7 @@ vpc <- function(sim = NULL,
     if(verbose) {
       message("Calculating statistics for observed data...")
     }
-    tmp1 <- obs %>% group_by(strat,bin)
+    tmp1 <- obs %>% dplyr::group_by(strat,bin)
     aggr_obs <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile(dv, pi[1])),
                                  tmp1 %>% dplyr::summarise(quantile(dv, 0.5 )),
                                  tmp1 %>% dplyr::summarise(quantile(dv, pi[2])),

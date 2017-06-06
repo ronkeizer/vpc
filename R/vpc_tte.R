@@ -233,8 +233,8 @@ vpc_tte <- function(sim = NULL,
         obs <- relative_times(obs)
       }
       obs <- obs %>%
-        dplyr::group_by(id) %>%
-        dplyr::arrange(id, time) %>%
+        dplyr::group_by_("id") %>%
+        dplyr::arrange_("id", "time") %>%
         dplyr::mutate(rtte = 1:length(dv))
 #       obs %>% dplyr::group_by(id) %>% dplyr::mutate(rtte = cumsum(dv != 0))
 #       obs[obs$dv == 0,]$rtte <- obs[obs$dv == 0,]$rtte + 1 # these censored points actually "belong" to the next rtte strata
@@ -300,16 +300,17 @@ vpc_tte <- function(sim = NULL,
 
     # set last_observation and repeat_obs per sim&id
     sim <- sim %>%
-      dplyr::group_by(sim, id) %>%
+      dplyr::group_by_("sim", "id") %>%
       dplyr::mutate(last_obs = 1*(1:length(time) == length(time)), repeat_obs = 1*(cumsum(dv) > 1))
 
     # filter out stuff and recalculate rtte times
     sim <- sim[sim$dv == 1 | (sim$last_obs == 1 & sim$dv == 0),]
     if(rtte) {
       sim <- sim %>%
-        dplyr::group_by(sim, id) %>%
-        dplyr::arrange(sim, id, time) %>% dplyr::mutate(rtte = 1:length(dv)) %>%
-        dplyr::arrange(sim, id)
+        dplyr::group_by_("sim", "id") %>%
+        dplyr::arrange_("sim", "id", "time") %>%
+        dplyr::mutate(rtte = 1:length(dv)) %>%
+        dplyr::arrange_("sim", "id")
       if(rtte_calc_diff) {
         sim <- relative_times(sim, simulation=TRUE)
       }
@@ -342,7 +343,7 @@ vpc_tte <- function(sim = NULL,
     for (i in 1:n_sim) {
       tmp <- sim %>% dplyr::filter(sim == i)
       tmp2 <- add_stratification(tmp %>%
-                                   dplyr::arrange(id, time), stratify)
+                                 dplyr::arrange_("id", "time"), stratify)
       if(!is.null(kmmc) && kmmc %in% names(obs)) {
         tmp3 <- compute_kmmc(tmp2, strat = "strat", reverse_prob = reverse_prob, kmmc = kmmc)
       } else {
@@ -365,8 +366,8 @@ vpc_tte <- function(sim = NULL,
       all <- rbind(all, cbind(i, tmp4)) ## RK: this can be done more efficient!
     }
     sim_km <- all %>%
-      dplyr::group_by (strat, bin) %>%
-      dplyr::summarize (bin_mid = head(bin_mid,1),
+      dplyr::group_by_("strat", "bin") %>%
+      dplyr::summarise (bin_mid = head(bin_mid,1),
                  bin_min = head(bin_min,1),
                  bin_max = head(bin_max,1),
                  qmin = quantile(surv, 0.05),
@@ -404,11 +405,6 @@ vpc_tte <- function(sim = NULL,
     cens_dat <- data.frame(obs[obs$dv == 0 & obs$time > 0,])
   }
 
-  if (smooth) {
-    geom_line_custom <- ggplot2::geom_line
-  } else {
-    geom_line_custom <- ggplot2::geom_step
-  }
   if (!is.null(stratify_original)) {
     if (length(stratify) == 2) {
       if(!is.null(sim_km)) {
@@ -484,7 +480,8 @@ vpc_tte <- function(sim = NULL,
                  cens_dat = cens_dat,
                  rtte = rtte,
                  type = "time-to-event",
-                 as_percentage = as_percentage)
+                 as_percentage = as_percentage,
+                 tmp_bins = tmp_bins)
   if(is.null(xlab)) {
     xlab <- "Time (days)"
   }

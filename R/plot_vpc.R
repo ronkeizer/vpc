@@ -35,7 +35,7 @@ plot_vpc <- function(db,
     ################################################################
 
     if (!is.null(db$sim)) {
-      pl <- ggplot2::ggplot(db$vpc_dat, aes(x=bin_mid))
+      pl <- ggplot2::ggplot(db$vpc_dat, ggplot2::aes(x=bin_mid))
       if(show$sim_median) {
         pl <- pl + ggplot2::geom_line(ggplot2::aes(y=q50.med), colour=vpc_theme$sim_median_color, linetype=vpc_theme$sim_median_linetype, size=vpc_theme$sim_median_size)
       }
@@ -177,7 +177,7 @@ plot_vpc <- function(db,
             ggplot2::geom_ribbon(data = db$sim_km, ggplot2::aes(min = qmin, max=qmax, y=qmed, fill=strat_color), alpha=vpc_theme$sim_median_alpha) +
             ggplot2::scale_fill_discrete(name="")
         } else {
-          pl <- pl + geom_ribbon(data = db$sim_km, aes(min = qmin, max=qmax, y=qmed), fill = vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha)
+          pl <- pl + ggplot2::geom_ribbon(data = db$sim_km, ggplot2::aes(min = qmin, max=qmax, y=qmed), fill = vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha)
         }
       } else {
         if (!is.null(db$stratify_color)) {
@@ -197,7 +197,12 @@ plot_vpc <- function(db,
       pl <- pl + ggplot2::geom_point(data=db$cens_dat, ggplot2::aes(x=time, y=y), shape="|", size=2.5)
     }
     if (show$sim_median) {
-      pl <- pl + ggplot2::geom_line_custom(linetype="dashed")
+      if (smooth) {
+        geom_line_custom <- ggplot2::geom_line
+      } else {
+        geom_line_custom <- ggplot2::geom_step
+      }
+      pl <- pl + geom_line_custom(linetype="dashed")
     }
     if(!is.null(db$obs) && show$obs_ci) {
       if (!is.null(db$stratify_color)) {
@@ -209,9 +214,9 @@ plot_vpc <- function(db,
     if (!is.null(db$obs) && show$obs_dv) {
       chk_tbl <- db$obs_km %>%
         dplyr::group_by(strat) %>%
-        dplyr::summarize(t = length(time))
+        dplyr::summarise(t = length(time))
       if (sum(chk_tbl$t <= 1)>0) { # it is not safe to use geom_step, so use
-        geom_step <- geom_line
+        geom_step <- ggplot2::geom_line
       }
       msg("Warning: some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).", verbose)
       if (!is.null(db$stratify_color)) {
@@ -263,8 +268,8 @@ plot_vpc <- function(db,
     }
     if (show$bin_sep) {
       if(!(class(db$bins) == "logical" && db$bins == FALSE)) {
-        bdat <- data.frame(cbind(x=tmp_bins, y=NA))
-        pl <- pl + ggplot2::geom_rug(data=bdat, sides = "t", aes(x = x, y=y, group=NA), colour=vpc_theme$bin_separators_color)
+        bdat <- data.frame(cbind(x = db$tmp_bins, y = NA))
+        pl <- pl + ggplot2::geom_rug(data=bdat, sides = "t", ggplot2::aes(x = x, y=y, group=NA), colour=vpc_theme$bin_separators_color)
       }
     }
     if(is.null(xlab)) {
