@@ -13,7 +13,7 @@ test_that("vpc_cat returned proper object", {
 
 test_that("vpc_cat parsed data correctly", {
   expect_equal(sum(obj$vpc_dat$q50.med), 11, tolerance = 0.001)
-  expect_equal(sum(obj$vpc_dat$q50.low), 9.598, tolerance = 0.001)
+  expect_equal(sum(obj$vpc_dat$q50.low), 9.598, tolerance = 0.01)
   expect_equal(sum(obj$vpc_dat$q50.up), 12.41069, tolerance = 0.001)
   expect_equal(sum(obj$vpc_dat$bin_mid), 122.25, tolerance = 0.001)
   expect_equal(sum(obj$aggr_obs$obs50), 11, tolerance = 0.001)

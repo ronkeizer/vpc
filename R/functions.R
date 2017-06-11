@@ -65,9 +65,9 @@ relative_times <- function (dat, simulation = FALSE) {
 }
 
 convert_from_dense_grid <- function (dat) { # note: only for a single trial, requires a loop or ddply for multiple subproblems
-  tmp <- dat %>% dplyr::group_by(id)
+  tmp <- dat %>% dplyr::group_by_("id")
   if("rtte" %in% names(dat)) {
-    tmp <- tmp %>% dplyr::filter (rtte == 1)
+    tmp <- tmp %>% dplyr::filter(rtte == 1)
   }
   #  filter (dv == 1 | time == max(time) )
   tmp2 <- rbind(tmp %>% dplyr::filter(length(time) > 1) %>% dplyr::mutate(time = time - c(0,time[1:(length(time)-1)])),

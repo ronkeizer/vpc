@@ -26,7 +26,7 @@ sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)),
                       n=100) {
   if (is.null(par_values)) {
     param <- draw_params_mvr( # draw parameter values. can also be just population values, or specified manually ()
-      ids = unique(as.numeric(as.character(obs$id))),
+      ids = 1:n,
       n_sim = n,
       theta,
       omega_mat = triangle_to_full(omega_mat),
@@ -45,7 +45,7 @@ sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)),
   tmp$dv <- add_noise(model(tmp), ruv = error)
   tmp$pred <- model(tmp_pred)
   colnames(tmp) <- gsub("\\.x", "", colnames(tmp))
-  dplyr::arrange_("tmp", "sim", "id", "time")
+  tmp %>% dplyr::arrange_("sim", "id", "time")
 }
 
 sim_data_tte <- function (fit, t_cens = NULL, n = 100) {
