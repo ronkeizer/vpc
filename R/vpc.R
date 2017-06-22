@@ -192,7 +192,6 @@ vpc <- function(sim = NULL,
   if(!is.null(sim)) {
     sim <- bin_data(sim, bins, "idv")
   }
-
   if (pred_corr) {
     if (!is.null(obs) & !cols$obs$pred %in% names(obs)) {
       msg("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...", verbose)
