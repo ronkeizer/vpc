@@ -9,12 +9,11 @@ add_sim_index_number <- function (sim, id = "id") { # for multiple simulations i
       return(sim$sim)
   }
   sim[[id]] <- as.num(sim[[id]])
-  sim_id <- unique(sim[[id]])
-  sim$id_shift <- c(sim[[id]][2:length(sim[[id]])], 0) 
-  idx <- c(1, (1:length(sim[[id]]))[sim[[id]] == tail(sim_id,1) & sim$id_shift == sim_id[1]], length(sim[[id]]))
+  sim_id <- cumsum(unlist(sapply(rle(sim[[id]])$lengths, FUN = function(w) seq(length(w), w, 1)))<2)
   sim$sim <- 1
-  for (i in 1:(length(idx)-1)) {
-    sim$sim[(idx[i]+1) : (idx[i+1])] <- i 
+  for(i in unique(sim[[id]])){
+    sim$sim[sim[[id]]==i] <- cumsum(ave(1:length(sim_id[sim[[id]]==i]), 
+                                        sim_id[sim[[id]]==i], FUN = function(h) 1:length(h))<2)
   }
   return(sim$sim)
 }
