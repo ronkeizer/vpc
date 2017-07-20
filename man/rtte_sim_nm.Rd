@@ -12,4 +12,3 @@ rtte_sim_nm
 An example dataset with simulated repeated time-to-event data (100 simulations)
 }
 \keyword{datasets}
-

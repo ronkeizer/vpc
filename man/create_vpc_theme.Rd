@@ -12,4 +12,3 @@ create_vpc_theme(...)
 \description{
 Create new vpc theme
 }
-

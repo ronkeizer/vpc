@@ -9,7 +9,7 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
   software = "auto", obs_cols = NULL, sim_cols = NULL, kmmc = NULL,
   reverse_prob = FALSE, stratify = NULL, stratify_color = NULL,
   ci = c(0.05, 0.95), plot = FALSE, xlab = NULL, ylab = NULL,
-  show = list(), as_percentage = TRUE, title = NULL, smooth = FALSE,
+  show = NULL, as_percentage = TRUE, title = NULL, smooth = FALSE,
   vpc_theme = NULL, facet = "wrap", verbose = FALSE, vpcdb = FALSE)
 }
 \arguments{
@@ -102,4 +102,3 @@ vpc_tte(sim = rtte_sim_nm,
 \seealso{
 \link{vpc}
 }
-

@@ -81,4 +81,3 @@ Creates a VPC plot from observed and simulation data
 \seealso{
 \link{sim_data}, \link{vpc_cens}, \link{vpc_tte}
 }
-

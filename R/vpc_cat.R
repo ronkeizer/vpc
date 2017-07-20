@@ -92,7 +92,7 @@ vpc_cat  <- function(sim = NULL,
       check_stratification_columns_available(sim, stratify_color, "simulation")
     }
   }
-  
+
   ## define column names
   cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
   if(!is.null(obs)) {
@@ -138,25 +138,25 @@ vpc_cat  <- function(sim = NULL,
   obs$dv <- as.factor(obs$dv)
   lev <- levels(obs$dv)
   if (!is.null(sim)) {
-    tmp1 <- sim %>% group_by(sim, bin)
+    tmp1 <- sim %>% dplyr::group_by(sim, bin)
     for (i in seq(lev)) {
       if (i == 1) {
-        aggr_sim <- tmp1 %>% summarize(fact_perc(dv, lev[i]))
+        aggr_sim <- tmp1 %>% dplyr::summarise(fact_perc(dv, lev[i]))
       } else {
-        aggr_sim <- cbind(aggr_sim, tmp1 %>% summarize(fact_perc(dv, lev[i])) )
+        aggr_sim <- cbind(aggr_sim, tmp1 %>% dplyr::summarise(fact_perc(dv, lev[i])) )
       }
     }
-    aggr_sim <- cbind(aggr_sim, tmp1 %>% summarize(mean(idv)))
+    aggr_sim <- cbind(aggr_sim, tmp1 %>% dplyr::summarise(mean(idv)))
     aggr_sim <- data.frame(aggr_sim)
     aggr_sim <- aggr_sim[,-grep("(bin.|sim.)", colnames(aggr_sim))]
     colnames(aggr_sim) <- c("sim", "bin", paste0("fact_", lev), "mn_idv")
     tmp3 <- reshape2::melt(aggr_sim, id=c("sim", "bin", "mn_idv"))
     tmp3$strat <- rep(lev, each = length(aggr_sim[,1]))
-    tmp4 <- tmp3 %>% group_by(strat, bin)
-    vpc_dat <- data.frame(cbind(tmp4 %>% summarize(quantile(value, ci[1])),
-                                tmp4 %>% summarize(quantile(value, 0.5)),
-                                tmp4 %>% summarize(quantile(value, ci[2])),
-                                tmp4 %>% summarize(mean(mn_idv))
+    tmp4 <- tmp3 %>% dplyr::group_by(strat, bin)
+    vpc_dat <- data.frame(cbind(tmp4 %>% dplyr::summarise(quantile(value, ci[1])),
+                                tmp4 %>% dplyr::summarise(quantile(value, 0.5)),
+                                tmp4 %>% dplyr::summarise(quantile(value, ci[2])),
+                                tmp4 %>% dplyr::summarise(mean(mn_idv))
                                 ))
     vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
     colnames(vpc_dat) <- c("strat", "bin", "q50.low","q50.med","q50.up", "bin_mid")
@@ -169,15 +169,15 @@ vpc_cat  <- function(sim = NULL,
     vpc_dat <- NULL
   }
   if(!is.null(obs)) {
-    tmp <- obs %>% group_by(bin)
+    tmp <- obs %>% dplyr::group_by(bin)
     for (i in seq(lev)) {
       if (i == 1) {
-        aggr_obs <- tmp %>% summarize(fact_perc(dv, lev[i]))
+        aggr_obs <- tmp %>% dplyr::summarise(fact_perc(dv, lev[i]))
       } else {
-        aggr_obs <- cbind(aggr_obs, tmp %>% summarize(fact_perc(dv, lev[i])) )
+        aggr_obs <- cbind(aggr_obs, tmp %>% dplyr::summarise(fact_perc(dv, lev[i])) )
       }
     }
-    tmp1 <- data.frame(cbind(aggr_obs, data.frame(tmp %>% summarize(mean(idv)))))
+    tmp1 <- data.frame(cbind(aggr_obs, data.frame(tmp %>% dplyr::summarise(mean(idv)))))
     tmp1 <- tmp1[,-grep("(bin.|strat.|sim.)", colnames(tmp1))]
     colnames(tmp1) <- c("bin", paste0("fact_", lev), "bin_mid")
     tmp2 <- reshape2::melt(tmp1, id=c("bin", "bin_mid"))
@@ -212,18 +212,18 @@ vpc_cat  <- function(sim = NULL,
                  bins = bins,
                  facet = facet,
                  type = "categorical")
-  if(vpcdb) { 
+  if(vpcdb) {
     return(vpc_db)
   } else {
-    pl <- plot_vpc(db = vpc_db, 
-                   show = show, 
+    pl <- plot_vpc(db = vpc_db,
+                   show = show,
                    vpc_theme = vpc_theme,
                    smooth = smooth,
                    log_y = FALSE,
                    title = title,
                    xlab = xlab,
                    ylab = ylab)
-    pl <- pl + ylim(c(0,1))
-    return(pl)    
+    pl <- pl + ggplot2::ylim(c(0,1))
+    return(pl)
   }
 }

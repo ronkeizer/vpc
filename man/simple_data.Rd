@@ -16,4 +16,3 @@ simple vpc.
 vpc(simple_data$sim, simple_data$obs)
 }
 }
-

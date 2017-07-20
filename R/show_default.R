@@ -1,3 +1,5 @@
+#' Defaults for show argument
+#' 
 #' @export
 show_default <- list (
   obs_dv = FALSE,
@@ -12,4 +14,3 @@ show_default <- list (
   sim_km = FALSE,
   obs_cens = TRUE
 )
-

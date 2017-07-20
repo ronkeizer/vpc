@@ -14,4 +14,3 @@ add_sim_index_number(sim, id = "id")
 \description{
 Add simulation index number to simulation when not present
 }
-

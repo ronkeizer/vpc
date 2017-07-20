@@ -14,4 +14,3 @@ add_noise(x, ruv = list(proportional = 0, additive = 0, exponential = 0))
 \description{
 Add noise / residual error to data
 }
-

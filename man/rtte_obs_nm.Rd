@@ -12,4 +12,3 @@ rtte_obs_nm
 An example dataset with simulated repeated time-to-event data
 }
 \keyword{datasets}
-

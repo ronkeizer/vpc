@@ -26,8 +26,9 @@ plot_vpc(db, show = NULL, vpc_theme = NULL, smooth = TRUE,
 \item{xlab}{ylab as numeric vector of size 2}
 
 \item{ylab}{ylab as numeric vector of size 2}
+
+\item{verbose}{verbosity (T/F)}
 }
 \description{
 VPC plotting function
 }
-

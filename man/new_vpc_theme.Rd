@@ -40,4 +40,3 @@ This function creates a theme that customizes how the VPC looks, i.e. colors, fi
  \item{bin_separators_location}: {where to plot bin separators ("t" for top, "b" for bottom)}
 }
 }
-

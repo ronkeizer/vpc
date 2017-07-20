@@ -12,4 +12,3 @@ triangle_to_full(vect)
 \description{
 Convert the lower triangle of a covariance matrix to a full matrix object
 }
-

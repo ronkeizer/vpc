@@ -9,4 +9,3 @@ theme_empty()
 \description{
 Empty theme
 }
-

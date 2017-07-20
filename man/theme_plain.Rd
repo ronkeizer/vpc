@@ -9,4 +9,3 @@ theme_plain()
 \description{
 Nicer default theme for ggplot2
 }
-

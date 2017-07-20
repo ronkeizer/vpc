@@ -20,4 +20,3 @@ draw_params_mvr(ids, n_sim, theta, omega_mat, par_names = NULL)
 \description{
 Draw parameters from multivariate distribution
 }
-
