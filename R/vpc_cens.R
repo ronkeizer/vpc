@@ -24,6 +24,7 @@
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param facet either "wrap", "columns", or "rows"
+#' @param labeller ggplot2 labeller function to be passed to underlying ggplot object
 #' @param vpcdb boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @return a list containing calculated VPC information, and a ggplot2 object
@@ -51,6 +52,7 @@ vpc_cens <- function(sim = NULL,
                      smooth = TRUE,
                      vpc_theme = NULL,
                      facet = "wrap",
+                     labeller = NULL,
                      vpcdb = FALSE,
                      verbose = FALSE) {
   if (is.null(uloq) & is.null(lloq)) {
@@ -229,6 +231,7 @@ vpc_cens <- function(sim = NULL,
                  obs = obs,
                  bins = bins,
                  facet = facet,
+                 labeller = labeller,
                  type = "censored")
   if(vpcdb) {
     return(vpc_db)

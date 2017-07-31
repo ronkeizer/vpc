@@ -52,4 +52,4 @@ Warning: Ignoring unknown aesthetics: y
 > 
 > proc.time()
    user  system elapsed 
-  4.780   0.300   4.753 
+  3.640   0.348   3.637 

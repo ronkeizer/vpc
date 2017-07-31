@@ -12,7 +12,6 @@
 #' @param show what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
 #' @param software name of software platform using (eg nonmem, phoenix)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
-#' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param pred_corr perform prediction-correction?
 #' @param pred_corr_lower_bnd lower bound for the prediction-correction
 #' @param pi simulated prediction interval to plot. Default is c(0.05, 0.95),
@@ -24,10 +23,10 @@
 #' @param xlab ylab as numeric vector of size 2
 #' @param ylab ylab as numeric vector of size 2
 #' @param title title
-#' @param facet_names show facet names (e.g. "SEX=1" when TRUE) or just the value of the facet
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param facet either "wrap", "columns", or "rows"
+#' @param labeller ggplot2 labeller function to be passed to underlying ggplot object
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
@@ -44,7 +43,6 @@ vpc <- function(sim = NULL,
                 software = "auto",
                 show = NULL,
                 stratify = NULL,
-                stratify_color = NULL,
                 pred_corr = FALSE,
                 pred_corr_lower_bnd = 0,
                 pi = c(0.05, 0.95),
@@ -60,6 +58,7 @@ vpc <- function(sim = NULL,
                 smooth = TRUE,
                 vpc_theme = NULL,
                 facet = "wrap",
+                labeller = NULL,
                 vpcdb = FALSE,
                 verbose = FALSE) {
   if(!is.null(psn_folder)) {
@@ -87,6 +86,12 @@ vpc <- function(sim = NULL,
     software_type <- guess_software(software, obs)
   } else {
     software_type <- guess_software(software, sim)
+  }
+  if(!is.null(facet)) {
+    if(! facet %in% c("wrap", "grid", "columns", "rows")) {
+      stop("`facet` argument needs to be one of `wrap`, `columns`, or `rows`.")      
+    }
+    if(facet == "grid") facet <- "rows" 
   }
 
   ## software specific parsing, if necessary
@@ -131,17 +136,6 @@ vpc <- function(sim = NULL,
       check_stratification_columns_available(sim, stratify, "simulation")
     }
   }
-  if(!is.null(stratify_color)) {
-    if(verbose) {
-      message("Stratifying simulated data...")
-    }
-    if(!is.null(obs)) {
-      check_stratification_columns_available(obs, stratify_color, "observation")
-    }
-    if(!is.null(sim)) {
-      check_stratification_columns_available(sim, stratify_color, "simulation")
-    }
-  }
 
   ## parse data into specific format
   if(!is.null(obs)) {
@@ -159,19 +153,6 @@ vpc <- function(sim = NULL,
     sim <- format_vpc_input_data(sim, cols$sim, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated", verbose)
   }
 
-  stratify_original <- stratify
-  if(!is.null(stratify_color)) {
-    if (is.null(stratify)) {
-      stratify <- stratify_color
-    }
-    if (length(stratify_color) > 1) {
-      stop("Error: please specify only 1 stratification variable for color!")
-    }
-    if (!stratify_color %in% stratify) {
-      stratify_original <- stratify
-      stratify <- c(stratify, stratify_color)
-    }
-  }
   if (class(bins) != "numeric") {
     if(!is.null(obs)) {
       bins <- auto_bin(obs, bins, n_bins)
@@ -295,8 +276,8 @@ vpc <- function(sim = NULL,
   if(is.null(ylab)) {
     ylab <- cols$obs$dv
   }
-  if (!is.null(stratify_original)) {
-    if (length(stratify) == 2) {
+  if(!is.null(stratify)) {
+    if(length(stratify) == 2) {
       vpc_dat$strat1 <- unlist(strsplit(as.character(vpc_dat$strat), ", "))[(1:length(vpc_dat$strat)*2)-1]
       vpc_dat$strat2 <- unlist(strsplit(as.character(vpc_dat$strat), ", "))[(1:length(vpc_dat$strat)*2)]
       aggr_obs$strat1 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)-1]
@@ -311,12 +292,11 @@ vpc <- function(sim = NULL,
                  vpc_dat = vpc_dat,
                  smooth = smooth,
                  stratify = stratify,
-                 stratify_original = stratify_original,
-                 stratify_color = stratify_color,
                  aggr_obs = aggr_obs,
                  obs = obs,
                  bins = bins,
                  facet = facet,
+                 labeller = labeller,
                  type = "continuous")
   if(facet_names == FALSE) {
     datasets <- c("vpc_dat", "obs", "sim", "aggr_obs")

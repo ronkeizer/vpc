@@ -18,18 +18,22 @@ Type 'q()' to quit R.
 > library(testit)
 > library(vpc)
 > 
-> nonmem_df <- data.frame(ID = 0, MDV = 0, DV = 0)
-> phx_df <- data.frame(ID = 0, COBS = 0)
+> tmp <- simple_data
+> sex <- (tmp$obs$ID) %% 2
+> race <- (tmp$obs$ID) %% 3
+> tmp$obs$sex <- sex
+> tmp$obs$race <- race
+> tmp$sim$sex <- sex
+> tmp$sim$race <- race
 > 
-> assert("software type returned properly", 
-+        vpc:::guess_software("NONmem", nonmem_df) == "nonmem")
-> assert("software type returned properly", 
-+        vpc:::guess_software("nonmem", phx_df) == "nonmem")
-> assert("software type returned properly", 
-+        vpc:::guess_software("auto", nonmem_df) == "nonmem")
-> assert("software type returned properly", 
-+        vpc:::guess_software("auto", phx_df) == "phoenix") 
+> v1 <- vpc(sim = tmp$sim, obs = tmp$obs, stratify = "race",
++           facet = "wrap", vpcdb = F, labeller=ggplot2::label_both)
+Warning: Ignoring unknown aesthetics: y
+Warning: Ignoring unknown aesthetics: y
+Warning: Ignoring unknown aesthetics: y
+> assert("plot succeeded", "ggplot" %in% class(v1))
+> assert("facets succeeded", length(v1$facet$params$facets) == 1)
 > 
 > proc.time()
    user  system elapsed 
-  0.252   0.320   0.232 
+  3.796   0.364   3.802 

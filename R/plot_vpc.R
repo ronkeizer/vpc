@@ -27,7 +27,25 @@ plot_vpc <- function(db,
   }
 
   if(db$type != "time-to-event") {
-
+    
+    if(!is.null(db$stratify)) {
+      ## rename "strat" to original stratification variable names
+      if(length(db$stratify) == 1) {
+        if(!is.null(db$aggr_obs)) colnames(db$aggr_obs)[match("strat", colnames(db$aggr_obs))] <- db$stratify[1]
+        if(!is.null(db$vpc_dat)) colnames(db$vpc_dat)[match("strat", colnames(db$vpc_dat))] <- db$stratify[1]
+      } 
+      if(length(db$stratify) == 2) {
+        if(!is.null(db$aggr_obs)) {
+          colnames(db$aggr_obs)[match("strat1", colnames(db$aggr_obs))] <- db$stratify[1]
+          colnames(db$aggr_obs)[match("strat2", colnames(db$aggr_obs))] <- db$stratify[2]
+        }
+        if(!is.null(db$vpc_dat)) {
+          colnames(db$vpc_dat)[match("strat1", colnames(db$vpc_dat))] <- db$stratify[1]
+          colnames(db$vpc_dat)[match("strat2", colnames(db$vpc_dat))] <- db$stratify[2]
+        }
+      }
+    }
+    
     ################################################################
     ## VPC for continous, censored or categorical
     ## note: for now, tte-vpc is separated off, but need to unify
@@ -75,28 +93,19 @@ plot_vpc <- function(db,
         }
       }
     } else {
-      if (!is.null(db$stratify_color)) {
-        if (length(db$stratify) == 2) {
-          pl <- ggplot2::ggplot(db$aggr_obs, ggplot2::aes(colour=as.factor(strat2)))
-        } else {
-          pl <- ggplot2::ggplot(db$aggr_obs, ggplot2::aes(colour=as.factor(strat)))
-        }
-        pl <- pl + ggplot2::scale_colour_discrete(name="")
-      } else {
-        pl <- ggplot2::ggplot(db$aggr_obs)
-      }
+      pl <- ggplot2::ggplot(db$aggr_obs)
     }
     if(!is.null(db$obs)) {
-      if (show$obs_median) {
+      if(show$obs_median) {
         pl <- pl +
           ggplot2::geom_line(data=db$aggr_obs, ggplot2::aes(x=bin_mid, y=obs50), linetype=vpc_theme$obs_median_linetype, colour=vpc_theme$obs_median_color, size=vpc_theme$obs_median_size)
       }
-      if(show$obs_ci && !is.null(db$aggr_obs$obs5)) {
+      if(show$obs_ci && !is.null(db$aggr_obs[["obs5"]])) {
         pl <- pl +
           ggplot2::geom_line(data=db$aggr_obs, ggplot2::aes(x=bin_mid, y=obs5), linetype=vpc_theme$obs_ci_linetype, colour=vpc_theme$obs_ci_color, size=vpc_theme$obs_ci_size) +
           ggplot2::geom_line(data=db$aggr_obs, ggplot2::aes(x=bin_mid, y=obs95), linetype=vpc_theme$obs_ci_linetype, colour=vpc_theme$obs_ci_color, size=vpc_theme$obs_ci_size)
       }
-      if (show$obs_dv) {
+      if(show$obs_dv) {
         pl <- pl + ggplot2::geom_point(data=db$obs, ggplot2::aes(x=idv, y = dv), size=vpc_theme$obs_size, colour=vpc_theme$obs_color, alpha = vpc_theme$obs_alpha, shape = vpc_theme$obs_shape)
       }
     }
@@ -112,35 +121,29 @@ plot_vpc <- function(db,
     if (log_y) {
       pl <- pl + ggplot2::scale_y_log10()
     }
-    if (!is.null(db$stratify)) {
-      if (length(db$stratify_original) == 1) {
-        if (!is.null(db$stratify_color)) {
-          if (db$facet == "wrap") {
-            pl <- pl + ggplot2::facet_wrap(~ strat1)
-          } else {
-            if(length(grep("row", db$facet))>0) {
-              pl <- pl + ggplot2::facet_grid(strat1 ~ .)
-            } else {
-              pl <- pl + ggplot2::facet_grid(. ~ strat1)
-            }
-          }
+    if(!is.null(db$stratify)) {
+      if(length(db$stratify) == 1) {
+        if(is.null(db$labeller)) db$labeller <- ggplot2::label_both
+        if (db$facet == "wrap") {
+          pl <- pl + ggplot2::facet_wrap(reformulate(db$stratify[1], NULL), 
+                                         labeller = db$labeller)
         } else {
-          if (db$facet == "wrap") {
-            pl <- pl + ggplot2::facet_wrap(~ strat)
+          if(length(grep("row", db$facet))>0) {
+            pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[1], NULL), 
+                                           labeller = db$labeller)
           } else {
-            if(length(grep("row", db$facet))>0) {
-              pl <- pl + ggplot2::facet_grid(strat ~ .)
-            } else {
-              pl <- pl + ggplot2::facet_grid(. ~ strat)
-            }
+            pl <- pl + ggplot2::facet_grid(reformulate(".", db$stratify[1]), 
+                                           labeller = db$labeller)
           }
         }
       } else { # 2 grid-stratification
-        if ("strat1" %in% c(colnames(db$vpc_dat), colnames(db$aggr_obs))) {
+        if (db$stratify[1] %in% c(colnames(db$vpc_dat), colnames(db$aggr_obs))) {
           if(length(grep("row", db$facet))>0) {
-            pl <- pl + ggplot2::facet_grid(strat1 ~ strat2)
+            pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[1], db$stratify[2]), 
+                                           labeller = db$labeller)
           } else {
-            pl <- pl + ggplot2::facet_grid(strat2 ~ strat1)
+            pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[2], db$stratify[1]), 
+                                           labeller = db$labeller)
           }
         } else { # only color stratification
           if ("strat" %in% c(colnames(db$vpc_dat), colnames(db$aggr_obs))) {
@@ -158,10 +161,33 @@ plot_vpc <- function(db,
     return(pl)
 
   } else {
+    
     ################################################################
     ## VPC for time-to-event data
     ################################################################
 
+    if(!is.null(db$stratify)) {
+      ## rename "strat" to original stratification variable names
+      if(length(db$stratify) == 1) {
+        if(!is.null(db$obs_km)) colnames(db$obs_km)[match("strat", colnames(db$obs_km))] <- db$stratify[1]
+        if(!is.null(db$sim_km)) colnames(db$sim_km)[match("strat", colnames(db$sim_km))] <- db$stratify[1]
+        if(!is.null(db$all)) colnames(db$all)[match("strat", colnames(db$all))] <- db$stratify[1]
+      } 
+      if(length(db$stratify) == 2) {
+        if(!is.null(db$obs_km)) {
+          colnames(db$obs_km)[match("strat1", colnames(db$obs_km))] <- db$stratify[1]
+          colnames(db$obs_km)[match("strat2", colnames(db$obs_km))] <- db$stratify[2]
+        }
+        if(!is.null(db$sim_km)) {
+          colnames(db$sim_km)[match("strat1", colnames(db$sim_km))] <- db$stratify[1]
+          colnames(db$sim_km)[match("strat2", colnames(db$sim_km))] <- db$stratify[2]
+        }
+        if(!is.null(db$all)) {
+          colnames(db$all)[match("strat1", colnames(db$all))] <- db$stratify[1]
+          colnames(db$all)[match("strat2", colnames(db$all))] <- db$stratify[2]
+        }  
+    }
+    }
 
     show$pi_as_area <- TRUE
     pl <- ggplot2::ggplot(db$sim_km, ggplot2::aes(x=bin_mid, y=qmed, group=strat))
@@ -171,22 +197,10 @@ plot_vpc <- function(db,
       pl <- pl + ggplot2::geom_step(data = db$all, ggplot2::aes(x=bin_mid, y=surv, group=strat_sim), colour=grDevices::rgb(0.2,.53,0.796, transp))
     }
     if(show$pi_as_area) {
-      if (smooth) {
-        if (!is.null(db$stratify_color)) {
-          pl <- pl +
-            ggplot2::geom_ribbon(data = db$sim_km, ggplot2::aes(min = qmin, max=qmax, y=qmed, fill=strat_color), alpha=vpc_theme$sim_median_alpha) +
-            ggplot2::scale_fill_discrete(name="")
-        } else {
-          pl <- pl + ggplot2::geom_ribbon(data = db$sim_km, ggplot2::aes(min = qmin, max=qmax, y=qmed), fill = vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha)
-        }
+      if(smooth) {
+        pl <- pl + ggplot2::geom_ribbon(data = db$sim_km, ggplot2::aes(min = qmin, max=qmax, y=qmed), fill = vpc_theme$sim_median_fill, alpha=vpc_theme$sim_median_alpha)
       } else {
-        if (!is.null(db$stratify_color)) {
-          pl <- pl +
-            ggplot2::geom_rect(data = db$sim_km, ggplot2::aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax, fill=strat_color), alpha=vpc_theme$sim_median_alpha) +
-            ggplot2::scale_fill_discrete(name="")
-        } else {
-          pl <- pl + ggplot2::geom_rect(data = db$sim_km, ggplot2::aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)
-        }
+        pl <- pl + ggplot2::geom_rect(data = db$sim_km, ggplot2::aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)
       }
     } else {
       if(!is.null(db$obs)) {
@@ -205,11 +219,7 @@ plot_vpc <- function(db,
       pl <- pl + geom_line_custom(linetype="dashed")
     }
     if(!is.null(db$obs) && show$obs_ci) {
-      if (!is.null(db$stratify_color)) {
-        pl <- pl + ggplot2::geom_ribbon(data=db$obs_km, ggplot2::aes(x=time, ymin=lower, ymax=upper, group=strat_color), fill=vpc_theme$obs_ci_fill)
-      } else {
-        pl <- pl + ggplot2::geom_ribbon(data=db$obs_km, ggplot2::aes(x=time, ymin=lower, ymax=upper, group=strat), fill=vpc_theme$obs_ci_fill)
-      }
+      pl <- pl + ggplot2::geom_ribbon(data=db$obs_km, ggplot2::aes(x=time, ymin=lower, ymax=upper, group=strat), fill=vpc_theme$obs_ci_fill)
     }
     if (!is.null(db$obs) && show$obs_dv) {
       chk_tbl <- db$obs_km %>%
@@ -219,50 +229,30 @@ plot_vpc <- function(db,
         geom_step <- ggplot2::geom_line
       }
       msg("Warning: some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).", verbose)
-      if (!is.null(db$stratify_color)) {
-        pl <- pl +
-          ggplot2::geom_step(data = db$obs_km, ggplot2::aes(x=time, y=surv, colour=strat_color), size=.8) +
-          ggplot2::scale_colour_discrete(name="")
-      } else {
-        pl <- pl + ggplot2::geom_step(data = db$obs_km, ggplot2::aes(x=time, y=surv, group=strat), size=.8)
-      }
+      pl <- pl + ggplot2::geom_step(data = db$obs_km, ggplot2::aes(x=time, y=surv, group=strat), size=.8)
     }
-    if (!is.null(db$stratify)) {
-      if (length(db$stratify_original) == 1 | db$rtte) {
-        if (!is.null(db$stratify_color)) {
-          if (db$facet == "wrap") {
-            pl <- pl + ggplot2::facet_wrap(~ strat1)
-          } else {
-            if(length(grep("row", db$facet))>0) {
-              pl <- pl + ggplot2::facet_grid(strat1 ~ .)
-            } else {
-              pl <- pl + ggplot2::facet_grid(. ~ strat1)
-            }
-          }
+    if(!is.null(db$stratify)) {
+      if(is.null(db$labeller)) db$labeller <- ggplot2::label_both
+      if (length(db$stratify) == 1 | db$rtte) {
+        if (db$facet == "wrap") {
+          pl <- pl + ggplot2::facet_wrap(reformulate(db$stratify[1], NULL), 
+                                         labeller = db$labeller)
         } else {
-          if (db$facet == "wrap") {
-            pl <- pl + ggplot2::facet_wrap(~ strat)
+          if(length(grep("row", db$facet))>0) {
+            pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[1], NULL), 
+                                           labeller = db$labeller)
           } else {
-            if(length(grep("row", db$facet))>0) {
-              pl <- pl + ggplot2::facet_grid(strat ~ .)
-            } else {
-              pl <- pl + ggplot2::facet_grid(. ~ strat)
-            }
+            pl <- pl + ggplot2::facet_grid(reformulate(".", db$stratify[1]), 
+                                           labeller = db$labeller)
           }
         }
       } else {
-        if ("strat1" %in% c(colnames(db$sim_km), colnames(db$obs_km))) {
-          if(length(grep("row", db$facet))>0) {
-            pl <- pl + ggplot2::facet_grid(strat1 ~ strat2)
-          } else {
-            pl <- pl + ggplot2::facet_grid(strat2 ~ strat1)
-          }
+        if(length(grep("row", db$facet))>0) {
+          pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[1], db$stratify[2]), 
+                                         labeller = db$labeller)
         } else {
-          if ("strat" %in% c(colnames(db$sim_km), colnames(db$obs_km))) {
-            # color stratification only
-          } else {
-            stop ("Stratification unsuccesful.")
-          }
+          pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[2], db$stratify[1]), 
+                                         labeller = db$labeller)
         }
       }
     }

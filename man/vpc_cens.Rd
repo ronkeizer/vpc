@@ -9,7 +9,8 @@ vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   software = "auto", show = NULL, stratify = NULL,
   stratify_color = NULL, ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
   plot = FALSE, xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
-  vpc_theme = NULL, facet = "wrap", vpcdb = FALSE, verbose = FALSE)
+  vpc_theme = NULL, facet = "wrap", labeller = NULL, vpcdb = FALSE,
+  verbose = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -55,6 +56,8 @@ vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 \item{vpc_theme}{theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()}
 
 \item{facet}{either "wrap", "columns", or "rows"}
+
+\item{labeller}{ggplot2 labeller function to be passed to underlying ggplot object}
 
 \item{vpcdb}{boolean whether to return the underlying vpcdb rather than the plot}
 

@@ -75,71 +75,71 @@ Overfull \hbox (24.78088pt too wide) in paragraph at lines 578--578
  []  \T1/pcr/m/n/10 n_bins = "auto", bin_mid = "mean", obs_cols = NULL, sim_col
 s = NULL,[] 
 
-Overfull \hbox (12.78088pt too wide) in paragraph at lines 580--580
- []  \T1/pcr/m/n/10 stratify_color = NULL, pred_corr = FALSE, pred_corr_lower_b
-nd = 0,[] 
+Overfull \hbox (18.78088pt too wide) in paragraph at lines 579--579
+ []  \T1/pcr/m/n/10 software = "auto", show = NULL, stratify = NULL, pred_corr 
+= FALSE,[] 
 
-Overfull \hbox (6.78088pt too wide) in paragraph at lines 581--581
- []  \T1/pcr/m/n/10 pi = c(0.05, 0.95), ci = c(0.05, 0.95), uloq = NULL, lloq =
+Overfull \hbox (0.78088pt too wide) in paragraph at lines 580--580
+ []  \T1/pcr/m/n/10 pred_corr_lower_bnd = 0, pi = c(0.05, 0.95), ci = c(0.05, 0
+.95),[] 
+
+Overfull \hbox (6.78088pt too wide) in paragraph at lines 583--583
+ []  \T1/pcr/m/n/10 smooth = TRUE, vpc_theme = NULL, facet = "wrap", labeller =
  NULL,[] 
-
-Overfull \hbox (12.78088pt too wide) in paragraph at lines 583--583
- []  \T1/pcr/m/n/10 title = NULL, facet_names = TRUE, smooth = TRUE, vpc_theme 
-= NULL,[] 
 [12]
 Overfull \hbox (21.9175pt too wide) in paragraph at lines 608--609
 []\T1/ptm/m/n/10 what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, ob
 s_median, sim_median,
 [13] (/usr/share/texlive/texmf-dist/tex/latex/base/utf8.def)
-Overfull \hbox (0.78088pt too wide) in paragraph at lines 667--667
+Overfull \hbox (0.78088pt too wide) in paragraph at lines 665--665
  []\T1/pcr/m/n/10 vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "je
 nks",[] 
 
-Overfull \hbox (24.78088pt too wide) in paragraph at lines 668--668
+Overfull \hbox (24.78088pt too wide) in paragraph at lines 666--666
  []  \T1/pcr/m/n/10 n_bins = "auto", bin_mid = "mean", obs_cols = NULL, sim_col
 s = NULL,[] 
 
-Overfull \hbox (0.78088pt too wide) in paragraph at lines 669--669
+Overfull \hbox (0.78088pt too wide) in paragraph at lines 667--667
  []  \T1/pcr/m/n/10 software = "auto", show = NULL, ci = c(0.05, 0.95), uloq = 
 NULL,[] 
 
-Overfull \hbox (18.78088pt too wide) in paragraph at lines 670--670
+Overfull \hbox (18.78088pt too wide) in paragraph at lines 668--668
  []  \T1/pcr/m/n/10 lloq = NULL, xlab = NULL, ylab = NULL, title = NULL, smooth
  = TRUE,[] 
 [14] (/usr/share/texlive/texmf-dist/tex/latex/base/utf8.def)
-Overfull \hbox (6.78088pt too wide) in paragraph at lines 745--745
+Overfull \hbox (6.78088pt too wide) in paragraph at lines 746--746
  []\T1/pcr/m/n/10 vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "j
 enks",[] 
 
-Overfull \hbox (24.78088pt too wide) in paragraph at lines 748--748
+Overfull \hbox (24.78088pt too wide) in paragraph at lines 749--749
  []  \T1/pcr/m/n/10 stratify_color = NULL, ci = c(0.05, 0.95), uloq = NULL, llo
 q = NULL,[] 
-[15]
-Overfull \hbox (24.78088pt too wide) in paragraph at lines 749--749
+
+Overfull \hbox (24.78088pt too wide) in paragraph at lines 750--750
  []  \T1/pcr/m/n/10 plot = FALSE, xlab = NULL, ylab = NULL, title = NULL, smoot
 h = TRUE,[] 
 
-Overfull \hbox (6.78088pt too wide) in paragraph at lines 750--750
- []  \T1/pcr/m/n/10 vpc_theme = NULL, facet = "wrap", vpcdb = FALSE, verbose = 
-FALSE)[] 
-[16] (/usr/share/texlive/texmf-dist/tex/latex/base/utf8.def)
-Overfull \hbox (0.78088pt too wide) in paragraph at lines 823--823
+Overfull \hbox (6.78088pt too wide) in paragraph at lines 751--751
+ []  \T1/pcr/m/n/10 vpc_theme = NULL, facet = "wrap", labeller = NULL, vpcdb = 
+FALSE,[] 
+[15] [16] (/usr/share/texlive/texmf-dist/tex/latex/base/utf8.def)
+Overfull \hbox (0.78088pt too wide) in paragraph at lines 827--827
  []  \T1/pcr/m/n/10 rtte_calc_diff = TRUE, events = NULL, bins = FALSE, n_bins 
 = 10,[] 
 
-Overfull \hbox (6.78088pt too wide) in paragraph at lines 824--824
+Overfull \hbox (6.78088pt too wide) in paragraph at lines 828--828
  []  \T1/pcr/m/n/10 software = "auto", obs_cols = NULL, sim_cols = NULL, kmmc =
  NULL,[] 
 
-Overfull \hbox (0.78088pt too wide) in paragraph at lines 827--827
+Overfull \hbox (0.78088pt too wide) in paragraph at lines 831--831
  []  \T1/pcr/m/n/10 show = NULL, as_percentage = TRUE, title = NULL, smooth = F
 ALSE,[] 
 
-Overfull \hbox (6.78088pt too wide) in paragraph at lines 828--828
- []  \T1/pcr/m/n/10 vpc_theme = NULL, facet = "wrap", verbose = FALSE, vpcdb = 
-FALSE)[] 
+Overfull \hbox (18.78088pt too wide) in paragraph at lines 832--832
+ []  \T1/pcr/m/n/10 vpc_theme = NULL, facet = "wrap", labeller = NULL, verbose 
+= FALSE,[] 
 [17] [18]
-Overfull \hbox (69.18036pt too wide) in paragraph at lines 918--918
+Overfull \hbox (69.18036pt too wide) in paragraph at lines 925--925
  []\T1/pcr/m/n/9 # stratified per event number (we\TS1/pcr/m/n/9 '\T1/pcr/m/n/9
  ll only look at first 3 events) and stratify per arm[] 
 [19] (./Rd2.aux) )
@@ -150,7 +150,7 @@ courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr
 are/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/tex
 mf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/t
 ype1/urw/times/utmri8a.pfb>
-Output written on Rd2.pdf (19 pages, 96619 bytes).
+Output written on Rd2.pdf (19 pages, 96546 bytes).
 Transcript written on Rd2.log.
 This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex)
  restricted \write18 enabled.
@@ -226,71 +226,71 @@ Overfull \hbox (24.78088pt too wide) in paragraph at lines 578--578
  []  \T1/pcr/m/n/10 n_bins = "auto", bin_mid = "mean", obs_cols = NULL, sim_col
 s = NULL,[] 
 
-Overfull \hbox (12.78088pt too wide) in paragraph at lines 580--580
- []  \T1/pcr/m/n/10 stratify_color = NULL, pred_corr = FALSE, pred_corr_lower_b
-nd = 0,[] 
+Overfull \hbox (18.78088pt too wide) in paragraph at lines 579--579
+ []  \T1/pcr/m/n/10 software = "auto", show = NULL, stratify = NULL, pred_corr 
+= FALSE,[] 
 
-Overfull \hbox (6.78088pt too wide) in paragraph at lines 581--581
- []  \T1/pcr/m/n/10 pi = c(0.05, 0.95), ci = c(0.05, 0.95), uloq = NULL, lloq =
+Overfull \hbox (0.78088pt too wide) in paragraph at lines 580--580
+ []  \T1/pcr/m/n/10 pred_corr_lower_bnd = 0, pi = c(0.05, 0.95), ci = c(0.05, 0
+.95),[] 
+
+Overfull \hbox (6.78088pt too wide) in paragraph at lines 583--583
+ []  \T1/pcr/m/n/10 smooth = TRUE, vpc_theme = NULL, facet = "wrap", labeller =
  NULL,[] 
-
-Overfull \hbox (12.78088pt too wide) in paragraph at lines 583--583
- []  \T1/pcr/m/n/10 title = NULL, facet_names = TRUE, smooth = TRUE, vpc_theme 
-= NULL,[] 
 
 Overfull \hbox (21.9175pt too wide) in paragraph at lines 608--609
 []\T1/ptm/m/n/10 what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, ob
 s_median, sim_median,
 [13] (/usr/share/texlive/texmf-dist/tex/latex/base/utf8.def)
-Overfull \hbox (0.78088pt too wide) in paragraph at lines 667--667
+Overfull \hbox (0.78088pt too wide) in paragraph at lines 665--665
  []\T1/pcr/m/n/10 vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "je
 nks",[] 
 
-Overfull \hbox (24.78088pt too wide) in paragraph at lines 668--668
+Overfull \hbox (24.78088pt too wide) in paragraph at lines 666--666
  []  \T1/pcr/m/n/10 n_bins = "auto", bin_mid = "mean", obs_cols = NULL, sim_col
 s = NULL,[] 
 
-Overfull \hbox (0.78088pt too wide) in paragraph at lines 669--669
+Overfull \hbox (0.78088pt too wide) in paragraph at lines 667--667
  []  \T1/pcr/m/n/10 software = "auto", show = NULL, ci = c(0.05, 0.95), uloq = 
 NULL,[] 
 
-Overfull \hbox (18.78088pt too wide) in paragraph at lines 670--670
+Overfull \hbox (18.78088pt too wide) in paragraph at lines 668--668
  []  \T1/pcr/m/n/10 lloq = NULL, xlab = NULL, ylab = NULL, title = NULL, smooth
  = TRUE,[] 
 [14] [15] (/usr/share/texlive/texmf-dist/tex/latex/base/utf8.def)
-Overfull \hbox (6.78088pt too wide) in paragraph at lines 745--745
+Overfull \hbox (6.78088pt too wide) in paragraph at lines 746--746
  []\T1/pcr/m/n/10 vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "j
 enks",[] 
 
-Overfull \hbox (24.78088pt too wide) in paragraph at lines 748--748
+Overfull \hbox (24.78088pt too wide) in paragraph at lines 749--749
  []  \T1/pcr/m/n/10 stratify_color = NULL, ci = c(0.05, 0.95), uloq = NULL, llo
 q = NULL,[] 
 
-Overfull \hbox (24.78088pt too wide) in paragraph at lines 749--749
+Overfull \hbox (24.78088pt too wide) in paragraph at lines 750--750
  []  \T1/pcr/m/n/10 plot = FALSE, xlab = NULL, ylab = NULL, title = NULL, smoot
 h = TRUE,[] 
 
-Overfull \hbox (6.78088pt too wide) in paragraph at lines 750--750
- []  \T1/pcr/m/n/10 vpc_theme = NULL, facet = "wrap", vpcdb = FALSE, verbose = 
-FALSE)[] 
+Overfull \hbox (6.78088pt too wide) in paragraph at lines 751--751
+ []  \T1/pcr/m/n/10 vpc_theme = NULL, facet = "wrap", labeller = NULL, vpcdb = 
+FALSE,[] 
 [16] (/usr/share/texlive/texmf-dist/tex/latex/base/utf8.def)
-Overfull \hbox (0.78088pt too wide) in paragraph at lines 823--823
+Overfull \hbox (0.78088pt too wide) in paragraph at lines 827--827
  []  \T1/pcr/m/n/10 rtte_calc_diff = TRUE, events = NULL, bins = FALSE, n_bins 
 = 10,[] 
 
-Overfull \hbox (6.78088pt too wide) in paragraph at lines 824--824
+Overfull \hbox (6.78088pt too wide) in paragraph at lines 828--828
  []  \T1/pcr/m/n/10 software = "auto", obs_cols = NULL, sim_cols = NULL, kmmc =
  NULL,[] 
 
-Overfull \hbox (0.78088pt too wide) in paragraph at lines 827--827
+Overfull \hbox (0.78088pt too wide) in paragraph at lines 831--831
  []  \T1/pcr/m/n/10 show = NULL, as_percentage = TRUE, title = NULL, smooth = F
 ALSE,[] 
 
-Overfull \hbox (6.78088pt too wide) in paragraph at lines 828--828
- []  \T1/pcr/m/n/10 vpc_theme = NULL, facet = "wrap", verbose = FALSE, vpcdb = 
-FALSE)[] 
+Overfull \hbox (18.78088pt too wide) in paragraph at lines 832--832
+ []  \T1/pcr/m/n/10 vpc_theme = NULL, facet = "wrap", labeller = NULL, verbose 
+= FALSE,[] 
 [17] [18]
-Overfull \hbox (69.18036pt too wide) in paragraph at lines 918--918
+Overfull \hbox (69.18036pt too wide) in paragraph at lines 925--925
  []\T1/pcr/m/n/9 # stratified per event number (we\TS1/pcr/m/n/9 '\T1/pcr/m/n/9
  ll only look at first 3 events) and stratify per arm[] 
 [19] (./Rd2.aux) )
@@ -301,8 +301,8 @@ courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr
 are/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/tex
 mf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/t
 ype1/urw/times/utmri8a.pfb>
-Output written on Rd2.pdf (19 pages, 97918 bytes).
+Output written on Rd2.pdf (19 pages, 97930 bytes).
 Transcript written on Rd2.log.
 Saving output to ‘vpc-manual.pdf’ ...
 Done
-You may want to clean up by 'rm -rf /tmp/RtmpC7zHdY/Rd2pdf5881172709e1'
+You may want to clean up by 'rm -rf /tmp/RtmpBtbPlc/Rd2pdf57eace4bda4'

@@ -578,12 +578,12 @@ Creates a VPC plot from observed and simulation data
 \begin{verbatim}
 vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   n_bins = "auto", bin_mid = "mean", obs_cols = NULL, sim_cols = NULL,
-  software = "auto", show = NULL, stratify = NULL,
-  stratify_color = NULL, pred_corr = FALSE, pred_corr_lower_bnd = 0,
-  pi = c(0.05, 0.95), ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
-  log_y = FALSE, log_y_min = 0.001, xlab = NULL, ylab = NULL,
-  title = NULL, facet_names = TRUE, smooth = TRUE, vpc_theme = NULL,
-  facet = "wrap", vpcdb = FALSE, verbose = FALSE)
+  software = "auto", show = NULL, stratify = NULL, pred_corr = FALSE,
+  pred_corr_lower_bnd = 0, pi = c(0.05, 0.95), ci = c(0.05, 0.95),
+  uloq = NULL, lloq = NULL, log_y = FALSE, log_y_min = 0.001,
+  xlab = NULL, ylab = NULL, title = NULL, facet_names = TRUE,
+  smooth = TRUE, vpc_theme = NULL, facet = "wrap", labeller = NULL,
+  vpcdb = FALSE, verbose = FALSE)
 \end{verbatim}
 \end{Usage}
 %
@@ -611,8 +611,6 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item[\code{stratify}] character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 
-\item[\code{stratify\_color}] variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
-
 \item[\code{pred\_corr}] perform prediction-correction?
 
 \item[\code{pred\_corr\_lower\_bnd}] lower bound for the prediction-correction
@@ -635,13 +633,13 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item[\code{title}] title
 
-\item[\code{facet\_names}] show facet names (e.g. "SEX=1" when TRUE) or just the value of the facet
-
 \item[\code{smooth}] "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 
 \item[\code{vpc\_theme}] theme to be used in VPC. Expects list of class vpc\_theme created with function vpc\_theme()
 
 \item[\code{facet}] either "wrap", "columns", or "rows"
+
+\item[\code{labeller}] ggplot2 labeller function to be passed to underlying ggplot object
 
 \item[\code{vpcdb}] Boolean whether to return the underlying vpcdb rather than the plot
 
@@ -671,7 +669,8 @@ vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   software = "auto", show = NULL, ci = c(0.05, 0.95), uloq = NULL,
   lloq = NULL, xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
   stratify = NULL, stratify_color = NULL, vpc_theme = NULL,
-  facet = "wrap", plot = TRUE, vpcdb = FALSE, verbose = FALSE)
+  facet = "wrap", labeller = NULL, plot = TRUE, vpcdb = FALSE,
+  verbose = FALSE)
 \end{verbatim}
 \end{Usage}
 %
@@ -719,6 +718,8 @@ vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item[\code{facet}] either "wrap", "columns", or "rows"
 
+\item[\code{labeller}] ggplot2 labeller function to be passed to underlying ggplot object
+
 \item[\code{plot}] Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.
 
 \item[\code{vpcdb}] boolean whether to return the underlying vpcdb rather than the plot
@@ -749,7 +750,8 @@ vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   software = "auto", show = NULL, stratify = NULL,
   stratify_color = NULL, ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
   plot = FALSE, xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
-  vpc_theme = NULL, facet = "wrap", vpcdb = FALSE, verbose = FALSE)
+  vpc_theme = NULL, facet = "wrap", labeller = NULL, vpcdb = FALSE,
+  verbose = FALSE)
 \end{verbatim}
 \end{Usage}
 %
@@ -799,6 +801,8 @@ vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item[\code{facet}] either "wrap", "columns", or "rows"
 
+\item[\code{labeller}] ggplot2 labeller function to be passed to underlying ggplot object
+
 \item[\code{vpcdb}] boolean whether to return the underlying vpcdb rather than the plot
 
 \item[\code{verbose}] show debugging information (TRUE or FALSE)
@@ -827,7 +831,8 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
   reverse_prob = FALSE, stratify = NULL, stratify_color = NULL,
   ci = c(0.05, 0.95), plot = FALSE, xlab = NULL, ylab = NULL,
   show = NULL, as_percentage = TRUE, title = NULL, smooth = FALSE,
-  vpc_theme = NULL, facet = "wrap", verbose = FALSE, vpcdb = FALSE)
+  vpc_theme = NULL, facet = "wrap", labeller = NULL, verbose = FALSE,
+  vpcdb = FALSE)
 \end{verbatim}
 \end{Usage}
 %
@@ -882,6 +887,8 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
 \item[\code{vpc\_theme}] theme to be used in VPC. Expects list of class vpc\_theme created with function vpc\_theme()
 
 \item[\code{facet}] either "wrap", "columns", or "rows"
+
+\item[\code{labeller}] ggplot2 labeller function to be passed to underlying ggplot object
 
 \item[\code{verbose}] TRUE or FALSE (default)
 

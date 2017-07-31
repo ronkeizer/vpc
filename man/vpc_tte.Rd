@@ -10,7 +10,8 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
   reverse_prob = FALSE, stratify = NULL, stratify_color = NULL,
   ci = c(0.05, 0.95), plot = FALSE, xlab = NULL, ylab = NULL,
   show = NULL, as_percentage = TRUE, title = NULL, smooth = FALSE,
-  vpc_theme = NULL, facet = "wrap", verbose = FALSE, vpcdb = FALSE)
+  vpc_theme = NULL, facet = "wrap", labeller = NULL, verbose = FALSE,
+  vpcdb = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -62,6 +63,8 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
 \item{vpc_theme}{theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()}
 
 \item{facet}{either "wrap", "columns", or "rows"}
+
+\item{labeller}{ggplot2 labeller function to be passed to underlying ggplot object}
 
 \item{verbose}{TRUE or FALSE (default)}
 
