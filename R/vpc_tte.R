@@ -15,8 +15,7 @@
 #' @param kmmc either NULL (for regular TTE vpc, default), or a variable name for a KMMC plot (e.g. "WT")
 #' @param events numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events.
 #' @param reverse_prob reverse the probability scale (i.e. plot 1-probability)
-#' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied. If stratify_color is also specified, only 1 additional stratification can be specified.
-#' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
+#' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied. 
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.
 #' @param as_percentage Show y-scale from 0-100 percent? TRUE by default, if FALSE then scale from 0-1.
@@ -26,6 +25,7 @@
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param facet either "wrap", "columns", or "rows"
+#' @param labeller ggplot2 labeller function to be passed to underlying ggplot object
 #' @param verbose TRUE or FALSE (default)
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
 #' @return a list containing calculated VPC information, and a ggplot2 object
@@ -70,7 +70,6 @@ vpc_tte <- function(sim = NULL,
                     kmmc = NULL,
                     reverse_prob = FALSE,
                     stratify = NULL,
-                    stratify_color = NULL,
                     ci = c(0.05, 0.95),
                     plot = FALSE,
                     xlab = NULL,
@@ -81,6 +80,7 @@ vpc_tte <- function(sim = NULL,
                     smooth = FALSE,
                     vpc_theme = NULL,
                     facet = "wrap",
+                    labeller = NULL,
                     verbose = FALSE,
                     vpcdb = FALSE) {
   if(is.null(obs) & is.null(sim)) {
@@ -127,14 +127,6 @@ vpc_tte <- function(sim = NULL,
       check_stratification_columns_available(sim, stratify, "simulation")
     }
   }
-  if(!is.null(stratify_color)) {
-    if(!is.null(obs)) {
-      check_stratification_columns_available(obs, stratify_color, "observation")
-    }
-    if(!is.null(obs)) {
-      check_stratification_columns_available(sim, stratify_color, "simulation")
-    }
-  }
 
   ## redefine strat column in case of "strat"
   if(!is.null(stratify) && !is.null(obs)) {
@@ -145,16 +137,6 @@ vpc_tte <- function(sim = NULL,
         sim$strat_orig = sim$strat
       }
       stratify <- "strat_orig"
-    }
-  }
-  if(!is.null(stratify_color)) {
-    if(stratify_color == "strat") {
-      if(!is.null(obs)) {
-        obs$strat_orig = obs$strat
-      } else if (!is.null(sim)) {
-        sim$strat_orig = sim$strat
-      }
-      stratify_color <- "strat_orig"
     }
   }
 
@@ -179,18 +161,6 @@ vpc_tte <- function(sim = NULL,
 
   ## stratification
   stratify_original <- stratify
-  if(!is.null(stratify_color)) {
-    if (is.null(stratify)) {
-      stratify <- stratify_color
-    }
-    if (length(stratify_color) > 1) {
-      stop("Error: please specify only 1 stratification variable for color!")
-    }
-    if (!stratify_color %in% stratify) {
-      stratify_original <- stratify
-      stratify <- c(stratify, stratify_color)
-    }
-  }
   if(!is.null(stratify)) {
     if(rtte) {
       if (length(stratify) > 1) {
@@ -421,24 +391,8 @@ vpc_tte <- function(sim = NULL,
       }
     }
   }
-  if (!is.null(sim)) {
-    if (!is.null(stratify_color)) {
-      if (length(stratify) == 2) {
-        sim_km$strat_color <- sim_km$strat2
-      } else {
-        sim_km$strat_color <- sim_km$strat
-      }
-    }
-  }
 
   if (!is.null(obs)) {
-    if(!is.null(stratify_color)) {
-      if (length(stratify) == 2) {
-        obs_km$strat_color <- obs_km$strat2
-      } else {
-        obs_km$strat_color <- obs_km$strat
-      }
-    }
     if (show$obs_cens) {
       if(nrow(cens_dat)>0) {
         cens_dat$y <- 1
@@ -473,9 +427,9 @@ vpc_tte <- function(sim = NULL,
                  all = all,
                  stratify = stratify,
                  stratify_original = stratify_original,
-                 stratify_color = stratify_color,
                  bins = bins,
                  facet = facet,
+                 labeller = labeller,
                  kmmc = kmmc,
                  cens_dat = cens_dat,
                  rtte = rtte,

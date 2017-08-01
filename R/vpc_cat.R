@@ -12,8 +12,6 @@
 #' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param show what to show in VPC (obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
 #' @param software name of software platform using (eg nonmem, phoenix)
-#' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
-#' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.
 #' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.
@@ -24,6 +22,7 @@
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param facet either "wrap", "columns", or "rows"
+#' @param labeller ggplot2 labeller function to be passed to underlying ggplot object
 #' @param vpcdb boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
@@ -46,10 +45,9 @@ vpc_cat  <- function(sim = NULL,
                      ylab = NULL,
                      title = NULL,
                      smooth = TRUE,
-                     stratify = NULL,
-                     stratify_color = NULL,
                      vpc_theme = NULL,
                      facet = "wrap",
+                     labeller = NULL,
                      plot = TRUE,
                      vpcdb = FALSE,
                      verbose = FALSE) {
@@ -74,24 +72,6 @@ vpc_cat  <- function(sim = NULL,
 
   ## define what to show in plot
   show <- replace_list_elements(show_default, show)
-
-  ## checking whether stratification columns are available
-  if(!is.null(stratify)) {
-    if(!is.null(obs)) {
-      check_stratification_columns_available(obs, stratify, "observation")
-    }
-    if(!is.null(sim)) {
-      check_stratification_columns_available(sim, stratify, "simulation")
-    }
-  }
-  if(!is.null(stratify_color)) {
-    if(!is.null(obs)) {
-      check_stratification_columns_available(obs, stratify_color, "observation")
-    }
-    if(!is.null(obs)) {
-      check_stratification_columns_available(sim, stratify_color, "simulation")
-    }
-  }
 
   ## define column names
   cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
@@ -204,13 +184,13 @@ vpc_cat  <- function(sim = NULL,
   show$pi = FALSE
   vpc_db <- list(sim = sim,
                  vpc_dat = vpc_dat,
-                 stratify = "strat",
+                 stratify = "strat", # the stratification is the various categories!
                  stratify_original = "strat",
-                 stratify_color = NULL,
                  aggr_obs = aggr_obs,
                  obs = obs,
                  bins = bins,
                  facet = facet,
+                 labeller = labeller,
                  type = "categorical")
   if(vpcdb) {
     return(vpc_db)

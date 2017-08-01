@@ -8,7 +8,7 @@ add_stratification <- function (dat, strat, verbose = FALSE) {
         if(i > 1) { 
           dat$strat <- paste0(dat$strat, ", ")
         }
-        dat$strat <- paste0(dat$strat, strat[i], "=", data.frame(dat)[,strat[i]])
+        dat$strat <- paste0(dat$strat, data.frame(dat)[,strat[i]])
       }      
     } else {
       dat$strat <- 1      
