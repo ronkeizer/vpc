@@ -23,7 +23,7 @@ auto_bin <- function (dat, type="kmeans", n_bins = 8, verbose = FALSE) {
       if(class(n_bins) != "numeric" | is.null(n_bins)) {
         bins <- classInt::classIntervals(dat[["idv"]], style = type)                
       } else {
-        bins <- classInt::classIntervals(dat[["idv"]], n = n_bins-1, style = type)        
+        bins <- classInt::classIntervals(dat[["idv"]], n = n_bins, style = type)        
       }      
     })
     return(bins$brks)      
