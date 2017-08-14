@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .DS_Store
+..Rcheck
 inst/doc
 *.sublime-workspace
 *.sublime-project
