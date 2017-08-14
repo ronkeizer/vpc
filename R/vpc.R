@@ -285,7 +285,7 @@ vpc <- function(sim = NULL,
     }
   }
   # data combined and handed off to separate plotting function
-  if(verbose) {
+  if(verbose & !vpcdb) {
     message("Creating plot...")
   }
   vpc_db <- list(sim = sim,
