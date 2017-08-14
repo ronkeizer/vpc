@@ -198,7 +198,7 @@ vpc_tte <- function(sim = NULL,
       colnames(obs)[match("cens", tolower(colnames(obs)))] <- "cens"
       obs[obs$cens == 1,]$dv <- 0
     }
-    if (rtte) {
+    if(rtte) {
       if(rtte_calc_diff) {
         obs <- relative_times(obs)
       }
@@ -352,7 +352,7 @@ vpc_tte <- function(sim = NULL,
 
   if (rtte) {
     if(!is.null(sim)) {
-      sim_km$rtte <- as.num(gsub(".*rtte=(\\d.*).*", "\\1", sim_km$strat, perl = TRUE))
+      sim_km$rtte <- as.num(gsub(".*, (\\d)", "\\1", sim_km$strat, perl = TRUE))
       if (!is.null(events)) {
         sim_km <- sim_km %>%
           dplyr::filter(rtte %in% events)
@@ -361,7 +361,7 @@ vpc_tte <- function(sim = NULL,
       }
     }
     if(!is.null(obs)) {
-      obs_km$rtte <- as.num(gsub(".*rtte=(\\d.*).*", "\\1", obs_km$strat, perl = TRUE))
+      obs_km$rtte <- as.num(gsub(".*, (\\d)", "\\1", obs_km$strat, perl = TRUE))
       if (!is.null(events)) {
         obs_km <- obs_km %>%
           dplyr::filter(rtte %in% events)

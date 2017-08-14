@@ -21,13 +21,12 @@ plot_vpc <- function(db,
                      xlab = "Time",
                      ylab = "Dependent value",
                      verbose = FALSE) {
-  show <- replace_list_elements(show_default, show)
   if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
     vpc_theme <- new_vpc_theme()
   }
 
   if(db$type != "time-to-event") {
-    
+    show <- replace_list_elements(show_default, show)
     if(!is.null(db$stratify)) {
       ## rename "strat" to original stratification variable names
       if(length(db$stratify) == 1) {
@@ -165,15 +164,17 @@ plot_vpc <- function(db,
     ################################################################
     ## VPC for time-to-event data
     ################################################################
-
-    if(!is.null(db$stratify)) {
+    
+    show <- replace_list_elements(show_default_tte, show)
+    if(!is.null(db$stratify_original)) {
       ## rename "strat" to original stratification variable names
-      if(length(db$stratify) == 1) {
-        if(!is.null(db$obs_km)) colnames(db$obs_km)[match("strat", colnames(db$obs_km))] <- db$stratify[1]
-        if(!is.null(db$sim_km)) colnames(db$sim_km)[match("strat", colnames(db$sim_km))] <- db$stratify[1]
-        if(!is.null(db$all)) colnames(db$all)[match("strat", colnames(db$all))] <- db$stratify[1]
+      if(length(db$stratify_original) == 1) {
+        # "strat1" ==> "rtte"
+        if(!is.null(db$obs_km)) colnames(db$obs_km)[match("strat1", colnames(db$obs_km))] <- db$stratify[1]
+        if(!is.null(db$sim_km)) colnames(db$sim_km)[match("strat1", colnames(db$sim_km))] <- db$stratify[1]
+        if(!is.null(db$all)) colnames(db$all)[match("strat1", colnames(db$all))] <- db$stratify[1]
       } 
-      if(length(db$stratify) == 2) {
+      if(length(db$stratify_original) == 2) {
         if(!is.null(db$obs_km)) {
           colnames(db$obs_km)[match("strat1", colnames(db$obs_km))] <- db$stratify[1]
           colnames(db$obs_km)[match("strat2", colnames(db$obs_km))] <- db$stratify[2]
@@ -186,7 +187,7 @@ plot_vpc <- function(db,
           colnames(db$all)[match("strat1", colnames(db$all))] <- db$stratify[1]
           colnames(db$all)[match("strat2", colnames(db$all))] <- db$stratify[2]
         }  
-    }
+      }
     }
 
     show$pi_as_area <- TRUE
@@ -210,7 +211,7 @@ plot_vpc <- function(db,
     if(!is.null(db$cens_dat) && nrow(db$cens_dat)>0) {
       pl <- pl + ggplot2::geom_point(data=db$cens_dat, ggplot2::aes(x=time, y=y), shape="|", size=2.5)
     }
-    if (show$sim_median) {
+    if(show$sim_median) {
       if (smooth) {
         geom_line_custom <- ggplot2::geom_line
       } else {
@@ -231,9 +232,10 @@ plot_vpc <- function(db,
       msg("Warning: some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).", verbose)
       pl <- pl + ggplot2::geom_step(data = db$obs_km, ggplot2::aes(x=time, y=surv, group=strat), size=.8)
     }
+    
     if(!is.null(db$stratify)) {
       if(is.null(db$labeller)) db$labeller <- ggplot2::label_both
-      if (length(db$stratify) == 1 | db$rtte) {
+      if (length(db$stratify_original) == 1 | db$rtte) {
         if (db$facet == "wrap") {
           pl <- pl + ggplot2::facet_wrap(reformulate(db$stratify[1], NULL), 
                                          labeller = db$labeller)
@@ -279,7 +281,7 @@ plot_vpc <- function(db,
         ylab <- paste0("Mean (", db$kmmc, ")")
       }
     }
-    pl <- pl + theme_plain()
+    # pl <- pl + theme_plain()
     return(pl)
   }
 }
