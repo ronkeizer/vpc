@@ -1,4 +1,4 @@
-.Rproj.user
+B.Rproj.user
 .Rhistory
 .RData
 .DS_Store
@@ -8,3 +8,4 @@ inst/doc
 *.sublime-project
 ._.DS_Store
 .DS_Store
+.Rproj.user

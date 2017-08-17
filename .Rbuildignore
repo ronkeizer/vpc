@@ -3,6 +3,3 @@
 .travis.yml
 .DS_Store
 misc
-
-simple_data
-save(simple_data, file='data/simple_data.rda', compress='xz')
