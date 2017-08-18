@@ -89,9 +89,9 @@ vpc <- function(sim = NULL,
   }
   if(!is.null(facet)) {
     if(! facet %in% c("wrap", "grid", "columns", "rows")) {
-      stop("`facet` argument needs to be one of `wrap`, `columns`, or `rows`.")      
+      stop("`facet` argument needs to be one of `wrap`, `columns`, or `rows`.")
     }
-    if(facet == "grid") facet <- "rows" 
+    if(facet == "grid") facet <- "rows"
   }
 
   ## software specific parsing, if necessary
@@ -153,6 +153,7 @@ vpc <- function(sim = NULL,
     sim <- format_vpc_input_data(sim, cols$sim, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated", verbose)
   }
 
+  labeled_bins <- bins[1] == "percentiles"
   if (class(bins) != "numeric") {
     if(!is.null(obs)) {
       bins <- auto_bin(obs, bins, n_bins)
@@ -168,10 +169,10 @@ vpc <- function(sim = NULL,
     message(paste0("Binning: ", paste(bins, collapse=' ')))
   }
   if(!is.null(obs)) {
-    obs <- bin_data(obs, bins, "idv")
+    obs <- bin_data(obs, bins, "idv", labeled = labeled_bins)
   }
   if(!is.null(sim)) {
-    sim <- bin_data(sim, bins, "idv")
+    sim <- bin_data(sim, bins, "idv", labeled = labeled_bins)
   }
   if (pred_corr) {
     if (!is.null(obs) & !cols$obs$pred %in% names(obs)) {
@@ -309,8 +310,8 @@ vpc <- function(sim = NULL,
   if(vpcdb) {
     return(vpc_db)
   } else {
-    pl <- plot_vpc(vpc_db, 
-                   show = show, 
+    pl <- plot_vpc(vpc_db,
+                   show = show,
                    vpc_theme = vpc_theme,
                    smooth = smooth,
                    log_y = log_y,

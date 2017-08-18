@@ -4,7 +4,7 @@
 \alias{bin_data}
 \title{Function to bin data based on a vector of bin separators, e.g. for use in VPC}
 \usage{
-bin_data(x, bins = c(0, 3, 5, 7), idv = "time")
+bin_data(x, bins = c(0, 3, 5, 7), idv = "time", labeled = F)
 }
 \arguments{
 \item{x}{data}
@@ -12,6 +12,8 @@ bin_data(x, bins = c(0, 3, 5, 7), idv = "time")
 \item{bins}{numeric vector specifying bin separators}
 
 \item{idv}{variable in the data specifies the independent variable (e.g. "time")}
+
+\item{labeled}{whether a labeled factor instead of integers should be returned}
 }
 \description{
 Function to bin data based on a vector of bin separators, e.g. for use in VPC

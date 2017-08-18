@@ -24,7 +24,7 @@ plot_vpc <- function(db,
   if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
     vpc_theme <- new_vpc_theme()
   }
-
+  idv_as_factor <- is.factor(db$vpc_dat$bin)
   if(db$type != "time-to-event") {
     show <- replace_list_elements(show_default, show)
     if(!is.null(db$stratify)) {
@@ -32,7 +32,7 @@ plot_vpc <- function(db,
       if(length(db$stratify) == 1) {
         if(!is.null(db$aggr_obs)) colnames(db$aggr_obs)[match("strat", colnames(db$aggr_obs))] <- db$stratify[1]
         if(!is.null(db$vpc_dat)) colnames(db$vpc_dat)[match("strat", colnames(db$vpc_dat))] <- db$stratify[1]
-      } 
+      }
       if(length(db$stratify) == 2) {
         if(!is.null(db$aggr_obs)) {
           colnames(db$aggr_obs)[match("strat1", colnames(db$aggr_obs))] <- db$stratify[1]
@@ -44,7 +44,7 @@ plot_vpc <- function(db,
         }
       }
     }
-    
+
     ################################################################
     ## VPC for continous, censored or categorical
     ## note: for now, tte-vpc is separated off, but need to unify
@@ -52,7 +52,8 @@ plot_vpc <- function(db,
     ################################################################
 
     if (!is.null(db$sim)) {
-      pl <- ggplot2::ggplot(db$vpc_dat, ggplot2::aes(x=bin_mid))
+      if(idv_as_factor) db$vpc_dat$bin_mid <- db$vpc_dat$bin
+      pl <- ggplot2::ggplot(db$vpc_dat, ggplot2::aes(x=bin_mid, group=1))
       if(show$sim_median) {
         pl <- pl + ggplot2::geom_line(ggplot2::aes(y=q50.med), colour=vpc_theme$sim_median_color, linetype=vpc_theme$sim_median_linetype, size=vpc_theme$sim_median_size)
       }
@@ -95,7 +96,8 @@ plot_vpc <- function(db,
       pl <- ggplot2::ggplot(db$aggr_obs)
     }
     if(!is.null(db$obs)) {
-      if(show$obs_median) {
+      if(idv_as_factor) db$aggr_obs$bin_mid <- db$aggr_obs$bin
+      if (show$obs_median) {
         pl <- pl +
           ggplot2::geom_line(data=db$aggr_obs, ggplot2::aes(x=bin_mid, y=obs50), linetype=vpc_theme$obs_median_linetype, colour=vpc_theme$obs_median_color, size=vpc_theme$obs_median_size)
       }
@@ -109,13 +111,14 @@ plot_vpc <- function(db,
       }
     }
     bdat <- data.frame(cbind(x=db$bins, y=NA))
-    if(show$bin_sep) {
+    if(show$bin_sep && !idv_as_factor) {
       pl <- pl +
         ggplot2::geom_rug(data=bdat, sides = "t", ggplot2::aes(x = x, y=y), colour=vpc_theme$bin_separators_color)
     }
     pl <- pl + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
     if (log_x) {
-      pl <- pl + ggplot2::scale_x_log10()
+      if(!idv_as_factor) pl <- pl + ggplot2::scale_x_log10()
+      else warning("log_x option has no effect when the IDV is a factor ")
     }
     if (log_y) {
       pl <- pl + ggplot2::scale_y_log10()
@@ -124,24 +127,24 @@ plot_vpc <- function(db,
       if(length(db$stratify) == 1) {
         if(is.null(db$labeller)) db$labeller <- ggplot2::label_both
         if (db$facet == "wrap") {
-          pl <- pl + ggplot2::facet_wrap(reformulate(db$stratify[1], NULL), 
+          pl <- pl + ggplot2::facet_wrap(reformulate(db$stratify[1], NULL),
                                          labeller = db$labeller)
         } else {
           if(length(grep("row", db$facet))>0) {
-            pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[1], NULL), 
+            pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[1], NULL),
                                            labeller = db$labeller)
           } else {
-            pl <- pl + ggplot2::facet_grid(reformulate(".", db$stratify[1]), 
+            pl <- pl + ggplot2::facet_grid(reformulate(".", db$stratify[1]),
                                            labeller = db$labeller)
           }
         }
       } else { # 2 grid-stratification
         if (db$stratify[1] %in% c(colnames(db$vpc_dat), colnames(db$aggr_obs))) {
           if(length(grep("row", db$facet))>0) {
-            pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[1], db$stratify[2]), 
+            pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[1], db$stratify[2]),
                                            labeller = db$labeller)
           } else {
-            pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[2], db$stratify[1]), 
+            pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[2], db$stratify[1]),
                                            labeller = db$labeller)
           }
         } else { # only color stratification
@@ -160,11 +163,11 @@ plot_vpc <- function(db,
     return(pl)
 
   } else {
-    
+
     ################################################################
     ## VPC for time-to-event data
     ################################################################
-    
+
     show <- replace_list_elements(show_default_tte, show)
     if(!is.null(db$stratify_original)) {
       ## rename "strat" to original stratification variable names
@@ -173,7 +176,7 @@ plot_vpc <- function(db,
         if(!is.null(db$obs_km)) colnames(db$obs_km)[match("strat1", colnames(db$obs_km))] <- db$stratify[1]
         if(!is.null(db$sim_km)) colnames(db$sim_km)[match("strat1", colnames(db$sim_km))] <- db$stratify[1]
         if(!is.null(db$all)) colnames(db$all)[match("strat1", colnames(db$all))] <- db$stratify[1]
-      } 
+      }
       if(length(db$stratify_original) == 2) {
         if(!is.null(db$obs_km)) {
           colnames(db$obs_km)[match("strat1", colnames(db$obs_km))] <- db$stratify[1]
@@ -186,7 +189,7 @@ plot_vpc <- function(db,
         if(!is.null(db$all)) {
           colnames(db$all)[match("strat1", colnames(db$all))] <- db$stratify[1]
           colnames(db$all)[match("strat2", colnames(db$all))] <- db$stratify[2]
-        }  
+        }
       }
     }
 
@@ -232,28 +235,28 @@ plot_vpc <- function(db,
       msg("Warning: some strata in the observed data had zero or one observations, using line instead of step plot. Consider using less strata (e.g. using the 'events' argument).", verbose)
       pl <- pl + ggplot2::geom_step(data = db$obs_km, ggplot2::aes(x=time, y=surv, group=strat), size=.8)
     }
-    
+
     if(!is.null(db$stratify)) {
       if(is.null(db$labeller)) db$labeller <- ggplot2::label_both
       if (length(db$stratify_original) == 1 | db$rtte) {
         if (db$facet == "wrap") {
-          pl <- pl + ggplot2::facet_wrap(reformulate(db$stratify[1], NULL), 
+          pl <- pl + ggplot2::facet_wrap(reformulate(db$stratify[1], NULL),
                                          labeller = db$labeller)
         } else {
           if(length(grep("row", db$facet))>0) {
-            pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[1], NULL), 
+            pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[1], NULL),
                                            labeller = db$labeller)
           } else {
-            pl <- pl + ggplot2::facet_grid(reformulate(".", db$stratify[1]), 
+            pl <- pl + ggplot2::facet_grid(reformulate(".", db$stratify[1]),
                                            labeller = db$labeller)
           }
         }
       } else {
         if(length(grep("row", db$facet))>0) {
-          pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[1], db$stratify[2]), 
+          pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[1], db$stratify[2]),
                                          labeller = db$labeller)
         } else {
-          pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[2], db$stratify[1]), 
+          pl <- pl + ggplot2::facet_grid(reformulate(db$stratify[2], db$stratify[1]),
                                          labeller = db$labeller)
         }
       }
