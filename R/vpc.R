@@ -54,7 +54,6 @@ vpc <- function(sim = NULL,
                 xlab = NULL,
                 ylab = NULL,
                 title = NULL,
-                facet_names = TRUE,
                 smooth = TRUE,
                 vpc_theme = NULL,
                 facet = "wrap",
@@ -298,14 +297,6 @@ vpc <- function(sim = NULL,
                  facet = facet,
                  labeller = labeller,
                  type = "continuous")
-  if(facet_names == FALSE) {
-    datasets <- c("vpc_dat", "obs", "sim", "aggr_obs")
-    for(i in seq(datasets)) {
-      for(j in seq(vpc_db$stratify)) {
-        vpc_db[[datasets[i]]]$strat <- as.factor(gsub(paste0(vpc_db$stratify[j],"="), "", vpc_db[[datasets[i]]]$strat))
-      }
-    }
-  }
   if(vpcdb) {
     return(vpc_db)
   } else {
