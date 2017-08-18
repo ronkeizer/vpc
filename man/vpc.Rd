@@ -9,9 +9,9 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   software = "auto", show = NULL, stratify = NULL, pred_corr = FALSE,
   pred_corr_lower_bnd = 0, pi = c(0.05, 0.95), ci = c(0.05, 0.95),
   uloq = NULL, lloq = NULL, log_y = FALSE, log_y_min = 0.001,
-  xlab = NULL, ylab = NULL, title = NULL, facet_names = TRUE,
-  smooth = TRUE, vpc_theme = NULL, facet = "wrap", labeller = NULL,
-  vpcdb = FALSE, verbose = FALSE)
+  xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
+  vpc_theme = NULL, facet = "wrap", labeller = NULL, vpcdb = FALSE,
+  verbose = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
