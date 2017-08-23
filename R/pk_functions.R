@@ -9,9 +9,9 @@
 #' @param ruv Residual variability
 #' @return A vector of predicted values, with or without added residual variability
 #' @examples 
-#' dat1 <- pk_oral_1cmt(t = c(0:72), tau = 24, dose = 120, 
+#' dat1 <- vpc:::pk_oral_1cmt(t = c(0:72), tau = 24, dose = 120, 
 #'                      ka = 1, ke = 1, cl = 10)
-#' dat2 <- pk_oral_1cmt(t = c(0:72), tau = 24, dose = 120, 
+#' dat2 <- vpc:::pk_oral_1cmt(t = c(0:72), tau = 24, dose = 120, 
 #'                      ka = 1, ke = 1, cl = 10, 
 #'                      ruv = list(proportional = 0.1, additive = 0.1))
 pk_oral_1cmt <- function (t, tau = 24, dose=120, ka = 1, ke = 1, cl = 10, ruv = NULL) {
@@ -34,9 +34,9 @@ pk_oral_1cmt <- function (t, tau = 24, dose=120, ka = 1, ke = 1, cl = 10, ruv = 
 #' @param ruv Residual variability
 #' @return A vector of predicted values, with or without added residual variability
 #' @examples
-#' dat1 <- pk_iv_1cmt(t = c(0:72), tau = 24, dose = 120, 
+#' dat1 <- vpc:::pk_iv_1cmt(t = c(0:72), tau = 24, dose = 120, 
 #'                    CL = 5, Vc = 50)
-#' dat2 <- pk_iv_1cmt(t = c(0:72), tau = 24, dose = 120, 
+#' dat2 <- vpc:::pk_iv_1cmt(t = c(0:72), tau = 24, dose = 120, 
 #'                    CL = 5, Vc = 50, 
 #'                    ruv = list(proportional = 0.1, additive = 0.1))
 pk_iv_1cmt <- function (t, t_inf = 1, tau = 24, dose=120, CL = 0.345, Vc = 1.75, ruv = NULL) {

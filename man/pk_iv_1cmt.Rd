@@ -29,9 +29,9 @@ A vector of predicted values, with or without added residual variability
 Simulate PK data from a 1-compartment iv model
 }
 \examples{
-dat1 <- pk_iv_1cmt(t = c(0:72), tau = 24, dose = 120, 
+dat1 <- vpc:::pk_iv_1cmt(t = c(0:72), tau = 24, dose = 120, 
                    CL = 5, Vc = 50)
-dat2 <- pk_iv_1cmt(t = c(0:72), tau = 24, dose = 120, 
+dat2 <- vpc:::pk_iv_1cmt(t = c(0:72), tau = 24, dose = 120, 
                    CL = 5, Vc = 50, 
                    ruv = list(proportional = 0.1, additive = 0.1))
 }
