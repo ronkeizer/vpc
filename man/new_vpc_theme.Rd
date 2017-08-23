@@ -40,3 +40,14 @@ This function creates a theme that customizes how the VPC looks, i.e. colors, fi
  \item{bin_separators_location}: {where to plot bin separators ("t" for top, "b" for bottom)}
 }
 }
+\examples{
+theme1 <- new_vpc_theme(update = list(
+  obs_color = "red",
+  obs_ci_color = "#aa0000",
+  obs_alpha = .3,
+  sim_pi_fill = "#cc8833",
+  sim_pi_size = 2
+))
+vpc(simple_data$sim, simple_data$obs, vpc_theme = theme1)
+
+}

@@ -2,10 +2,14 @@
 % Please edit documentation in R/themes.R
 \name{theme_plain}
 \alias{theme_plain}
-\title{Nicer default theme for ggplot2}
+\title{A nicer default theme for ggplot2}
 \usage{
 theme_plain()
 }
 \description{
-Nicer default theme for ggplot2
+A nicer default theme for ggplot2
+}
+\examples{
+vpc(simple_data$sim, simple_data$obs) + theme_plain()
+
 }

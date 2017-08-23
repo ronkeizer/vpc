@@ -2,7 +2,6 @@
 #' 
 #' @description Convert the lower triangle of a covariance matrix to a full matrix object
 #' @param vect the lower triangle of a covariance matrix
-#' @export
 triangle_to_full <- function (vect) {
   for (i in 1:100) { # find the size of the matrix
     if (length(vect) == add_recurs(0,0,i)) {

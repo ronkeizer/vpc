@@ -30,5 +30,11 @@ plot_vpc(db, show = NULL, vpc_theme = NULL, smooth = TRUE,
 \item{verbose}{verbosity (T/F)}
 }
 \description{
-VPC plotting function
+This function performs no parsing of data, it just plots the already calculated statistics generated using one of the 
+`vpc` functions.
+}
+\examples{
+library(vpc)
+vpc_db <- vpc(sim = simple_data$sim, obs = simple_data$obs, vpcdb = TRUE)
+plot_vpc(vpc_db, title = "My new vpc", x = "Custom x label")
 }

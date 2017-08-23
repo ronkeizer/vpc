@@ -7,7 +7,7 @@
 draw_params_mvr(ids, n_sim, theta, omega_mat, par_names = NULL)
 }
 \arguments{
-\item{ids}{vector of ids}
+\item{ids}{vector of id numbers}
 
 \item{n_sim}{number of simulations}
 

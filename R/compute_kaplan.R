@@ -1,3 +1,9 @@
+#' Compute Kaplan-Meier statistics
+#' 
+#' @param dat data.frame with events
+#' @param strat vector of stratification variables
+#' @param reverse_prob reverse the probability (i.e. return `1-probability`)?
+#' @param ci confidence interval to calculate, numeric vector of length 2
 compute_kaplan <- function(dat, strat = "strat", reverse_prob = FALSE, ci = NULL) {
     if(length(dat[[strat]]) == 0) {
       dat$strat <- 1

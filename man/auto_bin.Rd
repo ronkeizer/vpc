@@ -19,11 +19,5 @@ auto_bin(dat, type = "kmeans", n_bins = 8, verbose = FALSE)
 A vector of bin separators
 }
 \description{
-Calculate appropriate bin separators for vpc
-}
-\details{
 This function calculates bin separators (e.g. for use in a vpc) based on nadirs in the density functions for the indenpendent variable
-}
-\seealso{
-\code{\link{vpc}}
 }

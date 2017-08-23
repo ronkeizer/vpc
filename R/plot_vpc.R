@@ -1,5 +1,8 @@
 #' VPC plotting function
 #'
+#' This function performs no parsing of data, it just plots the already calculated statistics generated using one of the 
+#' `vpc` functions.
+#' 
 #' @param db object created using the `vpc` function
 #' @param show what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
@@ -11,6 +14,10 @@
 #' @param ylab ylab as numeric vector of size 2
 #' @param verbose verbosity (T/F)
 #' @export
+#' @examples 
+#' library(vpc)
+#' vpc_db <- vpc(sim = simple_data$sim, obs = simple_data$obs, vpcdb = TRUE)
+#' plot_vpc(vpc_db, title = "My new vpc", x = "Custom x label")
 plot_vpc <- function(db,
                      show = NULL,
                      vpc_theme = NULL,

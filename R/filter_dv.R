@@ -1,5 +1,4 @@
 filter_dv <- function(x, verbose = FALSE, ...) {
-  
   available_methods <- c("phx", "nonmem")
   if(sum(available_methods %in% class(x)) > 0)  {
     f <- filter_dv_software[[class(x)[1]]]
@@ -7,7 +6,6 @@ filter_dv <- function(x, verbose = FALSE, ...) {
   } else {
     x    
   }
-  
 }
 
 filter_dv_software <- list(

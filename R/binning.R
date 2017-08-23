@@ -1,15 +1,12 @@
 #' Calculate appropriate bin separators for vpc
 #' 
+#' This function calculates bin separators (e.g. for use in a vpc) based on nadirs in the density functions for the indenpendent variable
+#'
 #' @param dat data frame
 #' @param type auto-binning type: "density", "time", or "data"
 #' @param n_bins number of bins to use. For "density" the function might not return a solution with the exact number of bins.
 #' @param verbose show warnings and other messages (TRUE or FALSE)
 #' @return A vector of bin separators
-#' @export auto_bin
-#' @seealso \code{\link{vpc}}
-#' @details
-#' This function calculates bin separators (e.g. for use in a vpc) based on nadirs in the density functions for the indenpendent variable
-
 auto_bin <- function (dat, type="kmeans", n_bins = 8, verbose = FALSE) {
   all_bins <- list()
   l_bins <- c()

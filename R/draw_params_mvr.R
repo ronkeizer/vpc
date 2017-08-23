@@ -1,10 +1,10 @@
 #' Draw parameters from multivariate distribution
-#' @param ids vector of ids
+#' 
+#' @param ids vector of id numbers
 #' @param n_sim number of simulations
 #' @param theta theta vector
 #' @param omega_mat omega matrix
 #' @param par_names parameter names vector
-#' @export
 draw_params_mvr <- function(ids, n_sim, theta, omega_mat, par_names = NULL) {
   n_ids <- length(ids)
   if (!is.null(par_names)) {

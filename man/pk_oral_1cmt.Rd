@@ -28,3 +28,10 @@ A vector of predicted values, with or without added residual variability
 \description{
 Simulate PK data from a 1-compartment oral model
 }
+\examples{
+dat1 <- pk_oral_1cmt(t = c(0:72), tau = 24, dose = 120, 
+                     ka = 1, ke = 1, cl = 10)
+dat2 <- pk_oral_1cmt(t = c(0:72), tau = 24, dose = 120, 
+                     ka = 1, ke = 1, cl = 10, 
+                     ruv = list(proportional = 0.1, additive = 0.1))
+}

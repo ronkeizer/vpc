@@ -28,6 +28,16 @@
 #' }
 #' @return A list with vpc theme specifiers
 #' @export
+#' @examples 
+#' theme1 <- new_vpc_theme(update = list(
+#'   obs_color = "red",
+#'   obs_ci_color = "#aa0000",
+#'   obs_alpha = .3,
+#'   sim_pi_fill = "#cc8833",
+#'   sim_pi_size = 2
+#' ))
+#' vpc(simple_data$sim, simple_data$obs, vpc_theme = theme1)
+#' 
 new_vpc_theme <- function (update = NULL) {
   tmp <- structure(list(  
     obs_color = "#000000",

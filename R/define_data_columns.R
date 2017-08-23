@@ -1,3 +1,10 @@
+#' Define data column defaults for various softwares
+#' 
+#' @param sim simulated data
+#' @param obs observed data
+#' @param sim_cols list for mapping simulation data columns, e.g. `list(dv = "DV", id = "ID", idv = "TIME", pred="PRED")`
+#' @param obs_cols list for mapping observation data columns, e.g. `list(dv = "DV", id = "ID", idv = "TIME", pred="PRED")`
+#' @param software_type software type, one of `nonmem`, `phoenix`, `PKPDsim`
 define_data_columns <- function(sim, obs, sim_cols, obs_cols, software_type) {
   software_types <- c("nonmem", "phoenix", "PKPDsim")
   if(software_type %in% software_types) {
