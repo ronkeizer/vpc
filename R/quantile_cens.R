@@ -16,3 +16,16 @@ quantile_cens <- function(x, p = 0.5, limit = 1, cens = "left") {
   q <- quantile(x, p)
   ifelse(q %in% c(Inf, -Inf), NA, q)
 }
+
+#' Calculate percentiles below / above lloq / uloq
+#' 
+#' @param x data
+#' @param limit censoring limit
+#' @param cens censoring direction (left/right)
+loq_perc <- function(x, limit = 1, cens = "left") {
+  if(cens %in% c("left", "lower", "bloq", "loq", "lloq")) {
+    (sum(x < limit, na.rm=TRUE) + sum(is.na(x))) / length(x) 
+  } else {
+    (sum(x > limit, na.rm=TRUE) + sum(is.na(x))) / length(x) 
+  }
+}

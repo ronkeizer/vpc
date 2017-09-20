@@ -160,16 +160,18 @@ vpc_cens <- function(sim = NULL,
     sim <- bin_data(sim, bins, "idv")
   }
 
-  ## functions describing censoring %
-  loq_perc <- function(x) { sum(x <= lloq) / length(x) } # below lloq, default
-  if (is.null(lloq)) {
-    loq_perc <- function(x) { sum(x >= uloq) / length(x) }
+  if(!is.null(lloq)) {
+    cens <- "left"
+    limit <- lloq
+  } else {
+    cens <- "right"
+    limit <- uloq
   }
-
+  
   ## Parsing data to get the quantiles for the VPC
   if (!is.null(sim)) {
     tmp1 <- sim %>% dplyr::group_by(strat, sim, bin)
-    aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarise(loq_perc(dv)),
+    aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarise(loq_perc(dv, limit = limit, cens = cens)),
                                  tmp1 %>% dplyr::summarise(mean(idv))))
     colnames(aggr_sim)[grep("loq_perc", colnames(aggr_sim))] <- "ploq"
     colnames(aggr_sim)[length(aggr_sim[1,])] <- c("mn_idv")
@@ -191,7 +193,7 @@ vpc_cens <- function(sim = NULL,
   }
   if(!is.null(obs)) {
     tmp <- obs %>% dplyr::group_by(strat,bin)
-    aggr_obs <- data.frame(cbind(tmp %>% dplyr::summarise(loq_perc(dv)),
+    aggr_obs <- data.frame(cbind(tmp %>% dplyr::summarise(loq_perc(dv, limit = lloq, cens = cens)),
                                  tmp %>% dplyr::summarise(mean(idv))))
     aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
     colnames(aggr_obs) <- c("strat", "bin", "obs50")
@@ -214,10 +216,10 @@ vpc_cens <- function(sim = NULL,
   }
 
   ## plotting starts here
-  show$median_ci = FALSE
   show$obs_dv = FALSE
   show$obs_ci = FALSE
-  show$sim_median = TRUE
+  show$obs_median = TRUE
+  show$sim_median = FALSE
   show$sim_median_ci = TRUE
   show$pi_as_area = FALSE
   show$pi_ci = FALSE
