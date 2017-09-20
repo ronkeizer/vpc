@@ -25,6 +25,7 @@
 #'  \item{sim_median_size}: {size for simulated median line}
 #'  \item{bin_separators_color}: {color for bin separator lines, NA for don't plot}
 #'  \item{bin_separators_location}: {where to plot bin separators ("t" for top, "b" for bottom)}
+#'  \item{loq_color}: {color of line showing limit of quantification}
 #' }
 #' @return A list with vpc theme specifiers
 #' @export
@@ -66,7 +67,8 @@ new_vpc_theme <- function (update = NULL) {
     sim_median_linetype = "dashed",
     sim_median_size = 1,  
                    
-    bin_separators_color = "#000000"                     
+    bin_separators_color = "#000000",
+    loq_color = "#990000"
   ), class = "vpc_theme")
   n <- names(tmp)
   if(is.null(update)) {

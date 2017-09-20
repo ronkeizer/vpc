@@ -135,6 +135,11 @@ vpc <- function(sim = NULL,
       check_stratification_columns_available(sim, stratify, "simulation")
     }
   }
+  
+  ## Currently we can't handle both LLOQ and ULOQ
+  if(!is.null(uloq) && !is.null(lloq)) {
+    stop("Sorry, currently the vpc function cannot handle both upper and lower limit of quantification. Please specify either `lloq` or `uloq`.")
+  }
 
   ## parse data into specific format
   if(!is.null(obs)) {
@@ -149,7 +154,7 @@ vpc <- function(sim = NULL,
       message("Parsing simulated data...")
     }
     sim <- filter_dv(sim, verbose)
-    sim <- format_vpc_input_data(sim, cols$sim, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated", verbose)
+    sim <- format_vpc_input_data(sim, cols$sim, NULL, NULL, stratify, bins, log_y, log_y_min, "simulated", verbose)
   }
 
   labeled_bins <- bins[1] == "percentiles"
@@ -256,10 +261,19 @@ vpc <- function(sim = NULL,
       message("Calculating statistics for observed data...")
     }
     tmp1 <- obs %>% dplyr::group_by(strat,bin)
-    aggr_obs <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile(dv, pi[1])),
-                                 tmp1 %>% dplyr::summarise(quantile(dv, 0.5 )),
-                                 tmp1 %>% dplyr::summarise(quantile(dv, pi[2])),
-                                 tmp1 %>% dplyr::summarise(mean(idv))))
+    if(!is.null(lloq) || !is.null(uloq)) {
+      if(!is.null(uloq)) { limit <- uloq; cens = "right" }
+      if(!is.null(lloq)) { limit <- lloq; cens = "left" }
+      aggr_obs <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile_cens(dv, pi[1], limit = limit, cens = cens)),
+                                   tmp1 %>% dplyr::summarise(quantile_cens(dv, 0.5, limit = limit, cens = cens)),
+                                   tmp1 %>% dplyr::summarise(quantile_cens(dv, pi[2], limit = limit, cens = cens)),
+                                   tmp1 %>% dplyr::summarise(mean(idv))))
+    } else {
+      aggr_obs <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile(dv, pi[1])),
+                                   tmp1 %>% dplyr::summarise(quantile(dv, 0.5)),
+                                   tmp1 %>% dplyr::summarise(quantile(dv, pi[2])),
+                                   tmp1 %>% dplyr::summarise(mean(idv))))
+    }
     aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
     colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95", "bin_mid")
     aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
@@ -297,6 +311,8 @@ vpc <- function(sim = NULL,
                  bins = bins,
                  facet = facet,
                  labeller = labeller,
+                 lloq = lloq,
+                 uloq = uloq,
                  type = "continuous")
   if(vpcdb) {
     return(vpc_db)

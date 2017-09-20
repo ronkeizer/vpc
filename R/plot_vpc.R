@@ -163,6 +163,12 @@ plot_vpc <- function(db,
         }
       }
     }
+    if(!is.null(db$lloq)) {
+      pl <- pl + ggplot2::geom_hline(yintercept = db$lloq, colour=vpc_theme$loq_color) 
+    }
+    if(!is.null(db$uloq)) {
+      pl <- pl + ggplot2::geom_hline(yintercept = db$uloq, colour=vpc_theme$loq_color)
+    }
     if (!is.null(title)) {
       pl <- pl + ggplot2::ggtitle(title)
     }

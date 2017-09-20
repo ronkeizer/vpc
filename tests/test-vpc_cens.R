@@ -2,6 +2,14 @@ library(vpc)
 library(testit)
 Sys.setenv("R_TESTS" = "")
 
+## Test regular vpc in presence of lloq / uloq data
+obj1 <- vpc(sim = vpc::simple_data$sim, obs = vpc::simple_data$obs, uloq = 120, vpcdb = TRUE)
+obj2 <- vpc(sim = vpc::simple_data$sim, obs = vpc::simple_data$obs, lloq = 20, vpcdb = TRUE)
+assert("6 values in upper percentile flagged as >uloq", sum(is.na(obj1$aggr_obs$obs95)) == 6)
+assert("4 values in upper percentile flagged as <lloq", sum(is.na(obj2$aggr_obs$obs5)) == 4)
+assert("1 values in upper percentile flagged as <lloq", sum(is.na(obj2$aggr_obs$obs50)) == 1)
+
+## test vpc func
 obj <- vpc_cens(sim = vpc::simple_data$sim, obs = vpc::simple_data$obs, lloq = 30, vpcdb = TRUE)
 
 obs50 <- c(0.56, 0.08, 0.00, 0.0, 0.02, 0.14, 0.42, 0.52)

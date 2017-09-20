@@ -38,6 +38,7 @@ This function creates a theme that customizes how the VPC looks, i.e. colors, fi
  \item{sim_median_size}: {size for simulated median line}
  \item{bin_separators_color}: {color for bin separator lines, NA for don't plot}
  \item{bin_separators_location}: {where to plot bin separators ("t" for top, "b" for bottom)}
+ \item{loq_color}: {color of line showing limit of quantification}
 }
 }
 \examples{
