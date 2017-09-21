@@ -1,16 +1,16 @@
 #' VPC function
 #'
 #' Creates a VPC plot from observed and simulation data
-#' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
-#' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
-#' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
+#' @param sim a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param obs a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param psn_folder instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder
 #' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param show what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
-#' @param software name of software platform using (eg nonmem, phoenix)
+#' @param software name of software platform using (e.g. nonmem, phoenix)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param pred_corr perform prediction-correction?
 #' @param pred_corr_lower_bnd lower bound for the prediction-correction
@@ -32,19 +32,19 @@
 #' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 #' @export
 #' @seealso \link{sim_data}, \link{vpc_cens}, \link{vpc_tte}, \link{vpc_cat}
-#' @examples 
-#' 
+#' @examples
+#'
 #' ## See vpc.ronkeizer.com for more documentation and examples
 #' library(vpc)
-#' 
+#'
 #' # Basic commands:
 #' vpc(sim = simple_data$sim, obs = simple_data$obs)
 #' vpc(sim = simple_data$sim, obs = simple_data$obs, lloq = 20)
-#' 
+#'
 #' # Compute the VPC statistics, plot using separate command:
 #' vpc1 <- vpc(sim = simple_data$sim, obs = simple_data$obs, vpcdb = TRUE)
 #' plot_vpc(vpc1)
-#' 
+#'
 vpc <- function(sim = NULL,
                 obs = NULL,
                 psn_folder = NULL,
@@ -148,7 +148,7 @@ vpc <- function(sim = NULL,
       check_stratification_columns_available(sim, stratify, "simulation")
     }
   }
-  
+
   ## Currently we can't handle both LLOQ and ULOQ
   if(!is.null(uloq) && !is.null(lloq)) {
     stop("Sorry, currently the vpc function cannot handle both upper and lower limit of quantification. Please specify either `lloq` or `uloq`.")

@@ -11,7 +11,7 @@ add_stratification(dat, strat, verbose = FALSE)
 
 \item{strat}{vector of stratification variables}
 
-\item{verbose}{verbocity (`TRUE` or `FALSE`)}
+\item{verbose}{verbosity (`TRUE` or `FALSE`)}
 }
 \description{
 Adds stratification to data set

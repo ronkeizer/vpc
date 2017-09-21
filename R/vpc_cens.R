@@ -2,22 +2,22 @@
 #'
 #' Creates a VPC plot from observed and simulation data for censored data. Function can handle both left- (below lower limit of quantification) and right-censored (above upper limit of quantification) data.
 #' 
-#' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
-#' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
-#' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
+#' @param sim a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param obs a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param psn_folder instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder
 #' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.
 #' @param n_bins number of bins
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param show what to show in VPC (obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
-#' @param software name of software platform using (eg nonmem, phoenix)
+#' @param software name of software platform using (e.g. nonmem, phoenix)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.
 #' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.
-#' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.
+#' @param plot Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.
 #' @param xlab ylab as numeric vector of size 2
 #' @param ylab ylab as numeric vector of size 2
 #' @param title title

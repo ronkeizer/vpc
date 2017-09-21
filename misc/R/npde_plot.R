@@ -1,8 +1,8 @@
 #' Create VPC-like NPDE plot (npde vs idv)
 #' 
 #' Creates NPDE plot from observed and simulation data
-#' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
-#' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param sim a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param obs a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param bins either "auto" or a numeric vector specifying the bin separators.  
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
 #' @param auto_bin_type auto-binning type, default is "simple".
@@ -21,8 +21,8 @@
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.  
 #' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.  
-#' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is TRUE.
-#' @param log_y Boolean indacting whether y-axis should be shown as logarithmic. Default is FALSE.
+#' @param plot Boolean indicating whether to plot the ggplot2 object after creation. Default is TRUE.
+#' @param log_y Boolean indicating whether y-axis should be shown as logarithmic. Default is FALSE.
 #' @param log_y_min minimal value when using log_y argument. Default is 1e-3.
 #' @param xlab ylab as numeric vector of size 2
 #' @param ylab ylab as numeric vector of size 2

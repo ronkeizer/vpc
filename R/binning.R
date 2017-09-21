@@ -1,6 +1,6 @@
 #' Calculate appropriate bin separators for vpc
 #' 
-#' This function calculates bin separators (e.g. for use in a vpc) based on nadirs in the density functions for the indenpendent variable
+#' This function calculates bin separators (e.g. for use in a vpc) based on nadirs in the density functions for the independent variable
 #'
 #' @param dat data frame
 #' @param type auto-binning type: "density", "time", or "data"

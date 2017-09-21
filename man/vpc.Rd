@@ -14,11 +14,11 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   verbose = FALSE)
 }
 \arguments{
-\item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+\item{sim}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{obs}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+\item{obs}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{psn_folder}{instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder}
+\item{psn_folder}{instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder}
 
 \item{bins}{either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.}
 
@@ -30,7 +30,7 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred")}
 
-\item{software}{name of software platform using (eg nonmem, phoenix)}
+\item{software}{name of software platform using (e.g. nonmem, phoenix)}
 
 \item{show}{what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
 

@@ -13,15 +13,15 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
   facet = "wrap", labeller = NULL, verbose = FALSE, vpcdb = FALSE)
 }
 \arguments{
-\item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+\item{sim}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{obs}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+\item{obs}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{psn_folder}{instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder}
+\item{psn_folder}{instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder}
 
-\item{rtte}{repeated time-to-event data? Deafult is FALSE (treat as single-event TTE)}
+\item{rtte}{repeated time-to-event data? Default is FALSE (treat as single-event TTE)}
 
-\item{rtte_calc_diff}{recalculate time (T/F)? When simulating in NONMEM, you will probably need to set this to TRUE to recalculate the TIME to relative times between events (unless you output the time difference between events and specify that as independent variable to the vpc_tte() funciton.}
+\item{rtte_calc_diff}{recalculate time (T/F)? When simulating in NONMEM, you will probably need to set this to TRUE to recalculate the TIME to relative times between events (unless you output the time difference between events and specify that as independent variable to the vpc_tte() function.}
 
 \item{events}{numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events.}
 
@@ -29,7 +29,7 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
 
 \item{n_bins}{number of bins}
 
-\item{software}{name of software platform using (eg nonmem, phoenix)}
+\item{software}{name of software platform using (e.g. nonmem, phoenix)}
 
 \item{obs_cols}{observation dataset column names (list elements: "dv", "idv", "id", "pred")}
 
@@ -43,7 +43,7 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
 
 \item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
 
-\item{plot}{Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.}
+\item{plot}{Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.}
 
 \item{xlab}{ylab as numeric vector of size 2}
 

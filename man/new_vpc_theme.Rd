@@ -18,7 +18,7 @@ Create a customized VPC theme
 \details{
 This function creates a theme that customizes how the VPC looks, i.e. colors, fills, transparencies, linetypes an sizes, etc. The following arguments can be specified in the input list:
 \itemize{
- \item{obs_color}: {color for observationss points}
+ \item{obs_color}: {color for observations points}
  \item{obs_size}: {size for observation points}
  \item{obs_median_color}: {color for median observation line}
  \item{obs_median_linetype}: {linetype for median observation line}

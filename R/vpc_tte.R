@@ -3,23 +3,23 @@
 #' This function can be used for either single time-to-event (TTE) or repeated time-to-event (RTTE) data.
 #'
 #' Creates a VPC plot from observed and simulation survival data
-#' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
-#' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
-#' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
+#' @param sim a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param obs a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param psn_folder instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder
 #' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.
 #' @param n_bins number of bins
 #' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
-#' @param software name of software platform using (eg nonmem, phoenix)
+#' @param software name of software platform using (e.g. nonmem, phoenix)
 #' @param show what to show in VPC (obs_ci, obs_median, sim_median, sim_median_ci)
-#' @param rtte repeated time-to-event data? Deafult is FALSE (treat as single-event TTE)
-#' @param rtte_calc_diff recalculate time (T/F)? When simulating in NONMEM, you will probably need to set this to TRUE to recalculate the TIME to relative times between events (unless you output the time difference between events and specify that as independent variable to the vpc_tte() funciton.
+#' @param rtte repeated time-to-event data? Default is FALSE (treat as single-event TTE)
+#' @param rtte_calc_diff recalculate time (T/F)? When simulating in NONMEM, you will probably need to set this to TRUE to recalculate the TIME to relative times between events (unless you output the time difference between events and specify that as independent variable to the vpc_tte() function.
 #' @param kmmc either NULL (for regular TTE vpc, default), or a variable name for a KMMC plot (e.g. "WT")
 #' @param events numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events.
 #' @param reverse_prob reverse the probability scale (i.e. plot 1-probability)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied. 
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
-#' @param plot Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.
+#' @param plot Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.
 #' @param as_percentage Show y-scale from 0-100 percent? TRUE by default, if FALSE then scale from 0-1.
 #' @param xlab ylab as numeric vector of size 2
 #' @param ylab ylab as numeric vector of size 2

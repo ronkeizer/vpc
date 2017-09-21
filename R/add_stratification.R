@@ -2,7 +2,7 @@
 #' 
 #' @param dat data.frame
 #' @param strat vector of stratification variables
-#' @param verbose verbocity (`TRUE` or `FALSE`)
+#' @param verbose verbosity (`TRUE` or `FALSE`)
 add_stratification <- function (dat, strat, verbose = FALSE) {
   if(is.null(strat)) {
     dat$strat <- 1
