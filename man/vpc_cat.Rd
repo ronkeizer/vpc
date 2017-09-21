@@ -12,11 +12,11 @@ vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
   vpcdb = FALSE, verbose = FALSE)
 }
 \arguments{
-\item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+\item{sim}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{obs}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+\item{obs}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{psn_folder}{instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder}
+\item{psn_folder}{instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder}
 
 \item{bins}{either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.}
 
@@ -28,7 +28,7 @@ vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred")}
 
-\item{software}{name of software platform using (eg nonmem, phoenix)}
+\item{software}{name of software platform using (e.g. nonmem, phoenix)}
 
 \item{show}{what to show in VPC (obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
 
@@ -73,7 +73,7 @@ library(vpc)
 sim_id <- function(id = 1) {
   n <- 10
   logit <- function(x) exp(x) / (1+exp(x))
-  data.frame(id = id, time = seq(1, n, length.out = n), 
+  data.frame(id = id, time = seq(1, n, length.out = n),
              dv = round(logit((1:n) - n/2 + rnorm(n, 0, 1.5))) )
 }
 ## simple function to simulate categorical data for a trial
@@ -85,7 +85,7 @@ sim_trial <- function(i = 1, n = 20) { # function to simulate categorical data f
 obs <- sim_trial(n = 20)
 
 ## simulate 200 trials of 20 individuals
-sim <- do.call("rbind", lapply(1:200, sim_trial, n = 20)) 
+sim <- do.call("rbind", lapply(1:200, sim_trial, n = 20))
 
 ## Plot categorical VPC
 vpc_cat(sim = sim, obs = obs)
