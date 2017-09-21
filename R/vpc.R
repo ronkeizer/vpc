@@ -41,10 +41,6 @@
 #' vpc(sim = simple_data$sim, obs = simple_data$obs)
 #' vpc(sim = simple_data$sim, obs = simple_data$obs, lloq = 20)
 #'
-#' # Compute the VPC statistics, plot using separate command:
-#' vpc1 <- vpc(sim = simple_data$sim, obs = simple_data$obs, vpcdb = TRUE)
-#' plot_vpc(vpc1)
-#'
 vpc <- function(sim = NULL,
                 obs = NULL,
                 psn_folder = NULL,

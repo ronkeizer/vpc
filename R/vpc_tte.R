@@ -34,30 +34,20 @@
 #' @export
 #' @seealso \link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cens}
 #' @examples
+#' ## See vpc-docs.ronkeizer.com for more documentation and examples.
+#' 
 #' ## Example for repeated) time-to-event data
 #' ## with NONMEM-like data (e.g. simulated using a dense grid)
+#' 
 #' data(rtte_obs_nm)
 #' data(rtte_sim_nm)
 #'
 #' # treat RTTE as TTE, no stratification
-#' vpc_tte(sim = rtte_sim_nm,
-#'         obs = rtte_obs_nm,
-#'         rtte = FALSE,
-#'         sim_cols=list(dv = "dv", idv = "t"), obs_cols=list(idv = "t"))
+#' vpc_tte(sim = rtte_sim_nm[rtte_sim_nm$sim <= 20,],
+#'        obs = rtte_obs_nm,
+#'        rtte = FALSE,
+#'        sim_cols=list(dv = "dv", idv = "t"), obs_cols=list(idv = "t"))
 #'
-#' # stratified for covariate and study arm
-#' vpc_tte(sim = rtte_sim_nm,
-#'         obs = rtte_obs_nm,
-#'         stratify = c("sex","drug"),
-#'         rtte = FALSE,
-#'         sim_cols=list(dv = "dv", idv = "t"), obs_cols=list(idv = "t"))
-#'
-#' # stratified per event number (we'll only look at first 3 events) and stratify per arm
-#' vpc_tte(sim = rtte_sim_nm,
-#'         obs = rtte_obs_nm,
-#'         rtte = TRUE, events = c(1:3),
-#'         stratify = c("drug"),
-#'         sim_cols=list(dv = "dv", idv = "t"), obs_cols=list(idv = "t"))
 vpc_tte <- function(sim = NULL,
                     obs = NULL,
                     psn_folder = NULL,
@@ -212,6 +202,7 @@ vpc_tte <- function(sim = NULL,
 #       obs[obs$dv == 0,]$rtte <- obs[obs$dv == 0,]$rtte + 1 # these censored points actually "belong" to the next rtte strata
       stratify <- c(stratify, "rtte")
     } else {
+      obs <- obs[!duplicated(obs$id),]
       obs$rtte <- 1
     }
 
@@ -255,7 +246,7 @@ vpc_tte <- function(sim = NULL,
       }
     }
     if("nonmem" %in% class(sim)) { # necessary due to a bug in NONMEM simulation
-      sim <- sim[!(sim$time ==0 & sim$dv == 1),]
+      sim <- sim[!(sim$time == 0 & sim$dv == 1),]
     }
     if(max(sim$dv) == 1) {
       if (sum(sim$dv > 0 & sim$dv < 1) > 0) {
