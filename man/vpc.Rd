@@ -76,6 +76,20 @@ a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 obj
 \description{
 Creates a VPC plot from observed and simulation data
 }
+\examples{
+
+## See vpc.ronkeizer.com for more documentation and examples
+library(vpc)
+
+# Basic commands:
+vpc(sim = simple_data$sim, obs = simple_data$obs)
+vpc(sim = simple_data$sim, obs = simple_data$obs, lloq = 20)
+
+# Compute the VPC statistics, plot using separate command:
+vpc1 <- vpc(sim = simple_data$sim, obs = simple_data$obs, vpcdb = TRUE)
+plot_vpc(vpc1)
+
+}
 \seealso{
-\link{sim_data}, \link{vpc_cens}, \link{vpc_tte}
+\link{sim_data}, \link{vpc_cens}, \link{vpc_tte}, \link{vpc_cat}
 }

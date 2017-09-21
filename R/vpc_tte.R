@@ -1,4 +1,6 @@
-#' VPC function for survival-type data
+#' VPC function for time-to-event (survival) data
+#' 
+#' This function can be used for either single time-to-event (TTE) or repeated time-to-event (RTTE) data.
 #'
 #' Creates a VPC plot from observed and simulation survival data
 #' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
@@ -30,7 +32,7 @@
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
 #' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
-#' @seealso \link{vpc}
+#' @seealso \link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cens}
 #' @examples
 #' ## Example for repeated) time-to-event data
 #' ## with NONMEM-like data (e.g. simulated using a dense grid)

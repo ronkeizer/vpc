@@ -31,7 +31,20 @@
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 #' @export
-#' @seealso \link{sim_data}, \link{vpc_cens}, \link{vpc_tte}
+#' @seealso \link{sim_data}, \link{vpc_cens}, \link{vpc_tte}, \link{vpc_cat}
+#' @examples 
+#' 
+#' ## See vpc.ronkeizer.com for more documentation and examples
+#' library(vpc)
+#' 
+#' # Basic commands:
+#' vpc(sim = simple_data$sim, obs = simple_data$obs)
+#' vpc(sim = simple_data$sim, obs = simple_data$obs, lloq = 20)
+#' 
+#' # Compute the VPC statistics, plot using separate command:
+#' vpc1 <- vpc(sim = simple_data$sim, obs = simple_data$obs, vpcdb = TRUE)
+#' plot_vpc(vpc1)
+#' 
 vpc <- function(sim = NULL,
                 obs = NULL,
                 psn_folder = NULL,

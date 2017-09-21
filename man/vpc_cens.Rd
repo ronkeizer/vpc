@@ -67,9 +67,17 @@ vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 a list containing calculated VPC information, and a ggplot2 object
 }
 \description{
-Creates a VPC plot from observed and simulation data
-sim,
+Creates a VPC plot from observed and simulation data for censored data. Function can handle both left- (below lower limit of quantification) and right-censored (above upper limit of quantification) data.
+}
+\examples{
+
+## See vpc.ronkeizer.com for more documentation and examples
+library(vpc)
+
+vpc_cens(sim = simple_data$sim, obs = simple_data$obs, lloq = 30)
+vpc_cens(sim = simple_data$sim, obs = simple_data$obs, uloq = 120)
+
 }
 \seealso{
-\link{vpc}
+\link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cat}
 }

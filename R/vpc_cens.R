@@ -1,7 +1,7 @@
 #' VPC function for left- or right-censored data (e.g. BLOQ data)
 #'
-#' Creates a VPC plot from observed and simulation data
-#' sim,
+#' Creates a VPC plot from observed and simulation data for censored data. Function can handle both left- (below lower limit of quantification) and right-censored (above upper limit of quantification) data.
+#' 
 #' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
@@ -29,7 +29,15 @@
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @return a list containing calculated VPC information, and a ggplot2 object
 #' @export
-#' @seealso \link{vpc}
+#' @seealso \link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cat}
+#' @examples 
+#' 
+#' ## See vpc.ronkeizer.com for more documentation and examples
+#' library(vpc)
+#' 
+#' vpc_cens(sim = simple_data$sim, obs = simple_data$obs, lloq = 30)
+#' vpc_cens(sim = simple_data$sim, obs = simple_data$obs, uloq = 120)
+#' 
 vpc_cens <- function(sim = NULL,
                      obs = NULL,
                      psn_folder = NULL,

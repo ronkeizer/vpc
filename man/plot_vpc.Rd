@@ -34,7 +34,12 @@ This function performs no parsing of data, it just plots the already calculated 
 `vpc` functions.
 }
 \examples{
+## See vpc.ronkeizer.com for more documentation and examples
+
 library(vpc)
 vpc_db <- vpc(sim = simple_data$sim, obs = simple_data$obs, vpcdb = TRUE)
 plot_vpc(vpc_db, title = "My new vpc", x = "Custom x label")
+}
+\seealso{
+\link{sim_data}, \link{vpc_cens}, \link{vpc_tte}, \link{vpc_cat}
 }

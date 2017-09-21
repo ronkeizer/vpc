@@ -2,7 +2,7 @@
 % Please edit documentation in R/vpc_tte.R
 \name{vpc_tte}
 \alias{vpc_tte}
-\title{VPC function for survival-type data}
+\title{VPC function for time-to-event (survival) data}
 \usage{
 vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
   rtte_calc_diff = TRUE, events = NULL, bins = FALSE, n_bins = 10,
@@ -71,6 +71,9 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
 a list containing calculated VPC information, and a ggplot2 object
 }
 \description{
+This function can be used for either single time-to-event (TTE) or repeated time-to-event (RTTE) data.
+}
+\details{
 Creates a VPC plot from observed and simulation survival data
 }
 \examples{
@@ -100,5 +103,5 @@ vpc_tte(sim = rtte_sim_nm,
         sim_cols=list(dv = "dv", idv = "t"), obs_cols=list(idv = "t"))
 }
 \seealso{
-\link{vpc}
+\link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cens}
 }

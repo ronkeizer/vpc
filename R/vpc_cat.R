@@ -1,7 +1,7 @@
 #' VPC function for categorical
 #'
-#' Creates a VPC plot from observed and simulation data
-#' sim,
+#' Creates a VPC plot from observed and simulation data for categorical variables.
+#' 
 #' @param sim a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param psn_folder instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder
@@ -27,7 +27,32 @@
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 #' @export
-#' @seealso \link{vpc}
+#' @seealso \link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cens}
+#' @examples 
+#' 
+#' ## See vpc.ronkeizer.com for more documentation and examples
+#' library(vpc)
+#' 
+#' # simple function to simulate categorical data for single individual
+#' sim_id <- function(id = 1) {
+#'   n <- 10
+#'   logit <- function(x) exp(x) / (1+exp(x))
+#'   data.frame(id = id, time = seq(1, n, length.out = n), 
+#'              dv = round(logit((1:n) - n/2 + rnorm(n, 0, 1.5))) )
+#' }
+#' ## simple function to simulate categorical data for a trial
+#' sim_trial <- function(i = 1, n = 20) { # function to simulate categorical data for a trial
+#'   data.frame(sim = i, do.call("rbind", lapply(1:n, sim_id)))
+#' }
+#' 
+#' ## simulate single trial for 20 individuals
+#' obs <- sim_trial(n = 20)
+#' 
+#' ## simulate 200 trials of 20 individuals
+#' sim <- do.call("rbind", lapply(1:200, sim_trial, n = 20)) 
+#' 
+#' ## Plot categorical VPC
+#' vpc_cat(sim = sim, obs = obs)
 vpc_cat  <- function(sim = NULL,
                      obs = NULL,
                      psn_folder = NULL,

@@ -1,5 +1,9 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-.travis.yml
+misc/
 .DS_Store
-misc
+.travis.yml
+.RData
+.Rhistory
+README.MD
+cran-comments.md
