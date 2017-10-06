@@ -239,7 +239,10 @@ plot_vpc <- function(db,
       pl <- pl + geom_line_custom(linetype="dashed")
     }
     if(!is.null(db$obs) && show$obs_ci) {
-      pl <- pl + ggplot2::geom_ribbon(data=db$obs_km, ggplot2::aes(x=time, ymin=lower, ymax=upper, group=strat), fill=vpc_theme$obs_ci_fill)
+      pl <- pl + ggplot2::geom_ribbon(
+        data=db$obs_km, 
+        ggplot2::aes(x=time, ymin=lower, ymax=upper, group=strat), 
+        fill=vpc_theme$obs_ci_fill)
     }
     if (!is.null(db$obs) && show$obs_dv) {
       chk_tbl <- db$obs_km %>%

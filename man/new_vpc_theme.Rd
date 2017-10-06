@@ -23,6 +23,7 @@ This function creates a theme that customizes how the VPC looks, i.e. colors, fi
  \item{obs_median_color}: {color for median observation line}
  \item{obs_median_linetype}: {linetype for median observation line}
  \item{obs_median_size}: {size for median observation line}
+ \item{obs_ci_fill}: {color for observation CI fill}
  \item{obs_ci_color}: {color for observation CI lines}
  \item{obs_ci_linetype}: {linetype for observation CI lines}
  \item{obs_ci_size}: {size for observations CI lines}
