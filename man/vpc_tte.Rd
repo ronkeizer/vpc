@@ -7,10 +7,11 @@
 vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
   rtte_calc_diff = TRUE, events = NULL, bins = FALSE, n_bins = 10,
   software = "auto", obs_cols = NULL, sim_cols = NULL, kmmc = NULL,
-  reverse_prob = FALSE, stratify = NULL, ci = c(0.05, 0.95),
-  plot = FALSE, xlab = NULL, ylab = NULL, show = NULL,
-  as_percentage = TRUE, title = NULL, smooth = FALSE, vpc_theme = NULL,
-  facet = "wrap", labeller = NULL, verbose = FALSE, vpcdb = FALSE)
+  reverse_prob = FALSE, stratify = NULL, stratify_color = NULL,
+  ci = c(0.05, 0.95), plot = FALSE, xlab = NULL, ylab = NULL,
+  show = NULL, as_percentage = TRUE, title = NULL, smooth = FALSE,
+  vpc_theme = NULL, facet = "wrap", labeller = NULL, verbose = FALSE,
+  vpcdb = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -40,6 +41,8 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
 \item{reverse_prob}{reverse the probability scale (i.e. plot 1-probability)}
 
 \item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
+
+\item{stratify_color}{character vector of stratification variables. Only 1 stratification variable can be supplied, cannot be used in conjunction with `stratify`.}
 
 \item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
 

@@ -19,10 +19,10 @@ show_default <- list (
 #' 
 #' @export
 show_default_tte <- list (
-  obs_dv = TRUE,
+  obs_dv = FALSE,
   obs_ci = FALSE,
   obs_median = TRUE,
-  sim_median = TRUE,
+  sim_median = FALSE,
   sim_median_ci = TRUE,
   pi = FALSE,
   pi_ci = TRUE,

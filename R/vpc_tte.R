@@ -18,6 +18,7 @@
 #' @param events numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events.
 #' @param reverse_prob reverse the probability scale (i.e. plot 1-probability)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied. 
+#' @param stratify_color character vector of stratification variables. Only 1 stratification variable can be supplied, cannot be used in conjunction with `stratify`. 
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param plot Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.
 #' @param as_percentage Show y-scale from 0-100 percent? TRUE by default, if FALSE then scale from 0-1.
@@ -62,6 +63,7 @@ vpc_tte <- function(sim = NULL,
                     kmmc = NULL,
                     reverse_prob = FALSE,
                     stratify = NULL,
+                    stratify_color = NULL,
                     ci = c(0.05, 0.95),
                     plot = FALSE,
                     xlab = NULL,
@@ -108,21 +110,30 @@ vpc_tte <- function(sim = NULL,
   }
 
   ## define what to show in plot
-  show <- replace_list_elements(show_default, show)
+  show <- replace_list_elements(show_default_tte, show)
 
   ## checking whether stratification columns are available
-  if(!is.null(stratify)) {
+  stratify_pars <- NULL
+  if(!is.null(stratify)) stratify_pars <- stratify
+  if(!is.null(stratify_color)) {
+    if(!is.null(stratify)) stop("Sorry, stratification using both facets and color is currently not supported, use either `stratify` or `stratify_color`.")
+    if(length(stratify_color) != 1) {
+      stop("Sorry, please specify only a single stratification variable for `stratify_color`.")      
+    }
+    stratify_pars <- stratify_color
+  }
+  if(!is.null(stratify_pars)) {
     if(!is.null(obs)) {
-      check_stratification_columns_available(obs, stratify, "observation")
+      check_stratification_columns_available(obs, stratify_pars, "observation")
     }
     if(!is.null(sim)) {
-      check_stratification_columns_available(sim, stratify, "simulation")
+      check_stratification_columns_available(sim, stratify_pars, "simulation")
     }
   }
 
   ## redefine strat column in case of "strat"
-  if(!is.null(stratify) && !is.null(obs)) {
-    if(stratify[1] == "strat") {
+  if(!is.null(stratify_pars) && !is.null(obs)) {
+    if(stratify_pars[1] == "strat") {
       if(!is.null(obs)) {
         obs$strat_orig = obs$strat
       } else if (!is.null(sim)){
@@ -152,15 +163,15 @@ vpc_tte <- function(sim = NULL,
   }
 
   ## stratification
-  stratify_original <- stratify
-  if(!is.null(stratify)) {
+  stratify_original <- stratify_pars
+  if(!is.null(stratify_pars)) {
     if(rtte) {
-      if (length(stratify) > 1) {
+      if (length(stratify_pars) > 1) {
         stop ("Sorry, with repeated time-to-event data, stratification on more than 1 variables is currently not supported!")
         invisible()
       }
     } else {
-      if (length(stratify) > 2) {
+      if (length(stratify_pars) > 2) {
         stop ("Sorry, stratification on more than 2 variables is currently not supported!")
         invisible()
       }
@@ -200,14 +211,14 @@ vpc_tte <- function(sim = NULL,
         dplyr::mutate(rtte = 1:length(dv))
 #       obs %>% dplyr::group_by(id) %>% dplyr::mutate(rtte = cumsum(dv != 0))
 #       obs[obs$dv == 0,]$rtte <- obs[obs$dv == 0,]$rtte + 1 # these censored points actually "belong" to the next rtte strata
-      stratify <- c(stratify, "rtte")
+      stratify_pars <- c(stratify_pars, "rtte")
     } else {
       obs <- obs[!duplicated(obs$id),]
       obs$rtte <- 1
     }
 
     # add stratification column and comput KM curve for observations
-    obs <- add_stratification(obs, stratify)
+    obs <- add_stratification(obs, stratify_pars)
     if(!is.null(kmmc) && kmmc %in% names(obs)) {
       obs_km <- compute_kmmc(obs, strat = "strat", reverse_prob = reverse_prob, kmmc=kmmc)
     } else {
@@ -306,7 +317,7 @@ vpc_tte <- function(sim = NULL,
     for (i in 1:n_sim) {
       tmp <- sim %>% dplyr::filter(sim == i)
       tmp2 <- add_stratification(tmp %>%
-                                 dplyr::arrange_("id", "time"), stratify)
+                                 dplyr::arrange_("id", "time"), stratify_pars)
       if(!is.null(kmmc) && kmmc %in% names(obs)) {
         tmp3 <- compute_kmmc(tmp2, strat = "strat", reverse_prob = reverse_prob, kmmc = kmmc)
       } else {
@@ -369,7 +380,7 @@ vpc_tte <- function(sim = NULL,
   }
 
   if (!is.null(stratify_original)) {
-    if (length(stratify) == 2) {
+    if (length(stratify_pars) == 2) {
       if(!is.null(sim_km)) {
         sim_km$strat1 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)-1]
         sim_km$strat2 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)]
@@ -418,7 +429,9 @@ vpc_tte <- function(sim = NULL,
                  obs = obs,
                  obs_km = obs_km,
                  all = all,
+                 stratify_pars = stratify_pars,
                  stratify = stratify,
+                 stratify_color = stratify_color,
                  stratify_original = stratify_original,
                  bins = bins,
                  facet = facet,
