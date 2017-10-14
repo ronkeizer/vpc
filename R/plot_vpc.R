@@ -29,7 +29,7 @@ plot_vpc <- function(db,
                      log_y = FALSE,
                      title = NULL,
                      xlab = "Time",
-                     ylab = "Dependent value",
+                     ylab = NULL,
                      verbose = FALSE) {
   if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
     vpc_theme <- new_vpc_theme()

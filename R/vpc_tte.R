@@ -445,9 +445,6 @@ vpc_tte <- function(sim = NULL,
   if(is.null(xlab)) {
     xlab <- "Time (days)"
   }
-  if(is.null(ylab)) {
-    ylab <- ""
-  }
   if(vpcdb) {
     return(vpc_db)
   } else {
