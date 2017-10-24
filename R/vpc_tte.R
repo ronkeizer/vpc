@@ -324,7 +324,8 @@ vpc_tte <- function(sim = NULL,
         tmp3 <- compute_kaplan(tmp2, strat = "strat", reverse_prob = reverse_prob)
       }
       tmp3$time_strat <- paste0(tmp3$time, "_", tmp3$strat)
-      tmp4 <- expand.grid(time = c(0, unique(sim$t)), surv=NA, lower=NA, upper=NA, strat=unique(tmp3$strat))
+      tmp4 <- expand.grid(time = c(0, unique(sim$time)), surv=NA, lower=NA, upper=NA, 
+                          strat = unique(tmp3$strat))
       tmp4$time_strat <- paste0(tmp4$time, "_", tmp4$strat)
       tmp4[match(tmp3$time_strat, tmp4$time_strat),]$surv <- tmp3$surv
 #       tmp4[match(tmp3$time_strat, tmp4$time_strat),]$lower <- tmp3$lower
