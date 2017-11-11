@@ -6,7 +6,7 @@
 \usage{
 plot_vpc(db, show = NULL, vpc_theme = NULL, smooth = TRUE,
   log_x = FALSE, log_y = FALSE, title = NULL, xlab = "Time",
-  ylab = "Dependent value", verbose = FALSE)
+  ylab = NULL, verbose = FALSE)
 }
 \arguments{
 \item{db}{object created using the `vpc` function}

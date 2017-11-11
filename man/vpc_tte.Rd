@@ -34,7 +34,7 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
 
 \item{obs_cols}{observation dataset column names (list elements: "dv", "idv", "id", "pred")}
 
-\item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred")}
+\item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred", "sim")}
 
 \item{kmmc}{either NULL (for regular TTE vpc, default), or a variable name for a KMMC plot (e.g. "WT")}
 
