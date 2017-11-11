@@ -9,7 +9,7 @@
 #' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.
 #' @param n_bins number of bins
 #' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
-#' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
+#' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred", "sim")
 #' @param software name of software platform using (e.g. nonmem, phoenix)
 #' @param show what to show in VPC (obs_ci, obs_median, sim_median, sim_median_ci)
 #' @param rtte repeated time-to-event data? Default is FALSE (treat as single-event TTE)
@@ -92,17 +92,17 @@ vpc_tte <- function(sim = NULL,
   }
   if(!is.null(psn_folder)) {
     if(!is.null(obs)) {
-      obs <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
+      obs <- vpc::read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
     }
     if(!is.null(sim)) {
-      sim <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="simulation.1.npctab")[1]))
+      sim <- vpc::read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="simulation.1.npctab")[1]))
     }
     software = "nonmem"
   }
   if (!is.null(obs)) {
-    software_type <- guess_software(software, obs)
+    software_type <- vpc:::guess_software(software, obs)
   } else {
-    software_type <- guess_software(software, sim)
+    software_type <- vpc:::guess_software(software, sim)
   }
 
   if(is.null(sim)) {
@@ -110,7 +110,7 @@ vpc_tte <- function(sim = NULL,
   }
 
   ## define what to show in plot
-  show <- replace_list_elements(show_default_tte, show)
+  show <- vpc::replace_list_elements(show_default_tte, show)
 
   ## checking whether stratification columns are available
   stratify_pars <- NULL
@@ -124,10 +124,10 @@ vpc_tte <- function(sim = NULL,
   }
   if(!is.null(stratify_pars)) {
     if(!is.null(obs)) {
-      check_stratification_columns_available(obs, stratify_pars, "observation")
+      vpc:::check_stratification_columns_available(obs, stratify_pars, "observation")
     }
     if(!is.null(sim)) {
-      check_stratification_columns_available(sim, stratify_pars, "simulation")
+      vpc:::check_stratification_columns_available(sim, stratify_pars, "simulation")
     }
   }
 
@@ -144,7 +144,7 @@ vpc_tte <- function(sim = NULL,
   }
 
   ## define column names
-  cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
+  cols <- vpc:::define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
   if(!is.null(obs)) {
     old_class <- class(obs)
     class(obs) <- c(software_type, old_class)
@@ -156,10 +156,10 @@ vpc_tte <- function(sim = NULL,
 
   ## remove EVID != 0 / MDV != 0
   if(!is.null(obs)) {
-    obs <- filter_dv(obs, verbose)
+    obs <- vpc:::filter_dv(obs, verbose)
   }
   if(!is.null(sim)) {
-    sim <- filter_dv(sim, verbose)
+    sim <- vpc:::filter_dv(sim, verbose)
   }
 
   ## stratification
@@ -213,22 +213,24 @@ vpc_tte <- function(sim = NULL,
 #       obs[obs$dv == 0,]$rtte <- obs[obs$dv == 0,]$rtte + 1 # these censored points actually "belong" to the next rtte strata
       stratify_pars <- c(stratify_pars, "rtte")
     } else {
-      obs <- obs[!duplicated(obs$id),]
+      obs <- obs %>% 
+        dplyr::filter(dv == 1) %>% 
+        filter(!duplicated(id))
       obs$rtte <- 1
     }
 
     # add stratification column and comput KM curve for observations
-    obs <- add_stratification(obs, stratify_pars)
+    obs <- vpc:::add_stratification(obs, stratify_pars)
     if(!is.null(kmmc) && kmmc %in% names(obs)) {
-      obs_km <- compute_kmmc(obs, strat = "strat", reverse_prob = reverse_prob, kmmc=kmmc)
+      obs_km <- vpc::compute_kmmc(obs, strat = "strat", reverse_prob = reverse_prob, kmmc=kmmc)
     } else {
       if(show$obs_ci) {
         if(length(ci) == 2 && (round(ci[1],3) != round((1-ci[2]),3))) {
           stop("Sorry, only symmetric confidence intervals can be computed. Please adjust the ci argument.")
         }
-        obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob, ci = ci)
+        obs_km <- vpc:::compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob, ci = ci)
       } else {
-        obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob)
+        obs_km <- vpc:::compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob)
       }
     }
   } else { # get bins from sim
@@ -238,6 +240,7 @@ vpc_tte <- function(sim = NULL,
     msg("Tip: with KMMC-type plots, binning of simulated data is recommended. See documentation for the 'bins' argument for more information.", msg)
   }
 
+  all_dat <- c()
   if(!is.null(sim)) {
     # format sim data and compute KM curve CI for simulations
     if (all(c(cols$sim$idv, cols$sim$id, cols$sim$dv) %in% names(sim))) {
@@ -270,7 +273,7 @@ vpc_tte <- function(sim = NULL,
       sim[sim$cens == 1,]$dv <- 0
     }
     # add sim index number
-    sim$sim <- add_sim_index_number(sim, id = cols$sim$id)
+    sim$sim <- vpc:::add_sim_index_number(sim, id = cols$sim$id, sim_label = cols$sim$sim)
 
     # set last_observation and repeat_obs per sim&id
     sim <- sim %>%
@@ -293,9 +296,9 @@ vpc_tte <- function(sim = NULL,
       sim <- sim[!duplicated(sim$sim_id),]
     }
 
-    n_sim <- length(unique(sim$sim))
-    all <- c()
     tmp_bins <- unique(c(0, sort(unique(sim$time)), max(sim$time)))
+    n_sim <- length(unique(sim$sim))
+    all_dat <- c()
     if(!(class(bins) == "logical" && bins == FALSE)) {
       if(class(bins) == "logical" && bins == TRUE) {
         bins <- "time"
@@ -314,14 +317,16 @@ vpc_tte <- function(sim = NULL,
         tmp_bins <- unique(c(0, bins, max(obs$time)))
       }
     }
+    pb <- txtProgressBar(min = 1, max = n_sim)
     for (i in 1:n_sim) {
+      setTxtProgressBar(pb, i)
       tmp <- sim %>% dplyr::filter(sim == i)
-      tmp2 <- add_stratification(tmp %>%
+      tmp2 <- vpc:::add_stratification(tmp %>%
                                  dplyr::arrange_("id", "time"), stratify_pars)
       if(!is.null(kmmc) && kmmc %in% names(obs)) {
-        tmp3 <- compute_kmmc(tmp2, strat = "strat", reverse_prob = reverse_prob, kmmc = kmmc)
+        tmp3 <- vpc:::compute_kmmc(tmp2, strat = "strat", reverse_prob = reverse_prob, kmmc = kmmc)
       } else {
-        tmp3 <- compute_kaplan(tmp2, strat = "strat", reverse_prob = reverse_prob)
+        tmp3 <- vpc:::compute_kaplan(tmp2, strat = "strat", reverse_prob = reverse_prob)
       }
       tmp3$time_strat <- paste0(tmp3$time, "_", tmp3$strat)
       tmp4 <- expand.grid(time = c(0, unique(sim$time)), surv=NA, lower=NA, upper=NA, 
@@ -338,9 +343,9 @@ vpc_tte <- function(sim = NULL,
       tmp4$bin_min <- tmp_bins[tmp4$bin]
       tmp4$bin_max <- tmp_bins[tmp4$bin+1]
       tmp4$bin_mid <- (tmp4$bin_min + tmp4$bin_max) / 2
-      all <- rbind(all, cbind(i, tmp4)) ## RK: this can be done more efficient!
+      all_dat <- dplyr::bind_rows(all_dat, cbind(i, tmp4)) ## RK: this can be done more efficient!
     }
-    sim_km <- all %>%
+    sim_km <- all_dat %>%
       dplyr::group_by_("strat", "bin") %>%
       dplyr::summarise (bin_mid = head(bin_mid,1),
                  bin_min = head(bin_min,1),
@@ -353,6 +358,7 @@ vpc_tte <- function(sim = NULL,
                  step = 0)
   } else {
     sim_km <- NULL
+    tmp_bins <- unique(c(0, sort(unique(obs$time)), max(obs$time)))
   }
 
   if (rtte) {
@@ -429,7 +435,7 @@ vpc_tte <- function(sim = NULL,
                  sim_km = sim_km,
                  obs = obs,
                  obs_km = obs_km,
-                 all = all,
+                 all_dat = all_dat,
                  stratify_pars = stratify_pars,
                  stratify = stratify,
                  stratify_color = stratify_color,
@@ -449,7 +455,7 @@ vpc_tte <- function(sim = NULL,
   if(vpcdb) {
     return(vpc_db)
   } else {
-    pl <- plot_vpc(vpc_db,
+    pl <- vpc::plot_vpc(vpc_db,
                    show = show,
                    vpc_theme = vpc_theme,
                    smooth = smooth,

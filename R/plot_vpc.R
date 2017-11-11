@@ -194,7 +194,7 @@ plot_vpc <- function(db,
         # "strat1" ==> "rtte"
         if(!is.null(db$obs_km)) db$obs_km[[db$stratify_pars[1]]] <- as.factor(db$obs_km$strat)
         if(!is.null(db$sim_km)) db$sim_km[[db$stratify_pars[1]]] <- as.factor(db$sim_km$strat)
-        if(!is.null(db$all)) db$all[[db$stratify_pars[1]]] <- as.factor(db$all$strat)
+        if(!is.null(db$all_dat)) db$all_dat[[db$stratify_pars[1]]] <- as.factor(db$all_dat$strat)
       }
       if(length(db$stratify_pars) == 2) {
         if(!is.null(db$obs_km)) {
@@ -207,13 +207,23 @@ plot_vpc <- function(db,
         }
       }
     }
-
+    if(!is.null(db$obs_km)) db$obs_km$bin_mid <- c(0, diff(db$obs_km$time))
+    
     show$pi_as_area <- TRUE
-    pl <- ggplot2::ggplot(db$sim_km, ggplot2::aes(x=bin_mid, y=qmed))
+    if(!is.null(db$sim_km)) {
+      pl <- ggplot2::ggplot(db$sim_km, ggplot2::aes(x=bin_mid, y=qmed))
+    } else {
+      pl <- ggplot2::ggplot(db$obs_km, ggplot2::aes(x=bin_mid, y=qmed))
+      show$sim_median <- FALSE
+      show$sim_median_ci <- FALSE
+      show$pi_ci <- FALSE
+      show$pi_as_area <- FALSE
+      show$sim_km <- FALSE
+    }
     if(show$sim_km) {
-      db$all$strat_sim <- paste0(db$all$strat, "_", db$all$i)
-      transp <- min(.1, 20*(1/length(unique(db$all$i))))
-      pl <- pl + ggplot2::geom_step(data = db$all, ggplot2::aes(x=bin_mid, y=surv, group=strat_sim), colour=grDevices::rgb(0.2,.53,0.796, transp))
+      db$all_dat$strat_sim <- paste0(db$all_dat$strat, "_", db$all_dat$i)
+      transp <- min(.1, 20*(1/length(unique(db$all_dat$i))))
+      pl <- pl + ggplot2::geom_step(data = db$all_dat, ggplot2::aes(x=bin_mid, y=surv, group=strat_sim), colour=grDevices::rgb(0.2,.53,0.796, transp))
     }
     if(show$pi_as_area) {
       if(smooth) {
@@ -261,7 +271,7 @@ plot_vpc <- function(db,
         ggplot2::aes(x=time, ymin=lower, ymax=upper, group=strat), 
         fill=vpc_theme$obs_ci_fill, colour = NA)
     }
-    if (!is.null(db$obs) && show$obs_dv) {
+    if (!is.null(db$obs)) {
       chk_tbl <- db$obs_km %>%
         dplyr::group_by(strat) %>%
         dplyr::summarise(t = length(time))

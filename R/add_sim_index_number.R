@@ -3,9 +3,10 @@
 #' @description Add simulation index number to simulation when not present
 #' @param sim a data.frame containing the simulation data
 #' @param id character specifying the column name in the data.frame
-add_sim_index_number <- function (sim, id = "id") { # for multiple simulations in a single dataframe, add an index number for every simulation
-  if ("sim" %in% colnames(sim)) {   # Keep simulation index column if already present
-      return(sim$sim)
+#' @param sim_label label to indicate simulation index (if available)
+add_sim_index_number <- function (sim, id = "id", sim_label = "sim") { # for multiple simulations in a single dataframe, add an index number for every simulation
+  if(!is.null(sim_label) && sim_label %in% colnames(sim)) {   # Keep simulation index column if already present
+    return(sim[[sim_label]])
   }
   sim[[id]] <- as.num(sim[[id]])
   sim_id <- cumsum(unlist(sapply(rle(sim[[id]])$lengths, FUN = function(w) seq(length(w), w, 1)))<2)

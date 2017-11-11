@@ -1,3 +1,9 @@
+msg <- function(txt, verbose = FALSE) {
+  if(verbose) {
+    message(txt)
+  }
+}
+
 add_recurs <- function(x, n, max) {
   x <- x + n
   n <- n + 1
