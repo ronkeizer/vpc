@@ -126,7 +126,7 @@ plot_vpc <- function(db,
     bdat <- data.frame(cbind(x=db$bins, y=NA))
     if(show$bin_sep && !idv_as_factor) {
       pl <- pl +
-        ggplot2::geom_rug(data=bdat, sides = "t", ggplot2::aes(x = x, y=y), colour=vpc_theme$bin_separators_color)
+        ggplot2::geom_rug(data=bdat, sides = "t", ggplot2::aes(x = x, y = y), colour=vpc_theme$bin_separators_color)
     }
     pl <- pl + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
     if (log_x) {
@@ -255,7 +255,8 @@ plot_vpc <- function(db,
       }
     }
     if(!is.null(db$cens_dat) && nrow(db$cens_dat)>0) {
-      pl <- pl + ggplot2::geom_point(data=db$cens_dat, ggplot2::aes(x=time, y=y), shape="|", size=2.5)
+      pl <- pl + ggplot2::geom_point(data=db$cens_dat, 
+                                     ggplot2::aes(x=time, y = y), shape="|", size=2.5)
     }
     if(show$sim_median) {
       if (smooth) {
@@ -317,7 +318,7 @@ plot_vpc <- function(db,
     if (show$bin_sep) {
       if(!(class(db$bins) == "logical" && db$bins == FALSE)) {
         bdat <- data.frame(cbind(x = db$tmp_bins, y = NA))
-        pl <- pl + ggplot2::geom_rug(data=bdat, sides = "t", ggplot2::aes(x = x, y=y, group=NA), colour=vpc_theme$bin_separators_color)
+        pl <- pl + ggplot2::geom_rug(data=bdat, sides = "t", ggplot2::aes(x = x, y = y, group=NA), colour=vpc_theme$bin_separators_color)
       }
     }
     if(is.null(xlab)) {
@@ -342,7 +343,6 @@ plot_vpc <- function(db,
                                  colour = ggplot2::guide_legend(title=db$stratify_color[1]))
     }
     pl <- pl + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
-    # pl <- pl + theme_plain()
     return(pl)
   }
 }

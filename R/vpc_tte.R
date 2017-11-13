@@ -77,6 +77,7 @@ vpc_tte <- function(sim = NULL,
                     labeller = NULL,
                     verbose = FALSE,
                     vpcdb = FALSE) {
+  message("Initializing.")
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
   }
@@ -100,9 +101,9 @@ vpc_tte <- function(sim = NULL,
     software = "nonmem"
   }
   if (!is.null(obs)) {
-    software_type <- vpc:::guess_software(software, obs)
+    software_type <- guess_software(software, obs)
   } else {
-    software_type <- vpc:::guess_software(software, sim)
+    software_type <- guess_software(software, sim)
   }
 
   if(is.null(sim)) {
@@ -124,10 +125,10 @@ vpc_tte <- function(sim = NULL,
   }
   if(!is.null(stratify_pars)) {
     if(!is.null(obs)) {
-      vpc:::check_stratification_columns_available(obs, stratify_pars, "observation")
+      check_stratification_columns_available(obs, stratify_pars, "observation")
     }
     if(!is.null(sim)) {
-      vpc:::check_stratification_columns_available(sim, stratify_pars, "simulation")
+      check_stratification_columns_available(sim, stratify_pars, "simulation")
     }
   }
 
@@ -144,7 +145,7 @@ vpc_tte <- function(sim = NULL,
   }
 
   ## define column names
-  cols <- vpc:::define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
+  cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
   if(!is.null(obs)) {
     old_class <- class(obs)
     class(obs) <- c(software_type, old_class)
@@ -156,10 +157,10 @@ vpc_tte <- function(sim = NULL,
 
   ## remove EVID != 0 / MDV != 0
   if(!is.null(obs)) {
-    obs <- vpc:::filter_dv(obs, verbose)
+    obs <- filter_dv(obs, verbose)
   }
   if(!is.null(sim)) {
-    sim <- vpc:::filter_dv(sim, verbose)
+    sim <- filter_dv(sim, verbose)
   }
 
   ## stratification
@@ -213,24 +214,26 @@ vpc_tte <- function(sim = NULL,
 #       obs[obs$dv == 0,]$rtte <- obs[obs$dv == 0,]$rtte + 1 # these censored points actually "belong" to the next rtte strata
       stratify_pars <- c(stratify_pars, "rtte")
     } else {
-      obs <- obs %>% 
-        dplyr::filter(dv == 1) %>% 
-        filter(!duplicated(id))
+      obs <- obs %>%
+        dplyr::group_by_("id") %>%
+        dplyr::mutate(last_obs = 1*(1:length(time) == length(time)), repeat_obs = 1*(cumsum(dv) > 1)) %>%
+        dplyr::filter(dv == 1 | last_obs == 1) %>%
+        dplyr::filter(!duplicated(id))
       obs$rtte <- 1
     }
 
     # add stratification column and comput KM curve for observations
-    obs <- vpc:::add_stratification(obs, stratify_pars)
+    obs <- add_stratification(obs, stratify_pars)
     if(!is.null(kmmc) && kmmc %in% names(obs)) {
-      obs_km <- vpc::compute_kmmc(obs, strat = "strat", reverse_prob = reverse_prob, kmmc=kmmc)
+      obs_km <- compute_kmmc(obs, strat = "strat", reverse_prob = reverse_prob, kmmc=kmmc)
     } else {
       if(show$obs_ci) {
         if(length(ci) == 2 && (round(ci[1],3) != round((1-ci[2]),3))) {
           stop("Sorry, only symmetric confidence intervals can be computed. Please adjust the ci argument.")
         }
-        obs_km <- vpc:::compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob, ci = ci)
+        obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob, ci = ci)
       } else {
-        obs_km <- vpc:::compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob)
+        obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob)
       }
     }
   } else { # get bins from sim
@@ -273,7 +276,7 @@ vpc_tte <- function(sim = NULL,
       sim[sim$cens == 1,]$dv <- 0
     }
     # add sim index number
-    sim$sim <- vpc:::add_sim_index_number(sim, id = cols$sim$id, sim_label = cols$sim$sim)
+    sim$sim <- add_sim_index_number(sim, id = cols$sim$id, sim_label = cols$sim$sim)
 
     # set last_observation and repeat_obs per sim&id
     sim <- sim %>%
@@ -317,16 +320,17 @@ vpc_tte <- function(sim = NULL,
         tmp_bins <- unique(c(0, bins, max(obs$time)))
       }
     }
-    pb <- txtProgressBar(min = 1, max = n_sim)
+    message("Calculating simulation stats.")
+    pb <- utils::txtProgressBar(min = 1, max = n_sim)
     for (i in 1:n_sim) {
-      setTxtProgressBar(pb, i)
+      utils::setTxtProgressBar(pb, i)
       tmp <- sim %>% dplyr::filter(sim == i)
-      tmp2 <- vpc:::add_stratification(tmp %>%
+      tmp2 <- add_stratification(tmp %>%
                                  dplyr::arrange_("id", "time"), stratify_pars)
       if(!is.null(kmmc) && kmmc %in% names(obs)) {
-        tmp3 <- vpc:::compute_kmmc(tmp2, strat = "strat", reverse_prob = reverse_prob, kmmc = kmmc)
+        tmp3 <- compute_kmmc(tmp2, strat = "strat", reverse_prob = reverse_prob, kmmc = kmmc)
       } else {
-        tmp3 <- vpc:::compute_kaplan(tmp2, strat = "strat", reverse_prob = reverse_prob)
+        tmp3 <- compute_kaplan(tmp2, strat = "strat", reverse_prob = reverse_prob)
       }
       tmp3$time_strat <- paste0(tmp3$time, "_", tmp3$strat)
       tmp4 <- expand.grid(time = c(0, unique(sim$time)), surv=NA, lower=NA, upper=NA, 
@@ -455,7 +459,8 @@ vpc_tte <- function(sim = NULL,
   if(vpcdb) {
     return(vpc_db)
   } else {
-    pl <- vpc::plot_vpc(vpc_db,
+    message("\nPlotting.")
+    pl <- plot_vpc(vpc_db,
                    show = show,
                    vpc_theme = vpc_theme,
                    smooth = smooth,
