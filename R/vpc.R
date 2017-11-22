@@ -149,7 +149,13 @@ vpc <- function(sim = NULL,
   if(!is.null(uloq) && !is.null(lloq)) {
     stop("Sorry, currently the vpc function cannot handle both upper and lower limit of quantification. Please specify either `lloq` or `uloq`.")
   }
-
+  ## Prediction-correction warning
+  if((!is.null(lloq) || !is.null(uloq)) && pred_corr) {
+    message("Prediction-correction cannot be used together with censored data (<LLOQ or >ULOQ). Not taking censoring into account!")
+    lloq <- NULL
+    uloq <- NULL
+  }
+  
   ## parse data into specific format
   if(!is.null(obs)) {
     if(verbose) {
@@ -178,17 +184,15 @@ vpc <- function(sim = NULL,
     }
   }
   bins <- unique(bins)
-  if(verbose) {
-    message(paste0("Binning: ", paste(bins, collapse=' ')))
-  }
+  if(verbose) message(paste0("Binning: ", paste(bins, collapse=' ')))
   if(!is.null(obs)) {
     obs <- bin_data(obs, bins, "idv", labeled = labeled_bins)
   }
   if(!is.null(sim)) {
     sim <- bin_data(sim, bins, "idv", labeled = labeled_bins)
   }
-  if (pred_corr) {
-    if (!is.null(obs) & !cols$obs$pred %in% names(obs)) {
+  if(pred_corr) {
+    if(!is.null(obs) & !cols$obs$pred %in% names(obs)) {
       msg("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...", verbose)
       if (!cols$obs$pred %in% names(sim)) {
         stop("Error: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
@@ -203,35 +207,29 @@ vpc <- function(sim = NULL,
       }
     }
     if(!is.null(obs)) {
-      obs$pred = obs[[cols$obs$pred]]
+      obs$pred <- obs[[cols$obs$pred]]
     }
     if(!is.null(sim)) {
       sim$pred <- sim[[cols$sim$pred]]
     }
   }
-  if (!is.null(obs)) {
-    if (pred_corr) {
-      if(verbose) {
-          message("Performing prediction-correction on observed data...")
-      }
+  if(!is.null(obs)) {
+    if(pred_corr) {
+      if(verbose) message("Performing prediction-correction on observed data...")
       obs <- obs %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(as.num(pred)))
       obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
     }
   }
-  if (!is.null(sim)) {
+  if(!is.null(sim)) {
     sim$sim <- add_sim_index_number(sim, id = "id")
-    if (pred_corr) {
-      if(verbose) {
-          message("Performing prediction-correction on simulated data...")
-      }
+    if(pred_corr) {
+      if(verbose) message("Performing prediction-correction on simulated data...")
       sim <- sim %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(pred))
       sim[sim$pred != 0,]$dv <- pred_corr_lower_bnd + (sim[sim$pred != 0,]$dv - pred_corr_lower_bnd) * (sim[sim$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (sim[sim$pred != 0,]$pred - pred_corr_lower_bnd)
     }
   }
-  if (!is.null(sim)) {
-    if(verbose) {
-      message("Calculating statistics for simulated data...")
-    }
+  if(!is.null(sim)) {
+    if(verbose) message("Calculating statistics for simulated data...")
     tmp1 <- sim %>% dplyr::group_by(strat, sim, bin)
     aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile(dv, pi[1])),
                                  tmp1 %>% dplyr::summarise(quantile(dv, 0.5 )),
