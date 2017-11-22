@@ -149,27 +149,30 @@ vpc <- function(sim = NULL,
   if(!is.null(uloq) && !is.null(lloq)) {
     stop("Sorry, currently the vpc function cannot handle both upper and lower limit of quantification. Please specify either `lloq` or `uloq`.")
   }
-  ## Prediction-correction warning
-  if((!is.null(lloq) || !is.null(uloq)) && pred_corr) {
-    message("Prediction-correction cannot be used together with censored data (<LLOQ or >ULOQ). Not taking censoring into account!")
-    lloq <- NULL
-    uloq <- NULL
-  }
-  
+
   ## parse data into specific format
   if(!is.null(obs)) {
     if(verbose) {
       message("Parsing observed data...")
     }
     obs <- filter_dv(obs, verbose)
-    obs <- format_vpc_input_data(obs, cols$obs, lloq, uloq, stratify, bins, log_y, log_y_min, "observed", verbose)
+    obs <- format_vpc_input_data(obs, cols$obs, lloq, uloq, stratify, bins, log_y, log_y_min, "observed", verbose, pred_corr)
   }
   if(!is.null(sim)) {
     if(verbose) {
       message("Parsing simulated data...")
     }
     sim <- filter_dv(sim, verbose)
-    sim <- format_vpc_input_data(sim, cols$sim, NULL, NULL, stratify, bins, log_y, log_y_min, "simulated", verbose)
+    if((!is.null(lloq) || !is.null(uloq)) && pred_corr) {
+      message("Prediction-correction cannot be used together with censored data (<LLOQ or >ULOQ). VPC plot will be shown for non-censored data only!")
+      sim <- format_vpc_input_data(sim, cols$sim, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated", verbose, pred_corr)
+    } else {
+      sim <- format_vpc_input_data(sim, cols$sim, NULL, NULL, stratify, bins, log_y, log_y_min, "simulated", verbose, pred_corr)
+    }
+  }
+  if(pred_corr) {
+    uloq <- NULL
+    lloq <- NULL
   }
 
   labeled_bins <- bins[1] == "percentiles"

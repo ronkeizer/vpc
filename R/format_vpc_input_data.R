@@ -1,4 +1,4 @@
-format_vpc_input_data <- function(dat, cols, lloq, uloq, strat, bins, log_y, log_y_min, what = "observed", verbose = FALSE) {
+format_vpc_input_data <- function(dat, cols, lloq, uloq, strat, bins, log_y, log_y_min, what = "observed", verbose = FALSE, pred_corr = FALSE) {
   if(cols[["id"]] %in% colnames(dat)) {
     if ("id" %in% colnames(dat) &! cols$id == "id") {
       colnames(dat)[match("id", colnames(dat))] <- "id.old"
@@ -26,8 +26,13 @@ format_vpc_input_data <- function(dat, cols, lloq, uloq, strat, bins, log_y, log
   if(is.na(match("idv", colnames(dat)))[1]) {
     stop (paste0("No column for indepentent variable found in ", what, " data, can't continue! Available columns: ", paste(colnames(dat), collapse = " ")))
   }
-  if (!is.null(uloq)) { dat$dv[dat$dv > uloq] <- NA }
-  if (!is.null(lloq)) { dat$dv[dat$dv < lloq] <- NA }
+  if(pred_corr) {
+    if (!is.null(uloq)) { dat$dv[dat$dv > uloq] <- uloq }
+    if (!is.null(lloq)) { dat$dv[dat$dv < lloq] <- lloq }
+  } else {
+    if (!is.null(uloq)) { dat$dv[dat$dv > uloq] <- NA }
+    if (!is.null(lloq)) { dat$dv[dat$dv < lloq] <- NA }
+  }
   if (log_y) {
     dat$dv[dat$dv < log_y_min] <- log_y_min
   }
