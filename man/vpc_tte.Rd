@@ -8,10 +8,10 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
   rtte_calc_diff = TRUE, events = NULL, bins = FALSE, n_bins = 10,
   software = "auto", obs_cols = NULL, sim_cols = NULL, kmmc = NULL,
   reverse_prob = FALSE, stratify = NULL, stratify_color = NULL,
-  ci = c(0.05, 0.95), plot = FALSE, xlab = NULL, ylab = NULL,
-  show = NULL, as_percentage = TRUE, title = NULL, smooth = FALSE,
-  vpc_theme = NULL, facet = "wrap", labeller = NULL, verbose = FALSE,
-  vpcdb = FALSE)
+  ci = c(0.05, 0.95), plot = FALSE, xlab = "Time",
+  ylab = "Survival (\%)", show = NULL, as_percentage = TRUE,
+  title = NULL, smooth = FALSE, vpc_theme = NULL, facet = "wrap",
+  labeller = NULL, verbose = FALSE, vpcdb = FALSE)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
@@ -48,9 +48,9 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
 
 \item{plot}{Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.}
 
-\item{xlab}{ylab as numeric vector of size 2}
+\item{xlab}{label for x-axis}
 
-\item{ylab}{ylab as numeric vector of size 2}
+\item{ylab}{label for y-axis}
 
 \item{show}{what to show in VPC (obs_ci, obs_median, sim_median, sim_median_ci)}
 

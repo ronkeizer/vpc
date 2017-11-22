@@ -22,8 +22,8 @@
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param plot Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.
 #' @param as_percentage Show y-scale from 0-100 percent? TRUE by default, if FALSE then scale from 0-1.
-#' @param xlab ylab as numeric vector of size 2
-#' @param ylab ylab as numeric vector of size 2
+#' @param xlab label for x-axis
+#' @param ylab label for y-axis
 #' @param title title
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
@@ -66,8 +66,8 @@ vpc_tte <- function(sim = NULL,
                     stratify_color = NULL,
                     ci = c(0.05, 0.95),
                     plot = FALSE,
-                    xlab = NULL,
-                    ylab = NULL,
+                    xlab = "Time",
+                    ylab = "Survival (%)",
                     show = NULL,
                     as_percentage = TRUE,
                     title = NULL,
@@ -77,9 +77,11 @@ vpc_tte <- function(sim = NULL,
                     labeller = NULL,
                     verbose = FALSE,
                     vpcdb = FALSE) {
-  message("Initializing.")
   if(is.null(obs) & is.null(sim)) {
     stop("At least a simulation or an observation dataset are required to create a plot!")
+  }
+  if(!is.null(bins) && bins != FALSE) {
+    message("Binning is not recommended for `vpc_tte()`, plot might not show correctly!")
   }
   if(!is.null(kmmc)) {
     if(!kmmc %in% names(obs)) {
@@ -91,6 +93,7 @@ vpc_tte <- function(sim = NULL,
       stop(paste0("Specified covariate ", kmmc, " not found among column names in simulated data."))
     }
   }
+  message("Initializing.")
   if(!is.null(psn_folder)) {
     if(!is.null(obs)) {
       obs <- vpc::read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
@@ -433,6 +436,9 @@ vpc_tte <- function(sim = NULL,
     show$obs_dv <- FALSE
   }
   show$pi <- TRUE
+  if(!is.null(kmmc)) {
+    ylab <- paste0("Mean (", db$kmmc, ")")
+  }
 
   # plotting starts here
   vpc_db <- list(sim = sim,
@@ -452,7 +458,9 @@ vpc_tte <- function(sim = NULL,
                  rtte = rtte,
                  type = "time-to-event",
                  as_percentage = as_percentage,
-                 tmp_bins = tmp_bins)
+                 tmp_bins = tmp_bins,
+                 xlab = xlab,
+                 ylab = ylab)
   if(is.null(xlab)) {
     xlab <- "Time (days)"
   }
@@ -465,9 +473,7 @@ vpc_tte <- function(sim = NULL,
                    vpc_theme = vpc_theme,
                    smooth = smooth,
                    log_y = FALSE,
-                   title = title,
-                   xlab = xlab,
-                   ylab = ylab)
+                   title = title)
     return(pl)
   }
 }

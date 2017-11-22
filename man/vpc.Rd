@@ -52,9 +52,9 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{log_y_min}{minimal value when using log_y argument. Default is 1e-3.}
 
-\item{xlab}{ylab as numeric vector of size 2}
+\item{xlab}{label for x axis}
 
-\item{ylab}{ylab as numeric vector of size 2}
+\item{ylab}{label for y axis}
 
 \item{title}{title}
 

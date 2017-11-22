@@ -54,8 +54,8 @@ vpc_cens <- function(sim = NULL,
                      uloq = NULL,
                      lloq = NULL,
                      plot = FALSE,
-                     xlab = NULL,
-                     ylab = NULL,
+                     xlab = "Time",
+                     ylab = "Probability of <LOQ",
                      title = NULL,
                      smooth = TRUE,
                      vpc_theme = NULL,
@@ -242,7 +242,9 @@ vpc_cens <- function(sim = NULL,
                  bins = bins,
                  facet = facet,
                  labeller = labeller,
-                 type = "censored")
+                 type = "censored",
+                 xlab = xlab,
+                 ylab = ylab)
   if(vpcdb) {
     return(vpc_db)
   } else {
@@ -251,9 +253,7 @@ vpc_cens <- function(sim = NULL,
                    vpc_theme = vpc_theme,
                    smooth = smooth,
                    log_y = FALSE,
-                   title = title,
-                   xlab = xlab,
-                   ylab = ylab)
+                   title = title)
     return(pl)
   }
 }

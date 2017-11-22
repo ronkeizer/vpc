@@ -10,8 +10,8 @@
 #' @param log_x Boolean indicting whether x-axis should be shown as logarithmic. Default is FALSE.
 #' @param log_y Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.
 #' @param title title
-#' @param xlab ylab as numeric vector of size 2
-#' @param ylab ylab as numeric vector of size 2
+#' @param xlab label for x axis 
+#' @param ylab label for y axis
 #' @param verbose verbosity (T/F)
 #' @export
 #' @seealso \link{sim_data}, \link{vpc_cens}, \link{vpc_tte}, \link{vpc_cat}
@@ -27,9 +27,9 @@ plot_vpc <- function(db,
                      smooth = TRUE,
                      log_x = FALSE,
                      log_y = FALSE,
-                     title = NULL,
-                     xlab = "Time",
+                     xlab = NULL,
                      ylab = NULL,
+                     title = NULL,
                      verbose = FALSE) {
   if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
     vpc_theme <- new_vpc_theme()
@@ -128,7 +128,16 @@ plot_vpc <- function(db,
       pl <- pl +
         ggplot2::geom_rug(data=bdat, sides = "t", ggplot2::aes(x = x, y = y), colour=vpc_theme$bin_separators_color)
     }
-    pl <- pl + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
+    if(!is.null(xlab)) {
+      pl <- pl + ggplot2::xlab(xlab)  
+    } else {
+      pl <- pl + ggplot2::xlab(db$xlab)  
+    }
+    if(!is.null(ylab)) {
+      pl <- pl + ggplot2::ylab(ylab)  
+    } else {
+      pl <- pl + ggplot2::ylab(db$ylab)  
+    }
     if (log_x) {
       if(!idv_as_factor) pl <- pl + ggplot2::scale_x_log10()
       else warning("log_x option has no effect when the IDV is a factor ")
@@ -289,60 +298,52 @@ plot_vpc <- function(db,
       }
     }
 
-    if(!is.null(db$stratify)) {
+    if(!is.null(db$stratify) || db$rtte) {
       if(is.null(db$labeller)) db$labeller <- ggplot2::label_both
       if (length(db$stratify_pars) == 1 | db$rtte) {
         if (db$facet == "wrap") {
           pl + ggplot2::facet_wrap(~sex)
-          pl <- pl + ggplot2::facet_wrap(stats::reformulate(db$stratify[1], NULL),
+          pl <- pl + ggplot2::facet_wrap(stats::reformulate(db$stratify_pars[1], NULL),
                                          labeller = db$labeller)
         } else {
-          if(length(grep("row", db$facet))>0) {
-            pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify[1], NULL),
+          if(length(grep("row", db$facet)) > 0) {
+            pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify_pars[1], NULL),
                                            labeller = db$labeller)
           } else {
-            pl <- pl + ggplot2::facet_grid(stats::reformulate(".", db$stratify[1]),
+            pl <- pl + ggplot2::facet_grid(stats::reformulate(".", db$stratify_pars[1]),
                                            labeller = db$labeller)
           }
         }
       } else {
-        if(length(grep("row", db$facet))>0) {
-          pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify[1], db$stratify[2]),
+        if(length(grep("row", db$facet)) > 0) {
+          pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify_pars[1], db$stratify_pars[2]),
                                          labeller = db$labeller)
         } else {
-          pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify[2], db$stratify[1]),
+          pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify_pars[2], db$stratify_pars[1]),
                                          labeller = db$labeller)
         }
       }
     }
-    if (show$bin_sep) {
+    if(show$bin_sep) {
       if(!(class(db$bins) == "logical" && db$bins == FALSE)) {
         bdat <- data.frame(cbind(x = db$tmp_bins, y = NA))
         pl <- pl + ggplot2::geom_rug(data=bdat, sides = "t", ggplot2::aes(x = x, y = y, group=NA), colour=vpc_theme$bin_separators_color)
-      }
-    }
-    if(is.null(xlab)) {
-      xlab <- "Time"
-    }
-    if(is.null(ylab)) {
-      if(is.null(db$kmmc)) {
-        if(db$as_percentage && is.null(db$kmmc)) {
-          percent <- seq(from=0, to=100, by=25)
-          pl <- pl +
-            ggplot2::scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1), labels = percent)
-          ylab <- "Survival (%)"
-        } else {
-          ylab <- "Survival"
-        }
-      } else {
-        ylab <- paste0("Mean (", db$kmmc, ")")
       }
     }
     if(!is.null(db$stratify_color)) {
       pl <- pl + ggplot2::guides(fill = ggplot2::guide_legend(title=db$stratify_color[1]),
                                  colour = ggplot2::guide_legend(title=db$stratify_color[1]))
     }
-    pl <- pl + ggplot2::xlab(xlab) + ggplot2::ylab(ylab)
+    if(!is.null(xlab)) {
+      pl <- pl + ggplot2::xlab(xlab)  
+    } else {
+      pl <- pl + ggplot2::xlab(db$xlab)  
+    }
+    if(!is.null(ylab)) {
+      pl <- pl + ggplot2::ylab(ylab)  
+    } else {
+      pl <- pl + ggplot2::ylab(db$ylab)  
+    }
     return(pl)
   }
 }

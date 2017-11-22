@@ -16,8 +16,8 @@
 #' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.
 #' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.
 #' @param plot Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.
-#' @param xlab ylab as numeric vector of size 2
-#' @param ylab ylab as numeric vector of size 2
+#' @param xlab label for x-axis
+#' @param ylab label for y-axis
 #' @param title title
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
@@ -216,7 +216,9 @@ vpc_cat  <- function(sim = NULL,
                  bins = bins,
                  facet = facet,
                  labeller = labeller,
-                 type = "categorical")
+                 type = "categorical",
+                 xlab = xlab,
+                 ylab = ylab)
   if(vpcdb) {
     return(vpc_db)
   } else {
@@ -225,9 +227,7 @@ vpc_cat  <- function(sim = NULL,
                    vpc_theme = vpc_theme,
                    smooth = smooth,
                    log_y = FALSE,
-                   title = title,
-                   xlab = xlab,
-                   ylab = ylab)
+                   title = title)
     pl <- pl + ggplot2::ylim(c(0,1))
     return(pl)
   }

@@ -20,8 +20,8 @@
 #' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.
 #' @param log_y Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.
 #' @param log_y_min minimal value when using log_y argument. Default is 1e-3.
-#' @param xlab ylab as numeric vector of size 2
-#' @param ylab ylab as numeric vector of size 2
+#' @param xlab label for x axis
+#' @param ylab label for y axis
 #' @param title title
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
@@ -322,7 +322,9 @@ vpc <- function(sim = NULL,
                  labeller = labeller,
                  lloq = lloq,
                  uloq = uloq,
-                 type = "continuous")
+                 type = "continuous",
+                 xlab = xlab,
+                 ylab = ylab)
   if(vpcdb) {
     return(vpc_db)
   } else {
@@ -331,9 +333,7 @@ vpc <- function(sim = NULL,
                    vpc_theme = vpc_theme,
                    smooth = smooth,
                    log_y = log_y,
-                   title = title,
-                   xlab = xlab,
-                   ylab = ylab)
+                   title = title)
     return(pl)
   }
 }
