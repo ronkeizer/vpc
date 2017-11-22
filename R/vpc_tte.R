@@ -437,7 +437,7 @@ vpc_tte <- function(sim = NULL,
   }
   show$pi <- TRUE
   if(!is.null(kmmc)) {
-    ylab <- paste0("Mean (", db$kmmc, ")")
+    ylab <- paste0("Mean (", kmmc, ")")
   }
 
   # plotting starts here
