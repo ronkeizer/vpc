@@ -13,4 +13,4 @@ tmp$sim$race <- race
 v1 <- vpc(sim = tmp$sim, obs = tmp$obs, stratify = "race",
           facet = "wrap", vpcdb = F, labeller = ggplot2::label_both)
 assert("plot succeeded", "ggplot" %in% class(v1))
-assert("facets succeeded", length(v1$facet$params$facets) == 1)
+assert("facets succeeded", vpc:::is_equal(length(v1$facet$params$facets), 1))

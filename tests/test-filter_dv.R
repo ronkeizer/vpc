@@ -16,8 +16,7 @@ class(nonmem_df)       <- c("nonmem", "data.frame")
 class(nonmem_filtered_mdv) <- c("nonmem", "data.frame")
 class(nonmem_filtered_evid) <- c("nonmem", "data.frame")
 
-assert("filtering values for nonmem works properly", vpc:::filter_dv(nonmem_mdv) == nonmem_filtered_mdv)
-assert("filtering values for nonmem works properly", vpc:::filter_dv(nonmem_evid) == nonmem_filtered_evid)
-assert("filtering values for nonmem works properly", vpc:::filter_dv(nonmem) == nonmem_filtered)
-assert("filtering values for nonmem works properly", vpc:::filter_dv(nonmem_df) == nonmem_df)
-
+assert("filtering values for nonmem works properly", vpc:::is_equal(vpc:::filter_dv(nonmem_mdv), nonmem_filtered_mdv, relative=F))
+assert("filtering values for nonmem works properly", vpc:::is_equal(vpc:::filter_dv(nonmem_evid), nonmem_filtered_evid, relative=F))
+assert("filtering values for nonmem works properly", vpc:::is_equal(vpc:::filter_dv(nonmem), nonmem_filtered, relative=F))
+assert("filtering values for nonmem works properly", vpc:::is_equal(vpc:::filter_dv(nonmem_df), nonmem_df, relative=F))
