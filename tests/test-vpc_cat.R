@@ -11,12 +11,10 @@ obj <- vpc_cat(sim = tmp$sim, obs = tmp$obs, vpcdb = TRUE)
 
 assert("vpc_cat returned proper object", all(c("obs", "sim", "aggr_obs", "vpc_dat", "stratify", "bins") %in% names(obj)))
 
-assert("vpc_cat parsed data correctly", 
-  sum(obj$vpc_dat$q50.med) == 11 &&
-  sum(obj$vpc_dat$q50.low) == 9.579 &&
-  sum(obj$vpc_dat$q50.up) == 12.401 &&
-  sum(obj$vpc_dat$bin_mid) == 122.25 &&
-  sum(obj$aggr_obs$obs50) == 11
-)  
+assert("vpc_cat parsed data correctly", vpc:::is_equal(sum(obj$vpc_dat$q50.med), 11))
+assert("vpc_cat parsed data correctly", vpc:::is_equal(sum(obj$vpc_dat$q50.low), 9.579))
+assert("vpc_cat parsed data correctly", vpc:::is_equal(sum(obj$vpc_dat$q50.up), 12.401))
+assert("vpc_cat parsed data correctly", vpc:::is_equal(sum(obj$vpc_dat$bin_mid), 122.25))
+assert("vpc_cat parsed data correctly", vpc:::is_equal(sum(obj$aggr_obs$obs50), 11))
 
 assert("vpc_cat plot succeeded", "ggplot" %in% class(plot_vpc(obj)))

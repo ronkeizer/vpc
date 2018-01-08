@@ -10,19 +10,19 @@ single_correct<- c("TRT")
 not_exist <- c("GENDER")
 some_exist <- c("GENOTYPE", "RACE", "GENDER")
 
-assert("diffs captured properly", 
-   length(setdiff(some_exist, col_names)) == 1
+assert("diffs captured properly",
+   vpc:::is_equal(length(setdiff(some_exist, col_names)), 1)
 )
-assert("diffs captured properly", 
-   length(setdiff(all_correct, col_names)) == 0
+assert("diffs captured properly",
+   vpc:::is_equal(length(setdiff(all_correct, col_names)), 0, relative = F)
 )
-assert("diffs captured properly", 
-   length(setdiff(not_exist, col_names)) == 1
+assert("diffs captured properly",
+   vpc:::is_equal(length(setdiff(not_exist, col_names)), 1)
 )
-assert("diffs captured properly", 
-   length(setdiff(single_correct, col_names)) == 0
+assert("diffs captured properly",
+   vpc:::is_equal(length(setdiff(single_correct, col_names)), 0, relative=F)
 )
-# expect_error(check_stratification_columns_available(mock_dat, some_exist)) 
+# expect_error(check_stratification_columns_available(mock_dat, some_exist))
 
 assert("expectation throws error if input not a named software type",
   vpc:::check_stratification_columns_available(mock_dat, all_correct)

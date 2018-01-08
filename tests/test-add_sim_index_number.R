@@ -23,4 +23,5 @@ sim <- sim_data(obs, # the design of the dataset
 
 s <- vpc:::add_sim_index_number(sim)
 h <- hist(s)
-assert("all simulated dataset-indices of equal length", length(unique(h$counts)) == 1)
+assert("all simulated dataset-indices of equal length",
+  vpc:::is_equal(length(unique(h$counts)), 1))
