@@ -11,3 +11,7 @@ R CMD check succeeded
 
 ## Downstream dependencies
 None
+
+## Current release notes:
+- Update tests to include tolerance in numerical results
+- Minor fixes in vpc functions
