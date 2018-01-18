@@ -5,6 +5,7 @@ misc/
 .travis.yml
 .RData
 .Rhistory
+.git/
 README.MD
 cran-comments.md
 revdep
