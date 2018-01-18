@@ -8,7 +8,7 @@
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
-#' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
+#' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred", "irep")
 #' @param show what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
 #' @param software name of software platform using (e.g. nonmem, phoenix)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
@@ -224,7 +224,7 @@ vpc <- function(sim = NULL,
     }
   }
   if(!is.null(sim)) {
-    sim$sim <- add_sim_index_number(sim, id = "id")
+    sim$sim <- add_sim_index_number(sim, id = "id", sim_label=sim_cols$irep)
     if(pred_corr) {
       if(verbose) message("Performing prediction-correction on simulated data...")
       sim <- sim %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(pred))
