@@ -70,19 +70,19 @@ plot_vpc <- function(db,
       if(show$pi_as_area) {
         if (smooth) {
           pl <- pl +
-            ggplot2::geom_ribbon(ggplot2::aes(x=bin_mid, y=q50.med, ymin=q5.med, ymax=q95.med), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)
+            ggplot2::geom_ribbon(ggplot2::aes(x=bin_mid, ymin=q5.med, ymax=q95.med), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)
         } else {
           pl <- pl +
-            ggplot2::geom_rect(ggplot2::aes(xmin=bin_min, xmax=bin_max, y=q50.med, ymin=q5.med, ymax=q95.med), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)
+            ggplot2::geom_rect(ggplot2::aes(xmin=bin_min, xmax=bin_max, ymin=q5.med, ymax=q95.med), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)
         }
       } else {
         if(show$sim_median_ci) {
           if (smooth) {
             pl <- pl +
-              ggplot2::geom_ribbon(ggplot2::aes(x=bin_mid, y=q50.med, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)
+              ggplot2::geom_ribbon(ggplot2::aes(x=bin_mid, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)
           } else {
             pl <- pl +
-              ggplot2::geom_rect(ggplot2::aes(xmin=bin_min, xmax=bin_max, y=q50.low, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)
+              ggplot2::geom_rect(ggplot2::aes(xmin=bin_min, xmax=bin_max, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)
           }
         }
         if (show$pi) {
@@ -93,8 +93,8 @@ plot_vpc <- function(db,
         if(show$pi_ci && !is.null(db$vpc_dat$q5.low)) {
           if (smooth) {
             pl <- pl +
-              ggplot2::geom_ribbon(ggplot2::aes(x=bin_mid, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill) +
-              ggplot2::geom_ribbon(ggplot2::aes(x=bin_mid, y=q95.low, ymin=q95.low, ymax=q95.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill)
+              ggplot2::geom_ribbon(ggplot2::aes(x=bin_mid, ymin=q5.low, ymax=q5.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill) +
+              ggplot2::geom_ribbon(ggplot2::aes(x=bin_mid, ymin=q95.low, ymax=q95.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill)
           } else {
             pl <- pl +
               ggplot2::geom_rect(ggplot2::aes(xmin=bin_min, xmax=bin_max, y=q5.low, ymin=q5.low, ymax=q5.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill) +
@@ -238,11 +238,11 @@ plot_vpc <- function(db,
       if(smooth) {
         if(!is.null(db$stratify_color)) {
           pl <- pl + ggplot2::geom_ribbon(data = db$sim_km, 
-                                          ggplot2::aes(min = qmin, max=qmax, y=qmed, fill = get(db$stratify_color[1])), 
+                                          ggplot2::aes(min = qmin, max=qmax, fill = get(db$stratify_color[1])), 
                                           alpha=vpc_theme$sim_median_alpha)
         } else {
           pl <- pl + ggplot2::geom_ribbon(data = db$sim_km, 
-                                          ggplot2::aes(min = qmin, max=qmax, y=qmed), 
+                                          ggplot2::aes(ymin = qmin, ymax=qmax), 
                                           fill = vpc_theme$sim_median_fill, 
                                           alpha=vpc_theme$sim_median_alpha)
         }
