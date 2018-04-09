@@ -68,7 +68,39 @@ vpc <- function(sim = NULL,
                 facet = "wrap",
                 labeller = NULL,
                 vpcdb = FALSE,
-                verbose = FALSE) {
+                verbose = FALSE){
+    UseMethod("vpc");
+}
+#'@rdname vpc
+#'@export
+vpc.default <- function(sim = NULL,
+                        obs = NULL,
+                        psn_folder = NULL,
+                        bins = "jenks",
+                        n_bins = "auto",
+                        bin_mid = "mean",
+                        obs_cols = NULL,
+                        sim_cols = NULL,
+                        software = "auto",
+                        show = NULL,
+                        stratify = NULL,
+                        pred_corr = FALSE,
+                        pred_corr_lower_bnd = 0,
+                        pi = c(0.05, 0.95),
+                        ci = c(0.05, 0.95),
+                        uloq = NULL,
+                        lloq = NULL,
+                        log_y = FALSE,
+                        log_y_min = 1e-3,
+                        xlab = NULL,
+                        ylab = NULL,
+                        title = NULL,
+                        smooth = TRUE,
+                        vpc_theme = NULL,
+                        facet = "wrap",
+                        labeller = NULL,
+                        vpcdb = FALSE,
+                        verbose = FALSE) {
   if(!is.null(psn_folder)) {
     if(is.null(obs)) {
       if(verbose) {
