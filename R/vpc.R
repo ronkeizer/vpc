@@ -1,7 +1,9 @@
+
+
 #' VPC function
 #'
 #' Creates a VPC plot from observed and simulation data
-#' @param sim a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
+#' @param sim this is usually a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}.  However it can also be an object like a nlmixr or xpose object
 #' @param obs a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param psn_folder instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder
 #' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
@@ -29,6 +31,7 @@
 #' @param labeller ggplot2 labeller function to be passed to underlying ggplot object
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
+#' @param ... Other arguments sent to other methods (like xpose or nlmixr);  Note these arguments are not used in the default vpc and are ignored by the default method.
 #' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 #' @export
 #' @seealso \link{sim_data}, \link{vpc_cens}, \link{vpc_tte}, \link{vpc_cat}
@@ -41,66 +44,46 @@
 #' vpc(sim = simple_data$sim, obs = simple_data$obs)
 #' vpc(sim = simple_data$sim, obs = simple_data$obs, lloq = 20)
 #'
-vpc <- function(sim = NULL,
-                obs = NULL,
-                psn_folder = NULL,
-                bins = "jenks",
-                n_bins = "auto",
-                bin_mid = "mean",
-                obs_cols = NULL,
-                sim_cols = NULL,
-                software = "auto",
-                show = NULL,
-                stratify = NULL,
-                pred_corr = FALSE,
-                pred_corr_lower_bnd = 0,
-                pi = c(0.05, 0.95),
-                ci = c(0.05, 0.95),
-                uloq = NULL,
-                lloq = NULL,
-                log_y = FALSE,
-                log_y_min = 1e-3,
-                xlab = NULL,
-                ylab = NULL,
-                title = NULL,
-                smooth = TRUE,
-                vpc_theme = NULL,
-                facet = "wrap",
-                labeller = NULL,
-                vpcdb = FALSE,
-                verbose = FALSE){
-    UseMethod("vpc");
-}
-#'@rdname vpc
 #'@export
-vpc.default <- function(sim = NULL,
-                        obs = NULL,
-                        psn_folder = NULL,
-                        bins = "jenks",
-                        n_bins = "auto",
-                        bin_mid = "mean",
-                        obs_cols = NULL,
-                        sim_cols = NULL,
-                        software = "auto",
-                        show = NULL,
-                        stratify = NULL,
-                        pred_corr = FALSE,
-                        pred_corr_lower_bnd = 0,
-                        pi = c(0.05, 0.95),
-                        ci = c(0.05, 0.95),
-                        uloq = NULL,
-                        lloq = NULL,
-                        log_y = FALSE,
-                        log_y_min = 1e-3,
-                        xlab = NULL,
-                        ylab = NULL,
-                        title = NULL,
-                        smooth = TRUE,
-                        vpc_theme = NULL,
-                        facet = "wrap",
-                        labeller = NULL,
-                        vpcdb = FALSE,
-                        verbose = FALSE) {
+vpc <- function(sim, ...){
+    UseMethod("vpc")
+}
+#' @rdname vpc
+#'@export
+vpc.default <- function(sim, ...){
+    call <- as.list(match.call(expand.dots=TRUE))[-1];
+    do.call(getFromNamespace("vpc_vpc","vpc"), call, envir = parent.frame(1))
+}
+#' @rdname vpc
+#'@export
+vpc_vpc <- function(sim = NULL,
+                    obs = NULL,
+                    psn_folder = NULL,
+                    bins = "jenks",
+                    n_bins = "auto",
+                    bin_mid = "mean",
+                    obs_cols = NULL,
+                    sim_cols = NULL,
+                    software = "auto",
+                    show = NULL,
+                    stratify = NULL,
+                    pred_corr = FALSE,
+                    pred_corr_lower_bnd = 0,
+                    pi = c(0.05, 0.95),
+                    ci = c(0.05, 0.95),
+                    uloq = NULL,
+                    lloq = NULL,
+                    log_y = FALSE,
+                    log_y_min = 1e-3,
+                    xlab = NULL,
+                    ylab = NULL,
+                    title = NULL,
+                    smooth = TRUE,
+                    vpc_theme = NULL,
+                    facet = "wrap",
+                    labeller = NULL,
+                    vpcdb = FALSE,
+                    verbose = FALSE, ...) {
   if(!is.null(psn_folder)) {
     if(is.null(obs)) {
       if(verbose) {
