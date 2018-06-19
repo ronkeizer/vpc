@@ -1,13 +1,20 @@
 #' Calculate appropriate bin separators for vpc
 #' 
-#' This function calculates bin separators (e.g. for use in a vpc) based on nadirs in the density functions for the independent variable
+#' This function calculates bin separators either using R's native binning approaches available in the classInt 
+#' library such as `kmeans`, `jenks`, `pretty` etc. Alternatively, a custom approach is available
+#' which is based on finding the nadirs in the density functions for the independent variable. Default approach 
+#' is k-means clustering.
 #'
 #' @param dat data frame
 #' @param type auto-binning type: "density", "time", or "data"
 #' @param n_bins number of bins to use. For "density" the function might not return a solution with the exact number of bins.
 #' @param verbose show warnings and other messages (TRUE or FALSE)
 #' @return A vector of bin separators
-auto_bin <- function (dat, type="kmeans", n_bins = 8, verbose = FALSE) {
+auto_bin <- function (
+  dat, 
+  type="kmeans", 
+  n_bins = 8, 
+  verbose = FALSE) {
   all_bins <- list()
   l_bins <- c()
   if (is.null(type) || type == "none") {
