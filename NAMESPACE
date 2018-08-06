@@ -3,6 +3,7 @@
 S3method(vpc,default)
 export(add_noise)
 export(bin_data)
+export(create_vpc_theme)
 export(new_vpc_theme)
 export(plot_vpc)
 export(read_table_nm)

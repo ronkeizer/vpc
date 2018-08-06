@@ -19,5 +19,8 @@ auto_bin(dat, type = "kmeans", n_bins = 8, verbose = FALSE)
 A vector of bin separators
 }
 \description{
-This function calculates bin separators (e.g. for use in a vpc) based on nadirs in the density functions for the independent variable
+This function calculates bin separators either using R's native binning approaches available in the classInt 
+library such as `kmeans`, `jenks`, `pretty` etc. Alternatively, a custom approach is available
+which is based on finding the nadirs in the density functions for the independent variable. Default approach 
+is k-means clustering.
 }
