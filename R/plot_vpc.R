@@ -123,10 +123,12 @@ plot_vpc <- function(db,
         pl <- pl + ggplot2::geom_point(data=db$obs, ggplot2::aes(x=idv, y = dv), size=vpc_theme$obs_size, colour=vpc_theme$obs_color, alpha = vpc_theme$obs_alpha, shape = vpc_theme$obs_shape)
       }
     }
-    bdat <- data.frame(cbind(x=db$bins, y=NA))
-    if(show$bin_sep && !idv_as_factor) {
-      pl <- pl +
-        ggplot2::geom_rug(data=bdat, sides = "t", ggplot2::aes(x = x, y = y), colour=vpc_theme$bin_separators_color)
+    if(!db$regression) {
+      bdat <- data.frame(cbind(x=db$bins, y=NA))
+      if(show$bin_sep && !idv_as_factor) {
+        pl <- pl +
+          ggplot2::geom_rug(data=bdat, sides = "t", ggplot2::aes(x = x, y = y), colour=vpc_theme$bin_separators_color)
+      }
     }
     if(!is.null(xlab)) {
       pl <- pl + ggplot2::xlab(xlab)  

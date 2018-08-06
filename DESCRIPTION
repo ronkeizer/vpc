@@ -1,6 +1,6 @@
 Package: vpc
 Title: Create Visual Predictive Checks
-Version: 1.0.2
+Version: 1.0.3
 Date: 2018-01-15
 Author: Ron Keizer <ronkeizer@gmail.com>
 Maintainer: Ron Keizer <ronkeizer@gmail.com>
@@ -14,7 +14,8 @@ Imports:
     MASS,
     survival,
     ggplot2,
-    readr
+    readr,
+    quantreg
 License: MIT + file LICENSE
 LazyData: true
 URL: https://github.com/ronkeizer/vpc

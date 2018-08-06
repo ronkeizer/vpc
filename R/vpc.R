@@ -1,5 +1,3 @@
-
-
 #' VPC function
 #'
 #' Creates a VPC plot from observed and simulation data
@@ -9,6 +7,7 @@
 #' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
+#' @param regression create regression-based VPC? (does not use bins)
 #' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred", "sim")
 #' @param show what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
@@ -59,6 +58,7 @@ vpc.default <- function(sim, ...){
 vpc_vpc <- function(sim = NULL,
                     obs = NULL,
                     psn_folder = NULL,
+                    regression = FALSE,
                     bins = "jenks",
                     n_bins = "auto",
                     bin_mid = "mean",
@@ -189,74 +189,132 @@ vpc_vpc <- function(sim = NULL,
     uloq <- NULL
     lloq <- NULL
   }
+  
+  if(regression) {
+    ############### Regression based VPCs ####################################
+    optim_func <- function(data, log_lambda, quant = 0.5) {
+      a <- AIC(
+        rqss(
+          data$dv ~ qss(data$idv, lambda=exp(log_lambda)), tau=quant, na.action=na.exclude), k = -1
+        )
+    }
+    calc_quantiles_aqr <- function(x, lambda = c(0.5, 0.5, 0.5), qs = c(0.05, 0.5, 0.95)) {
+      tmp <- x %>% 
+        dplyr::filter()
+      sim_tmp <- list()
+      for(i in seq(qs)) {
+        sim_tmp[[paste0("q_", qs[i])]] <- rqss(x$dv ~ qss(x$idv, lambda = exp(lambda[i])), tau = qs[i], na.action = na.exclude)
+      }
+      x[[paste0("q5")]] <- fitted(sim_tmp[[paste0("q_", qs[1])]])
+      x[[paste0("q50")]] <- fitted(sim_tmp[[paste0("q_", qs[2])]])
+      x[[paste0("q95")]] <- fitted(sim_tmp[[paste0("q_", qs[3])]])
+      x %>%
+        dplyr::filter(!duplicated(idv)) %>%
+        dplyr::arrange(idv)
+    }
+    
+    lambda <- c()
+    qs <- c(pi[1], 0.5, pi[2])
+    for(i in seq(qs)) {
+      if(verbose) message("Optimizing lambda for quantile (obs): ", qs[i])
+      lambda[i] <- optimize(optim_func, data = obs, quant = qs[i], interval=c(-1, 7))$min
+    }
+    if(verbose) message("Calculating VPC stats for quantiles (obs)")
+    aggr_obs <- calc_quantiles_aqr(obs, lambda = lambda, qs = qs) %>%
+      dplyr::mutate(mn_idv = idv) %>%
+      dplyr::mutate(bin = match(idv, unique(idv))) %>%
+      dplyr::select(strat = strat, bin = bin, obs5 = q5, obs50 = q50, obs95 = q95, bin_mid = mn_idv)
 
-  labeled_bins <- bins[1] == "percentiles"
-  if (class(bins) != "numeric") {
-    if(!is.null(obs)) {
-      bins <- auto_bin(obs, bins, n_bins)
-    } else { # get from sim
-      bins <- auto_bin(sim, bins, n_bins)
-    }
-    if (is.null(bins)) {
-      msg("Automatic binning unsuccessful, try increasing the number of bins, or specify vector of bin separators manually.", verbose)
-    }
-  }
-  bins <- unique(bins)
-  if(verbose) message(paste0("Binning: ", paste(bins, collapse=' ')))
-  if(!is.null(obs)) {
-    obs <- bin_data(obs, bins, "idv", labeled = labeled_bins)
-  }
-  if(!is.null(sim)) {
-    sim <- bin_data(sim, bins, "idv", labeled = labeled_bins)
-  }
-  if(pred_corr) {
-    if(!is.null(obs) & !cols$obs$pred %in% names(obs)) {
-      msg("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...", verbose)
-      if (!cols$obs$pred %in% names(sim)) {
-        stop("Error: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
-      } else {
-        obs <- obs %>% dplyr::ungroup()
-        obs[[cols$obs$pred]] <- unlist(sim[1:length(obs$id), cols$sim$pred])
-        msg ("OK", verbose)
+    if(verbose) message("Calculating simulation quantiles...")
+    sim$sim <- add_sim_index_number(sim, id = "id", sim_label=sim_cols$sim)
+    aggr_sim <- purrr::map(split(sim, sim$sim), calc_quantiles_aqr) %>%
+      dplyr::bind_rows() %>%
+      dplyr::mutate(mn_idv = idv) %>%
+      dplyr::mutate(bin = match(idv, unique(idv)))
+
+    # obs %>%
+    #   dplyr::filter(!duplicated(idv)) %>%
+    #   dplyr::arrange(idv) %>%
+    #   ggplot2::ggplot(ggplot2::aes(x = idv, y = q50)) + 
+    #     ggplot2::geom_line() + 
+    #     ggplot2::geom_line(ggplot2::aes(y = q5), linetype = 'dotted') + 
+    #     ggplot2::geom_line(ggplot2::aes(y = q95), linetype = 'dotted') 
+  } else {
+    ############### Non-Regression based VPCs ####################################
+    
+    ## Handle binning
+    labeled_bins <- bins[1] == "percentiles"
+    if (class(bins) != "numeric") {
+      if(!is.null(obs)) {
+        bins <- auto_bin(obs, bins, n_bins)
+      } else { # get from sim
+        bins <- auto_bin(sim, bins, n_bins)
       }
-    } else {
-      if (!cols$sim$pred %in% names(sim)) {
-        stop("Warning: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
+      if (is.null(bins)) {
+        msg("Automatic binning unsuccessful, try increasing the number of bins, or specify vector of bin separators manually.", verbose)
       }
     }
+    bins <- unique(bins)
+    if(verbose) message(paste0("Binning: ", paste(bins, collapse=' ')))
     if(!is.null(obs)) {
-      obs$pred <- obs[[cols$obs$pred]]
+      obs <- bin_data(obs, bins, "idv", labeled = labeled_bins)
     }
     if(!is.null(sim)) {
-      sim$pred <- sim[[cols$sim$pred]]
+      sim <- bin_data(sim, bins, "idv", labeled = labeled_bins)
     }
-  }
-  if(!is.null(obs)) {
     if(pred_corr) {
-      if(verbose) message("Performing prediction-correction on observed data...")
-      obs <- obs %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(as.num(pred)))
-      obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
+      if(!is.null(obs) & !cols$obs$pred %in% names(obs)) {
+        msg("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...", verbose)
+        if (!cols$obs$pred %in% names(sim)) {
+          stop("Error: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
+        } else {
+          obs <- obs %>% dplyr::ungroup()
+          obs[[cols$obs$pred]] <- unlist(sim[1:length(obs$id), cols$sim$pred])
+          msg ("OK", verbose)
+        }
+      } else {
+        if (!cols$sim$pred %in% names(sim)) {
+          stop("Warning: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
+        }
+      }
+      if(!is.null(obs)) {
+        obs$pred <- obs[[cols$obs$pred]]
+      }
+      if(!is.null(sim)) {
+        sim$pred <- sim[[cols$sim$pred]]
+      }
+    }
+    if(!is.null(obs)) {
+      if(pred_corr) {
+        if(verbose) message("Performing prediction-correction on observed data...")
+        obs <- obs %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(as.num(pred)))
+        obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
+      }
+    }
+    if(!is.null(sim)) {
+      sim$sim <- add_sim_index_number(sim, id = "id", sim_label=sim_cols$sim)
+      if(pred_corr) {
+        if(verbose) message("Performing prediction-correction on simulated data...")
+        sim <- sim %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(pred))
+        sim[sim$pred != 0,]$dv <- pred_corr_lower_bnd + (sim[sim$pred != 0,]$dv - pred_corr_lower_bnd) * (sim[sim$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (sim[sim$pred != 0,]$pred - pred_corr_lower_bnd)
+      }
     }
   }
+
   if(!is.null(sim)) {
-    sim$sim <- add_sim_index_number(sim, id = "id", sim_label=sim_cols$sim)
-    if(pred_corr) {
-      if(verbose) message("Performing prediction-correction on simulated data...")
-      sim <- sim %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(pred))
-      sim[sim$pred != 0,]$dv <- pred_corr_lower_bnd + (sim[sim$pred != 0,]$dv - pred_corr_lower_bnd) * (sim[sim$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (sim[sim$pred != 0,]$pred - pred_corr_lower_bnd)
+    if(!regression) {
+      if(verbose) message("Calculating statistics for simulated data...")
+      tmp1 <- sim %>% dplyr::group_by(strat, sim, bin)
+      aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile(dv, pi[1])),
+                                   tmp1 %>% dplyr::summarise(quantile(dv, 0.5 )),
+                                   tmp1 %>% dplyr::summarise(quantile(dv, pi[2])),
+                                   tmp1 %>% dplyr::summarise(mean(idv))))
+      aggr_sim <- aggr_sim[,-grep("(bin.|strat.|sim.)", colnames(aggr_sim))]
+      colnames(aggr_sim)[grep("quantile", colnames(aggr_sim))] <- c("q5", "q50", "q95")
+      colnames(aggr_sim)[length(aggr_sim[1,])] <- "mn_idv"
     }
-  }
-  if(!is.null(sim)) {
-    if(verbose) message("Calculating statistics for simulated data...")
-    tmp1 <- sim %>% dplyr::group_by(strat, sim, bin)
-    aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile(dv, pi[1])),
-                                 tmp1 %>% dplyr::summarise(quantile(dv, 0.5 )),
-                                 tmp1 %>% dplyr::summarise(quantile(dv, pi[2])),
-                                 tmp1 %>% dplyr::summarise(mean(idv))))
-    aggr_sim <- aggr_sim[,-grep("(bin.|strat.|sim.)", colnames(aggr_sim))]
-    colnames(aggr_sim)[grep("quantile", colnames(aggr_sim))] <- c("q5", "q50", "q95")
-    colnames(aggr_sim)[length(aggr_sim[1,])] <- "mn_idv"
-    tmp <- aggr_sim %>% dplyr::group_by(strat, bin)
+    tmp <- aggr_sim %>% 
+      dplyr::group_by(strat, bin)
     vpc_dat <- data.frame(cbind(tmp %>% dplyr::summarise(quantile(q5, ci[1])),
                                 tmp %>% dplyr::summarise(quantile(q5, 0.5)),
                                 tmp %>% dplyr::summarise(quantile(q5, ci[2])),
@@ -269,12 +327,17 @@ vpc_vpc <- function(sim = NULL,
                                 tmp %>% dplyr::summarise(mean(mn_idv))))
     vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
     colnames(vpc_dat) <- c("strat", "bin",
-                           "q5.low","q5.med","q5.up",
-                           "q50.low","q50.med","q50.up",
-                           "q95.low","q95.med","q95.up",
-                           "bin_mid")
-    vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
-    vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
+                             "q5.low","q5.med","q5.up",
+                             "q50.low","q50.med","q50.up",
+                             "q95.low","q95.med","q95.up",
+                             "bin_mid")
+    if(!regression) {
+      vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
+      vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
+    } else {
+      vpc_dat <- vpc_dat %>%
+        dplyr::mutate(bin_min = bin_mid, bin_max = bin_mid)
+    }
     if(bin_mid == "middle") {
       vpc_dat$bin_mid <- apply(cbind(vpc_dat$bin_min, vpc_dat$bin_max), 1, mean)
     }
@@ -282,29 +345,37 @@ vpc_vpc <- function(sim = NULL,
     vpc_dat <- NULL
   }
   if(!is.null(obs)) {
-    if(verbose) {
-      message("Calculating statistics for observed data...")
+    if(!regression) {
+      if(verbose) {
+        message("Calculating statistics for observed data...")
+      }
+      tmp1 <- obs %>% 
+        dplyr::group_by(strat, bin)
+      if(!is.null(lloq) || !is.null(uloq)) {
+        if(!is.null(uloq)) { limit <- uloq; cens = "right" }
+        if(!is.null(lloq)) { limit <- lloq; cens = "left" }
+        aggr_obs <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile_cens(dv, pi[1], limit = limit, cens = cens)),
+                                     tmp1 %>% dplyr::summarise(quantile_cens(dv, 0.5, limit = limit, cens = cens)),
+                                     tmp1 %>% dplyr::summarise(quantile_cens(dv, pi[2], limit = limit, cens = cens)),
+                                     tmp1 %>% dplyr::summarise(mean(idv))))
+      } else {
+        aggr_obs <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile(dv, pi[1])),
+                                     tmp1 %>% dplyr::summarise(quantile(dv, 0.5)),
+                                     tmp1 %>% dplyr::summarise(quantile(dv, pi[2])),
+                                     tmp1 %>% dplyr::summarise(mean(idv))))
+      }
+      aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
+      colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95", "bin_mid")
     }
-    tmp1 <- obs %>% dplyr::group_by(strat,bin)
-    if(!is.null(lloq) || !is.null(uloq)) {
-      if(!is.null(uloq)) { limit <- uloq; cens = "right" }
-      if(!is.null(lloq)) { limit <- lloq; cens = "left" }
-      aggr_obs <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile_cens(dv, pi[1], limit = limit, cens = cens)),
-                                   tmp1 %>% dplyr::summarise(quantile_cens(dv, 0.5, limit = limit, cens = cens)),
-                                   tmp1 %>% dplyr::summarise(quantile_cens(dv, pi[2], limit = limit, cens = cens)),
-                                   tmp1 %>% dplyr::summarise(mean(idv))))
+    if(!regression) {
+      aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
+      aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
+      if(bin_mid == "middle") {
+        aggr_obs$bin_mid <- apply(cbind(aggr_obs$bin_min, aggr_obs$bin_max), 1, mean)
+      }
     } else {
-      aggr_obs <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile(dv, pi[1])),
-                                   tmp1 %>% dplyr::summarise(quantile(dv, 0.5)),
-                                   tmp1 %>% dplyr::summarise(quantile(dv, pi[2])),
-                                   tmp1 %>% dplyr::summarise(mean(idv))))
-    }
-    aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
-    colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95", "bin_mid")
-    aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
-    aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
-    if(bin_mid == "middle") {
-      aggr_obs$bin_mid <- apply(cbind(aggr_obs$bin_min, aggr_obs$bin_max), 1, mean)
+      aggr_obs <- aggr_obs %>%
+        dplyr::mutate(bin_min = bin_mid, bin_max = bin_mid)
     }
   } else {
     aggr_obs <- NULL
@@ -340,7 +411,8 @@ vpc_vpc <- function(sim = NULL,
                  uloq = uloq,
                  type = "continuous",
                  xlab = xlab,
-                 ylab = ylab)
+                 ylab = ylab,
+                 regression = regression)
   if(vpcdb) {
     return(vpc_db)
   } else {
