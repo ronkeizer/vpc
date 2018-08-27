@@ -1,7 +1,7 @@
 ## Test environments
 * local OS X install, R 3.4.3
-* ubuntu 12.04 (on travis-ci), R 3.4.2
-* win-builder, R 2018-01-13 r74117
+* ubuntu 16.04, R 3.4.3
+* win-builder, R Under development (unstable) (2018-08-25 r75182)
 
 ## R CMD check results
 R CMD check results
@@ -10,8 +10,8 @@ R CMD check results
 R CMD check succeeded
 
 ## Downstream dependencies
-None
+xpose, nlmixr
 
 ## Current release notes:
-- Update tests to include tolerance in numerical results
+- Allow use from nlmixr: add S3 methods
 - Minor fixes in vpc functions
