@@ -192,11 +192,13 @@ vpc_vpc <- function(sim = NULL,
   
   if(regression) {
     ############### Regression based VPCs ####################################
+    require(quantreg)
     optim_func <- function(data, log_lambda, quant = 0.5) {
-      a <- AIC(
+      a <- stats::AIC(
         rqss(
-          data$dv ~ qss(data$idv, lambda=exp(log_lambda)), tau=quant, na.action=na.exclude), k = -1
-        )
+          data$dv ~ qss(data$idv, lambda=exp(log_lambda)), 
+          tau = quant, na.action=na.exclude), 
+        k = -1)
     }
     calc_quantiles_aqr <- function(x, lambda = c(0.5, 0.5, 0.5), qs = c(0.05, 0.5, 0.95)) {
       tmp <- x %>% 
