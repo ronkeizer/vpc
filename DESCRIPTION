@@ -1,7 +1,7 @@
 Package: vpc
 Title: Create Visual Predictive Checks
-Version: 1.0.2
-Date: 2018-01-15
+Version: 1.1.0
+Date: 2018-08-27
 Author: Ron Keizer <ronkeizer@gmail.com>
 Maintainer: Ron Keizer <ronkeizer@gmail.com>
 Description: Visual predictive checks are a commonly used diagnostic plot in pharmacometrics, showing how certain statistics (percentiles) for observed data compare to those same statistics for data simulated from a model. The package can generate VPCs for continuous, categorical, censored, and (repeated) time-to-event data.
