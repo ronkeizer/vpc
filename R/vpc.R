@@ -51,7 +51,7 @@ vpc <- function(sim, ...){
 #'@export
 vpc.default <- function(sim, ...){
     call <- as.list(match.call(expand.dots=TRUE))[-1];
-    do.call(getFromNamespace("vpc_vpc","vpc"), call, envir = parent.frame(1))
+    do.call(utils::getFromNamespace("vpc_vpc","vpc"), call, envir = parent.frame(1))
 }
 #' @rdname vpc
 #'@export
