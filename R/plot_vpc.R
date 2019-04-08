@@ -146,8 +146,8 @@ plot_vpc <- function(db,
       pl <- pl + ggplot2::scale_y_log10()
     }
     if(!is.null(db$stratify)) {
+      if(is.null(db$labeller)) db$labeller <- ggplot2::label_both
       if(length(db$stratify) == 1) {
-        if(is.null(db$labeller)) db$labeller <- ggplot2::label_both
         if (db$facet == "wrap") {
           pl <- pl + ggplot2::facet_wrap(stats::reformulate(db$stratify[1], NULL), 
                                          labeller = db$labeller)
