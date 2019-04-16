@@ -221,7 +221,7 @@ vpc_tte <- function(sim = NULL,
         dplyr::group_by_("id") %>%
         dplyr::mutate(last_obs = 1*(1:length(time) == length(time)), repeat_obs = 1*(cumsum(dv) > 1)) %>%
         dplyr::filter(dv == 1 | last_obs == 1) %>%
-        dplyr::filter(!duplicated(id)) %>%
+        dplyr::filter(!duplicated(id))
       obs$rtte <- 1
     }
 
