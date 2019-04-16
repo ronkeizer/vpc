@@ -14,6 +14,7 @@
 #' @param show what to show in VPC (obs_ci, obs_median, sim_median, sim_median_ci)
 #' @param rtte repeated time-to-event data? Default is FALSE (treat as single-event TTE)
 #' @param rtte_calc_diff recalculate time (T/F)? When simulating in NONMEM, you will probably need to set this to TRUE to recalculate the TIME to relative times between events (unless you output the time difference between events and specify that as independent variable to the vpc_tte() function.
+#' @param rtte_conditional `TRUE` (default) or `FALSE`. Compute the probability for each event newly (`TRUE`), or calculate the absolute probability (`FALSE`, i.e. the "probability of a 1st, 2nd, 3rd event etc" rather than the "probability of an event happening").
 #' @param kmmc either NULL (for regular TTE vpc, default), or a variable name for a KMMC plot (e.g. "WT")
 #' @param events numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events.
 #' @param reverse_prob reverse the probability scale (i.e. plot 1-probability)
@@ -54,6 +55,7 @@ vpc_tte <- function(sim = NULL,
                     psn_folder = NULL,
                     rtte = FALSE,
                     rtte_calc_diff = TRUE,
+                    rtte_conditional = TRUE,
                     events = NULL,
                     bins = FALSE,
                     n_bins = 10,
@@ -234,9 +236,9 @@ vpc_tte <- function(sim = NULL,
         if(length(ci) == 2 && (round(ci[1],3) != round((1-ci[2]),3))) {
           stop("Sorry, only symmetric confidence intervals can be computed. Please adjust the ci argument.")
         }
-        obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob, ci = ci)
+        obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob, rtte_conditional = rtte_conditional, ci = ci)
       } else {
-        obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob)
+        obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob, rtte_conditional = rtte_conditional)
       }
     }
   } else { # get bins from sim
@@ -333,7 +335,7 @@ vpc_tte <- function(sim = NULL,
       if(!is.null(kmmc) && kmmc %in% names(obs)) {
         tmp3 <- compute_kmmc(tmp2, strat = "strat", reverse_prob = reverse_prob, kmmc = kmmc)
       } else {
-        tmp3 <- compute_kaplan(tmp2, strat = "strat", reverse_prob = reverse_prob)
+        tmp3 <- compute_kaplan(tmp2, strat = "strat", reverse_prob = reverse_prob, rtte_conditional = rtte_conditional)
       }
       tmp3$time_strat <- paste0(tmp3$time, "_", tmp3$strat)
       tmp4 <- expand.grid(time = c(0, unique(sim$time)), surv=NA, lower=NA, upper=NA, 

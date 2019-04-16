@@ -4,7 +4,8 @@
 \alias{compute_kaplan}
 \title{Compute Kaplan-Meier statistics}
 \usage{
-compute_kaplan(dat, strat = "strat", reverse_prob = FALSE, ci = NULL)
+compute_kaplan(dat, strat = "strat", reverse_prob = FALSE,
+  rtte_conditional = TRUE, ci = NULL)
 }
 \arguments{
 \item{dat}{data.frame with events}
@@ -12,6 +13,8 @@ compute_kaplan(dat, strat = "strat", reverse_prob = FALSE, ci = NULL)
 \item{strat}{vector of stratification variables}
 
 \item{reverse_prob}{reverse the probability (i.e. return `1-probability`)?}
+
+\item{rtte_conditional}{`TRUE` (default) or `FALSE`. Compute the probability for each event newly (`TRUE`), or calculate the absolute probability (`FALSE`, i.e. the "probability of a 1st, 2nd, 3rd event etc" rather than the "probability of an event happening").}
 
 \item{ci}{confidence interval to calculate, numeric vector of length 2}
 }
