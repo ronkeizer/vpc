@@ -3,8 +3,14 @@
 #' @param dat data.frame with events
 #' @param strat vector of stratification variables
 #' @param reverse_prob reverse the probability (i.e. return `1-probability`)?
+#' @param rtte_conditional `TRUE` (default) or `FALSE`. Compute the probability for each event newly (`TRUE`), or calculate the absolute probability (`FALSE`, i.e. the "probability of a 1st, 2nd, 3rd event etc" rather than the "probability of an event happening").
 #' @param ci confidence interval to calculate, numeric vector of length 2
-compute_kaplan <- function(dat, strat = "strat", reverse_prob = FALSE, ci = NULL) {
+compute_kaplan <- function(
+  dat, 
+  strat = "strat",
+  reverse_prob = FALSE,
+  rtte_conditional = TRUE, 
+  ci = NULL) {
     if(length(dat[[strat]]) == 0) {
       dat$strat <- 1
     }
@@ -20,7 +26,16 @@ compute_kaplan <- function(dat, strat = "strat", reverse_prob = FALSE, ci = NULL
       ci = 0.95
     }
     for (i in seq(strats)) {
-      tmp1 <- dat[dat[[strat]] == strats[i],]
+      if(rtte_conditional) {
+        tmp1 <- dat[dat[[strat]] == strats[i],]
+      } else {
+        tmp1 <- dat
+        tmp1[[strat]] <- as.num(tmp1[[strat]])
+        idx1 <- tmp1[[strat]] < as.num(strats[i])
+        if(sum(idx1) > 0) tmp1[idx1,]$dv <- 0
+        idx2 <- tmp1[[strat]] <= as.num(strats[i])
+        if(sum(idx2) > 0) tmp1 <- tmp1[idx2,]
+      }
       if(length(grep( "rtte", strats[1])) > 0  & i > 1) {
         for (j in 1:i) {
           tmp_j <- dat[dat[[strat]] == strats[j] & dat$dv == 0,]     
