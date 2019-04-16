@@ -211,7 +211,7 @@ vpc_tte <- function(sim = NULL,
       }
       obs <- obs %>%
         dplyr::group_by_("id") %>%
-        dplyr::arrange_("id", "time") %>%
+        dplyr::arrange_("id", "t") %>%
         dplyr::mutate(rtte = 1:length(dv))
 #       obs %>% dplyr::group_by(id) %>% dplyr::mutate(rtte = cumsum(dv != 0))
 #       obs[obs$dv == 0,]$rtte <- obs[obs$dv == 0,]$rtte + 1 # these censored points actually "belong" to the next rtte strata
@@ -221,7 +221,7 @@ vpc_tte <- function(sim = NULL,
         dplyr::group_by_("id") %>%
         dplyr::mutate(last_obs = 1*(1:length(time) == length(time)), repeat_obs = 1*(cumsum(dv) > 1)) %>%
         dplyr::filter(dv == 1 | last_obs == 1) %>%
-        dplyr::filter(!duplicated(id))
+        dplyr::filter(!duplicated(id)) %>%
       obs$rtte <- 1
     }
 
