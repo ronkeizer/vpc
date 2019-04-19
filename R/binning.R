@@ -108,7 +108,10 @@ find_nadirs <- function (x, thresh = 0) {
 #' @param labeled whether a labeled factor instead of integers should be returned 
 #' @export
 bin_data <- function(x, bins = c(0, 3, 5, 7), idv = "time", labeled = F) {
-  if(!labeled) x$bin <- cut(x[[idv]], bins, labels = FALSE, right=FALSE)
-  else x$bin <- cut(x[[idv]], bins, right=FALSE, include.lowest = T)
+  if(!labeled) {
+    x$bin <- cut(x[[idv]], bins, labels = FALSE, right=FALSE, include.lowest = TRUE)
+  } else {
+    x$bin <- cut(x[[idv]], bins, right=FALSE, include.lowest = TRUEB)
+  }
   return(x)
 }
