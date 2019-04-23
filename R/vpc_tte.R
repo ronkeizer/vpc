@@ -392,7 +392,15 @@ vpc_tte <- function(sim = NULL,
 
   cens_dat <- NULL
   if(show$obs_cens) {
-    cens_dat <- data.frame(obs[obs$dv == 0 & obs$time > 0,])
+    cens_dat <- obs
+    if(rtte) {
+      if(!rtte_conditional || !rtte_calc_diff) {
+        cens_dat <- cens_dat %>% 
+          dplyr::mutate(time = t)
+      }
+    }
+    cens_dat <- cens_dat %>%
+      dplyr::filter(dv == 0, time > 0)
   }
 
   if (!is.null(stratify_original)) {
@@ -418,7 +426,7 @@ vpc_tte <- function(sim = NULL,
         cens_dat$y <- 1
         cens_dat$strat1 <- NA
         cens_dat$strat2 <- NA
-        for (j in 1:length(cens_dat[,1])) {
+        for (j in 1:nrow(cens_dat[,1])) {
           tmp <- obs_km[as.character(obs_km$strat) == as.character(cens_dat$strat[j]),]
           cens_dat$y[j] <- rev(tmp$surv[(cens_dat$time[j] - tmp$time) > 0])[1]
           if ("strat1" %in% names(tmp)) {
