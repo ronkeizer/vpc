@@ -306,6 +306,9 @@ vpc_tte <- function(sim = NULL,
 
     tmp_bins <- unique(c(0, sort(unique(sim$time)), max(sim$time)))
     n_sim <- length(unique(sim$sim))
+    if(n_sim <= 1) {
+      stop(paste0("Something seems wrong with your simulation dataset, only ", n_sim, " iterations of the simulation were identified."))
+    }
     all_dat <- c()
     if(!(class(bins) == "logical" && bins == FALSE)) {
       if(class(bins) == "logical" && bins == TRUE) {
