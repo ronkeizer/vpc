@@ -245,7 +245,7 @@ vpc_tte <- function(sim = NULL,
     obs_km <- NULL
   }
   if(!is.null(kmmc) & (class(bins) == "logical" && bins == FALSE)) {
-    msg("Tip: with KMMC-type plots, binning of simulated data is recommended. See documentation for the 'bins' argument for more information.", msg)
+    msg("Tip: with KMMC-type plots, binning of simulated data is recommended. See documentation for the 'bins' argument for more information.", verbose)
   }
 
   all_dat <- c()
@@ -261,10 +261,10 @@ vpc_tte <- function(sim = NULL,
     if(max(sim$dv) > 2) { # guessing DV definition if not just 0/1
       if(max(sim$dv) == 2) { # common approach in NONMEM, 2 = censored
         sim[sim$dv != 1,]$dv <- 1
-        msg("Warning: Expected simulated dependent variable to contain only 0 (censored, or no event simerved) or 1 (event simerved). Setting all simulated observations != 1 to 0.", msg)
+        msg("Warning: Expected simulated dependent variable to contain only 0 (censored, or no event simerved) or 1 (event simerved). Setting all simulated observations != 1 to 0.", verbose)
       } else {
         sim[sim$dv != 1,]$dv <- 1 # some people use DV to indicate the event time.
-        msg("Warning: Expected simulated dependent variable to contain only 0 (censored, or no event simerved) or 1 (event simerved). Setting all simulated observations != 1 to 1.", msg)
+        msg("Warning: Expected simulated dependent variable to contain only 0 (censored, or no event simerved) or 1 (event simerved). Setting all simulated observations != 1 to 1.", verbose)
       }
     }
     if("nonmem" %in% class(sim)) { # necessary due to a bug in NONMEM simulation
