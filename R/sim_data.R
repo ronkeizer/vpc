@@ -43,7 +43,8 @@ sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)),
   tmp_pred <- cbind(data.frame(design), matrix(rep(theta, each=nrow(design[,1])), ncol=length(theta)))
   colnames(tmp_pred)[length(tmp_pred)-length(par_names)+1:3] <- par_names
   tmp$dv <- add_noise(model(tmp), ruv = error)
-  tmp$pred <- model(tmp_pred)
+  tmp$pred <- rep(model(tmp_pred), n)
+  
   colnames(tmp) <- gsub("\\.x", "", colnames(tmp))
   tmp %>% dplyr::arrange_("sim", "id", "time")
 }
