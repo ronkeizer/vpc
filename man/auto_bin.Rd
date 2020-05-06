@@ -6,12 +6,11 @@
 \alias{auto_bin.data.frame}
 \title{Calculate appropriate bin separators for vpc}
 \usage{
-auto_bin(dat, ...)
+auto_bin(dat, type = "kmeans", n_bins = NULL, verbose = FALSE, ...)
 
-\method{auto_bin}{numeric}(dat, type = "kmeans", n_bins = 8,
-  verbose = FALSE)
+\method{auto_bin}{numeric}(dat, type = "kmeans", n_bins = NULL, verbose = FALSE, ...)
 
-\method{auto_bin}{data.frame}(dat, ...)
+\method{auto_bin}{data.frame}(dat, type = "kmeans", n_bins = NULL, verbose = FALSE, ...)
 }
 \arguments{
 \item{dat}{data frame}
@@ -23,6 +22,8 @@ auto_bin(dat, ...)
 bins.}
 
 \item{verbose}{show warnings and other messages (TRUE or FALSE)}
+
+\item{...}{arguments passed on to underlying binning functions}
 }
 \value{
 A vector of bin separators

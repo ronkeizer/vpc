@@ -4,8 +4,7 @@
 \alias{check_stratification_columns_available}
 \title{Check whether stratification columns are available}
 \usage{
-check_stratification_columns_available(data, stratify,
-  type = "observation")
+check_stratification_columns_available(data, stratify, type = "observation")
 }
 \arguments{
 \item{data}{`data.frame` with observation or simulation data}

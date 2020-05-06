@@ -4,9 +4,18 @@
 \alias{plot_vpc}
 \title{VPC plotting function}
 \usage{
-plot_vpc(db, show = NULL, vpc_theme = NULL, smooth = TRUE,
-  log_x = FALSE, log_y = FALSE, xlab = NULL, ylab = NULL,
-  title = NULL, verbose = FALSE)
+plot_vpc(
+  db,
+  show = NULL,
+  vpc_theme = NULL,
+  smooth = TRUE,
+  log_x = FALSE,
+  log_y = FALSE,
+  xlab = NULL,
+  ylab = NULL,
+  title = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{db}{object created using the `vpc` function}

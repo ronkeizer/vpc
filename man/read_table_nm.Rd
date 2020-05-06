@@ -4,8 +4,13 @@
 \alias{read_table_nm}
 \title{NONMEM output table import function}
 \usage{
-read_table_nm(file = NULL, skip = NULL, header = NULL,
-  rm_duplicates = FALSE, nonmem_tab = TRUE)
+read_table_nm(
+  file = NULL,
+  skip = NULL,
+  header = NULL,
+  rm_duplicates = FALSE,
+  nonmem_tab = TRUE
+)
 }
 \arguments{
 \item{file}{full file name}
