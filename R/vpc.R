@@ -248,31 +248,30 @@ vpc_vpc <- function(sim = NULL,
   }
   if(!is.null(sim)) {
     if(verbose) message("Calculating statistics for simulated data...")
-    tmp1 <- sim %>% dplyr::group_by(strat, sim, bin)
-    aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile(dv, pi[1])),
-                                 tmp1 %>% dplyr::summarise(quantile(dv, 0.5 )),
-                                 tmp1 %>% dplyr::summarise(quantile(dv, pi[2])),
-                                 tmp1 %>% dplyr::summarise(mean(idv))))
-    aggr_sim <- aggr_sim[,-grep("(bin.|strat.|sim.)", colnames(aggr_sim))]
-    colnames(aggr_sim)[grep("quantile", colnames(aggr_sim))] <- c("q5", "q50", "q95")
-    colnames(aggr_sim)[length(aggr_sim[1,])] <- "mn_idv"
-    tmp <- aggr_sim %>% dplyr::group_by(strat, bin)
-    vpc_dat <- data.frame(cbind(tmp %>% dplyr::summarise(quantile(q5, ci[1])),
-                                tmp %>% dplyr::summarise(quantile(q5, 0.5)),
-                                tmp %>% dplyr::summarise(quantile(q5, ci[2])),
-                                tmp %>% dplyr::summarise(quantile(q50, ci[1])),
-                                tmp %>% dplyr::summarise(quantile(q50, 0.5)),
-                                tmp %>% dplyr::summarise(quantile(q50, ci[2])),
-                                tmp %>% dplyr::summarise(quantile(q95, ci[1])),
-                                tmp %>% dplyr::summarise(quantile(q95, 0.5)),
-                                tmp %>% dplyr::summarise(quantile(q95, ci[2])),
-                                tmp %>% dplyr::summarise(mean(mn_idv))))
-    vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
-    colnames(vpc_dat) <- c("strat", "bin",
-                           "q5.low","q5.med","q5.up",
-                           "q50.low","q50.med","q50.up",
-                           "q95.low","q95.med","q95.up",
-                           "bin_mid")
+
+    aggr_sim <- sim %>% 
+      dplyr::group_by(strat, sim, bin) %>% 
+      dplyr::summarise(
+        q5 = quantile(dv, pi[1]),
+        q50 = quantile(dv, 0.5),
+        q95 = quantile(dv, pi[2]),
+        mn_idv = mean(idv)
+      )
+      
+    vpc_dat <- aggr_sim %>% dplyr::group_by(strat, bin) %>% 
+      dplyr::summarise(
+        q5.low = quantile(q5, ci[1]),
+        q5.med = quantile(q5, 0.5),
+        q5.up = quantile(q5, ci[2]),
+        q50.low = quantile(q50, ci[1]),
+        q50.med = quantile(q50, 0.5),
+        q50.up = quantile(q50, ci[2]),
+        q95.low = quantile(q95, ci[1]),
+        q95.med = quantile(q95, 0.5),
+        q95.up = quantile(q95, ci[2]),
+        bin_mid = mean(mn_idv)
+    ) 
+
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     if(bin_mid == "middle") {
@@ -289,18 +288,23 @@ vpc_vpc <- function(sim = NULL,
     if(!is.null(lloq) || !is.null(uloq)) {
       if(!is.null(uloq)) { limit <- uloq; cens = "right" }
       if(!is.null(lloq)) { limit <- lloq; cens = "left" }
-      aggr_obs <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile_cens(dv, pi[1], limit = limit, cens = cens)),
-                                   tmp1 %>% dplyr::summarise(quantile_cens(dv, 0.5, limit = limit, cens = cens)),
-                                   tmp1 %>% dplyr::summarise(quantile_cens(dv, pi[2], limit = limit, cens = cens)),
-                                   tmp1 %>% dplyr::summarise(mean(idv))))
+      
+      aggr_obs <- tmp1 %>% 
+        dplyr::summarise(
+          obs5 = quantile_cens(dv, pi[1], limit = limit, cens = cens),
+          obs50 = quantile_cens(dv, 0.5, limit = limit, cens = cens),
+          obs95 = quantile_cens(dv, pi[2], limit = limit, cens = cens),
+          bin_mid = mean(idv)
+        )
     } else {
-      aggr_obs <- data.frame(cbind(tmp1 %>% dplyr::summarise(quantile(dv, pi[1])),
-                                   tmp1 %>% dplyr::summarise(quantile(dv, 0.5)),
-                                   tmp1 %>% dplyr::summarise(quantile(dv, pi[2])),
-                                   tmp1 %>% dplyr::summarise(mean(idv))))
+      aggr_obs <- tmp1 %>% 
+        dplyr::summarise(
+          obs5 = quantile(dv, pi[1]),
+          obs50 = quantile(dv, 0.5),
+          obs95 = quantile(dv, pi[2]),
+          bin_mid = mean(idv)
+        )
     }
-    aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
-    colnames(aggr_obs) <- c("strat", "bin", "obs5","obs50","obs95", "bin_mid")
     aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
     aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
     if(bin_mid == "middle") {

@@ -38,12 +38,12 @@ sim_rtte <- function (n = 200,
 }
 
 # simulate some trial data (two arms) + one covariate (sex) having 50% higher hazard rate
-trial_dat <- tbl_df(rbind(cbind(sim_rtte(rate = 0.01*1.5, rate_iiv_cv = 0.3, n=50, id_offset=0, min_gap=1, round_t=TRUE), drug = 1, sex=1),
+trial_dat <- as_tibble(rbind(cbind(sim_rtte(rate = 0.01*1.5, rate_iiv_cv = 0.3, n=50, id_offset=0, min_gap=1, round_t=TRUE), drug = 1, sex=1),
                           cbind(sim_rtte(rate = 0.01, rate_iiv_cv = 0.3, n=50, id_offset=50, min_gap=1, round_t=TRUE), drug = 1, sex=0),
                           cbind(sim_rtte(rate = 0.02*1.5, rate_iiv_cv = 0.3, n=50, id_offset=100, min_gap=1, round_t=TRUE), drug = 0, sex=1),
                           cbind(sim_rtte(rate = 0.02, rate_iiv_cv = 0.3, n=50, id_offset=150, min_gap=1, round_t=TRUE), drug = 0, sex=0)))
-#rtte_obs_nm <- tbl_df(convert_to_dense_grid (trial_dat, t_start = 0, t_step = 1, t = "t", add = c("drug", "sex")))
-rtte_obs_nm <- tbl_df(trial_dat)
+#rtte_obs_nm <- as_tibble(convert_to_dense_grid (trial_dat, t_start = 0, t_step = 1, t = "t", add = c("drug", "sex")))
+rtte_obs_nm <- as_tibble(trial_dat)
 save(rtte_obs_nm, file = "data/rtte_obs_nm.rda")
 
 # repeated simulation
@@ -59,7 +59,7 @@ for (i in 1:100) {
   #                   data.frame(sim = i,
   #                              convert_to_dense_grid (tmp, t_start = 1, t_step = 1, t = "t", add = c("drug", "sex"))))
 }
-rtte_sim_nm <- tbl_df(rtte_sim_nm)
+rtte_sim_nm <- as_tibble(rtte_sim_nm)
 save(rtte_sim_nm, file = "data/rtte_sim_nm.rda")
 
 tmp2 <- convert_to_dense_grid (tmp, t_start = 1, t_step = 1, t = "t", add = c("drug", "sex"))
