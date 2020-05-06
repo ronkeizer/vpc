@@ -4,11 +4,17 @@
 \alias{sim_data}
 \title{Simulate data based on a model and parameter distributions}
 \usage{
-sim_data(design = cbind(id = c(1, 1, 1), idv = c(0, 1, 2)),
-  model = function(x) {     return(x$alpha + x$beta) }, theta, omega_mat,
-  par_names, par_values = NULL, draw_iiv = "mvrnorm",
+sim_data(
+  design = cbind(id = c(1, 1, 1), idv = c(0, 1, 2)),
+  model = function(x) {     return(x$alpha + x$beta) },
+  theta,
+  omega_mat,
+  par_names,
+  par_values = NULL,
+  draw_iiv = "mvrnorm",
   error = list(proportional = 0, additive = 0, exponential = 0),
-  n = 100)
+  n = 100
+)
 }
 \arguments{
 \item{design}{a design dataset. See example}

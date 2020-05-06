@@ -4,8 +4,15 @@
 \alias{pk_iv_1cmt}
 \title{Simulate PK data from a 1-compartment iv model}
 \usage{
-pk_iv_1cmt(t, t_inf = 1, tau = 24, dose = 120, CL = 0.345,
-  Vc = 1.75, ruv = NULL)
+pk_iv_1cmt(
+  t,
+  t_inf = 1,
+  tau = 24,
+  dose = 120,
+  CL = 0.345,
+  Vc = 1.75,
+  ruv = NULL
+)
 }
 \arguments{
 \item{t}{Time after dose}

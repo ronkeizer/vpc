@@ -4,8 +4,13 @@
 \alias{compute_kaplan}
 \title{Compute Kaplan-Meier statistics}
 \usage{
-compute_kaplan(dat, strat = "strat", reverse_prob = FALSE,
-  rtte_conditional = TRUE, ci = NULL)
+compute_kaplan(
+  dat,
+  strat = "strat",
+  reverse_prob = FALSE,
+  rtte_conditional = TRUE,
+  ci = NULL
+)
 }
 \arguments{
 \item{dat}{data.frame with events}

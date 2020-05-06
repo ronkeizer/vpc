@@ -12,14 +12,15 @@
 #'   "density" the function might not return a solution with the exact number of
 #'   bins.
 #' @param verbose show warnings and other messages (TRUE or FALSE)
+#' @param ... arguments passed on to underlying binning functions
 #' @return A vector of bin separators
 #' @export
-auto_bin <- function(dat, ...)
+auto_bin <- function(dat, type="kmeans", n_bins=NULL, verbose=FALSE, ...)
   UseMethod("auto_bin")
 
 #' @rdname auto_bin
 #' @export
-auto_bin.numeric <- function(dat, type="kmeans", n_bins=8, verbose=FALSE) {
+auto_bin.numeric <- function(dat, type="kmeans", n_bins=NULL, verbose=FALSE, ...) {
   all_bins <- list()
   l_bins <- c()
   if (is.null(type) || type == "none") {
@@ -88,7 +89,7 @@ auto_bin.numeric <- function(dat, type="kmeans", n_bins=8, verbose=FALSE) {
 
 #' @rdname auto_bin
 #' @export
-auto_bin.data.frame <- function(dat, ...) {
+auto_bin.data.frame <- function(dat, type="kmeans", n_bins=NULL, verbose=FALSE, ...) {
   auto_bin(dat=dat[["idv"]], ...)
 }
 
@@ -111,7 +112,7 @@ bin_data <- function(x, bins = c(0, 3, 5, 7), idv = "time", labeled = F) {
   if(!labeled) {
     x$bin <- cut(x[[idv]], bins, labels = FALSE, right=FALSE, include.lowest = TRUE)
   } else {
-    x$bin <- cut(x[[idv]], bins, right=FALSE, include.lowest = TRUEB)
+    x$bin <- cut(x[[idv]], bins, right=FALSE, include.lowest = TRUE)
   }
   return(x)
 }

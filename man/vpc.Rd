@@ -10,14 +10,37 @@ vpc(sim, ...)
 
 \method{vpc}{default}(sim, ...)
 
-vpc_vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
-  n_bins = "auto", bin_mid = "mean", obs_cols = NULL,
-  sim_cols = NULL, software = "auto", show = NULL, stratify = NULL,
-  pred_corr = FALSE, pred_corr_lower_bnd = 0, pi = c(0.05, 0.95),
-  ci = c(0.05, 0.95), uloq = NULL, lloq = NULL, log_y = FALSE,
-  log_y_min = 0.001, xlab = NULL, ylab = NULL, title = NULL,
-  smooth = TRUE, vpc_theme = NULL, facet = "wrap", labeller = NULL,
-  vpcdb = FALSE, verbose = FALSE, ...)
+vpc_vpc(
+  sim = NULL,
+  obs = NULL,
+  psn_folder = NULL,
+  bins = "jenks",
+  n_bins = "auto",
+  bin_mid = "mean",
+  obs_cols = NULL,
+  sim_cols = NULL,
+  software = "auto",
+  show = NULL,
+  stratify = NULL,
+  pred_corr = FALSE,
+  pred_corr_lower_bnd = 0,
+  pi = c(0.05, 0.95),
+  ci = c(0.05, 0.95),
+  uloq = NULL,
+  lloq = NULL,
+  log_y = FALSE,
+  log_y_min = 0.001,
+  xlab = NULL,
+  ylab = NULL,
+  title = NULL,
+  smooth = TRUE,
+  vpc_theme = NULL,
+  facet = "wrap",
+  labeller = NULL,
+  vpcdb = FALSE,
+  verbose = FALSE,
+  ...
+)
 }
 \arguments{
 \item{sim}{this is usually a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}.  However it can also be an object like a nlmixr or xpose object}

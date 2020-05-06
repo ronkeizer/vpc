@@ -394,7 +394,7 @@ vpc_tte <- function(sim = NULL,
   }
 
   cens_dat <- NULL
-  if(show$obs_cens) {
+  if(show$obs_cens && !is.null(obs)) {
     cens_dat <- obs
     if(rtte) {
       if(!rtte_conditional || !rtte_calc_diff) {

@@ -4,15 +4,37 @@
 \alias{vpc_tte}
 \title{VPC function for time-to-event (survival) data}
 \usage{
-vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
-  rtte_calc_diff = TRUE, rtte_conditional = TRUE, events = NULL,
-  bins = FALSE, n_bins = 10, software = "auto", obs_cols = NULL,
-  sim_cols = NULL, kmmc = NULL, reverse_prob = FALSE,
-  stratify = NULL, stratify_color = NULL, ci = c(0.05, 0.95),
-  plot = FALSE, xlab = "Time", ylab = "Survival (\%)", show = NULL,
-  as_percentage = TRUE, title = NULL, smooth = FALSE,
-  vpc_theme = NULL, facet = "wrap", labeller = NULL,
-  verbose = FALSE, vpcdb = FALSE)
+vpc_tte(
+  sim = NULL,
+  obs = NULL,
+  psn_folder = NULL,
+  rtte = FALSE,
+  rtte_calc_diff = TRUE,
+  rtte_conditional = TRUE,
+  events = NULL,
+  bins = FALSE,
+  n_bins = 10,
+  software = "auto",
+  obs_cols = NULL,
+  sim_cols = NULL,
+  kmmc = NULL,
+  reverse_prob = FALSE,
+  stratify = NULL,
+  stratify_color = NULL,
+  ci = c(0.05, 0.95),
+  plot = FALSE,
+  xlab = "Time",
+  ylab = "Survival (\%)",
+  show = NULL,
+  as_percentage = TRUE,
+  title = NULL,
+  smooth = FALSE,
+  vpc_theme = NULL,
+  facet = "wrap",
+  labeller = NULL,
+  verbose = FALSE,
+  vpcdb = FALSE
+)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}

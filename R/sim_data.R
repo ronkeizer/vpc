@@ -46,7 +46,8 @@ sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)),
   tmp$pred <- rep(model(tmp_pred), n)
   
   colnames(tmp) <- gsub("\\.x", "", colnames(tmp))
-  tmp %>% dplyr::arrange_("sim", "id", "time")
+  tmp %>% 
+    dplyr::arrange_("sim", "id", "time")
 }
 
 sim_data_tte <- function (fit, t_cens = NULL, n = 100) {
@@ -83,5 +84,5 @@ sim_data_tte <- function (fit, t_cens = NULL, n = 100) {
     out <- rbind(out, cbind(i, km_fit$time, km_fit$surv))
   }
   colnames(out) <- c("sim", "time", "dv")
-  dplyr::as_tibble(data.frame(out))
+  return(dplyr::as_tibble(data.frame(out)))
 }

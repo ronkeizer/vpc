@@ -4,8 +4,7 @@
 \alias{pk_oral_1cmt}
 \title{Simulate PK data from a 1-compartment oral model}
 \usage{
-pk_oral_1cmt(t, tau = 24, dose = 120, ka = 1, ke = 1, cl = 10,
-  ruv = NULL)
+pk_oral_1cmt(t, tau = 24, dose = 120, ka = 1, ke = 1, cl = 10, ruv = NULL)
 }
 \arguments{
 \item{t}{Time after dose}

@@ -5,15 +5,10 @@ global:
   - R_CHECK_ARGS="--no-build-vignettes --no-examples --no-manual"
 
 r_binary_packages:
+  - Rcpp
   - MASS
   - dplyr
   - ggplot2
   - testthat
   - rmarkdown
   - classInt
-
-r_packages:
-  - covr
-
-after_success:
-  - Rscript -e 'library(covr); codecov()'
