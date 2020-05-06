@@ -15,12 +15,13 @@
 #' @param ... arguments passed on to underlying binning functions
 #' @return A vector of bin separators
 #' @export
-auto_bin <- function(dat, type="kmeans", n_bins=NULL, verbose=FALSE, ...)
+auto_bin <- function(dat, type = "kmeans", n_bins = 8, verbose = FALSE, ...) {
   UseMethod("auto_bin")
+}
 
 #' @rdname auto_bin
 #' @export
-auto_bin.numeric <- function(dat, type="kmeans", n_bins=NULL, verbose=FALSE, ...) {
+auto_bin.numeric <- function(dat, type = "kmeans", n_bins = 8, verbose = FALSE, ...) {
   all_bins <- list()
   l_bins <- c()
   if (is.null(type) || type == "none") {
@@ -89,8 +90,8 @@ auto_bin.numeric <- function(dat, type="kmeans", n_bins=NULL, verbose=FALSE, ...
 
 #' @rdname auto_bin
 #' @export
-auto_bin.data.frame <- function(dat, type="kmeans", n_bins=NULL, verbose=FALSE, ...) {
-  auto_bin(dat=dat[["idv"]], ...)
+auto_bin.data.frame <- function(dat, type = "kmeans", n_bins = 8, verbose = FALSE, ...) {
+  auto_bin(dat=dat[["idv"]], type, n_bins, verbose, ...)
 }
 
 find_nadirs <- function (x, thresh = 0) {

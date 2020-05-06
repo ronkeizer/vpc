@@ -152,9 +152,9 @@ vpc_cens <- function(sim = NULL,
   }
   if (class(bins) != "numeric") {
     if(!is.null(obs)) {
-      bins <- auto_bin(obs, bins, n_bins)
+      bins <- auto_bin(obs, type = bins, n_bins = n_bins)
     } else { # get from sim
-      bins <- auto_bin(sim, bins, n_bins)
+      bins <- auto_bin(sim, type = bins, n_bins = n_bins)
     }
     if (is.null(bins)) {
       msg("Automatic binning unsuccessful, try increasing the number of bins, or specify vector of bin separators manually.", verbose)

@@ -11,13 +11,13 @@ assert("1 values in upper percentile flagged as <lloq", vpc:::is_equal(sum(is.na
 
 ## test vpc func
 obj <- vpc_cens(sim = vpc::simple_data$sim, obs = vpc::simple_data$obs, 
-              lloq = 30, vpcdb = TRUE, n_bins = 8)
+              lloq = 30, n_bins = 8, vpcdb = TRUE)
 #vpc_cens(sim = vpc::simple_data$sim, obs = vpc::simple_data$obs, lloq = 30)
 
-obs50 <- c(0.56, 0.08, 0.00, 0.0, 0, 0, 0.02, 0.14, 0.42, 0.5, 0.54)
-sim50 <- c(0.48, 0.07, 0.00, 0.00, 0, 0, 0.02, 0.18, 0.46, 0.5, 0.54)
-sim5  <- c(0.34, 0.02, 0.00, 0.00, 0, 0, 0.0, 0.10, 0.40, 0.48, 0.5)
-sim95 <- c(0.58, 0.12, 0.02, 0.00, 0.00, 0.02, 0.08, 0.26, 0.50, 0.5, 0.6)
+obs50 <- c(0.56, 0.08, 0.00, 0.0, 0.02, 0.14, 0.42, 0.52)
+sim50 <- c(0.48, 0.07, 0.00, 0.00, 0.02, 0.18, 0.46, 0.52)
+sim5  <- c(0.34, 0.02, 0.00, 0.00, 0.0, 0.10, 0.40, 0.5)
+sim95 <- c(0.58, 0.12, 0.01, 0.01, 0.08, 0.26, 0.50, 0.55)
 
 assert("vpc_cens returned proper object",
   all(c("obs", "sim", "aggr_obs", "vpc_dat", "stratify", "bins") %in% names(obj)))
