@@ -11,9 +11,3 @@ r_binary_packages:
   - testthat
   - rmarkdown
   - classInt
-
-r_packages:
-  - covr
-
-after_success:
-  - Rscript -e 'library(covr); codecov()'
