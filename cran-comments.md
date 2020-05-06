@@ -1,7 +1,7 @@
 ## Test environments
-* local OS X install, R 3.4.3
-* ubuntu 16.04, R 3.4.3
-* win-builder, R Under development (unstable) (2018-08-25 r75182)
+* local OS X install, R 3.6.3
+* ubuntu 20.04, R 4.0.0
+* win-builder, R Under development (unstable) (2020-05-05 r78369)
 
 ## R CMD check results
 R CMD check results
@@ -10,8 +10,16 @@ R CMD check results
 R CMD check succeeded
 
 ## Downstream dependencies
-xpose, nlmixr
+xpose, nlmixr, xpose.nlmixr, tidyvpc
 
 ## Current release notes:
-- Allow use from nlmixr: add S3 methods
-- Minor fixes in vpc functions
+- fixes for tibble 3.0.0
+- fixes in calls to msg()
+- fixes auto_bin S3 methods / docs
+- fix in labeler function
+- fix arrange() in tte parser
+- add conditional=FALSE option to vpc_tte
+- fix censoring bug vpc_tte
+- respect factor levels in order of facets
+- added extra data checks
+- fix misc typos
