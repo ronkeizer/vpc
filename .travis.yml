@@ -5,6 +5,7 @@ global:
   - R_CHECK_ARGS="--no-build-vignettes --no-examples --no-manual"
 
 r_binary_packages:
+  - Rcpp
   - MASS
   - dplyr
   - ggplot2
