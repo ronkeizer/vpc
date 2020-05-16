@@ -5,11 +5,12 @@
 #' @details
 #' This function creates a theme that customizes how the VPC looks, i.e. colors, fills, transparencies, linetypes an sizes, etc. The following arguments can be specified in the input list:
 #' \itemize{
-#'  \item{obs_color}: {color for observationss points}
+#'  \item{obs_color}: {color for observations points}
 #'  \item{obs_size}: {size for observation points}
 #'  \item{obs_median_color}: {color for median observation line}
 #'  \item{obs_median_linetype}: {linetype for median observation line}
 #'  \item{obs_median_size}: {size for median observation line}
+#'  \item{obs_ci_fill}: {color for observation CI fill}
 #'  \item{obs_ci_color}: {color for observation CI lines}
 #'  \item{obs_ci_linetype}: {linetype for observation CI lines}
 #'  \item{obs_ci_size}: {size for observations CI lines}
@@ -25,9 +26,20 @@
 #'  \item{sim_median_size}: {size for simulated median line}
 #'  \item{bin_separators_color}: {color for bin separator lines, NA for don't plot}
 #'  \item{bin_separators_location}: {where to plot bin separators ("t" for top, "b" for bottom)}
+#'  \item{loq_color}: {color of line showing limit of quantification}
 #' }
 #' @return A list with vpc theme specifiers
 #' @export
+#' @examples 
+#' theme1 <- new_vpc_theme(update = list(
+#'   obs_color = "red",
+#'   obs_ci_color = "#aa0000",
+#'   obs_alpha = .3,
+#'   sim_pi_fill = "#cc8833",
+#'   sim_pi_size = 2
+#' ))
+#' vpc(simple_data$sim, simple_data$obs, vpc_theme = theme1)
+#' 
 new_vpc_theme <- function (update = NULL) {
   tmp <- structure(list(  
     obs_color = "#000000",
@@ -56,7 +68,8 @@ new_vpc_theme <- function (update = NULL) {
     sim_median_linetype = "dashed",
     sim_median_size = 1,  
                    
-    bin_separators_color = "#000000"                     
+    bin_separators_color = "#000000",
+    loq_color = "#990000"
   ), class = "vpc_theme")
   n <- names(tmp)
   if(is.null(update)) {

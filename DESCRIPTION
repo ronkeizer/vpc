@@ -1,11 +1,10 @@
 Package: vpc
-Title: Create visual predictive checks in R
-Version: 0.9.0
+Title: Create Visual Predictive Checks
+Version: 1.2.0
+Date: 2020-05-06
 Author: Ron Keizer <ronkeizer@gmail.com>
 Maintainer: Ron Keizer <ronkeizer@gmail.com>
-Description: Create visual predictive checks in R, a commonly used diagnostic
-    plot in pharmacometrics. Create it completely within the R environment, so
-    without the use of PsN and Xpose.
+Description: Visual predictive checks are a commonly used diagnostic plot in pharmacometrics, showing how certain statistics (percentiles) for observed data compare to those same statistics for data simulated from a model. The package can generate VPCs for continuous, categorical, censored, and (repeated) time-to-event data.
 Depends:
     R (>= 3.1.0)
 Imports:
@@ -21,6 +20,5 @@ LazyData: true
 URL: https://github.com/ronkeizer/vpc
 Suggests:
     knitr,
-    testthat
-VignetteBuilder: knitr
-RoxygenNote: 6.0.1
+    testit
+RoxygenNote: 7.1.0

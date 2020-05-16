@@ -2,26 +2,52 @@
 % Please edit documentation in R/vpc_tte.R
 \name{vpc_tte}
 \alias{vpc_tte}
-\title{VPC function for survival-type data}
+\title{VPC function for time-to-event (survival) data}
 \usage{
-vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
-  rtte_calc_diff = TRUE, events = NULL, bins = FALSE, n_bins = 10,
-  software = "auto", obs_cols = NULL, sim_cols = NULL, kmmc = NULL,
-  reverse_prob = FALSE, stratify = NULL, stratify_color = NULL,
-  ci = c(0.05, 0.95), plot = FALSE, xlab = NULL, ylab = NULL,
-  show = NULL, as_percentage = TRUE, title = NULL, smooth = FALSE,
-  vpc_theme = NULL, facet = "wrap", verbose = FALSE, vpcdb = FALSE)
+vpc_tte(
+  sim = NULL,
+  obs = NULL,
+  psn_folder = NULL,
+  rtte = FALSE,
+  rtte_calc_diff = TRUE,
+  rtte_conditional = TRUE,
+  events = NULL,
+  bins = FALSE,
+  n_bins = 10,
+  software = "auto",
+  obs_cols = NULL,
+  sim_cols = NULL,
+  kmmc = NULL,
+  reverse_prob = FALSE,
+  stratify = NULL,
+  stratify_color = NULL,
+  ci = c(0.05, 0.95),
+  plot = FALSE,
+  xlab = "Time",
+  ylab = "Survival (\%)",
+  show = NULL,
+  as_percentage = TRUE,
+  title = NULL,
+  smooth = FALSE,
+  vpc_theme = NULL,
+  facet = "wrap",
+  labeller = NULL,
+  verbose = FALSE,
+  vpcdb = FALSE
+)
 }
 \arguments{
-\item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+\item{sim}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{obs}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+\item{obs}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{psn_folder}{instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder}
+\item{psn_folder}{instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder}
 
-\item{rtte}{repeated time-to-event data? Deafult is FALSE (treat as single-event TTE)}
+\item{rtte}{repeated time-to-event data? Default is FALSE (treat as single-event TTE)}
 
-\item{rtte_calc_diff}{recalculate time (T/F)? When simulating in NONMEM, you will probably need to set this to TRUE to recalculate the TIME to relative times between events (unless you output the time difference between events and specify that as independent variable to the vpc_tte() funciton.}
+\item{rtte_calc_diff}{recalculate time (T/F)? When simulating in NONMEM, you will probably need to set this to TRUE to recalculate the TIME to relative times between events (unless you output the time difference between events and specify that as independent variable to the vpc_tte() function.}
+
+\item{rtte_conditional}{`TRUE` (default) or `FALSE`. Compute the probability for each event newly (`TRUE`), or calculate the absolute probability (`FALSE`, i.e. the "probability of a 1st, 2nd, 3rd event etc" rather than the "probability of an event happening").}
 
 \item{events}{numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events.}
 
@@ -29,27 +55,27 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
 
 \item{n_bins}{number of bins}
 
-\item{software}{name of software platform using (eg nonmem, phoenix)}
+\item{software}{name of software platform using (e.g. nonmem, phoenix)}
 
 \item{obs_cols}{observation dataset column names (list elements: "dv", "idv", "id", "pred")}
 
-\item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred")}
+\item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred", "sim")}
 
 \item{kmmc}{either NULL (for regular TTE vpc, default), or a variable name for a KMMC plot (e.g. "WT")}
 
 \item{reverse_prob}{reverse the probability scale (i.e. plot 1-probability)}
 
-\item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied. If stratify_color is also specified, only 1 additional stratification can be specified.}
+\item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
 
-\item{stratify_color}{variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.}
+\item{stratify_color}{character vector of stratification variables. Only 1 stratification variable can be supplied, cannot be used in conjunction with `stratify`.}
 
 \item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
 
-\item{plot}{Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.}
+\item{plot}{Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.}
 
-\item{xlab}{ylab as numeric vector of size 2}
+\item{xlab}{label for x-axis}
 
-\item{ylab}{ylab as numeric vector of size 2}
+\item{ylab}{label for y-axis}
 
 \item{show}{what to show in VPC (obs_ci, obs_median, sim_median, sim_median_ci)}
 
@@ -63,6 +89,8 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
 
 \item{facet}{either "wrap", "columns", or "rows"}
 
+\item{labeller}{ggplot2 labeller function to be passed to underlying ggplot object}
+
 \item{verbose}{TRUE or FALSE (default)}
 
 \item{vpcdb}{Boolean whether to return the underlying vpcdb rather than the plot}
@@ -71,34 +99,27 @@ vpc_tte(sim = NULL, obs = NULL, psn_folder = NULL, rtte = FALSE,
 a list containing calculated VPC information, and a ggplot2 object
 }
 \description{
+This function can be used for either single time-to-event (TTE) or repeated time-to-event (RTTE) data.
+}
+\details{
 Creates a VPC plot from observed and simulation survival data
 }
 \examples{
+## See vpc-docs.ronkeizer.com for more documentation and examples.
+
 ## Example for repeated) time-to-event data
 ## with NONMEM-like data (e.g. simulated using a dense grid)
+
 data(rtte_obs_nm)
 data(rtte_sim_nm)
 
 # treat RTTE as TTE, no stratification
-vpc_tte(sim = rtte_sim_nm,
-        obs = rtte_obs_nm,
-        rtte = FALSE,
-        sim_cols=list(dv = "dv", idv = "t"), obs_cols=list(idv = "t"))
+vpc_tte(sim = rtte_sim_nm[rtte_sim_nm$sim <= 20,],
+       obs = rtte_obs_nm,
+       rtte = FALSE,
+       sim_cols=list(dv = "dv", idv = "t"), obs_cols=list(idv = "t"))
 
-# stratified for covariate and study arm
-vpc_tte(sim = rtte_sim_nm,
-        obs = rtte_obs_nm,
-        stratify = c("sex","drug"),
-        rtte = FALSE,
-        sim_cols=list(dv = "dv", idv = "t"), obs_cols=list(idv = "t"))
-
-# stratified per event number (we'll only look at first 3 events) and stratify per arm
-vpc_tte(sim = rtte_sim_nm,
-        obs = rtte_obs_nm,
-        rtte = TRUE, events = c(1:3),
-        stratify = c("drug"),
-        sim_cols=list(dv = "dv", idv = "t"), obs_cols=list(idv = "t"))
 }
 \seealso{
-\link{vpc}
+\link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cens}
 }

@@ -4,8 +4,13 @@
 \alias{read_table_nm}
 \title{NONMEM output table import function}
 \usage{
-read_table_nm(file = NULL, skip = NULL, header = NULL,
-  rm_duplicates = FALSE, nonmem_tab = TRUE)
+read_table_nm(
+  file = NULL,
+  skip = NULL,
+  header = NULL,
+  rm_duplicates = FALSE,
+  nonmem_tab = TRUE
+)
 }
 \arguments{
 \item{file}{full file name}
@@ -17,14 +22,14 @@ of the variables as its first line}
 
 \item{rm_duplicates}{logical value indicating whether duplicated columns should be removed}
 
-\item{nonmem_tab}{logical value indicading to the function whether the file is a
+\item{nonmem_tab}{logical value indicating to the function whether the file is a
 table or a nonmem additional output file.}
 }
 \value{
 A \code{data.frame}
 }
 \description{
-Quickly import NONMEM output tables into R. 
+Quickly import NONMEM output tables into R.
 Function taken from `modelviz` package by Benjamin Guiastrennec.
 When both \code{skip} and \code{header} are \code{NULL},
 \code{read_nmtab} will automatically detect the optimal

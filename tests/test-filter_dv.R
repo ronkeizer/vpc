@@ -1,4 +1,5 @@
-context('filter-dv')
+library(vpc)
+library(testit)
 
 nonmem_df <- data.frame(ID = 1, ADV = c(1, 0, 0), DV = 1)
 nonmem_mdv <- data.frame(ID = 1, MDV = c(1, 0, 0), DV = 1)
@@ -15,10 +16,7 @@ class(nonmem_df)       <- c("nonmem", "data.frame")
 class(nonmem_filtered_mdv) <- c("nonmem", "data.frame")
 class(nonmem_filtered_evid) <- c("nonmem", "data.frame")
 
-test_that("filtering values for nonmem works properly", {
-  expect_equal(filter_dv(nonmem_mdv), nonmem_filtered_mdv)
-  expect_equal(filter_dv(nonmem_evid), nonmem_filtered_evid)
-  expect_equal(filter_dv(nonmem), nonmem_filtered)
-  expect_equal(filter_dv(nonmem_df), nonmem_df)
-})
-
+assert("filtering values for nonmem works properly", vpc:::is_equal(vpc:::filter_dv(nonmem_mdv), nonmem_filtered_mdv, relative=F))
+assert("filtering values for nonmem works properly", vpc:::is_equal(vpc:::filter_dv(nonmem_evid), nonmem_filtered_evid, relative=F))
+assert("filtering values for nonmem works properly", vpc:::is_equal(vpc:::filter_dv(nonmem), nonmem_filtered, relative=F))
+assert("filtering values for nonmem works properly", vpc:::is_equal(vpc:::filter_dv(nonmem_df), nonmem_df, relative=F))

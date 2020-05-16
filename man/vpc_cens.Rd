@@ -4,19 +4,40 @@
 \alias{vpc_cens}
 \title{VPC function for left- or right-censored data (e.g. BLOQ data)}
 \usage{
-vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
-  n_bins = 8, bin_mid = "mean", obs_cols = NULL, sim_cols = NULL,
-  software = "auto", show = NULL, stratify = NULL,
-  stratify_color = NULL, ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
-  plot = FALSE, xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
-  vpc_theme = NULL, facet = "wrap", vpcdb = FALSE, verbose = FALSE)
+vpc_cens(
+  sim = NULL,
+  obs = NULL,
+  psn_folder = NULL,
+  bins = "jenks",
+  n_bins = 8,
+  bin_mid = "mean",
+  obs_cols = NULL,
+  sim_cols = NULL,
+  software = "auto",
+  show = NULL,
+  stratify = NULL,
+  stratify_color = NULL,
+  ci = c(0.05, 0.95),
+  uloq = NULL,
+  lloq = NULL,
+  plot = FALSE,
+  xlab = "Time",
+  ylab = "Probability of <LOQ",
+  title = NULL,
+  smooth = TRUE,
+  vpc_theme = NULL,
+  facet = "wrap",
+  labeller = NULL,
+  vpcdb = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
-\item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+\item{sim}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{obs}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+\item{obs}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{psn_folder}{instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder}
+\item{psn_folder}{instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder}
 
 \item{bins}{either "density", "time", or "data", or a numeric vector specifying the bin separators.}
 
@@ -28,7 +49,7 @@ vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred")}
 
-\item{software}{name of software platform using (eg nonmem, phoenix)}
+\item{software}{name of software platform using (e.g. nonmem, phoenix)}
 
 \item{show}{what to show in VPC (obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
 
@@ -42,7 +63,7 @@ vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{lloq}{Number or NULL indicating lower limit of quantification. Default is NULL.}
 
-\item{plot}{Boolean indacting whether to plot the ggplot2 object after creation. Default is FALSE.}
+\item{plot}{Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.}
 
 \item{xlab}{ylab as numeric vector of size 2}
 
@@ -56,6 +77,8 @@ vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{facet}{either "wrap", "columns", or "rows"}
 
+\item{labeller}{ggplot2 labeller function to be passed to underlying ggplot object}
+
 \item{vpcdb}{boolean whether to return the underlying vpcdb rather than the plot}
 
 \item{verbose}{show debugging information (TRUE or FALSE)}
@@ -64,9 +87,17 @@ vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 a list containing calculated VPC information, and a ggplot2 object
 }
 \description{
-Creates a VPC plot from observed and simulation data
-sim,
+Creates a VPC plot from observed and simulation data for censored data. Function can handle both left- (below lower limit of quantification) and right-censored (above upper limit of quantification) data.
+}
+\examples{
+
+## See vpc.ronkeizer.com for more documentation and examples
+library(vpc)
+
+vpc_cens(sim = simple_data$sim, obs = simple_data$obs, lloq = 30)
+vpc_cens(sim = simple_data$sim, obs = simple_data$obs, uloq = 120)
+
 }
 \seealso{
-\link{vpc}
+\link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cat}
 }

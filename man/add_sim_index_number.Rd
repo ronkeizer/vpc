@@ -4,12 +4,14 @@
 \alias{add_sim_index_number}
 \title{Add sim index number}
 \usage{
-add_sim_index_number(sim, id = "id")
+add_sim_index_number(sim, id = "id", sim_label = "sim")
 }
 \arguments{
 \item{sim}{a data.frame containing the simulation data}
 
 \item{id}{character specifying the column name in the data.frame}
+
+\item{sim_label}{label to indicate simulation index (if available)}
 }
 \description{
 Add simulation index number to simulation when not present

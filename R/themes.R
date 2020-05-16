@@ -1,5 +1,8 @@
-#' Nicer default theme for ggplot2
+#' A nicer default theme for ggplot2
 #'
+#' @examples
+#' vpc(simple_data$sim, simple_data$obs) + theme_plain()
+#' 
 #' @export
 theme_plain <-  function () {
   ggplot2::theme(
@@ -17,7 +20,11 @@ theme_plain <-  function () {
   )
 }
 
-#' Empty theme
+#' Empty ggplot2 theme
+#' 
+#' @examples 
+#' vpc(simple_data$sim, simple_data$obs) + theme_empty()
+#' 
 #' @export
 theme_empty <- function () {
   ggplot2::theme(panel.grid.major = ggplot2::element_blank(),

@@ -2,28 +2,36 @@
 % Please edit documentation in R/binning.R
 \name{auto_bin}
 \alias{auto_bin}
+\alias{auto_bin.numeric}
+\alias{auto_bin.data.frame}
 \title{Calculate appropriate bin separators for vpc}
 \usage{
-auto_bin(dat, type = "kmeans", n_bins = 8, verbose = FALSE)
+auto_bin(dat, type = "kmeans", n_bins = 8, verbose = FALSE, ...)
+
+\method{auto_bin}{numeric}(dat, type = "kmeans", n_bins = 8, verbose = FALSE, ...)
+
+\method{auto_bin}{data.frame}(dat, type = "kmeans", n_bins = 8, verbose = FALSE, ...)
 }
 \arguments{
 \item{dat}{data frame}
 
 \item{type}{auto-binning type: "density", "time", or "data"}
 
-\item{n_bins}{number of bins to use. For "density" the function might not return a solution with the exact number of bins.}
+\item{n_bins}{number of bins to use; either a positive integer or "auto". For
+"density" the function might not return a solution with the exact number of
+bins.}
 
 \item{verbose}{show warnings and other messages (TRUE or FALSE)}
+
+\item{...}{arguments passed on to underlying binning functions}
 }
 \value{
 A vector of bin separators
 }
 \description{
-Calculate appropriate bin separators for vpc
-}
-\details{
-This function calculates bin separators (e.g. for use in a vpc) based on nadirs in the density functions for the indenpendent variable
-}
-\seealso{
-\code{\link{vpc}}
+This function calculates bin separators either using R's native binning
+approaches available in the classInt library such as `kmeans`, `jenks`,
+`pretty` etc. Alternatively, a custom approach is available which is based on
+finding the nadirs in the density functions for the independent variable.
+Default approach is k-means clustering.
 }

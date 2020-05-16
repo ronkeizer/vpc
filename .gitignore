@@ -1,9 +1,12 @@
-.Rproj.user
+B.Rproj.user
 .Rhistory
 .RData
 .DS_Store
+..Rcheck
 inst/doc
 *.sublime-workspace
 *.sublime-project
 ._.DS_Store
 .DS_Store
+.Rproj.user
+revdep

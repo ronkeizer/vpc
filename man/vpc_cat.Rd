@@ -4,19 +4,38 @@
 \alias{vpc_cat}
 \title{VPC function for categorical}
 \usage{
-vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
-  n_bins = "auto", bin_mid = "mean", obs_cols = NULL, sim_cols = NULL,
-  software = "auto", show = NULL, ci = c(0.05, 0.95), uloq = NULL,
-  lloq = NULL, xlab = NULL, ylab = NULL, title = NULL, smooth = TRUE,
-  stratify = NULL, stratify_color = NULL, vpc_theme = NULL,
-  facet = "wrap", plot = TRUE, vpcdb = FALSE, verbose = FALSE)
+vpc_cat(
+  sim = NULL,
+  obs = NULL,
+  psn_folder = NULL,
+  bins = "jenks",
+  n_bins = "auto",
+  bin_mid = "mean",
+  obs_cols = NULL,
+  sim_cols = NULL,
+  software = "auto",
+  show = NULL,
+  ci = c(0.05, 0.95),
+  uloq = NULL,
+  lloq = NULL,
+  xlab = NULL,
+  ylab = NULL,
+  title = NULL,
+  smooth = TRUE,
+  vpc_theme = NULL,
+  facet = "wrap",
+  labeller = NULL,
+  plot = TRUE,
+  vpcdb = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
-\item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+\item{sim}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{obs}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+\item{obs}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{psn_folder}{instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder}
+\item{psn_folder}{instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder}
 
 \item{bins}{either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.}
 
@@ -28,7 +47,7 @@ vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred")}
 
-\item{software}{name of software platform using (eg nonmem, phoenix)}
+\item{software}{name of software platform using (e.g. nonmem, phoenix)}
 
 \item{show}{what to show in VPC (obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
 
@@ -38,21 +57,19 @@ vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{lloq}{Number or NULL indicating lower limit of quantification. Default is NULL.}
 
-\item{xlab}{ylab as numeric vector of size 2}
+\item{xlab}{label for x-axis}
 
-\item{ylab}{ylab as numeric vector of size 2}
+\item{ylab}{label for y-axis}
 
 \item{title}{title}
 
 \item{smooth}{"smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.}
 
-\item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
-
-\item{stratify_color}{variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.}
-
 \item{vpc_theme}{theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()}
 
 \item{facet}{either "wrap", "columns", or "rows"}
+
+\item{labeller}{ggplot2 labeller function to be passed to underlying ggplot object}
 
 \item{plot}{Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.}
 
@@ -64,9 +81,34 @@ vpc_cat(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 }
 \description{
-Creates a VPC plot from observed and simulation data
-sim,
+Creates a VPC plot from observed and simulation data for categorical variables.
+}
+\examples{
+
+## See vpc.ronkeizer.com for more documentation and examples
+library(vpc)
+
+# simple function to simulate categorical data for single individual
+sim_id <- function(id = 1) {
+  n <- 10
+  logit <- function(x) exp(x) / (1+exp(x))
+  data.frame(id = id, time = seq(1, n, length.out = n),
+             dv = round(logit((1:n) - n/2 + rnorm(n, 0, 1.5))) )
+}
+## simple function to simulate categorical data for a trial
+sim_trial <- function(i = 1, n = 20) { # function to simulate categorical data for a trial
+  data.frame(sim = i, do.call("rbind", lapply(1:n, sim_id)))
+}
+
+## simulate single trial for 20 individuals
+obs <- sim_trial(n = 20)
+
+## simulate 200 trials of 20 individuals
+sim <- do.call("rbind", lapply(1:200, sim_trial, n = 20))
+
+## Plot categorical VPC
+vpc_cat(sim = sim, obs = obs)
 }
 \seealso{
-\link{vpc}
+\link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cens}
 }

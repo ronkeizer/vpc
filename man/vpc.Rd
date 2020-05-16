@@ -2,23 +2,54 @@
 % Please edit documentation in R/vpc.R
 \name{vpc}
 \alias{vpc}
+\alias{vpc.default}
+\alias{vpc_vpc}
 \title{VPC function}
 \usage{
-vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
-  n_bins = "auto", bin_mid = "mean", obs_cols = NULL, sim_cols = NULL,
-  software = "auto", show = NULL, stratify = NULL,
-  stratify_color = NULL, pred_corr = FALSE, pred_corr_lower_bnd = 0,
-  pi = c(0.05, 0.95), ci = c(0.05, 0.95), uloq = NULL, lloq = NULL,
-  log_y = FALSE, log_y_min = 0.001, xlab = NULL, ylab = NULL,
-  title = NULL, facet_names = TRUE, smooth = TRUE, vpc_theme = NULL,
-  facet = "wrap", vpcdb = FALSE, verbose = FALSE)
+vpc(sim, ...)
+
+\method{vpc}{default}(sim, ...)
+
+vpc_vpc(
+  sim = NULL,
+  obs = NULL,
+  psn_folder = NULL,
+  bins = "jenks",
+  n_bins = "auto",
+  bin_mid = "mean",
+  obs_cols = NULL,
+  sim_cols = NULL,
+  software = "auto",
+  show = NULL,
+  stratify = NULL,
+  pred_corr = FALSE,
+  pred_corr_lower_bnd = 0,
+  pi = c(0.05, 0.95),
+  ci = c(0.05, 0.95),
+  uloq = NULL,
+  lloq = NULL,
+  log_y = FALSE,
+  log_y_min = 0.001,
+  xlab = NULL,
+  ylab = NULL,
+  title = NULL,
+  smooth = TRUE,
+  vpc_theme = NULL,
+  facet = "wrap",
+  labeller = NULL,
+  vpcdb = FALSE,
+  verbose = FALSE,
+  ...
+)
 }
 \arguments{
-\item{sim}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+\item{sim}{this is usually a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}.  However it can also be an object like a nlmixr or xpose object}
 
-\item{obs}{a data.frame with observed data, containing the indenpendent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+\item{...}{Other arguments sent to other methods (like xpose or nlmixr);  Note these arguments are not used in the default vpc and are ignored by the default method.}
 
-\item{psn_folder}{instead of specyfing "sim" and "obs", specify a PsN-generated VPC-folder}
+\item{obs}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+
+\item{psn_folder}{instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder}
 
 \item{bins}{either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.}
 
@@ -28,15 +59,13 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{obs_cols}{observation dataset column names (list elements: "dv", "idv", "id", "pred")}
 
-\item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred")}
+\item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred", "sim")}
 
-\item{software}{name of software platform using (eg nonmem, phoenix)}
+\item{software}{name of software platform using (e.g. nonmem, phoenix)}
 
 \item{show}{what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
 
 \item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
-
-\item{stratify_color}{variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.}
 
 \item{pred_corr}{perform prediction-correction?}
 
@@ -54,19 +83,19 @@ vpc(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
 
 \item{log_y_min}{minimal value when using log_y argument. Default is 1e-3.}
 
-\item{xlab}{ylab as numeric vector of size 2}
+\item{xlab}{label for x axis}
 
-\item{ylab}{ylab as numeric vector of size 2}
+\item{ylab}{label for y axis}
 
 \item{title}{title}
-
-\item{facet_names}{show facet names (e.g. "SEX=1" when TRUE) or just the value of the facet}
 
 \item{smooth}{"smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.}
 
 \item{vpc_theme}{theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()}
 
 \item{facet}{either "wrap", "columns", or "rows"}
+
+\item{labeller}{ggplot2 labeller function to be passed to underlying ggplot object}
 
 \item{vpcdb}{Boolean whether to return the underlying vpcdb rather than the plot}
 
@@ -78,6 +107,16 @@ a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 obj
 \description{
 Creates a VPC plot from observed and simulation data
 }
+\examples{
+
+## See vpc.ronkeizer.com for more documentation and examples
+library(vpc)
+
+# Basic commands:
+vpc(sim = simple_data$sim, obs = simple_data$obs)
+vpc(sim = simple_data$sim, obs = simple_data$obs, lloq = 20)
+
+}
 \seealso{
-\link{sim_data}, \link{vpc_cens}, \link{vpc_tte}
+\link{sim_data}, \link{vpc_cens}, \link{vpc_tte}, \link{vpc_cat}
 }

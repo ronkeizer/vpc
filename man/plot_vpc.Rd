@@ -4,9 +4,18 @@
 \alias{plot_vpc}
 \title{VPC plotting function}
 \usage{
-plot_vpc(db, show = NULL, vpc_theme = NULL, smooth = TRUE,
-  log_x = FALSE, log_y = FALSE, title = NULL, xlab = "Time",
-  ylab = "Dependent value", verbose = FALSE)
+plot_vpc(
+  db,
+  show = NULL,
+  vpc_theme = NULL,
+  smooth = TRUE,
+  log_x = FALSE,
+  log_y = FALSE,
+  xlab = NULL,
+  ylab = NULL,
+  title = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{db}{object created using the `vpc` function}
@@ -21,14 +30,25 @@ plot_vpc(db, show = NULL, vpc_theme = NULL, smooth = TRUE,
 
 \item{log_y}{Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.}
 
+\item{xlab}{label for x axis}
+
+\item{ylab}{label for y axis}
+
 \item{title}{title}
-
-\item{xlab}{ylab as numeric vector of size 2}
-
-\item{ylab}{ylab as numeric vector of size 2}
 
 \item{verbose}{verbosity (T/F)}
 }
 \description{
-VPC plotting function
+This function performs no parsing of data, it just plots the already calculated statistics generated using one of the 
+`vpc` functions.
+}
+\examples{
+## See vpc.ronkeizer.com for more documentation and examples
+
+library(vpc)
+vpc_db <- vpc(sim = simple_data$sim, obs = simple_data$obs, vpcdb = TRUE)
+plot_vpc(vpc_db, title = "My new vpc", x = "Custom x label")
+}
+\seealso{
+\link{sim_data}, \link{vpc_cens}, \link{vpc_tte}, \link{vpc_cat}
 }

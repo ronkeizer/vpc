@@ -2,10 +2,14 @@
 % Please edit documentation in R/themes.R
 \name{theme_empty}
 \alias{theme_empty}
-\title{Empty theme}
+\title{Empty ggplot2 theme}
 \usage{
 theme_empty()
 }
 \description{
-Empty theme
+Empty ggplot2 theme
+}
+\examples{
+vpc(simple_data$sim, simple_data$obs) + theme_empty()
+
 }

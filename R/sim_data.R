@@ -38,14 +38,16 @@ sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)),
   sim_des$sim  <- rep(1:n, each=nrow(design[,1]))
   sim_des$join <- paste(sim_des$sim, sim_des$id, sep="_")
   param$join   <- paste(param$sim, param$id, sep="_")
-  tmp <- dplyr::tbl_df(merge(sim_des, param,
+  tmp <- dplyr::as_tibble(merge(sim_des, param,
                       by.x="join", by.y="join"))
   tmp_pred <- cbind(data.frame(design), matrix(rep(theta, each=nrow(design[,1])), ncol=length(theta)))
   colnames(tmp_pred)[length(tmp_pred)-length(par_names)+1:3] <- par_names
   tmp$dv <- add_noise(model(tmp), ruv = error)
-  tmp$pred <- model(tmp_pred)
+  tmp$pred <- rep(model(tmp_pred), n)
+  
   colnames(tmp) <- gsub("\\.x", "", colnames(tmp))
-  tmp %>% dplyr::arrange_("sim", "id", "time")
+  tmp %>% 
+    dplyr::arrange_("sim", "id", "time")
 }
 
 sim_data_tte <- function (fit, t_cens = NULL, n = 100) {
@@ -82,5 +84,5 @@ sim_data_tte <- function (fit, t_cens = NULL, n = 100) {
     out <- rbind(out, cbind(i, km_fit$time, km_fit$surv))
   }
   colnames(out) <- c("sim", "time", "dv")
-  dplyr::tbl_df(data.frame(out))
+  return(dplyr::as_tibble(data.frame(out)))
 }

@@ -4,8 +4,7 @@
 \alias{pk_oral_1cmt}
 \title{Simulate PK data from a 1-compartment oral model}
 \usage{
-pk_oral_1cmt(t, tau = 24, dose = 120, ka = 1, ke = 1, cl = 10,
-  ruv = NULL)
+pk_oral_1cmt(t, tau = 24, dose = 120, ka = 1, ke = 1, cl = 10, ruv = NULL)
 }
 \arguments{
 \item{t}{Time after dose}
@@ -27,4 +26,11 @@ A vector of predicted values, with or without added residual variability
 }
 \description{
 Simulate PK data from a 1-compartment oral model
+}
+\examples{
+dat1 <- vpc:::pk_oral_1cmt(t = c(0:72), tau = 24, dose = 120, 
+                     ka = 1, ke = 1, cl = 10)
+dat2 <- vpc:::pk_oral_1cmt(t = c(0:72), tau = 24, dose = 120, 
+                     ka = 1, ke = 1, cl = 10, 
+                     ruv = list(proportional = 0.1, additive = 0.1))
 }

@@ -1,13 +1,7 @@
-#' Add noise / residual error to data
-#'
-#' @param x data
-#' @param ruv list describing the magnitude of errors. List arguments: "proportional", "additive", "exponential".
-#' @export
-add_noise <- function(x, ruv = list(proportional = 0, additive = 0, exponential = 0)) {
-  if (is.null(ruv$proportional)) { ruv$proportional <- 0 }
-  if (is.null(ruv$additive)) { ruv$additive <- 0 }
-  if (is.null(ruv$exponential)) { ruv$exponential <- 0 }
-  x * (1 + rnorm(length(x), 0, ruv$proportional)) +  rnorm(length(x), 0, ruv$additive) * exp(rnorm(length(x), 0, ruv$exponential))
+msg <- function(txt, verbose = FALSE) {
+  if(verbose) {
+    message(txt)
+  }
 }
 
 add_recurs <- function(x, n, max) {
@@ -64,12 +58,12 @@ relative_times <- function (dat, simulation = FALSE) {
   }
 }
 
-convert_from_dense_grid <- function (dat) { # note: only for a single trial, requires a loop or ddply for multiple subproblems
+convert_from_dense_grid <- function (dat) { 
+  ## Note RK: only for a single trial, requires a loop or ddply for multiple subproblems
   tmp <- dat %>% dplyr::group_by_("id")
   if("rtte" %in% names(dat)) {
     tmp <- tmp %>% dplyr::filter(rtte == 1)
   }
-  #  filter (dv == 1 | time == max(time) )
   tmp2 <- rbind(tmp %>% dplyr::filter(length(time) > 1) %>% dplyr::mutate(time = time - c(0,time[1:(length(time)-1)])),
                 tmp %>% dplyr::filter(length(time) == 1) )
   return(tmp2 %>% dplyr::arrange_("id", "time"))
