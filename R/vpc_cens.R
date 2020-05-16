@@ -179,15 +179,15 @@ vpc_cens <- function(sim = NULL,
   ## Parsing data to get the quantiles for the VPC
   if (!is.null(sim)) {
     tmp1 <- sim %>% dplyr::group_by(strat, sim, bin)
-    aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarise(loq_perc(dv, limit = limit, cens = cens)),
-                                 tmp1 %>% dplyr::summarise(mean(idv))))
+    aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarise(loq_perc(dv, limit = limit, cens = cens)) %>% dplyr::ungroup(),
+                                 tmp1 %>% dplyr::summarise(mean(idv)) %>% dplyr::ungroup()))
     colnames(aggr_sim)[grep("loq_perc", colnames(aggr_sim))] <- "ploq"
     colnames(aggr_sim)[length(aggr_sim[1,])] <- c("mn_idv")
     tmp <- aggr_sim %>% dplyr::group_by(strat, bin)
-    vpc_dat <- data.frame(cbind(tmp %>% dplyr::summarise(quantile(ploq, ci[1])),
-                                tmp %>% dplyr::summarise(quantile(ploq, 0.5)),
-                                tmp %>% dplyr::summarise(quantile(ploq, ci[2])),
-                                tmp %>% dplyr::summarise(mean(mn_idv))
+    vpc_dat <- data.frame(cbind(tmp %>% dplyr::summarise(quantile(ploq, ci[1])) %>% dplyr::ungroup(),
+                                tmp %>% dplyr::summarise(quantile(ploq, 0.5)) %>% dplyr::ungroup(),
+                                tmp %>% dplyr::summarise(quantile(ploq, ci[2])) %>% dplyr::ungroup(),
+                                tmp %>% dplyr::summarise(mean(mn_idv)) %>% dplyr::ungroup()
                                 ))
     vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
     colnames(vpc_dat) <- c("strat", "bin", "q50.low","q50.med","q50.up", "bin_mid")
@@ -201,8 +201,8 @@ vpc_cens <- function(sim = NULL,
   }
   if(!is.null(obs)) {
     tmp <- obs %>% dplyr::group_by(strat,bin)
-    aggr_obs <- data.frame(cbind(tmp %>% dplyr::summarise(loq_perc(dv, limit = lloq, cens = cens)),
-                                 tmp %>% dplyr::summarise(mean(idv))))
+    aggr_obs <- data.frame(cbind(tmp %>% dplyr::summarise(loq_perc(dv, limit = lloq, cens = cens)) %>% dplyr::ungroup(),
+                                 tmp %>% dplyr::summarise(mean(idv)) %>% dplyr::ungroup()))
     aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
     colnames(aggr_obs) <- c("strat", "bin", "obs50")
     colnames(aggr_obs)[length(aggr_obs[1,])] <- c("bin_mid")
