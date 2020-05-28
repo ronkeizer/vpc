@@ -90,7 +90,7 @@ plot_vpc <- function(db,
             ggplot2::geom_line(ggplot2::aes(x=bin_mid, y=q5.med), colour=vpc_theme$sim_pi_color, linetype=vpc_theme$sim_pi_linetype, size=vpc_theme$sim_pi_size) +
             ggplot2::geom_line(ggplot2::aes(x=bin_mid, y=q95.med), colour=vpc_theme$sim_pi_color, linetype=vpc_theme$sim_pi_linetype, size=vpc_theme$sim_pi_size)
         }
-        if(show$pi_ci && !is.null(db$vpc_dat$q5.low)) {
+        if(show$pi_ci && "q5.low" %in% names(db$vpc_dat)) {
           if (smooth) {
             pl <- pl +
               ggplot2::geom_ribbon(ggplot2::aes(x=bin_mid, ymin=q5.low, ymax=q5.up), alpha=vpc_theme$sim_pi_alpha, fill = vpc_theme$sim_pi_fill) +
