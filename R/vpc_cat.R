@@ -172,7 +172,7 @@ vpc_cat  <- function(sim = NULL,
                        q50.med = quantile(value, 0.5),
                        q50.up = quantile(value, ci[2]),
                        bin_mid = mean(mn_idv)) %>%
-      dplyr::ungroup
+      dplyr::ungroup()
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     if(bin_mid == "middle") {
