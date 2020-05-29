@@ -161,8 +161,7 @@ vpc_cat  <- function(sim = NULL,
     aggr_sim <- cbind(aggr_sim, tmp1 %>% 
                         dplyr::summarise(mean(idv), .groups = "drop") %>% 
                         dplyr::ungroup() %>%
-                        dplyr::select(-sim, -bin)) %>%
-      data.frame()
+                        dplyr::select(-sim, -bin))
     colnames(aggr_sim) <- c("sim", "bin", paste0("fact_", lev), "mn_idv")
     tmp3 <- tidyr::pivot_longer(aggr_sim, names_to = "strat", cols = paste0("fact_", lev)) %>%
       dplyr::arrange(sim, strat, bin) %>%
@@ -172,7 +171,8 @@ vpc_cat  <- function(sim = NULL,
       dplyr::summarise(q50.low = quantile(value, ci[1]),
                        q50.med = quantile(value, 0.5),
                        q50.up = quantile(value, ci[2]),
-                       bin_mid = mean(mn_idv))
+                       bin_mid = mean(mn_idv)) %>%
+      dplyr::ungroup
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     if(bin_mid == "middle") {
