@@ -188,12 +188,16 @@ vpc_cat  <- function(sim = NULL,
         aggr_obs <- tmp %>% 
           dplyr::summarise(fact_perc(dv, lev[i]))
       } else {
-        aggr_obs <- dplyr::bind_cols(aggr_obs, tmp %>% 
-                            dplyr::summarise(fact_perc(dv, lev[i])) )
+        aggr_obs <- cbind(aggr_obs, tmp %>% 
+                            dplyr::summarise(fact_perc(dv, lev[i])) %>% 
+                            dplyr::ungroup() %>%
+                            dplyr::select(-bin) )
       }
     }
-    tmp1 <- dplyr::bind_cols(aggr_obs, tmp %>% dplyr::summarise(mean(idv)))
-    tmp1 <- tmp1[,-grep("(bin.|strat.|sim.)", colnames(tmp1))]
+    tmp1 <- cbind(aggr_obs,  tmp %>% 
+                               dplyr::summarise(mean(idv)) %>%
+                               dplyr::ungroup() %>%
+                               dplyr::select(-bin))
     colnames(tmp1) <- c("bin", paste0("fact_", lev), "bin_mid")
     tmp2 <- tidyr::pivot_longer(tmp1, names_to = "strat", cols = paste0("fact_", lev)) %>%
       dplyr::arrange(strat, bin) %>%
