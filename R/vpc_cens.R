@@ -192,7 +192,7 @@ vpc_cens <- function(sim = NULL,
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     if(bin_mid == "middle") {
-      vpc_dat$bin_mid <- apply(cbind(vpc_dat$bin_min, vpc_dat$bin_max), 1, mean)
+      vpc_dat$bin_mid <- apply(dplyr::bind_cols(vpc_dat$bin_min, vpc_dat$bin_max), 1, mean)
     }
   } else {
     vpc_dat <- NULL
@@ -207,7 +207,7 @@ vpc_cens <- function(sim = NULL,
     aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
     aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
     if(bin_mid == "middle") {
-      aggr_obs$bin_mid <- apply(cbind(aggr_obs$bin_min, aggr_obs$bin_max), 1, mean)
+      aggr_obs$bin_mid <- apply(dplyr::bind_cols(aggr_obs$bin_min, aggr_obs$bin_max), 1, mean)
     }
   } else {
     aggr_obs <- NULL

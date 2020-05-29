@@ -10,3 +10,4 @@ README.MD
 cran-comments.md
 revdep
 Rplots.pdf
+^CRAN-RELEASE$

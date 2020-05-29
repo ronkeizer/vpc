@@ -151,15 +151,15 @@ vpc_cat  <- function(sim = NULL,
           dplyr::summarise(fact_perc(dv, lev[i]))
       } else {
         suppressMessages({
-          aggr_sim <- cbind(aggr_sim, tmp1 %>% 
+          aggr_sim <- dplyr::bind_cols(aggr_sim, tmp1 %>% 
                               dplyr::summarise(fact_perc(dv, lev[i])) %>%
                               dplyr::ungroup() %>%
                               dplyr::select(-sim, -bin))
         })
       }
     }
-    aggr_sim <- cbind(aggr_sim, tmp1 %>% 
-                        dplyr::summarise(mean(idv), .groups = "drop") %>% 
+    aggr_sim <- dplyr::bind_cols(aggr_sim, tmp1 %>% 
+                        dplyr::summarise(mean(idv)) %>% 
                         dplyr::ungroup() %>%
                         dplyr::select(-sim, -bin))
     colnames(aggr_sim) <- c("sim", "bin", paste0("fact_", lev), "mn_idv")
@@ -188,11 +188,11 @@ vpc_cat  <- function(sim = NULL,
         aggr_obs <- tmp %>% 
           dplyr::summarise(fact_perc(dv, lev[i]))
       } else {
-        aggr_obs <- cbind(aggr_obs, tmp %>% 
+        aggr_obs <- dplyr::bind_cols(aggr_obs, tmp %>% 
                             dplyr::summarise(fact_perc(dv, lev[i])) )
       }
     }
-    tmp1 <- data.frame(cbind(aggr_obs, data.frame(tmp %>% dplyr::summarise(mean(idv)))))
+    tmp1 <- dplyr::bind_cols(aggr_obs, tmp %>% dplyr::summarise(mean(idv)))
     tmp1 <- tmp1[,-grep("(bin.|strat.|sim.)", colnames(tmp1))]
     colnames(tmp1) <- c("bin", paste0("fact_", lev), "bin_mid")
     tmp2 <- tidyr::pivot_longer(tmp1, names_to = "strat", cols = paste0("fact_", lev)) %>%
@@ -201,7 +201,7 @@ vpc_cat  <- function(sim = NULL,
     tmp2$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(tmp2$strat)) )[tmp2$bin]
     tmp2$bin_max <- rep(bins[2:length(bins)], length(unique(tmp2$strat)) )[tmp2$bin]
     if(bin_mid == "middle") {
-      tmp2$bin_mid <- apply(cbind(tmp2$bin_min, tmp2$bin_max), 1, mean)
+      tmp2$bin_mid <- apply(dplyr::bind_cols(tmp2$bin_min, tmp2$bin_max), 1, mean)
     }
     aggr_obs <- tmp2
     colnames(aggr_obs)[4] <- "obs50"
