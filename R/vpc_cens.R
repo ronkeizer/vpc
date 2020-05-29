@@ -178,19 +178,17 @@ vpc_cens <- function(sim = NULL,
   
   ## Parsing data to get the quantiles for the VPC
   if (!is.null(sim)) {
-    tmp1 <- sim %>% dplyr::group_by(strat, sim, bin)
-    aggr_sim <- data.frame(cbind(tmp1 %>% dplyr::summarise(loq_perc(dv, limit = limit, cens = cens)),
-                                 tmp1 %>% dplyr::summarise(mean(idv))))
-    colnames(aggr_sim)[grep("loq_perc", colnames(aggr_sim))] <- "ploq"
-    colnames(aggr_sim)[length(aggr_sim[1,])] <- c("mn_idv")
-    tmp <- aggr_sim %>% dplyr::group_by(strat, bin)
-    vpc_dat <- data.frame(cbind(tmp %>% dplyr::summarise(quantile(ploq, ci[1])),
-                                tmp %>% dplyr::summarise(quantile(ploq, 0.5)),
-                                tmp %>% dplyr::summarise(quantile(ploq, ci[2])),
-                                tmp %>% dplyr::summarise(mean(mn_idv))
-                                ))
-    vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
-    colnames(vpc_dat) <- c("strat", "bin", "q50.low","q50.med","q50.up", "bin_mid")
+    tmp1 <- sim %>% 
+      dplyr::group_by(strat, sim, bin)
+    vpc_dat <- tmp1 %>%
+      dplyr::summarise(ploq = loq_perc(dv, limit = limit, cens = cens),
+                       mn_idv = mean(idv)) %>%
+      dplyr::group_by(strat, bin) %>%
+      dplyr::summarise(q50.low = quantile(ploq, ci[1]),
+                       q50.med = quantile(ploq, 0.5),
+                       q50.up = quantile(ploq, ci[2]),
+                       bin_mid = mean(mn_idv)) %>%
+      dplyr::ungroup()
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     if(bin_mid == "middle") {
@@ -200,12 +198,12 @@ vpc_cens <- function(sim = NULL,
     vpc_dat <- NULL
   }
   if(!is.null(obs)) {
-    tmp <- obs %>% dplyr::group_by(strat,bin)
-    aggr_obs <- data.frame(cbind(tmp %>% dplyr::summarise(loq_perc(dv, limit = lloq, cens = cens)),
-                                 tmp %>% dplyr::summarise(mean(idv))))
-    aggr_obs <- aggr_obs[,-grep("(bin.|strat.|sim.)", colnames(aggr_obs))]
-    colnames(aggr_obs) <- c("strat", "bin", "obs50")
-    colnames(aggr_obs)[length(aggr_obs[1,])] <- c("bin_mid")
+    tmp <- obs %>% 
+      dplyr::group_by(strat,bin)
+    aggr_obs <- tmp %>% 
+      dplyr::summarise(obs50 = loq_perc(dv, limit = lloq, cens = cens),
+                       bin_mid = mean(idv)) %>%
+      dplyr::ungroup()
     aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
     aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
     if(bin_mid == "middle") {

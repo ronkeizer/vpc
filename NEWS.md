@@ -1,3 +1,6 @@
+# vpc 1.2.1
+- fixes to account for dplyr 1.0.0 release
+
 # vpc 1.2.0
 - fixes to account for tibble 3.0.0 release
 - fixes in calls to msg()

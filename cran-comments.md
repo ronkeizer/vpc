@@ -13,13 +13,4 @@ R CMD check succeeded
 xpose, nlmixr, xpose.nlmixr, tidyvpc
 
 ## Current release notes:
-- fixes for tibble 3.0.0
-- fixes in calls to msg()
-- fixes auto_bin S3 methods / docs
-- fix in labeler function
-- fix arrange() in tte parser
-- add conditional=FALSE option to vpc_tte
-- fix censoring bug vpc_tte
-- respect factor levels in order of facets
-- added extra data checks
-- fix misc typos
+- fixes for dplyr 1.0.0

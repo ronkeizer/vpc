@@ -143,28 +143,36 @@ vpc_cat  <- function(sim = NULL,
   obs$dv <- as.factor(obs$dv)
   lev <- levels(obs$dv)
   if (!is.null(sim)) {
-    tmp1 <- sim %>% dplyr::group_by(sim, bin)
+    tmp1 <- sim %>% 
+      dplyr::group_by(sim, bin) 
     for (i in seq(lev)) {
       if (i == 1) {
-        aggr_sim <- tmp1 %>% dplyr::summarise(fact_perc(dv, lev[i]))
+        aggr_sim <- tmp1 %>% 
+          dplyr::summarise(fact_perc(dv, lev[i]))
       } else {
-        aggr_sim <- cbind(aggr_sim, tmp1 %>% dplyr::summarise(fact_perc(dv, lev[i])) )
+        suppressMessages({
+          aggr_sim <- cbind(aggr_sim, tmp1 %>% 
+                              dplyr::summarise(fact_perc(dv, lev[i])) %>%
+                              dplyr::ungroup() %>%
+                              dplyr::select(-sim, -bin))
+        })
       }
     }
-    aggr_sim <- cbind(aggr_sim, tmp1 %>% dplyr::summarise(mean(idv)))
-    aggr_sim <- data.frame(aggr_sim)
-    aggr_sim <- aggr_sim[,-grep("(bin.|sim.)", colnames(aggr_sim))]
+    aggr_sim <- cbind(aggr_sim, tmp1 %>% 
+                        dplyr::summarise(mean(idv), .groups = "drop") %>% 
+                        dplyr::ungroup() %>%
+                        dplyr::select(-sim, -bin))
     colnames(aggr_sim) <- c("sim", "bin", paste0("fact_", lev), "mn_idv")
-    tmp3 <- reshape2::melt(aggr_sim, id=c("sim", "bin", "mn_idv"))
-    tmp3$strat <- rep(lev, each = length(aggr_sim[,1]))
-    tmp4 <- tmp3 %>% dplyr::group_by(strat, bin)
-    vpc_dat <- data.frame(cbind(tmp4 %>% dplyr::summarise(quantile(value, ci[1])),
-                                tmp4 %>% dplyr::summarise(quantile(value, 0.5)),
-                                tmp4 %>% dplyr::summarise(quantile(value, ci[2])),
-                                tmp4 %>% dplyr::summarise(mean(mn_idv))
-                                ))
-    vpc_dat <- vpc_dat[,-grep("(bin.|strat.)", colnames(vpc_dat))]
-    colnames(vpc_dat) <- c("strat", "bin", "q50.low","q50.med","q50.up", "bin_mid")
+    tmp3 <- tidyr::pivot_longer(aggr_sim, names_to = "strat", cols = paste0("fact_", lev)) %>%
+      dplyr::arrange(sim, strat, bin) %>%
+      dplyr::mutate(strat = stringr::str_replace(strat, "fact_", ""))
+    vpc_dat <- tmp3 %>% 
+      dplyr::group_by(strat, bin) %>%
+      dplyr::summarise(q50.low = quantile(value, ci[1]),
+                       q50.med = quantile(value, 0.5),
+                       q50.up = quantile(value, ci[2]),
+                       bin_mid = mean(mn_idv)) %>%
+      dplyr::ungroup()
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     if(bin_mid == "middle") {
@@ -177,16 +185,19 @@ vpc_cat  <- function(sim = NULL,
     tmp <- obs %>% dplyr::group_by(bin)
     for (i in seq(lev)) {
       if (i == 1) {
-        aggr_obs <- tmp %>% dplyr::summarise(fact_perc(dv, lev[i]))
+        aggr_obs <- tmp %>% 
+          dplyr::summarise(fact_perc(dv, lev[i]))
       } else {
-        aggr_obs <- cbind(aggr_obs, tmp %>% dplyr::summarise(fact_perc(dv, lev[i])) )
+        aggr_obs <- cbind(aggr_obs, tmp %>% 
+                            dplyr::summarise(fact_perc(dv, lev[i])) )
       }
     }
     tmp1 <- data.frame(cbind(aggr_obs, data.frame(tmp %>% dplyr::summarise(mean(idv)))))
     tmp1 <- tmp1[,-grep("(bin.|strat.|sim.)", colnames(tmp1))]
     colnames(tmp1) <- c("bin", paste0("fact_", lev), "bin_mid")
-    tmp2 <- reshape2::melt(tmp1, id=c("bin", "bin_mid"))
-    tmp2$strat <- rep(lev, each=length(aggr_obs[,1]))
+    tmp2 <- tidyr::pivot_longer(tmp1, names_to = "strat", cols = paste0("fact_", lev)) %>%
+      dplyr::arrange(strat, bin) %>%
+      dplyr::mutate(strat = stringr::str_replace(strat, "fact_", ""))
     tmp2$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(tmp2$strat)) )[tmp2$bin]
     tmp2$bin_max <- rep(bins[2:length(bins)], length(unique(tmp2$strat)) )[tmp2$bin]
     if(bin_mid == "middle") {
