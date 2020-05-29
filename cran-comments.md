@@ -14,3 +14,10 @@ xpose, nlmixr, xpose.nlmixr, tidyvpc
 
 ## Current release notes:
 - fixes for dplyr 1.0.0
+
+## Downstream dependencies
+I have also run R CMD check on downstream dependencies of vpc
+All packages that I could install passed except:
+
+* xpose: I've put in a PR for that package to fix the reference
+object that makes the test fail.
