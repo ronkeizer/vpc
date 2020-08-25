@@ -1,4 +1,5 @@
-`%>%` <- dplyr::`%>%`
+#' @importFrom dplyr "%>%"
+NULL
 
 is_equal <- function(test, ref, tol = 1e-3, relative=TRUE) {
   if(relative) {
