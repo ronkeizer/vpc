@@ -4,9 +4,7 @@
 \name{show_default_tte}
 \alias{show_default_tte}
 \title{Defaults for show argument for TTE VPC}
-\format{
-An object of class \code{list} of length 11.
-}
+\format{An object of class \code{list} of length 11.}
 \usage{
 show_default_tte
 }
