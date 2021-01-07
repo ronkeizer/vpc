@@ -28,6 +28,7 @@
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param facet either "wrap", "columns", or "rows"
+#' @param scales either "fixed" (default), "free_y", "free_x" or "free"
 #' @param labeller ggplot2 labeller function to be passed to underlying ggplot object
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
@@ -81,6 +82,7 @@ vpc_vpc <- function(sim = NULL,
                     smooth = TRUE,
                     vpc_theme = NULL,
                     facet = "wrap",
+                    scales = "fixed",
                     labeller = NULL,
                     vpcdb = FALSE,
                     verbose = FALSE, ...) {
@@ -116,7 +118,14 @@ vpc_vpc <- function(sim = NULL,
     }
     if(facet == "grid") facet <- "rows"
   }
-
+  ### Added by Satyaprakash Nayak ---
+  if(!is.null(scales)) {
+    if(! scales %in% c("fixed", "free_x", "free_y", "free")) {
+      stop("`scales` argument needs to be one of `fixed`, `free_y`, `free_x` or `free`.")
+    }
+    if(scales == "fixed") scales <- "fixed"
+  }
+  ###---
   ## software specific parsing, if necessary
   if (software_type == "PKPDsim") {
     if (!is.null(obs)) {
@@ -339,6 +348,7 @@ vpc_vpc <- function(sim = NULL,
                  obs = obs,
                  bins = bins,
                  facet = facet,
+                 scales = scales,       
                  labeller = labeller,
                  lloq = lloq,
                  uloq = uloq,

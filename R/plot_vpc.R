@@ -149,24 +149,24 @@ plot_vpc <- function(db,
       if(is.null(db$labeller)) db$labeller <- ggplot2::label_both
       if(length(db$stratify) == 1) {
         if (db$facet == "wrap") {
-          pl <- pl + ggplot2::facet_wrap(stats::reformulate(db$stratify[1], NULL), 
+          pl <- pl + ggplot2::facet_wrap(stats::reformulate(db$stratify[1], NULL), scales = db$scales, 
                                          labeller = db$labeller)
         } else {
           if(length(grep("row", db$facet))>0) {
-            pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify[1], NULL),
+            pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify[1], NULL), scales = db$scales,
                                            labeller = db$labeller)
           } else {
-            pl <- pl + ggplot2::facet_grid(stats::reformulate(".", db$stratify[1]),
+            pl <- pl + ggplot2::facet_grid(stats::reformulate(".", db$stratify[1]), scales = db$scales,
                                            labeller = db$labeller)
           }
         }
       } else { # 2 grid-stratification
         if (db$stratify[1] %in% c(colnames(db$vpc_dat), colnames(db$aggr_obs))) {
           if(length(grep("row", db$facet))>0) {
-            pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify[1], db$stratify[2]),
+            pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify[1], db$stratify[2]), scales = db$scales,
                                            labeller = db$labeller)
           } else {
-            pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify[2], db$stratify[1]),
+            pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify[2], db$stratify[1]), scales = db$scales,
                                            labeller = db$labeller)
           }
         } else { # only color stratification
@@ -303,23 +303,23 @@ plot_vpc <- function(db,
       if (length(db$stratify_pars) == 1 | db$rtte) {
         if (db$facet == "wrap") {
           pl + ggplot2::facet_wrap(~sex)
-          pl <- pl + ggplot2::facet_wrap(stats::reformulate(db$stratify_pars[1], NULL),
+          pl <- pl + ggplot2::facet_wrap(stats::reformulate(db$stratify_pars[1], NULL), scales = db$scales, 
                                          labeller = db$labeller)
         } else {
           if(length(grep("row", db$facet)) > 0) {
-            pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify_pars[1], NULL),
+            pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify_pars[1], NULL), scales = db$scales,
                                            labeller = db$labeller)
           } else {
-            pl <- pl + ggplot2::facet_grid(stats::reformulate(".", db$stratify_pars[1]),
+            pl <- pl + ggplot2::facet_grid(stats::reformulate(".", db$stratify_pars[1]), scales = db$scales,
                                            labeller = db$labeller)
           }
         }
       } else {
         if(length(grep("row", db$facet)) > 0) {
-          pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify_pars[1], db$stratify_pars[2]),
+          pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify_pars[1], db$stratify_pars[2]), scales = db$scales, 
                                          labeller = db$labeller)
         } else {
-          pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify_pars[2], db$stratify_pars[1]),
+          pl <- pl + ggplot2::facet_grid(stats::reformulate(db$stratify_pars[2], db$stratify_pars[1]), scales = db$scales, 
                                          labeller = db$labeller)
         }
       }
