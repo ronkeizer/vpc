@@ -4,14 +4,33 @@
 \alias{vpc_cens}
 \title{VPC function for left- or right-censored data (e.g. BLOQ data)}
 \usage{
-vpc_cens(sim = NULL, obs = NULL, psn_folder = NULL, bins = "jenks",
-  n_bins = 8, bin_mid = "mean", obs_cols = NULL, sim_cols = NULL,
-  software = "auto", show = NULL, stratify = NULL,
-  stratify_color = NULL, ci = c(0.05, 0.95), uloq = NULL,
-  lloq = NULL, plot = FALSE, xlab = "Time",
-  ylab = "Probability of <LOQ", title = NULL, smooth = TRUE,
-  vpc_theme = NULL, facet = "wrap", labeller = NULL, vpcdb = FALSE,
-  verbose = FALSE)
+vpc_cens(
+  sim = NULL,
+  obs = NULL,
+  psn_folder = NULL,
+  bins = "jenks",
+  n_bins = 8,
+  bin_mid = "mean",
+  obs_cols = NULL,
+  sim_cols = NULL,
+  software = "auto",
+  show = NULL,
+  stratify = NULL,
+  stratify_color = NULL,
+  ci = c(0.05, 0.95),
+  uloq = NULL,
+  lloq = NULL,
+  plot = FALSE,
+  xlab = "Time",
+  ylab = "Probability of <LOQ",
+  title = NULL,
+  smooth = TRUE,
+  vpc_theme = NULL,
+  facet = "wrap",
+  labeller = NULL,
+  vpcdb = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{sim}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
