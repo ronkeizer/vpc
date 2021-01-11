@@ -13,7 +13,7 @@ R CMD check succeeded
 xpose, nlmixr, xpose.nlmixr, tidyvpc
 
 ## Current release notes:
-- fixes for dplyr 1.0.0
+- fixes for margrittr::pipe
 
 ## Downstream dependencies
 I have also run R CMD check on downstream dependencies of vpc

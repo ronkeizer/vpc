@@ -1,3 +1,7 @@
+# vpc 1.2.2
+- fixes to account for changes in magrittr pipe function
+- added functionality and argument to handle scales
+
 # vpc 1.2.1
 - fixes to account for dplyr 1.0.0 release
 
