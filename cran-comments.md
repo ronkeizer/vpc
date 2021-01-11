@@ -1,7 +1,7 @@
 ## Test environments
 * local OS X install, R 3.6.3
 * ubuntu 20.04, R 4.0.0
-* win-builder, R Under development (unstable) (2020-05-05 r78369)
+* Windows Server 2008 R2 SP1, R-devel, 32/64 bit
 
 ## R CMD check results
 R CMD check results
@@ -14,10 +14,7 @@ xpose, nlmixr, xpose.nlmixr, tidyvpc
 
 ## Current release notes:
 - fixes for margrittr::pipe
+- added argument for scales
 
 ## Downstream dependencies
-I have also run R CMD check on downstream dependencies of vpc
-All packages that I could install passed except:
-
-* xpose: I've put in a PR for that package to fix the reference
-object that makes the test fail.
+Tested. No problems reported.
