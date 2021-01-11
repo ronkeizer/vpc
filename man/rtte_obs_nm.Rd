@@ -4,7 +4,9 @@
 \name{rtte_obs_nm}
 \alias{rtte_obs_nm}
 \title{Simulated RTTE data (1x)}
-\format{An object of class \code{data.frame} with 573 rows and 6 columns.}
+\format{
+An object of class \code{data.frame} with 573 rows and 6 columns.
+}
 \usage{
 rtte_obs_nm
 }

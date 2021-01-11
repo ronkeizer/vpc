@@ -4,7 +4,9 @@
 \name{simple_data}
 \alias{simple_data}
 \title{A small rich dataset}
-\format{An object of class \code{list} of length 2.}
+\format{
+An object of class \code{list} of length 2.
+}
 \usage{
 simple_data
 }
