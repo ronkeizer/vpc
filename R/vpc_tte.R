@@ -226,7 +226,7 @@ vpc_tte <- function(sim = NULL,
         dplyr::filter(!duplicated(id))
       obs$rtte <- 1
     }
-
+    
     # add stratification column and comput KM curve for observations
     obs <- add_stratification(obs, stratify_pars)
     if(!is.null(kmmc) && kmmc %in% names(obs)) {

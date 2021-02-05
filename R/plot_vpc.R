@@ -299,10 +299,9 @@ plot_vpc <- function(db,
     }
 
     if(!is.null(db$stratify) || db$rtte) {
-      if(is.null(db$labeller)) db$labeller <- ggplot2::label_both
+      if(is.null(db$labeller)) db$labeller <- label_vpc_tte
       if (length(db$stratify_pars) == 1 | db$rtte) {
         if (db$facet == "wrap") {
-          pl + ggplot2::facet_wrap(~sex)
           pl <- pl + ggplot2::facet_wrap(stats::reformulate(db$stratify_pars[1], NULL), scales = db$scales, 
                                          labeller = db$labeller)
         } else {
