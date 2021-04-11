@@ -2,6 +2,7 @@
 #'
 #' Creates a VPC plot from observed and simulation data for censored data. Function can handle both left- (below lower limit of quantification) and right-censored (above upper limit of quantification) data.
 #' 
+#' @inheritParams format_vpc_input_data
 #' @param sim a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param psn_folder instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder
@@ -15,8 +16,6 @@
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
-#' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.
-#' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.
 #' @param plot Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.
 #' @param xlab ylab as numeric vector of size 2
 #' @param ylab ylab as numeric vector of size 2
@@ -128,11 +127,29 @@ vpc_cens <- function(sim = NULL,
   ## parse data into specific format
   if(!is.null(obs)) {
     obs <- filter_dv(obs, verbose)
-    obs <- format_vpc_input_data(obs, cols$obs, lloq, uloq, stratify, bins, FALSE, 0, "observed", verbose)
+    obs <-
+      format_vpc_input_data(
+        dat=obs,
+        cols=cols$obs,
+        lloq=lloq, uloq=uloq,
+        strat=stratify,
+        log_y=FALSE, log_y_min=0,
+        what="observed",
+        verbose=verbose
+      )
   }
   if(!is.null(sim)) {
     sim <- filter_dv(sim, verbose)
-    sim <- format_vpc_input_data(sim, cols$sim, NULL, NULL, stratify, bins, FALSE, 0, "simulated", verbose)
+    sim <-
+      format_vpc_input_data(
+        dat=sim,
+        cols=cols$sim,
+        lloq=NULL, uloq=NULL,
+        strat=stratify,
+        log_y=FALSE, log_y_min=0,
+        what="simulated",
+        verbose=verbose
+      )
     # add sim index number
     sim$sim <- add_sim_index_number(sim)
   }

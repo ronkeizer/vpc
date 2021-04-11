@@ -2,6 +2,7 @@
 #'
 #' Creates a VPC plot from observed and simulation data for categorical variables.
 #'
+#' @inheritParams format_vpc_input_data
 #' @param sim a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param obs a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param psn_folder instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder
@@ -13,8 +14,6 @@
 #' @param show what to show in VPC (obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
 #' @param software name of software platform using (e.g. nonmem, phoenix)
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
-#' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.
-#' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.
 #' @param plot Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.
 #' @param xlab label for x-axis
 #' @param ylab label for y-axis
@@ -112,11 +111,29 @@ vpc_cat  <- function(sim = NULL,
   ## parse data into specific format
   if(!is.null(obs)) {
     obs <- filter_dv(obs, verbose)
-    obs <- format_vpc_input_data(obs, cols$obs, lloq, uloq, strat = NULL, bins, FALSE, 0, "observed", verbose)
+    obs <-
+      format_vpc_input_data(
+        dat=obs,
+        cols=cols$obs,
+        lloq=lloq, uloq=uloq,
+        strat=NULL,
+        log_y=FALSE, log_y_min=0,
+        what="observed",
+        verbose=verbose
+      )
   }
   if(!is.null(sim)) {
     sim <- filter_dv(sim, verbose)
-    sim <- format_vpc_input_data(sim, cols$sim, lloq, uloq, strat = NULL, bins, FALSE, 0, "simulated", verbose)
+    sim <-
+      format_vpc_input_data(
+        dat=sim,
+        cols=cols$sim,
+        lloq=lloq, uloq=uloq,
+        strat=NULL,
+        log_y=FALSE, log_y_min=0,
+        what="simulated",
+        verbose=verbose
+      )
     sim$sim <- add_sim_index_number(sim, id = "id")
   }
 

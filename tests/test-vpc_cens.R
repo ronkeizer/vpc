@@ -28,4 +28,3 @@ assert("vpc_cens parsed data correctly", vpc:::is_equal(obs50, obj$aggr_obs$obs5
 assert("vpc_cens parsed data correctly", vpc:::is_equal(sim50, obj$vpc_dat$q50.med, relative=FALSE))
 assert("vpc_cens parsed data correctly", vpc:::is_equal(sim5, obj$vpc_dat$q50.low, relative=FALSE))
 assert("vpc_cens parsed data correctly", vpc:::is_equal(sim95, obj$vpc_dat$q50.up, relative=FALSE))
-

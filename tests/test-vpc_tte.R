@@ -37,4 +37,3 @@ obj2 <- vpc_tte(sim = vpc::rtte_sim_nm[1:500000,],  # stratified for covariate a
 pl2 <- plot_vpc(obj2)
 
 assert("vpc_tte without obs succeeded","ggplot" %in% class(pl2))
-

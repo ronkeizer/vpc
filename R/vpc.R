@@ -1,8 +1,8 @@
-
-
 #' VPC function
 #'
 #' Creates a VPC plot from observed and simulation data
+#' 
+#' @inheritParams format_vpc_input_data
 #' @param sim this is usually a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}.  However it can also be an object like a nlmixr or xpose object
 #' @param obs a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param psn_folder instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder
@@ -18,10 +18,6 @@
 #' @param pred_corr_lower_bnd lower bound for the prediction-correction
 #' @param pi simulated prediction interval to plot. Default is c(0.05, 0.95),
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
-#' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.
-#' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.
-#' @param log_y Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.
-#' @param log_y_min minimal value when using log_y argument. Default is 1e-3.
 #' @param xlab label for x axis
 #' @param ylab label for y axis
 #' @param title title
@@ -180,7 +176,17 @@ vpc_vpc <- function(sim = NULL,
       message("Parsing observed data...")
     }
     obs <- filter_dv(obs, verbose)
-    obs <- format_vpc_input_data(obs, cols$obs, lloq, uloq, stratify, bins, log_y, log_y_min, "observed", verbose, pred_corr)
+    obs <-
+      format_vpc_input_data(
+        dat=obs,
+        cols=cols$obs,
+        lloq=lloq, uloq=uloq,
+        strat=stratify,
+        log_y=log_y, log_y_min=log_y_min,
+        what="observed",
+        verbose=verbose,
+        pred_corr=pred_corr
+      )
   }
   if(!is.null(sim)) {
     if(verbose) {
@@ -189,9 +195,29 @@ vpc_vpc <- function(sim = NULL,
     sim <- filter_dv(sim, verbose)
     if((!is.null(lloq) || !is.null(uloq)) && pred_corr) {
       message("Prediction-correction cannot be used together with censored data (<LLOQ or >ULOQ). VPC plot will be shown for non-censored data only!")
-      sim <- format_vpc_input_data(sim, cols$sim, lloq, uloq, stratify, bins, log_y, log_y_min, "simulated", verbose, pred_corr)
+      sim <-
+        format_vpc_input_data(
+          dat=sim,
+          cols=cols$sim,
+          lloq=lloq, uloq=uloq,
+          strat=stratify,
+          log_y=log_y, log_y_min=log_y_min,
+          what="simulated",
+          verbose=verbose,
+          pred_corr=pred_corr
+        )
     } else {
-      sim <- format_vpc_input_data(sim, cols$sim, NULL, NULL, stratify, bins, log_y, log_y_min, "simulated", verbose, pred_corr)
+      sim <-
+        format_vpc_input_data(
+          dat=sim,
+          cols=cols$sim,
+          lloq=NULL, uloq=NULL,
+          strat=stratify,
+          log_y=log_y, log_y_min=log_y_min,
+          what="simulated",
+          verbose=verbose,
+          pred_corr=pred_corr
+        )
     }
   }
   if(pred_corr) {
