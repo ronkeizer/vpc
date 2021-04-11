@@ -3,16 +3,13 @@
 #' Creates a VPC plot from observed and simulation data for censored data. Function can handle both left- (below lower limit of quantification) and right-censored (above upper limit of quantification) data.
 #' 
 #' @inheritParams format_vpc_input_data
-#' @param sim a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
-#' @param obs a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
-#' @param psn_folder instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder
+#' @inheritParams read_vpc
 #' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.
 #' @param n_bins number of bins
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param show what to show in VPC (obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
-#' @param software name of software platform using (e.g. nonmem, phoenix)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
@@ -62,6 +59,11 @@ vpc_cens <- function(sim = NULL,
                      labeller = NULL,
                      vpcdb = FALSE,
                      verbose = FALSE) {
+  vpc_data <- read_vpc(sim=sim, obs=obs, psn_folder=psn_folder, software=software)
+  sim <- vpc_data$sim
+  obs <- vpc_data$obs
+  software_type <- vpc_data$software
+
   if(is.null(uloq) & is.null(lloq)) {
     stop("You have to specify either a lower limit of quantification (lloq=...) or an upper limit (uloq=...).")
   }
@@ -73,23 +75,6 @@ vpc_cens <- function(sim = NULL,
   }
   if(is.null(uloq)) {
     type <- "left-censored"
-  }
-  if(is.null(obs) & is.null(sim)) {
-    stop("At least a simulation or an observation dataset are required to create a plot!")
-  }
-  if(!is.null(psn_folder)) {
-    if(!is.null(obs)) {
-      obs <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
-    }
-    if(!is.null(sim)) {
-      sim <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="simulation.1.npctab")[1]))
-    }
-    software = "nonmem"
-  }
-  if (!is.null(obs)) {
-    software_type <- guess_software(software, obs)
-  } else {
-    software_type <- guess_software(software, sim)
   }
 
   ## checking whether stratification columns are available
@@ -115,14 +100,6 @@ vpc_cens <- function(sim = NULL,
 
   ## define column names
   cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
-  if(!is.null(obs)) {
-    old_class <- class(obs)
-    class(obs) <- c(software_type, old_class)
-  }
-  if(!is.null(sim)) {
-    old_class <- class(sim)
-    class(sim) <- c(software_type, old_class)
-  }
 
   ## parse data into specific format
   if(!is.null(obs)) {

@@ -15,7 +15,6 @@ obj <- vpc_tte(sim = test,  # stratified for covariate and study arm
 
 assert("vpc_tte no stratification succeeded","ggplot" %in% class(obj))
 
-
 obj <- vpc_tte(sim = vpc::rtte_sim_nm[1:200000,],  # stratified for covariate and study arm
                obs = vpc::rtte_obs_nm, 
                stratify = c("sex","drug"), 

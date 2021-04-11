@@ -3,16 +3,13 @@
 #' Creates a VPC plot from observed and simulation data
 #' 
 #' @inheritParams format_vpc_input_data
-#' @param sim this is usually a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}.  However it can also be an object like a nlmixr or xpose object
-#' @param obs a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
-#' @param psn_folder instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder
+#' @inheritParams read_vpc
 #' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred", "sim")
 #' @param show what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
-#' @param software name of software platform using (e.g. nonmem, phoenix)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param pred_corr perform prediction-correction?
 #' @param pred_corr_lower_bnd lower bound for the prediction-correction
@@ -82,32 +79,13 @@ vpc_vpc <- function(sim = NULL,
                     labeller = NULL,
                     vpcdb = FALSE,
                     verbose = FALSE, ...) {
-  if(!is.null(psn_folder)) {
-    if(is.null(obs)) {
-      if(verbose) {
-        message("Reading oberved data...")
-      }
-      obs <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
-    }
-    if(is.null(sim)) {
-      if(verbose) {
-        message("Reading simulated data...")
-      }
-      sim <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="simulation.1.npctab")[1]))
-    }
-    software <- "nonmem"
-  }
-  if(is.null(obs) & is.null(sim)) {
-    stop("At least a simulation or an observation dataset are required to create a plot!")
-  }
   if(verbose) {
     message("Configuring and initializing...")
   }
-  if (!is.null(obs)) {
-    software_type <- guess_software(software, obs)
-  } else {
-    software_type <- guess_software(software, sim)
-  }
+  vpc_data <- read_vpc(sim=sim, obs=obs, psn_folder=psn_folder, software=software)
+  sim <- vpc_data$sim
+  obs <- vpc_data$obs
+  software_type <- vpc_data$software
   if(!is.null(facet)) {
     if(! facet %in% c("wrap", "grid", "columns", "rows")) {
       stop("`facet` argument needs to be one of `wrap`, `columns`, or `rows`.")
@@ -122,35 +100,12 @@ vpc_vpc <- function(sim = NULL,
     if(scales == "fixed") scales <- "fixed"
   }
   ###---
-  ## software specific parsing, if necessary
-  if (software_type == "PKPDsim") {
-    if (!is.null(obs)) {
-      if("obs" %in% obs$comp) {
-        obs <- obs %>% dplyr::filter(comp == "obs")
-      }
-      obs <- data.frame(obs)
-    }
-    if (!is.null(sim)) {
-      if("obs" %in% sim$comp) {
-        sim <- sim %>% dplyr::filter(comp == "obs")
-      }
-      sim <- data.frame(sim)
-    }
-  }
 
   ## define what to show in plot
   show <- replace_list_elements(show_default, show)
 
   ## define column names
   cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
-  if(!is.null(obs)) {
-    old_class <- class(obs)
-    class(obs) <- c(software_type, old_class)
-  }
-  if(!is.null(sim)) {
-    old_class <- class(sim)
-    class(sim) <- c(software_type, old_class)
-  }
 
   ## checking whether stratification columns are available
   if(!is.null(stratify)) {
