@@ -7,8 +7,6 @@
 #' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
-#' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
-#' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred", "sim")
 #' @param show what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param pred_corr perform prediction-correction?
@@ -82,10 +80,16 @@ vpc_vpc <- function(sim = NULL,
   if(verbose) {
     message("Configuring and initializing...")
   }
-  vpc_data <- read_vpc(sim=sim, obs=obs, psn_folder=psn_folder, software=software)
+  vpc_data <-
+    read_vpc(
+      sim=sim, obs=obs, psn_folder=psn_folder,
+      software=software,
+      sim_cols=sim_cols, obs_cols=obs_cols
+    )
   sim <- vpc_data$sim
   obs <- vpc_data$obs
   software_type <- vpc_data$software
+  cols <- vpc_data$cols
   if(!is.null(facet)) {
     if(! facet %in% c("wrap", "grid", "columns", "rows")) {
       stop("`facet` argument needs to be one of `wrap`, `columns`, or `rows`.")
@@ -103,9 +107,6 @@ vpc_vpc <- function(sim = NULL,
 
   ## define what to show in plot
   show <- replace_list_elements(show_default, show)
-
-  ## define column names
-  cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
 
   ## checking whether stratification columns are available
   if(!is.null(stratify)) {

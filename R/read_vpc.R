@@ -1,11 +1,14 @@
 #' Read in VPC data
 #' 
+#' @inheritParams define_data_columns
 #' @param sim this is usually a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}.  However it can also be an object like a nlmixr or xpose object
 #' @param obs a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param psn_folder instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder
 #' @param software name of software platform using (e.g. nonmem, phoenix)
-#' @return A list with names of "sim", "obs", and "software"
-read_vpc <- function(sim, obs, psn_folder, software) {
+#' @return A list with names of "sim", "obs", "software", and "cols"
+read_vpc <- function(sim, obs, psn_folder,
+                     software,
+                     sim_cols, obs_cols) {
   if(!is.null(psn_folder)) {
     if(is.null(obs)) {
       if(verbose) {
@@ -51,6 +54,13 @@ read_vpc <- function(sim, obs, psn_folder, software) {
       sim <- data.frame(sim)
     }
   }
+  ## define column names
+  cols <-
+    define_data_columns(
+      sim=sim, obs=obs,
+      sim_cols=sim_cols, obs_cols=obs_cols,
+      software_type=software
+    )
 
-  list(sim=sim, obs=obs, software=software)
+  list(sim=sim, obs=obs, software=software, cols=cols)
 }

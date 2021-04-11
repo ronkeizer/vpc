@@ -8,8 +8,6 @@
 #' @inheritParams read_vpc
 #' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.
 #' @param n_bins number of bins
-#' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
-#' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred", "sim")
 #' @param show what to show in VPC (obs_ci, obs_median, sim_median, sim_median_ci)
 #' @param rtte repeated time-to-event data? Default is FALSE (treat as single-event TTE)
 #' @param rtte_calc_diff recalculate time (T/F)? When simulating in NONMEM, you will probably need to set this to TRUE to recalculate the TIME to relative times between events (unless you output the time difference between events and specify that as independent variable to the vpc_tte() function.
@@ -78,10 +76,16 @@ vpc_tte <- function(sim = NULL,
                     labeller = NULL,
                     verbose = FALSE,
                     vpcdb = FALSE) {
-  vpc_data <- read_vpc(sim=sim, obs=obs, psn_folder=psn_folder, software=software)
+  vpc_data <-
+    read_vpc(
+      sim=sim, obs=obs, psn_folder=psn_folder,
+      software=software,
+      sim_cols=sim_cols, obs_cols=obs_cols
+    )
   sim <- vpc_data$sim
   obs <- vpc_data$obs
   software_type <- vpc_data$software
+  cols <- vpc_data$cols
   if(!is.null(bins) && bins != FALSE) {
     message("Binning is not recommended for `vpc_tte()`, plot might not show correctly!")
   }
@@ -134,9 +138,6 @@ vpc_tte <- function(sim = NULL,
       stratify <- "strat_orig"
     }
   }
-
-  ## define column names
-  cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
 
   ## remove EVID != 0 / MDV != 0
   if(!is.null(obs)) {

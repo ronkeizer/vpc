@@ -57,9 +57,9 @@ vpc_tte(
 
 \item{software}{name of software platform using (e.g. nonmem, phoenix)}
 
-\item{obs_cols}{observation dataset column names (list elements: "dv", "idv", "id", "pred")}
+\item{obs_cols}{list for mapping observation data columns, e.g. `list(dv = "DV", id = "ID", idv = "TIME", pred="PRED")`}
 
-\item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred", "sim")}
+\item{sim_cols}{list for mapping simulation data columns, e.g. `list(dv = "DV", id = "ID", idv = "TIME", pred="PRED")`}
 
 \item{kmmc}{either NULL (for regular TTE vpc, default), or a variable name for a KMMC plot (e.g. "WT")}
 

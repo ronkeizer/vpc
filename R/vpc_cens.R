@@ -7,8 +7,6 @@
 #' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.
 #' @param n_bins number of bins
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
-#' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
-#' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
 #' @param show what to show in VPC (obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
@@ -59,11 +57,17 @@ vpc_cens <- function(sim = NULL,
                      labeller = NULL,
                      vpcdb = FALSE,
                      verbose = FALSE) {
-  vpc_data <- read_vpc(sim=sim, obs=obs, psn_folder=psn_folder, software=software)
+  vpc_data <-
+    read_vpc(
+      sim=sim, obs=obs, psn_folder=psn_folder,
+      software=software,
+      sim_cols=sim_cols, obs_cols=obs_cols
+    )
   sim <- vpc_data$sim
   obs <- vpc_data$obs
   software_type <- vpc_data$software
-
+  cols <- vpc_data$cols
+  
   if(is.null(uloq) & is.null(lloq)) {
     stop("You have to specify either a lower limit of quantification (lloq=...) or an upper limit (uloq=...).")
   }
@@ -97,9 +101,6 @@ vpc_cens <- function(sim = NULL,
   
   ## define what to show in plot
   show <- replace_list_elements(show_default, show)
-
-  ## define column names
-  cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
 
   ## parse data into specific format
   if(!is.null(obs)) {
