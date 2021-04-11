@@ -4,6 +4,7 @@
 #' 
 #' @inheritParams format_vpc_input_data
 #' @inheritParams read_vpc
+#' @inheritParams ggplot2::facet_grid
 #' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
@@ -19,7 +20,6 @@
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param facet either "wrap", "columns", or "rows"
-#' @param scales either "fixed" (default), "free_y", "free_x" or "free"
 #' @param labeller ggplot2 labeller function to be passed to underlying ggplot object
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)

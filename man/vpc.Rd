@@ -96,7 +96,9 @@ vpc_vpc(
 
 \item{facet}{either "wrap", "columns", or "rows"}
 
-\item{scales}{either "fixed" (default), "free_y", "free_x" or "free"}
+\item{scales}{Are scales shared across all facets (the default,
+\code{"fixed"}), or do they vary across rows (\code{"free_x"}),
+columns (\code{"free_y"}), or both rows and columns (\code{"free"})?}
 
 \item{labeller}{ggplot2 labeller function to be passed to underlying ggplot object}
 
