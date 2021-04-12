@@ -1,21 +1,25 @@
 #' Calculate quantiles respecting the censored data
 #' 
-#' @param x data
-#' @param p quantile
+#' @inheritParams stats::quantile
 #' @param limit censoring limit
-#' @param cens censoring direction (left/right)
-#' 
+#' @param cens censoring direction ("left"/"right")
+#' @return 
 #' @export
-quantile_cens <- function(x, p = 0.5, limit = 1, cens = "left") {
-  if(cens %in% c("left", "lower", "bloq", "loq", "lloq")) {
+quantile_cens <- function(x, probs = 0.5, limit = 1, cens = c("left", "right")) {
+  cens <- match.arg(cens)
+  if (cens == "left") {
     x[is.na(x)] <- -Inf
     x[x<limit] <- -Inf
-  } else {
+  } else if (cens == "right") {
     x[is.na(x)] <- Inf
     x[x>limit] <- Inf
+  } else {
+    stop("Invalid value for cens: ", cens) # nocov
   }
-  q <- quantile(x, p)
-  ifelse(q %in% c(Inf, -Inf), NA, q)
+  q <- quantile(x, probs=probs)
+  # TODO: Revew on 2021-04: NA_real_ instead of NA is returned to ensure that
+  # the return value is numeric
+  ifelse(q %in% c(Inf, -Inf), NA_real_, q)
 }
 
 #' Calculate fraction of observations below lloq / above uloq
@@ -31,6 +35,6 @@ loq_frac <- function(x, limit = 1, cens = c("left", "right")) {
   } else if (cens == "right") {
     (sum(x > limit, na.rm=TRUE) + sum(is.na(x))) / length(x) 
   } else {
-    stop("Invalid value for cens: ", cens)
+    stop("Invalid value for cens: ", cens) # nocov
   }
 }

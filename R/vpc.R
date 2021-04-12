@@ -287,17 +287,17 @@ vpc_vpc <- function(sim = NULL,
     if(!is.null(lloq) || !is.null(uloq)) {
       aggr_obs <- tmp1 %>% 
         dplyr::summarise(
-          obs5 = quantile_cens(dv, pi[1], limit = cens_limit, cens = cens_type),
-          obs50 = quantile_cens(dv, 0.5, limit = cens_limit, cens = cens_type),
-          obs95 = quantile_cens(dv, pi[2], limit = cens_limit, cens = cens_type),
+          obs5 = quantile_cens(x=dv, probs=pi[1], limit = cens_limit, cens = cens_type),
+          obs50 = quantile_cens(x=dv, probs=0.5, limit = cens_limit, cens = cens_type),
+          obs95 = quantile_cens(x=dv, probs=pi[2], limit = cens_limit, cens = cens_type),
           bin_mid = mean(idv)
         )
     } else {
       aggr_obs <- tmp1 %>% 
         dplyr::summarise(
-          obs5 = quantile(dv, pi[1]),
-          obs50 = quantile(dv, 0.5),
-          obs95 = quantile(dv, pi[2]),
+          obs5 = quantile(x=dv, probs=pi[1]),
+          obs50 = quantile(x=dv, probs=0.5),
+          obs95 = quantile(x=dv, probs=pi[2]),
           bin_mid = mean(idv)
         )
     }
