@@ -296,6 +296,7 @@ vpc_tte <- function(sim = NULL,
       tmp4$bin_mid <- (tmp4$bin_min + tmp4$bin_max) / 2
       all_dat <- dplyr::bind_rows(all_dat, cbind(i, tmp4)) ## RK: this can be done more efficient!
     }
+    close(pb)
     sim_km <- all_dat %>%
       dplyr::group_by_("strat", "bin") %>%
       dplyr::summarise (bin_mid = head(bin_mid,1),
