@@ -72,8 +72,6 @@ vpc_cat  <- function(sim = NULL,
       software=software,
       sim_cols=sim_cols, obs_cols=obs_cols
     )
-  sim <- vpc_data$sim
-  obs <- vpc_data$obs
   software_type <- vpc_data$software
   cols <- vpc_data$cols
   
@@ -81,10 +79,10 @@ vpc_cat  <- function(sim = NULL,
   show <- replace_list_elements(show_default, show)
 
   ## parse data into specific format
-  if(!is.null(obs)) {
-    obs <-
+  if(!is.null(vpc_data$obs)) {
+    vpc_data$obs <-
       format_vpc_input_data(
-        dat=obs,
+        dat=vpc_data$obs,
         cols=cols$obs,
         lloq=lloq, uloq=uloq,
         stratify=NULL,
@@ -93,10 +91,10 @@ vpc_cat  <- function(sim = NULL,
         verbose=verbose
       )
   }
-  if(!is.null(sim)) {
-    sim <-
+  if(!is.null(vpc_data$sim)) {
+    vpc_data$sim <-
       format_vpc_input_data(
-        dat=sim,
+        dat=vpc_data$sim,
         cols=cols$sim,
         lloq=lloq, uloq=uloq,
         stratify=NULL,
@@ -104,18 +102,14 @@ vpc_cat  <- function(sim = NULL,
         what="simulated",
         verbose=verbose
       )
-    sim$sim <- add_sim_index_number(sim, id = "id")
+    vpc_data$sim$sim <- add_sim_index_number(vpc_data$sim, id = "id")
   }
 
   # Binning ####
-  bins_data <- define_bins(obs=obs, sim=sim, bins=bins, n_bins=n_bins, verbose=verbose)
+  bins_data <- define_bins(obs=vpc_data$obs, sim=vpc_data$sim, bins=bins, n_bins=n_bins, verbose=verbose)
   bins <- bins_data$bins
-  if(!is.null(obs)) {
-    obs <- bin_data(obs, bins, "idv")
-  }
-  if(!is.null(sim)) {
-    sim <- bin_data(sim, bins, "idv")
-  }
+  obs <- bins_data$obs
+  sim <- bins_data$sim
 
   ## parsing
   fact_perc <- function(x, fact) { sum(x == fact) / length(x) } # below lloq, default

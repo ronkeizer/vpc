@@ -75,8 +75,7 @@ vpc_vpc <- function(sim = NULL,
       software=software,
       sim_cols=sim_cols, obs_cols=obs_cols
     )
-  sim <- vpc_data$sim
-  obs <- vpc_data$obs
+  vpc_data$obs <- vpc_data$obs
   software_type <- vpc_data$software
   cols <- vpc_data$cols
 
@@ -98,17 +97,17 @@ vpc_vpc <- function(sim = NULL,
 
   ## checking whether stratification columns are available
   msg("Stratifying data...", verbose=verbose)
-  check_stratification_columns_available(data=obs, stratify=stratify, type="observation")
-  check_stratification_columns_available(data=sim, stratify=stratify, type="simulation")
+  check_stratification_columns_available(data=vpc_data$obs, stratify=stratify, type="observation")
+  check_stratification_columns_available(data=vpc_data$sim, stratify=stratify, type="simulation")
 
   ## parse data into specific format
-  if(!is.null(obs)) {
+  if(!is.null(vpc_data$obs)) {
     if(verbose) {
       message("Parsing observed data...")
     }
-    obs <-
+    vpc_data$obs <-
       format_vpc_input_data(
-        dat=obs,
+        dat=vpc_data$obs,
         cols=cols$obs,
         lloq=lloq, uloq=uloq,
         stratify=stratify,
@@ -118,15 +117,15 @@ vpc_vpc <- function(sim = NULL,
         pred_corr=pred_corr
       )
   }
-  if(!is.null(sim)) {
+  if(!is.null(vpc_data$sim)) {
     if(verbose) {
       message("Parsing simulated data...")
     }
     if((!is.null(lloq) || !is.null(uloq)) && pred_corr) {
       message("Prediction-correction cannot be used together with censored data (<LLOQ or >ULOQ). VPC plot will be shown for non-censored data only!")
-      sim <-
+      vpc_data$sim <-
         format_vpc_input_data(
-          dat=sim,
+          dat=vpc_data$sim,
           cols=cols$sim,
           lloq=lloq, uloq=uloq,
           stratify=stratify,
@@ -136,9 +135,9 @@ vpc_vpc <- function(sim = NULL,
           pred_corr=pred_corr
         )
     } else {
-      sim <-
+      vpc_data$sim <-
         format_vpc_input_data(
-          dat=sim,
+          dat=vpc_data$sim,
           cols=cols$sim,
           lloq=NULL, uloq=NULL,
           stratify=stratify,
@@ -155,15 +154,12 @@ vpc_vpc <- function(sim = NULL,
   }
 
   # Binning ####
-  bins_data <- define_bins(obs=obs, sim=sim, bins=bins, n_bins=n_bins, verbose=verbose)
+  bins_data <- define_bins(obs=vpc_data$obs, sim=vpc_data$sim, bins=bins, n_bins=n_bins, verbose=verbose)
   bins <- bins_data$bins
   labeled_bins <- bins_data$labeled
-  if(!is.null(obs)) {
-    obs <- bin_data(obs, bins, "idv", labeled = labeled_bins)
-  }
-  if(!is.null(sim)) {
-    sim <- bin_data(sim, bins, "idv", labeled = labeled_bins)
-  }
+  obs <- bins_data$obs
+  sim <- bins_data$sim
+
   if(pred_corr) {
     if(!is.null(obs) & !cols$obs$pred %in% names(obs)) {
       msg("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...", verbose)

@@ -79,9 +79,6 @@ vpc_tte <- function(sim = NULL,
   obs <- vpc_data$obs
   software_type <- vpc_data$software
   cols <- vpc_data$cols
-  if(!is.null(bins) && bins != FALSE) {
-    message("Binning is not recommended for `vpc_tte()`, plot might not show correctly!")
-  }
   if(!is.null(kmmc)) {
     if(!kmmc %in% names(obs)) {
       stop(paste0("Specified covariate ", kmmc, " not found among column names in observed data."))
@@ -207,9 +204,6 @@ vpc_tte <- function(sim = NULL,
   } else { # get bins from sim
     obs_km <- NULL
   }
-  if(!is.null(kmmc) & (class(bins) == "logical" && bins == FALSE)) {
-    msg("Tip: with KMMC-type plots, binning of simulated data is recommended. See documentation for the 'bins' argument for more information.", verbose)
-  }
 
   all_dat <- c()
   if(!is.null(sim)) {
@@ -267,30 +261,12 @@ vpc_tte <- function(sim = NULL,
       sim <- sim[!duplicated(sim$sim_id),]
     }
 
-    tmp_bins <- unique(c(0, sort(unique(sim$time)), max(sim$time)))
     n_sim <- length(unique(sim$sim))
     if(n_sim <= 1) {
       stop(paste0("Something seems wrong with your simulation dataset, only ", n_sim, " iterations of the simulation were identified."))
     }
-    all_dat <- c()
-    if(!(class(bins) == "logical" && bins == FALSE)) {
-      if(class(bins) == "logical" && bins == TRUE) {
-        bins <- "time"
-      }
-      if(class(bins) == "character") {
-        if (bins == "obs") {
-          tmp_bins <- unique(c(0, sort(unique(obs$time)), max(obs$time)))
-        } else {
-          if (!(bins %in% c("time","data"))) {
-            msg(paste0("Note: bining method ", bins," might be slow. Consider using method 'time', or specify 'bins' as numeric vector"), verbose)
-          }
-          tmp_bins <- unique(c(0, auto_bin(sim %>% dplyr::mutate(idv=time), type=bins, n_bins = n_bins-1), max(sim$time)))
-        }
-      }
-      if(class(bins) == "numeric") {
-        tmp_bins <- unique(c(0, bins, max(obs$time)))
-      }
-    }
+    bins_data <- define_bins_tte(obs=obs, sim=sim, bins=bins, n_bins=n_bins, kmmc=kmmc, verbose=verbose)
+    tmp_bins <- bins_data$tmp_bins
     message("Calculating simulation stats.")
     pb <- utils::txtProgressBar(min = 1, max = n_sim)
     for (i in 1:n_sim) {
@@ -333,7 +309,8 @@ vpc_tte <- function(sim = NULL,
                  step = 0)
   } else {
     sim_km <- NULL
-    tmp_bins <- unique(c(0, sort(unique(obs$time)), max(obs$time)))
+    bins_data <- define_bins_tte(obs=obs, sim=sim, bins=bins, n_bins=n_bins, kmmc=kmmc, verbose=verbose)
+    tmp_bins <- bins_data$tmp_bins
   }
 
   if (rtte) {

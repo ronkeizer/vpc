@@ -56,7 +56,6 @@ vpc_cens <- function(sim = NULL,
       software=software,
       sim_cols=sim_cols, obs_cols=obs_cols
     )
-  sim <- vpc_data$sim
   obs <- vpc_data$obs
   software_type <- vpc_data$software
   cols <- vpc_data$cols
@@ -77,9 +76,9 @@ vpc_cens <- function(sim = NULL,
   ## checking whether stratification columns are available
   msg("Stratifying data...", verbose=verbose)
   check_stratification_columns_available(data=obs, stratify=stratify, type="observation")
-  check_stratification_columns_available(data=sim, stratify=stratify, type="simulation")
+  check_stratification_columns_available(data=vpc_data$sim, stratify=stratify, type="simulation")
   check_stratification_columns_available(data=obs, stratify=stratify_color, type="observation")
-  check_stratification_columns_available(data=sim, stratify=stratify_color, type="simulation")
+  check_stratification_columns_available(data=vpc_data$sim, stratify=stratify_color, type="simulation")
 
   ## define what to show in plot
   show <- replace_list_elements(show_default, show)
@@ -97,10 +96,10 @@ vpc_cens <- function(sim = NULL,
         verbose=verbose
       )
   }
-  if(!is.null(sim)) {
-    sim <-
+  if(!is.null(vpc_data$sim)) {
+    vpc_data$sim <-
       format_vpc_input_data(
-        dat=sim,
+        dat=vpc_data$sim,
         cols=cols$sim,
         lloq=NULL, uloq=NULL,
         stratify=stratify,
@@ -109,7 +108,7 @@ vpc_cens <- function(sim = NULL,
         verbose=verbose
       )
     # add sim index number
-    sim$sim <- add_sim_index_number(sim)
+    vpc_data$sim$sim <- add_sim_index_number(vpc_data$sim)
   }
 
   stratify_original <- stratify
@@ -127,14 +126,10 @@ vpc_cens <- function(sim = NULL,
   }
 
   # Binning ####
-  bins_data <- define_bins(obs=obs, sim=sim, bins=bins, n_bins=n_bins, verbose=verbose)
+  bins_data <- define_bins(obs=obs, sim=vpc_data$sim, bins=bins, n_bins=n_bins, verbose=verbose)
   bins <- bins_data$bins
-  if(!is.null(obs)) {
-    obs <- bin_data(obs, bins, "idv")
-  }
-  if(!is.null(sim)) {
-    sim <- bin_data(sim, bins, "idv")
-  }
+  obs <- bins_data$obs
+  sim <- bins_data$sim
 
   ## Parsing data to get the quantiles for the VPC
   if (!is.null(sim)) {
