@@ -1,5 +1,7 @@
+normal_df <- data.frame(ID = 1, MDV = c(1, 0, 0), DV = 1)
+
 nonmem_df <- data.frame(ID = 1, ADV = c(1, 0, 0), DV = 1)
-nonmem_mdv <- data.frame(ID = 1, MDV = c(1, 0, 0), DV = 1)
+nonmem_mdv <- normal_df
 nonmem_evid <- data.frame(ID = 1, EVID = c(1, 0, 0), DV = 1)
 nonmem <- data.frame(ID = 1, MDV = c(1, 0, 0), EVID = c(0, 1, 0), DV = 1)
 nonmem_filtered_mdv <- nonmem_mdv[2:3, c("ID", "MDV", "DV")]
@@ -17,3 +19,17 @@ assert("filtering values for nonmem works properly", vpc:::is_equal(vpc:::filter
 assert("filtering values for nonmem works properly", vpc:::is_equal(vpc:::filter_dv(nonmem_evid), nonmem_filtered_evid, relative=F))
 assert("filtering values for nonmem works properly", vpc:::is_equal(vpc:::filter_dv(nonmem), nonmem_filtered, relative=F))
 assert("filtering values for nonmem works properly", vpc:::is_equal(vpc:::filter_dv(nonmem_df), nonmem_df, relative=F))
+
+assert(
+  "filtering values for unknown data gives a warning",
+  startsWith(
+    tryCatch(
+      assert(
+        "filtering values for unknown data does nothing",
+        vpc:::filter_dv(normal_df) %==% normal_df
+      ),
+      warning=function(w) conditionMessage(w)
+    ),
+    "No software packages matched for filtering values"
+  )
+)

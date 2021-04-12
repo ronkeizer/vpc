@@ -31,12 +31,12 @@ read_vpc <- function(sim, obs, psn_folder,
     software <- guess_software(software, sim)
   }
   if (!is.null(obs)) {
-    obs <- filter_dv(obs, verbose)
     class(obs) <- c(software, class(obs))
+    obs <- filter_dv(obs, verbose)
   }
   if (!is.null(sim)) {
-    sim <- filter_dv(sim, verbose)
     class(sim) <- c(software, class(sim))
+    sim <- filter_dv(sim, verbose)
   }
 
   ## software specific parsing, if necessary

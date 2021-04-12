@@ -8,13 +8,18 @@ filter_dv <- function(x, verbose = FALSE, ...) {
   if (length(software_match) > 1) {
     # TODO: Review 2021-04: Matching the software is a bit stricter now
     warning(
-      "Multiple software packages matched for filtering observed values, not filtering.  Software matched: ",
+      "Multiple software packages matched for filtering values, not filtering.  Software matched: ",
       paste(software_match, collapse=", ")
     )
     x
   } else if (length(software_match) == 1) {
     filter_dv_software[[software_match]](x=x, verbose=verbose, ...)
   } else {
+    warning(
+      "No software packages matched for filtering values, not filtering.",
+      "\n Object class: ", paste(class(x), collapse=", "),
+      "\n Available filters: ", paste(names(filter_dv_software), collapse=", ")
+    )
     x    
   }
 }
