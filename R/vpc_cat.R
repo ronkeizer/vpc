@@ -4,17 +4,12 @@
 #'
 #' @inheritParams format_vpc_input_data
 #' @inheritParams read_vpc
+#' @inheritParams plot_vpc
 #' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
-#' @param show what to show in VPC (obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param plot Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.
-#' @param xlab label for x-axis
-#' @param ylab label for y-axis
-#' @param title title
-#' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
-#' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param facet either "wrap", "columns", or "rows"
 #' @param labeller ggplot2 labeller function to be passed to underlying ggplot object
 #' @param vpcdb boolean whether to return the underlying vpcdb rather than the plot

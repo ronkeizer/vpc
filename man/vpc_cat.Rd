@@ -49,7 +49,7 @@ vpc_cat(
 
 \item{software}{name of software platform using (e.g. nonmem, phoenix)}
 
-\item{show}{what to show in VPC (obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
+\item{show}{what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
 
 \item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
 
@@ -57,9 +57,9 @@ vpc_cat(
 
 \item{lloq}{Number or NULL indicating lower limit of quantification. Default is NULL.}
 
-\item{xlab}{label for x-axis}
+\item{xlab}{label for x axis}
 
-\item{ylab}{label for y-axis}
+\item{ylab}{label for y axis}
 
 \item{title}{title}
 

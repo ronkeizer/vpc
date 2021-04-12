@@ -12,7 +12,7 @@
 #' @param title title
 #' @param xlab label for x axis 
 #' @param ylab label for y axis
-#' @param verbose verbosity (T/F)
+#' @param verbose show debugging information (TRUE or FALSE)
 #' @export
 #' @seealso \link{sim_data}, \link{vpc_cens}, \link{vpc_tte}, \link{vpc_cat}
 #' @examples 

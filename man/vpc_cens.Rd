@@ -51,7 +51,7 @@ vpc_cens(
 
 \item{software}{name of software platform using (e.g. nonmem, phoenix)}
 
-\item{show}{what to show in VPC (obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
+\item{show}{what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
 
 \item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
 
@@ -65,9 +65,9 @@ vpc_cens(
 
 \item{plot}{Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.}
 
-\item{xlab}{ylab as numeric vector of size 2}
+\item{xlab}{label for x axis}
 
-\item{ylab}{ylab as numeric vector of size 2}
+\item{ylab}{label for y axis}
 
 \item{title}{title}
 

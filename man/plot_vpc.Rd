@@ -36,7 +36,7 @@ plot_vpc(
 
 \item{title}{title}
 
-\item{verbose}{verbosity (T/F)}
+\item{verbose}{show debugging information (TRUE or FALSE)}
 }
 \description{
 This function performs no parsing of data, it just plots the already calculated statistics generated using one of the 

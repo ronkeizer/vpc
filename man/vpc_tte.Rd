@@ -77,7 +77,7 @@ vpc_tte(
 
 \item{ylab}{label for y-axis}
 
-\item{show}{what to show in VPC (obs_ci, obs_median, sim_median, sim_median_ci)}
+\item{show}{what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
 
 \item{as_percentage}{Show y-scale from 0-100 percent? TRUE by default, if FALSE then scale from 0-1.}
 
