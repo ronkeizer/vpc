@@ -99,17 +99,9 @@ vpc_vpc <- function(sim = NULL,
   show <- replace_list_elements(show_default, show)
 
   ## checking whether stratification columns are available
-  if(!is.null(stratify)) {
-    if(verbose) {
-      message("Stratifying oberved data...")
-    }
-    if(!is.null(obs)) {
-      check_stratification_columns_available(obs, stratify, "observation")
-    }
-    if(!is.null(sim)) {
-      check_stratification_columns_available(sim, stratify, "simulation")
-    }
-  }
+  msg("Stratifying data...", verbose=verbose)
+  check_stratification_columns_available(data=obs, stratify=stratify, type="observation")
+  check_stratification_columns_available(data=sim, stratify=stratify, type="simulation")
 
   ## parse data into specific format
   if(!is.null(obs)) {

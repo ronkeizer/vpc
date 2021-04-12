@@ -7,11 +7,16 @@
 check_stratification_columns_available(data, stratify, type = "observation")
 }
 \arguments{
-\item{data}{`data.frame` with observation or simulation data}
+\item{data}{`data.frame` with observation or simulation data (or \code{NULL}
+to skip checking)}
 
-\item{stratify}{vector of stratification columns}
+\item{stratify}{vector of stratification columns (or \code{NULL} to skip
+checking)}
 
 \item{type}{either `observation` or `simulation`}
+}
+\value{
+\code{TRUE} or raise an error about the missing columns
 }
 \description{
 Check whether stratification columns are available

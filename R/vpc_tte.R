@@ -102,23 +102,22 @@ vpc_tte <- function(sim = NULL,
   show <- vpc::replace_list_elements(show_default_tte, show)
 
   ## checking whether stratification columns are available
-  stratify_pars <- NULL
-  if(!is.null(stratify)) stratify_pars <- stratify
-  if(!is.null(stratify_color)) {
-    if(!is.null(stratify)) stop("Sorry, stratification using both facets and color is currently not supported, use either `stratify` or `stratify_color`.")
-    if(length(stratify_color) != 1) {
-      stop("Sorry, please specify only a single stratification variable for `stratify_color`.")      
+  msg("Stratifying data...", verbose=verbose)
+  stratify_pars <-
+    if (!is.null(stratify) & !is.null(stratify_color)) {
+      stop("Sorry, stratification using both facets and color is currently not supported, use either `stratify` or `stratify_color`.")
+    } else if (!is.null(stratify)) {
+      stratify
+    } else if (!is.null(stratify_color)) {
+      if(length(stratify_color) != 1) {
+        stop("Sorry, please specify only a single stratification variable for `stratify_color`.")      
+      }
+      stratify_color
+    } else {
+      NULL
     }
-    stratify_pars <- stratify_color
-  }
-  if(!is.null(stratify_pars)) {
-    if(!is.null(obs)) {
-      check_stratification_columns_available(obs, stratify_pars, "observation")
-    }
-    if(!is.null(sim)) {
-      check_stratification_columns_available(sim, stratify_pars, "simulation")
-    }
-  }
+  check_stratification_columns_available(data=obs, stratify=stratify_pars, type="observation")
+  check_stratification_columns_available(data=sim, stratify=stratify_pars, type="simulation")
 
   ## redefine strat column in case of "strat"
   if(!is.null(stratify_pars) && !is.null(obs)) {
