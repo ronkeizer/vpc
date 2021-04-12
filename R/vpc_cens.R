@@ -168,7 +168,7 @@ vpc_cens <- function(sim = NULL,
     tmp1 <- sim %>% 
       dplyr::group_by(strat, sim, bin)
     vpc_dat <- tmp1 %>%
-      dplyr::summarise(ploq = loq_perc(dv, limit = cens_limit, cens = cens_type),
+      dplyr::summarise(ploq = loq_frac(dv, limit = cens_limit, cens = cens_type),
                        mn_idv = mean(idv)) %>%
       dplyr::group_by(strat, bin) %>%
       dplyr::summarise(q50.low = quantile(ploq, ci[1]),
@@ -192,7 +192,7 @@ vpc_cens <- function(sim = NULL,
       # appears that it should have been set to `limit` which is now named
       # `cens_limit`.  The change is so that uloq values could be correctly
       # censored for right-censored data.
-      dplyr::summarise(obs50 = loq_perc(dv, limit = cens_limit, cens = cens_type),
+      dplyr::summarise(obs50 = loq_frac(dv, limit = cens_limit, cens = cens_type),
                        bin_mid = mean(idv)) %>%
       dplyr::ungroup()
     aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
