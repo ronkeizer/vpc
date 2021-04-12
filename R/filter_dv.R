@@ -1,15 +1,28 @@
+#' Remove values that are not observed values from data
+#' 
+#' @param dat A data.frame or similar object
+#' @param verbose show debugging information (TRUE or FALSE)
+#' @return dat With non-observation rows removed
 filter_dv <- function(x, verbose = FALSE, ...) {
-  available_methods <- c("phx", "nonmem")
-  if(sum(available_methods %in% class(x)) > 0)  {
-    f <- filter_dv_software[[class(x)[1]]]
-    do.call(f, args = list(x = x, verbose = verbose, ...)) 
+  software_match <- intersect(class(x), names(filter_dv_software))
+  if (length(software_match) > 1) {
+    # TODO: Review 2021-04: Matching the software is a bit stricter now
+    warning(
+      "Multiple software packages matched for filtering observed values, not filtering.  Software matched: ",
+      paste(software_match, collapse=", ")
+    )
+    x
+  } else if (length(software_match) == 1) {
+    filter_dv_software[[software_match]](x=x, verbose=verbose, ...)
   } else {
     x    
   }
 }
 
 filter_dv_software <- list(
-  "phx" = function(x, dv, verbose = FALSE, ...) {
+  # TODO: Review 2021-04: name was "phx" here and "phoenix" elsewhere.
+  # Standardizing to "phoenix".
+  "phoenix" = function(x, dv, verbose = FALSE, ...) {
     msg("Filtering rows with no DV values", verbose)
     x[!is.na(x[[dv]]),]
   },

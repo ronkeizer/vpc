@@ -108,7 +108,6 @@ vpc_vpc <- function(sim = NULL,
     if(verbose) {
       message("Parsing observed data...")
     }
-    obs <- filter_dv(obs, verbose)
     obs <-
       format_vpc_input_data(
         dat=obs,
@@ -125,7 +124,6 @@ vpc_vpc <- function(sim = NULL,
     if(verbose) {
       message("Parsing simulated data...")
     }
-    sim <- filter_dv(sim, verbose)
     if((!is.null(lloq) || !is.null(uloq)) && pred_corr) {
       message("Prediction-correction cannot be used together with censored data (<LLOQ or >ULOQ). VPC plot will be shown for non-censored data only!")
       sim <-

@@ -131,14 +131,6 @@ vpc_tte <- function(sim = NULL,
     }
   }
 
-  ## remove EVID != 0 / MDV != 0
-  if(!is.null(obs)) {
-    obs <- filter_dv(obs, verbose)
-  }
-  if(!is.null(sim)) {
-    sim <- filter_dv(sim, verbose)
-  }
-
   ## stratification
   stratify_original <- stratify_pars
   if(!is.null(stratify_pars)) {

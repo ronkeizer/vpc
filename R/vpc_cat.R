@@ -82,7 +82,6 @@ vpc_cat  <- function(sim = NULL,
 
   ## parse data into specific format
   if(!is.null(obs)) {
-    obs <- filter_dv(obs, verbose)
     obs <-
       format_vpc_input_data(
         dat=obs,
@@ -95,7 +94,6 @@ vpc_cat  <- function(sim = NULL,
       )
   }
   if(!is.null(sim)) {
-    sim <- filter_dv(sim, verbose)
     sim <-
       format_vpc_input_data(
         dat=sim,

@@ -12,11 +12,11 @@ read_vpc <- function(sim, obs, psn_folder,
                      sim_cols, obs_cols,
                      verbose=FALSE) {
   if(!is.null(psn_folder)) {
-    if(is.null(obs)) {
+    if (is.null(obs)) {
       msg("Reading oberved data...", verbose=verbose)
       obs <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
     }
-    if(is.null(sim)) {
+    if (is.null(sim)) {
       msg("Reading simulated data...", verbose=verbose)
       sim <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="simulation.1.npctab")[1]))
     }
@@ -31,9 +31,11 @@ read_vpc <- function(sim, obs, psn_folder,
     software <- guess_software(software, sim)
   }
   if (!is.null(obs)) {
+    obs <- filter_dv(obs, verbose)
     class(obs) <- c(software, class(obs))
   }
   if (!is.null(sim)) {
+    sim <- filter_dv(sim, verbose)
     class(sim) <- c(software, class(sim))
   }
 
