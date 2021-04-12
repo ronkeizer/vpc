@@ -21,7 +21,7 @@ quantile_cens(x, probs = 0.5, limit = 1, cens = c("left", "right"))
 \item{cens}{censoring direction ("left"/"right")}
 }
 \value{
-
+The quantile of \code{x} treating \code{NA} values as censored
 }
 \description{
 Calculate quantiles respecting the censored data

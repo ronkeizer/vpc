@@ -1,6 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-misc/
+^misc
 .DS_Store
 .travis.yml
 .RData

@@ -6,7 +6,14 @@
 \usage{
 label_vpc_tte(labels, multi_line = TRUE, sep = ": ")
 }
+\arguments{
+\item{labels}{Data frame of labels. Usually contains only one element, but faceting over multiple factors entails multiple label variables.}
+
+\item{multi_line}{Whether to display the labels of multiple factors on separate lines.}
+
+\item{sep}{String separating variables and values.}
+}
 \description{
-Slight rewrite of ggplot::label_both, to make sure that labels 
+Slight rewrite of ggplot2::label_both, to make sure that labels 
 for events are ordered appropriately when doing facet_wrap.
 }

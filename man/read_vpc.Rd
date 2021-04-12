@@ -4,7 +4,7 @@
 \alias{read_vpc}
 \title{Read in VPC data}
 \usage{
-read_vpc(sim, obs, psn_folder, software, sim_cols, obs_cols)
+read_vpc(sim, obs, psn_folder, software, sim_cols, obs_cols, verbose = FALSE)
 }
 \arguments{
 \item{sim}{this is usually a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}.  However it can also be an object like a nlmixr or xpose object}
@@ -18,6 +18,8 @@ read_vpc(sim, obs, psn_folder, software, sim_cols, obs_cols)
 \item{sim_cols}{list for mapping simulation data columns, e.g. `list(dv = "DV", id = "ID", idv = "TIME", pred="PRED")`}
 
 \item{obs_cols}{list for mapping observation data columns, e.g. `list(dv = "DV", id = "ID", idv = "TIME", pred="PRED")`}
+
+\item{verbose}{show debugging information (TRUE or FALSE)}
 }
 \value{
 A list with names of "sim", "obs", "software", and "cols"
