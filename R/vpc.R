@@ -7,8 +7,6 @@
 #' @inheritParams define_loq
 #' @inheritParams plot_vpc
 #' @inheritParams as_vpcdb
-#' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
-#' @param n_bins when using the "auto" binning method, what number of bins to aim for
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param pi simulated prediction interval to plot. Default is c(0.05, 0.95),
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
@@ -156,19 +154,10 @@ vpc_vpc <- function(sim = NULL,
     lloq <- NULL
   }
 
-  labeled_bins <- bins[1] == "percentiles"
-  if (class(bins) != "numeric") {
-    if(!is.null(obs)) {
-      bins <- auto_bin(obs, bins, n_bins)
-    } else { # get from sim
-      bins <- auto_bin(sim, bins, n_bins)
-    }
-    if (is.null(bins)) {
-      msg("Automatic binning unsuccessful, try increasing the number of bins, or specify vector of bin separators manually.", verbose)
-    }
-  }
-  bins <- unique(bins)
-  if(verbose) message(paste0("Binning: ", paste(bins, collapse=' ')))
+  # Binning ####
+  bins_data <- define_bins(obs=obs, sim=sim, bins=bins, n_bins=n_bins, verbose=verbose)
+  bins <- bins_data$bins
+  labeled_bins <- bins_data$labeled
   if(!is.null(obs)) {
     obs <- bin_data(obs, bins, "idv", labeled = labeled_bins)
   }

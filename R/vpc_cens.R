@@ -60,7 +60,7 @@ vpc_cens <- function(sim = NULL,
   obs <- vpc_data$obs
   software_type <- vpc_data$software
   cols <- vpc_data$cols
-  
+
   loq_data <-
     define_loq(
       lloq=lloq, uloq=uloq,
@@ -125,17 +125,10 @@ vpc_cens <- function(sim = NULL,
       stratify <- c(stratify, stratify_color)
     }
   }
-  if (class(bins) != "numeric") {
-    if(!is.null(obs)) {
-      bins <- auto_bin(obs, type = bins, n_bins = n_bins)
-    } else { # get from sim
-      bins <- auto_bin(sim, type = bins, n_bins = n_bins)
-    }
-    if (is.null(bins)) {
-      msg("Automatic binning unsuccessful, try increasing the number of bins, or specify vector of bin separators manually.", verbose)
-    }
-  }
-  bins <- unique(bins)
+
+  # Binning ####
+  bins_data <- define_bins(obs=obs, sim=sim, bins=bins, n_bins=n_bins, verbose=verbose)
+  bins <- bins_data$bins
   if(!is.null(obs)) {
     obs <- bin_data(obs, bins, "idv")
   }

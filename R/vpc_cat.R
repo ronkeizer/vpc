@@ -107,17 +107,9 @@ vpc_cat  <- function(sim = NULL,
     sim$sim <- add_sim_index_number(sim, id = "id")
   }
 
-  if (class(bins) != "numeric") {
-    if(!is.null(obs)) {
-      bins <- auto_bin(obs, bins, n_bins)
-    } else { # get from sim
-      bins <- auto_bin(sim, bins, n_bins)
-    }
-    if (is.null(bins)) {
-      msg("Automatic binning unsuccessful, try increasing the number of bins, or specify vector of bin separators manually.", verbose)
-    }
-  }
-  bins <- unique(bins)
+  # Binning ####
+  bins_data <- define_bins(obs=obs, sim=sim, bins=bins, n_bins=n_bins, verbose=verbose)
+  bins <- bins_data$bins
   if(!is.null(obs)) {
     obs <- bin_data(obs, bins, "idv")
   }
