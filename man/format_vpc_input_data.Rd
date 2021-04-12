@@ -34,6 +34,8 @@ format_vpc_input_data(
 \item{log_y_min}{minimal value when using log_y argument. Default is 1e-3.}
 
 \item{what}{The description of the data (typically "observed" or "simulated")}
+
+\item{pred_corr}{perform prediction-correction?}
 }
 \value{
 \code{dat} modified based on other inputs.

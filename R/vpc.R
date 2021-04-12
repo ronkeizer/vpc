@@ -5,13 +5,12 @@
 #' @inheritParams format_vpc_input_data
 #' @inheritParams read_vpc
 #' @inheritParams ggplot2::facet_grid
+#' @inheritParams define_loq
 #' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param show what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
-#' @param pred_corr perform prediction-correction?
-#' @param pred_corr_lower_bnd lower bound for the prediction-correction
 #' @param pi simulated prediction interval to plot. Default is c(0.05, 0.95),
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param xlab label for x axis
@@ -90,6 +89,20 @@ vpc_vpc <- function(sim = NULL,
   obs <- vpc_data$obs
   software_type <- vpc_data$software
   cols <- vpc_data$cols
+
+  loq_data <-
+    define_loq(
+      lloq=lloq, uloq=uloq,
+      pred_corr=pred_corr, pred_corr_lower_bnd=pred_corr_lower_bnd,
+      require_loq=FALSE
+    )
+  lloq <- loq_data$lloq
+  uloq <- loq_data$uloq
+  pred_corr <- loq_data$pred_corr
+  pred_corr_lower_bnd <- loq_data$pred_corr_lower_bnd
+  cens_type <- loq_data$cens_type
+  cens_limit <- loq_data$cens_limit
+
   if(!is.null(facet)) {
     if(! facet %in% c("wrap", "grid", "columns", "rows")) {
       stop("`facet` argument needs to be one of `wrap`, `columns`, or `rows`.")
@@ -119,11 +132,6 @@ vpc_vpc <- function(sim = NULL,
     if(!is.null(sim)) {
       check_stratification_columns_available(sim, stratify, "simulation")
     }
-  }
-
-  ## Currently we can't handle both LLOQ and ULOQ
-  if(!is.null(uloq) && !is.null(lloq)) {
-    stop("Sorry, currently the vpc function cannot handle both upper and lower limit of quantification. Please specify either `lloq` or `uloq`.")
   }
 
   ## parse data into specific format
@@ -277,14 +285,11 @@ vpc_vpc <- function(sim = NULL,
     }
     tmp1 <- obs %>% dplyr::group_by(strat,bin)
     if(!is.null(lloq) || !is.null(uloq)) {
-      if(!is.null(uloq)) { limit <- uloq; cens = "right" }
-      if(!is.null(lloq)) { limit <- lloq; cens = "left" }
-      
       aggr_obs <- tmp1 %>% 
         dplyr::summarise(
-          obs5 = quantile_cens(dv, pi[1], limit = limit, cens = cens),
-          obs50 = quantile_cens(dv, 0.5, limit = limit, cens = cens),
-          obs95 = quantile_cens(dv, pi[2], limit = limit, cens = cens),
+          obs5 = quantile_cens(dv, pi[1], limit = cens_limit, cens = cens_type),
+          obs50 = quantile_cens(dv, 0.5, limit = cens_limit, cens = cens_type),
+          obs95 = quantile_cens(dv, pi[2], limit = cens_limit, cens = cens_type),
           bin_mid = mean(idv)
         )
     } else {

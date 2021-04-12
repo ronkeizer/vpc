@@ -68,18 +68,18 @@ vpc_cens <- function(sim = NULL,
   software_type <- vpc_data$software
   cols <- vpc_data$cols
   
-  if(is.null(uloq) & is.null(lloq)) {
-    stop("You have to specify either a lower limit of quantification (lloq=...) or an upper limit (uloq=...).")
-  }
-  if(!is.null(uloq) & !is.null(lloq)) {
-    stop("You have to specify either a lower limit of quantification (lloq=...) or an upper limit (uloq=...), but you can't specify both.")
-  }
-  if(is.null(lloq)) {
-    type <- "right-censored"
-  }
-  if(is.null(uloq)) {
-    type <- "left-censored"
-  }
+  loq_data <-
+    define_loq(
+      lloq=lloq, uloq=uloq,
+      pred_corr=FALSE, pred_corr_lower_bnd=NULL,
+      require_loq=TRUE
+    )
+  lloq <- loq_data$lloq
+  uloq <- loq_data$uloq
+  pred_corr <- loq_data$pred_corr
+  pred_corr_lower_bnd <- loq_data$pred_corr_lower_bnd
+  cens_type <- loq_data$cens_type
+  cens_limit <- loq_data$cens_limit
 
   ## checking whether stratification columns are available
   if(!is.null(stratify)) {
@@ -163,20 +163,12 @@ vpc_cens <- function(sim = NULL,
     sim <- bin_data(sim, bins, "idv")
   }
 
-  if(!is.null(lloq)) {
-    cens <- "left"
-    limit <- lloq
-  } else {
-    cens <- "right"
-    limit <- uloq
-  }
-  
   ## Parsing data to get the quantiles for the VPC
   if (!is.null(sim)) {
     tmp1 <- sim %>% 
       dplyr::group_by(strat, sim, bin)
     vpc_dat <- tmp1 %>%
-      dplyr::summarise(ploq = loq_perc(dv, limit = limit, cens = cens),
+      dplyr::summarise(ploq = loq_perc(dv, limit = cens_limit, cens = cens_type),
                        mn_idv = mean(idv)) %>%
       dplyr::group_by(strat, bin) %>%
       dplyr::summarise(q50.low = quantile(ploq, ci[1]),
@@ -195,8 +187,12 @@ vpc_cens <- function(sim = NULL,
   if(!is.null(obs)) {
     tmp <- obs %>% 
       dplyr::group_by(strat,bin)
-    aggr_obs <- tmp %>% 
-      dplyr::summarise(obs50 = loq_perc(dv, limit = lloq, cens = cens),
+    aggr_obs <- tmp %>%
+      # TODO: For review in 2021-04: limit here was set to `lloq`, but it
+      # appears that it should have been set to `limit` which is now named
+      # `cens_limit`.  The change is so that uloq values could be correctly
+      # censored for right-censored data.
+      dplyr::summarise(obs50 = loq_perc(dv, limit = cens_limit, cens = cens_type),
                        bin_mid = mean(idv)) %>%
       dplyr::ungroup()
     aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]

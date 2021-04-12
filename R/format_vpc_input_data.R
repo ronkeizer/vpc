@@ -39,8 +39,7 @@ standardize_column <- function(dat, cols, colname, coldesc, what) {
 #' stratification, and logarithmic values.
 #' 
 #' @inheritParams standardize_column
-#' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.
-#' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.
+#' @inheritParams define_loq
 #' @param log_y Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.
 #' @param log_y_min minimal value when using log_y argument. Default is 1e-3.
 #' @return \code{dat} modified based on other inputs.

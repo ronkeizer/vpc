@@ -10,9 +10,9 @@ assert("4 values in upper percentile flagged as <lloq", vpc:::is_equal(sum(is.na
 assert("1 values in upper percentile flagged as <lloq", vpc:::is_equal(sum(is.na(obj2$aggr_obs$obs50)), 1))
 
 ## test vpc func
-obj <- vpc_cens(sim = vpc::simple_data$sim, 
-                obs = vpc::simple_data$obs, 
-              lloq = 30, n_bins = 8, vpcdb = TRUE)
+obj <- vpc_cens(sim = vpc::simple_data$sim,
+                obs = vpc::simple_data$obs,
+                lloq = 30, n_bins = 8, vpcdb = TRUE)
 
 #vpc_cens(sim = vpc::simple_data$sim, obs = vpc::simple_data$obs, lloq = 30)
 
