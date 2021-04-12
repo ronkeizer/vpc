@@ -1,22 +1,22 @@
 #' Adds stratification to data set
 #' 
-#' @param dat data.frame
-#' @param strat vector of stratification variables
+#' @param dat An input data.frame or similar object
+#' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param verbose verbosity (`TRUE` or `FALSE`)
-add_stratification <- function (dat, strat, verbose = FALSE) {
-  if(is.null(strat)) {
+add_stratification <- function (dat, stratify, verbose = FALSE) {
+  if(is.null(stratify)) {
     dat$strat <- 1
   } else {
-    if (all(strat %in% colnames(dat))) {
-      if(length(strat) == 1) {
-        dat$strat <- data.frame(dat)[,strat]
+    if (all(stratify %in% colnames(dat))) {
+      if(length(stratify) == 1) {
+        dat$strat <- data.frame(dat)[,stratify]
       } else {
         dat$strat <- ""
-        for(i in seq(strat)) {
+        for(i in seq(stratify)) {
           if(i > 1) { 
             dat$strat <- paste0(dat$strat, ", ")
           }
-          dat$strat <- paste0(dat$strat, data.frame(dat)[,strat[i]])
+          dat$strat <- paste0(dat$strat, data.frame(dat)[,stratify[i]])
         }      
       }
     } else {

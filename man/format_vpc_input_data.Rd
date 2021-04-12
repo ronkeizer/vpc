@@ -11,7 +11,7 @@ format_vpc_input_data(
   cols,
   lloq,
   uloq,
-  strat,
+  stratify,
   log_y,
   log_y_min,
   what = "observed",
@@ -29,11 +29,15 @@ format_vpc_input_data(
 
 \item{uloq}{Number or NULL indicating upper limit of quantification. Default is NULL.}
 
+\item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
+
 \item{log_y}{Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.}
 
 \item{log_y_min}{minimal value when using log_y argument. Default is 1e-3.}
 
 \item{what}{The description of the data (typically "observed" or "simulated")}
+
+\item{verbose}{show debugging information (TRUE or FALSE)}
 
 \item{pred_corr}{perform prediction-correction?}
 }

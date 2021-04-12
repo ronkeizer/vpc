@@ -40,10 +40,12 @@ standardize_column <- function(dat, cols, colname, coldesc, what) {
 #' 
 #' @inheritParams standardize_column
 #' @inheritParams define_loq
+#' @inheritParams add_stratification
 #' @param log_y Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.
 #' @param log_y_min minimal value when using log_y argument. Default is 1e-3.
+#' @param verbose show debugging information (TRUE or FALSE)
 #' @return \code{dat} modified based on other inputs.
-format_vpc_input_data <- function(dat, cols, lloq, uloq, strat, log_y, log_y_min, what = "observed", verbose = FALSE, pred_corr = FALSE) {
+format_vpc_input_data <- function(dat, cols, lloq, uloq, stratify, log_y, log_y_min, what = "observed", verbose = FALSE, pred_corr = FALSE) {
   dat <- standardize_column(dat=dat, cols=cols, colname="id", coldesc="id indicator", what=what)
   dat <- standardize_column(dat=dat, cols=cols, colname="dv", coldesc="dependent variable", what=what)
   dat <- standardize_column(dat=dat, cols=cols, colname="idv", coldesc="indepentent variable", what=what)
@@ -57,6 +59,6 @@ format_vpc_input_data <- function(dat, cols, lloq, uloq, strat, log_y, log_y_min
   if (log_y) {
     dat$dv[dat$dv < log_y_min] <- log_y_min
   }
-  dat <- add_stratification(dat, strat)
+  dat <- add_stratification(dat=dat, stratify=stratify, verbose=verbose)
   return(dat)
 }

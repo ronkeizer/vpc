@@ -4,12 +4,12 @@
 \alias{add_stratification}
 \title{Adds stratification to data set}
 \usage{
-add_stratification(dat, strat, verbose = FALSE)
+add_stratification(dat, stratify, verbose = FALSE)
 }
 \arguments{
-\item{dat}{data.frame}
+\item{dat}{An input data.frame or similar object}
 
-\item{strat}{vector of stratification variables}
+\item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
 
 \item{verbose}{verbosity (`TRUE` or `FALSE`)}
 }

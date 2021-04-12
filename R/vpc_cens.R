@@ -8,7 +8,6 @@
 #' @param n_bins number of bins
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param show what to show in VPC (obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
-#' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param plot Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.
@@ -110,7 +109,7 @@ vpc_cens <- function(sim = NULL,
         dat=obs,
         cols=cols$obs,
         lloq=lloq, uloq=uloq,
-        strat=stratify,
+        stratify=stratify,
         log_y=FALSE, log_y_min=0,
         what="observed",
         verbose=verbose
@@ -123,7 +122,7 @@ vpc_cens <- function(sim = NULL,
         dat=sim,
         cols=cols$sim,
         lloq=NULL, uloq=NULL,
-        strat=stratify,
+        stratify=stratify,
         log_y=FALSE, log_y_min=0,
         what="simulated",
         verbose=verbose

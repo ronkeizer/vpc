@@ -10,7 +10,6 @@
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param show what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
-#' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
 #' @param pi simulated prediction interval to plot. Default is c(0.05, 0.95),
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param xlab label for x axis
@@ -145,7 +144,7 @@ vpc_vpc <- function(sim = NULL,
         dat=obs,
         cols=cols$obs,
         lloq=lloq, uloq=uloq,
-        strat=stratify,
+        stratify=stratify,
         log_y=log_y, log_y_min=log_y_min,
         what="observed",
         verbose=verbose,

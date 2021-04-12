@@ -15,7 +15,6 @@
 #' @param kmmc either NULL (for regular TTE vpc, default), or a variable name for a KMMC plot (e.g. "WT")
 #' @param events numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events.
 #' @param reverse_prob reverse the probability scale (i.e. plot 1-probability)
-#' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied. 
 #' @param stratify_color character vector of stratification variables. Only 1 stratification variable can be supplied, cannot be used in conjunction with `stratify`. 
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param plot Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.
