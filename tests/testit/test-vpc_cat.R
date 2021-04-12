@@ -1,7 +1,3 @@
-library(vpc)
-library(testit)
-Sys.setenv("R_TESTS" = "")
-
 tmp <- simple_data
 cat <- cut(tmp$obs$DV, breaks = c(-1, 10, 40, 1000))
 tmp$obs$DV <- match(cat, levels(cat))

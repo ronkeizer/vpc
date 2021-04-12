@@ -1,6 +1,3 @@
-library(vpc)
-library(testit)
-
 assert(
   "define_loq errors if both limits are given",
   class(try(vpc:::define_loq(lloq=0, uloq=1), silent=TRUE)) == "try-error"

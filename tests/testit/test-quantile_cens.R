@@ -1,6 +1,3 @@
-library(vpc)
-library(testit)
-
 assert(
   "quantile_cens returns the expected quantile when no values are censored",
   vpc::quantile_cens(x=1:10, probs=0.3, cens="left", limit=0) ==

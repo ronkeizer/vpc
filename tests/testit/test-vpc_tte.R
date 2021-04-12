@@ -1,7 +1,3 @@
-library(vpc)
-library(testit)
-Sys.setenv("R_TESTS" = "")
-
 ## Test for bug AR 20171025 column name simulation dataset
 test <- vpc::rtte_sim_nm[1:200000,]
 test$bla <- test$t

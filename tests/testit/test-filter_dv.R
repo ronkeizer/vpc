@@ -1,6 +1,3 @@
-library(vpc)
-library(testit)
-
 nonmem_df <- data.frame(ID = 1, ADV = c(1, 0, 0), DV = 1)
 nonmem_mdv <- data.frame(ID = 1, MDV = c(1, 0, 0), DV = 1)
 nonmem_evid <- data.frame(ID = 1, EVID = c(1, 0, 0), DV = 1)

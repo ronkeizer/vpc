@@ -1,6 +1,3 @@
-library(vpc)
-library(testit)
-
 nonmem_df <- data.frame(ID = 1, ADV = c(1, 0, 0), DV = 1)
 
 # Check standardize_column ####

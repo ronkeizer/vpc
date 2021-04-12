@@ -1,7 +1,4 @@
 library(dplyr)
-library(vpc)
-library(testit)
-Sys.setenv("R_TESTS" = "")
 
 ## Load the theophylline PK dataset
 obs <- Theoph

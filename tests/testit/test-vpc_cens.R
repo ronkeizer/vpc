@@ -1,7 +1,3 @@
-library(vpc)
-library(testit)
-Sys.setenv("R_TESTS" = "")
-
 ## Test regular vpc in presence of lloq / uloq data
 obj1 <- vpc(sim = vpc::simple_data$sim, obs = vpc::simple_data$obs, uloq = 120, vpcdb = TRUE)
 obj2 <- vpc(sim = vpc::simple_data$sim, obs = vpc::simple_data$obs, lloq = 20, vpcdb = TRUE)
