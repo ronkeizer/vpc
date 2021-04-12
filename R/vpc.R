@@ -4,16 +4,14 @@
 #' 
 #' @inheritParams format_vpc_input_data
 #' @inheritParams read_vpc
-#' @inheritParams ggplot2::facet_grid
 #' @inheritParams define_loq
 #' @inheritParams plot_vpc
+#' @inheritParams as_vpcdb
 #' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param pi simulated prediction interval to plot. Default is c(0.05, 0.95),
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
-#' @param facet either "wrap", "columns", or "rows"
-#' @param labeller ggplot2 labeller function to be passed to underlying ggplot object
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @param ... Other arguments sent to other methods (like xpose or nlmixr);  Note these arguments are not used in the default vpc and are ignored by the default method.
@@ -96,21 +94,6 @@ vpc_vpc <- function(sim = NULL,
   pred_corr_lower_bnd <- loq_data$pred_corr_lower_bnd
   cens_type <- loq_data$cens_type
   cens_limit <- loq_data$cens_limit
-
-  if(!is.null(facet)) {
-    if(! facet %in% c("wrap", "grid", "columns", "rows")) {
-      stop("`facet` argument needs to be one of `wrap`, `columns`, or `rows`.")
-    }
-    if(facet == "grid") facet <- "rows"
-  }
-  ### Added by Satyaprakash Nayak ---
-  if(!is.null(scales)) {
-    if(! scales %in% c("fixed", "free_x", "free_y", "free")) {
-      stop("`scales` argument needs to be one of `fixed`, `free_y`, `free_x` or `free`.")
-    }
-    if(scales == "fixed") scales <- "fixed"
-  }
-  ###---
 
   ## define what to show in plot
   show <- replace_list_elements(show_default, show)
@@ -321,24 +304,28 @@ vpc_vpc <- function(sim = NULL,
   if(verbose & !vpcdb) {
     message("Creating plot...")
   }
-  vpc_db <- list(sim = sim,
-                 vpc_dat = vpc_dat,
-                 smooth = smooth,
-                 stratify = stratify,
-                 aggr_obs = aggr_obs,
-                 obs = obs,
-                 bins = bins,
-                 facet = facet,
-                 scales = scales,       
-                 labeller = labeller,
-                 lloq = lloq,
-                 uloq = uloq,
-                 type = "continuous",
-                 xlab = xlab,
-                 ylab = ylab)
+  vpc_db <-
+    as_vpcdb(
+      sim = sim,
+      vpc_dat = vpc_dat,
+      smooth = smooth,
+      stratify = stratify,
+      aggr_obs = aggr_obs,
+      obs = obs,
+      bins = bins,
+      facet = facet,
+      scales = scales,       
+      labeller = labeller,
+      lloq = lloq,
+      uloq = uloq,
+      type = "continuous",
+      xlab = xlab,
+      ylab = ylab
+    )
   if(vpcdb) {
     return(vpc_db)
   } else {
+    msg("Plotting...", verbose=verbose)
     pl <- plot_vpc(vpc_db,
                    show = show,
                    vpc_theme = vpc_theme,

@@ -7,6 +7,7 @@
 #' @inheritParams format_vpc_input_data
 #' @inheritParams read_vpc
 #' @inheritParams plot_vpc
+#' @inheritParams as_vpcdb
 #' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.
 #' @param n_bins number of bins
 #' @param rtte repeated time-to-event data? Default is FALSE (treat as single-event TTE)
@@ -19,11 +20,9 @@
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param plot Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.
 #' @param as_percentage Show y-scale from 0-100 percent? TRUE by default, if FALSE then scale from 0-1.
-#' @param facet either "wrap", "columns", or "rows"
-#' @param labeller ggplot2 labeller function to be passed to underlying ggplot object
-#' @param verbose TRUE or FALSE (default)
+#' @param verbose show debugging information (TRUE or FALSE)
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
-#' @return a list containing calculated VPC information, and a ggplot2 object
+#' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 #' @export
 #' @seealso \link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cens}
 #' @examples
@@ -427,33 +426,33 @@ vpc_tte <- function(sim = NULL,
   }
 
   # plotting starts here
-  vpc_db <- list(sim = sim,
-                 sim_km = sim_km,
-                 obs = obs,
-                 obs_km = obs_km,
-                 all_dat = all_dat,
-                 stratify_pars = stratify_pars,
-                 stratify = stratify,
-                 stratify_color = stratify_color,
-                 stratify_original = stratify_original,
-                 bins = bins,
-                 facet = facet,
-                 labeller = labeller,
-                 kmmc = kmmc,
-                 cens_dat = cens_dat,
-                 rtte = rtte,
-                 type = "time-to-event",
-                 as_percentage = as_percentage,
-                 tmp_bins = tmp_bins,
-                 xlab = xlab,
-                 ylab = ylab)
-  if(is.null(xlab)) {
-    xlab <- "Time (days)"
-  }
-  if(vpcdb) {
+  vpc_db <-
+    as_vpcdb(
+      sim = sim,
+      sim_km = sim_km,
+      obs = obs,
+      obs_km = obs_km,
+      all_dat = all_dat,
+      stratify_pars = stratify_pars,
+      stratify = stratify,
+      stratify_color = stratify_color,
+      stratify_original = stratify_original,
+      bins = bins,
+      facet = facet,
+      labeller = labeller,
+      kmmc = kmmc,
+      cens_dat = cens_dat,
+      rtte = rtte,
+      type = "time-to-event",
+      as_percentage = as_percentage,
+      tmp_bins = tmp_bins,
+      xlab = xlab,
+      ylab = ylab
+    )
+  if (vpcdb) {
     return(vpc_db)
   } else {
-    message("\nPlotting.")
+    msg("Plotting...", verbose=verbose)
     pl <- plot_vpc(vpc_db,
                    show = show,
                    vpc_theme = vpc_theme,

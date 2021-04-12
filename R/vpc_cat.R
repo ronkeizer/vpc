@@ -5,6 +5,7 @@
 #' @inheritParams format_vpc_input_data
 #' @inheritParams read_vpc
 #' @inheritParams plot_vpc
+#' @inheritParams as_vpcdb
 #' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
 #' @param n_bins when using the "auto" binning method, what number of bins to aim for
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
@@ -210,21 +211,25 @@ vpc_cat  <- function(sim = NULL,
   show$pi_as_area = FALSE
   show$pi_ci = FALSE
   show$pi = FALSE
-  vpc_db <- list(sim = sim,
-                 vpc_dat = vpc_dat,
-                 stratify = "strat", # the stratification is the various categories!
-                 stratify_original = "strat",
-                 aggr_obs = aggr_obs,
-                 obs = obs,
-                 bins = bins,
-                 facet = facet,
-                 labeller = labeller,
-                 type = "categorical",
-                 xlab = xlab,
-                 ylab = ylab)
+  vpc_db <-
+    as_vpcdb(
+      sim = sim,
+      vpc_dat = vpc_dat,
+      stratify = "strat", # the stratification is the various categories!
+      stratify_original = "strat",
+      aggr_obs = aggr_obs,
+      obs = obs,
+      bins = bins,
+      facet = facet,
+      labeller = labeller,
+      type = "categorical",
+      xlab = xlab,
+      ylab = ylab
+    )
   if(vpcdb) {
     return(vpc_db)
   } else {
+    msg("Plotting...", verbose=verbose)
     pl <- plot_vpc(db = vpc_db,
                    show = show,
                    vpc_theme = vpc_theme,

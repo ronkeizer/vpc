@@ -73,9 +73,9 @@ vpc_tte(
 
 \item{plot}{Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.}
 
-\item{xlab}{label for x-axis}
+\item{xlab}{label for x axis}
 
-\item{ylab}{label for y-axis}
+\item{ylab}{label for y axis}
 
 \item{show}{what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
 
@@ -91,12 +91,12 @@ vpc_tte(
 
 \item{labeller}{ggplot2 labeller function to be passed to underlying ggplot object}
 
-\item{verbose}{TRUE or FALSE (default)}
+\item{verbose}{show debugging information (TRUE or FALSE)}
 
 \item{vpcdb}{Boolean whether to return the underlying vpcdb rather than the plot}
 }
 \value{
-a list containing calculated VPC information, and a ggplot2 object
+a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 }
 \description{
 This function can be used for either single time-to-event (TTE) or repeated time-to-event (RTTE) data.

@@ -84,7 +84,7 @@ vpc_cens(
 \item{verbose}{show debugging information (TRUE or FALSE)}
 }
 \value{
-a list containing calculated VPC information, and a ggplot2 object
+a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 }
 \description{
 Creates a VPC plot from observed and simulation data for censored data. Function can handle both left- (below lower limit of quantification) and right-censored (above upper limit of quantification) data.

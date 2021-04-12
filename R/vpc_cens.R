@@ -5,17 +5,16 @@
 #' @inheritParams format_vpc_input_data
 #' @inheritParams read_vpc
 #' @inheritParams plot_vpc
+#' @inheritParams as_vpcdb
 #' @param bins either "density", "time", or "data", or a numeric vector specifying the bin separators.
 #' @param n_bins number of bins
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param plot Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.
-#' @param facet either "wrap", "columns", or "rows"
-#' @param labeller ggplot2 labeller function to be passed to underlying ggplot object
 #' @param vpcdb boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
-#' @return a list containing calculated VPC information, and a ggplot2 object
+#' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 #' @export
 #' @seealso \link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cat}
 #' @examples 
@@ -215,22 +214,26 @@ vpc_cens <- function(sim = NULL,
   show$pi_as_area = FALSE
   show$pi_ci = FALSE
   show$pi = FALSE
-  vpc_db <- list(sim = sim,
-                 vpc_dat = vpc_dat,
-                 stratify = stratify,
-                 stratify_original = stratify_original,
-                 stratify_color = stratify_color,
-                 aggr_obs = aggr_obs,
-                 obs = obs,
-                 bins = bins,
-                 facet = facet,
-                 labeller = labeller,
-                 type = "censored",
-                 xlab = xlab,
-                 ylab = ylab)
+  vpc_db <-
+    as_vpcdb(
+      sim = sim,
+      vpc_dat = vpc_dat,
+      stratify = stratify,
+      stratify_original = stratify_original,
+      stratify_color = stratify_color,
+      aggr_obs = aggr_obs,
+      obs = obs,
+      bins = bins,
+      facet = facet,
+      labeller = labeller,
+      type = "censored",
+      xlab = xlab,
+      ylab = ylab
+    )
   if(vpcdb) {
     return(vpc_db)
   } else {
+    msg("Plotting...", verbose=verbose)
     pl <- plot_vpc(db = vpc_db,
                    show = show, 
                    vpc_theme = vpc_theme,
