@@ -39,9 +39,12 @@ vpc_cens(
 
 \item{psn_folder}{instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder}
 
-\item{bins}{either "density", "time", or "data", or a numeric vector specifying the bin separators.}
+\item{bins}{either "density", "time", or "data", "none", or one of the
+approaches available in classInterval() such as "jenks" (default) or
+"pretty", or a numeric vector specifying the bin separators.}
 
-\item{n_bins}{number of bins}
+\item{n_bins}{when using the "auto" binning method, what number of bins to
+aim for}
 
 \item{bin_mid}{either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.}
 

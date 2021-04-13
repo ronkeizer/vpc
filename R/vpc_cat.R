@@ -6,8 +6,7 @@
 #' @inheritParams read_vpc
 #' @inheritParams plot_vpc
 #' @inheritParams as_vpcdb
-#' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
-#' @param n_bins when using the "auto" binning method, what number of bins to aim for
+#' @inheritParams define_bins
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param plot Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.

@@ -51,9 +51,12 @@ vpc_tte(
 
 \item{events}{numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events.}
 
-\item{bins}{either "density", "time", or "data", or a numeric vector specifying the bin separators.}
+\item{bins}{either "density", "time", or "data", "none", or one of the
+approaches available in classInterval() such as "jenks" (default) or
+"pretty", or a numeric vector specifying the bin separators.}
 
-\item{n_bins}{number of bins}
+\item{n_bins}{when using the "auto" binning method, what number of bins to
+aim for}
 
 \item{software}{name of software platform using (e.g. nonmem, phoenix)}
 
