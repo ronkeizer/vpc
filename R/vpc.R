@@ -5,11 +5,9 @@
 #' @inheritParams format_vpc_input_data
 #' @inheritParams read_vpc
 #' @inheritParams define_loq
-#' @inheritParams plot_vpc
+#' @inheritParams calc_vpc_continuous
 #' @inheritParams as_vpcdb
-#' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
-#' @param pi simulated prediction interval to plot. Default is c(0.05, 0.95),
-#' @param ci confidence interval to plot. Default is (0.05, 0.95)
+#' @inheritParams plot_vpc
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @param ... Other arguments sent to other methods (like xpose or nlmixr);  Note these arguments are not used in the default vpc and are ignored by the default method.
@@ -151,6 +149,71 @@ vpc_vpc <- function(sim = NULL,
   obs <- bins_data$obs
   sim <- bins_data$sim
 
+  # Calculations ####
+  calc_data <-
+    calc_vpc_continuous(
+      sim=sim, obs=obs,
+      pred_corr=pred_corr,
+      pi=pi, ci=ci,
+      cols=cols,
+      stratify=stratify,
+      bin_mid=bin_mid
+    )
+  # Wrapup ####
+  if(is.null(xlab)) {
+    xlab <- cols$obs$idv
+  }
+  if(is.null(ylab)) {
+    ylab <- cols$obs$dv
+  }
+
+  # data combined and handed off to separate plotting function
+  vpc_db <-
+    as_vpcdb(
+      sim = calc_data$sim,
+      vpc_dat = calc_data$vpc_dat,
+      smooth = smooth,
+      stratify = stratify,
+      aggr_obs = calc_data$aggr_obs,
+      obs = calc_data$obs,
+      bins = bins,
+      facet = facet,
+      scales = scales,       
+      labeller = labeller,
+      lloq = lloq,
+      uloq = uloq,
+      type = "continuous",
+      xlab = xlab,
+      ylab = ylab,
+      show = show
+    )
+  if(vpcdb) {
+    return(vpc_db)
+  } else {
+    msg("Plotting...", verbose=verbose)
+    pl <- plot_vpc(vpc_db,
+                   vpc_theme = vpc_theme,
+                   smooth = smooth,
+                   log_y = log_y,
+                   title = title)
+    return(pl)
+  }
+}
+
+#' Calculate aggregate statistics for simulated and observed VPC data
+#' 
+#' @inheritParams read_vpc
+#' @inheritParams define_loq
+#' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
+#' @param pi simulated prediction interval to plot. Default is c(0.05, 0.95),
+#' @param ci confidence interval to plot. Default is (0.05, 0.95)
+#' @param cols A length 2, named list with one element named "obs" and the other
+#'   named "sim", each containing a sub-list with elements for mapping columns
+#'   names in the data to expected column names for use.
+#' @param stratify character vector of stratification variables.
+#' @return A list with "sim" and "obs" (with \code{pred_corr} performed, if
+#'   requested) and "vpc_dat" and "aggr_obs".
+calc_vpc_continuous <- function(sim, obs, pred_corr, pi, ci, cols, stratify, bin_mid) {
   if(pred_corr) {
     if(!is.null(obs) & !cols$obs$pred %in% names(obs)) {
       msg("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...", verbose)
@@ -190,7 +253,7 @@ vpc_vpc <- function(sim = NULL,
   }
   if(!is.null(sim)) {
     msg("Calculating statistics for simulated data...", verbose=verbose)
-
+    
     aggr_sim <- sim %>% 
       dplyr::group_by(strat, sim, bin) %>% 
       dplyr::summarise(
@@ -199,7 +262,7 @@ vpc_vpc <- function(sim = NULL,
         q95 = quantile(dv, pi[2]),
         mn_idv = mean(idv)
       )
-      
+    
     vpc_dat <- aggr_sim %>% dplyr::group_by(strat, bin) %>% 
       dplyr::summarise(
         q5.low = quantile(q5, ci[1]),
@@ -212,8 +275,8 @@ vpc_vpc <- function(sim = NULL,
         q95.med = quantile(q95, 0.5),
         q95.up = quantile(q95, ci[2]),
         bin_mid = mean(mn_idv)
-    ) 
-
+      ) 
+    
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     if(bin_mid == "middle") {
@@ -250,12 +313,6 @@ vpc_vpc <- function(sim = NULL,
   } else {
     aggr_obs <- NULL
   }
-  if(is.null(xlab)) {
-    xlab <- cols$obs$idv
-  }
-  if(is.null(ylab)) {
-    ylab <- cols$obs$dv
-  }
   if(!is.null(stratify)) {
     if(length(stratify) == 2) {
       vpc_dat$strat1 <- unlist(strsplit(as.character(vpc_dat$strat), ", "))[(1:length(vpc_dat$strat)*2)-1]
@@ -264,35 +321,11 @@ vpc_vpc <- function(sim = NULL,
       aggr_obs$strat2 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)]
     }
   }
-  # data combined and handed off to separate plotting function
-  vpc_db <-
-    as_vpcdb(
-      sim = sim,
-      vpc_dat = vpc_dat,
-      smooth = smooth,
-      stratify = stratify,
-      aggr_obs = aggr_obs,
-      obs = obs,
-      bins = bins,
-      facet = facet,
-      scales = scales,       
-      labeller = labeller,
-      lloq = lloq,
-      uloq = uloq,
-      type = "continuous",
-      xlab = xlab,
-      ylab = ylab,
-      show = show
-    )
-  if(vpcdb) {
-    return(vpc_db)
-  } else {
-    msg("Plotting...", verbose=verbose)
-    pl <- plot_vpc(vpc_db,
-                   vpc_theme = vpc_theme,
-                   smooth = smooth,
-                   log_y = log_y,
-                   title = title)
-    return(pl)
-  }
+  
+  list(
+    sim=sim,
+    obs=obs,
+    vpc_dat=vpc_dat,
+    aggr_obs=aggr_obs
+  )
 }
