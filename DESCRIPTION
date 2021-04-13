@@ -10,11 +10,11 @@ Depends:
 Imports:
     classInt,
     dplyr,
-    MASS,
-    survival,
     ggplot2,
+    MASS,
     readr,
     stringr,
+    survival,
     tidyr
 License: MIT + file LICENSE
 LazyData: true
