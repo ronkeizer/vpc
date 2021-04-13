@@ -4,14 +4,14 @@
 \alias{loq_frac}
 \title{Calculate fraction of observations below lloq / above uloq}
 \usage{
-loq_frac(x, limit = 1, cens = c("left", "right"))
+loq_frac(x, limit = 1, cens = c("left", "right", "neither", "both"))
 }
 \arguments{
-\item{x}{data}
+\item{x}{A numeric vector}
 
-\item{limit}{censoring limit}
+\item{limit}{censoring limit (ignored if \code{cens="neither"})}
 
-\item{cens}{censoring direction (left/right)}
+\item{cens}{censoring direction}
 }
 \value{
 The fraction of observations (\code{NA} is counted as below/above)
