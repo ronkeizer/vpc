@@ -253,7 +253,6 @@ calc_vpc_continuous <- function(sim, obs, pred_corr, loq, pi, ci, cols, stratify
   }
   if(!is.null(sim)) {
     msg("Calculating statistics for simulated data...", verbose=verbose)
-    
     aggr_sim <-
       sim %>% 
       dplyr::group_by(strat, sim, bin) %>% 
@@ -264,6 +263,8 @@ calc_vpc_continuous <- function(sim, obs, pred_corr, loq, pi, ci, cols, stratify
         mean_idv = mean(idv)
       )
     
+    # TODO: Review 2021-04: Shouldn't this aggregation of sim use
+    # quantile_cens()?
     vpc_dat <-
       aggr_sim %>%
       dplyr::group_by(strat, bin) %>% 
@@ -290,26 +291,15 @@ calc_vpc_continuous <- function(sim, obs, pred_corr, loq, pi, ci, cols, stratify
   }
   if(!is.null(obs)) {
     msg("Calculating statistics for observed data...", verbose=verbose)
-    tmp1 <- obs %>% dplyr::group_by(strat,bin)
-    if (!is.null(loq$cens_limit)) {
-      aggr_obs <-
-        tmp1 %>% 
-        dplyr::summarise(
-          obs5 = quantile_cens(x=dv, probs=pi[1], limit = loq$cens_limit, cens = loq$cens_type),
-          obs50 = quantile_cens(x=dv, probs=0.5, limit = loq$cens_limit, cens = loq$cens_type),
-          obs95 = quantile_cens(x=dv, probs=pi[2], limit = loq$cens_limit, cens = loq$cens_type),
-          bin_mid = mean(idv)
-        )
-    } else {
-      aggr_obs <-
-        tmp1 %>% 
-        dplyr::summarise(
-          obs5 = quantile(x=dv, probs=pi[1]),
-          obs50 = quantile(x=dv, probs=0.5),
-          obs95 = quantile(x=dv, probs=pi[2]),
-          bin_mid = mean(idv)
-        )
-    }
+    aggr_obs <-
+      obs %>%
+      dplyr::group_by(strat,bin) %>%
+      dplyr::summarise(
+        obs5 = quantile_cens(x=dv, probs=pi[1], limit = loq$cens_limit, cens = loq$cens_type),
+        obs50 = quantile_cens(x=dv, probs=0.5, limit = loq$cens_limit, cens = loq$cens_type),
+        obs95 = quantile_cens(x=dv, probs=pi[2], limit = loq$cens_limit, cens = loq$cens_type),
+        bin_mid = mean(idv)
+      )
     aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
     aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
     if(bin_mid == "middle") {
