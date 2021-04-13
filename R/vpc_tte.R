@@ -187,7 +187,7 @@ vpc_tte <- function(sim = NULL,
     msg("Calculating simulation stats...", verbose=verbose)
     pb <- utils::txtProgressBar(min = 1, max = n_sim)
     for (i in 1:n_sim) {
-      utils::setTxtProgressBar(pb, i)
+      if (verbose) utils::setTxtProgressBar(pb, i)
       tmp <- sim %>% dplyr::filter(sim == i)
       tmp2 <- add_stratification(tmp %>%
                                  dplyr::arrange_("id", "time"), stratify_pars)
