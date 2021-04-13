@@ -7,12 +7,14 @@
 filter_dv(x, verbose = FALSE, ...)
 }
 \arguments{
+\item{x}{A data.frame or similar object}
+
 \item{verbose}{show debugging information (TRUE or FALSE)}
 
-\item{dat}{A data.frame or similar object}
+\item{...}{Passed to software-specific filtering function}
 }
 \value{
-dat With non-observation rows removed
+\code{x} With non-observation rows removed
 }
 \description{
 Remove values that are not observed values from data

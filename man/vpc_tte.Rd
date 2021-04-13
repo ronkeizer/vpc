@@ -42,9 +42,13 @@ vpc_tte(
 
 \item{psn_folder}{instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder}
 
-\item{rtte}{repeated time-to-event data? Default is FALSE (treat as single-event TTE)}
+\item{rtte}{repeated time-to-event data? Default is FALSE (treat as
+single-event TTE)}
 
-\item{rtte_calc_diff}{recalculate time (T/F)? When simulating in NONMEM, you will probably need to set this to TRUE to recalculate the TIME to relative times between events (unless you output the time difference between events and specify that as independent variable to the vpc_tte() function.}
+\item{rtte_calc_diff}{recalculate time (T/F)? When simulating in NONMEM, you
+will probably need to set this to TRUE to recalculate the TIME to relative
+times between events (unless you output the time difference between events
+and specify that as independent variable to the vpc_tte() function.}
 
 \item{rtte_conditional}{`TRUE` (default) or `FALSE`. Compute the probability for each event newly (`TRUE`), or calculate the absolute probability (`FALSE`, i.e. the "probability of a 1st, 2nd, 3rd event etc" rather than the "probability of an event happening").}
 

@@ -51,6 +51,14 @@ format_vpc_input_data_tte(
 \item{verbose}{show debugging information (TRUE or FALSE)}
 
 \item{pred_corr}{perform prediction-correction?}
+
+\item{rtte}{repeated time-to-event data? Default is FALSE (treat as
+single-event TTE)}
+
+\item{rtte_calc_diff}{recalculate time (T/F)? When simulating in NONMEM, you
+will probably need to set this to TRUE to recalculate the TIME to relative
+times between events (unless you output the time difference between events
+and specify that as independent variable to the vpc_tte() function.}
 }
 \value{
 \code{dat} modified based on other inputs.

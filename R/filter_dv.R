@@ -1,8 +1,9 @@
 #' Remove values that are not observed values from data
 #' 
-#' @param dat A data.frame or similar object
+#' @param x A data.frame or similar object
 #' @param verbose show debugging information (TRUE or FALSE)
-#' @return dat With non-observation rows removed
+#' @param ... Passed to software-specific filtering function
+#' @return \code{x} With non-observation rows removed
 filter_dv <- function(x, verbose = FALSE, ...) {
   software_match <- intersect(class(x), names(filter_dv_software))
   if (length(software_match) > 1) {

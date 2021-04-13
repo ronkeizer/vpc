@@ -26,10 +26,6 @@ approaches available in classInterval() such as "jenks" (default) or
 \item{bin_mid}{either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.}
 
 \item{verbose}{show debugging information (TRUE or FALSE)}
-
-\item{cols}{A length 2, named list with one element named "obs" and the other
-named "sim", each containing a sub-list with elements for mapping columns
-names in the data to expected column names for use.}
 }
 \value{
 A list with "vpc_dat" and "aggr_obs"

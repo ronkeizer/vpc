@@ -22,6 +22,10 @@ calc_pred_corr_continuous(
 
 \item{pred_corr_lower_bnd}{lower bound for the prediction-correction}
 
+\item{cols}{A length 2, named list with one element named "obs" and the other
+named "sim", each containing a sub-list with elements for mapping columns
+names in the data to expected column names for use.}
+
 \item{verbose}{show debugging information (TRUE or FALSE)}
 }
 \value{

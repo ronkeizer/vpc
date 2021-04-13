@@ -207,6 +207,9 @@ vpc_vpc <- function(sim = NULL,
 #'
 #' @inheritParams read_vpc
 #' @inheritParams define_loq
+#' @param cols A length 2, named list with one element named "obs" and the other
+#'   named "sim", each containing a sub-list with elements for mapping columns
+#'   names in the data to expected column names for use.
 #' @return A list with "sim" and "obs" (with \code{pred_corr} performed, if
 #'   requested)
 calc_pred_corr_continuous <- function(sim, obs, pred_corr, pred_corr_lower_bnd, cols, verbose) {
@@ -261,12 +264,10 @@ calc_pred_corr_continuous <- function(sim, obs, pred_corr, pred_corr_lower_bnd, 
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param pi simulated prediction interval to plot. Default is c(0.05, 0.95),
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
-#' @param cols A length 2, named list with one element named "obs" and the other
-#'   named "sim", each containing a sub-list with elements for mapping columns
-#'   names in the data to expected column names for use.
 #' @param stratify character vector of stratification variables.
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @return A list with "vpc_dat" and "aggr_obs"
+#' @importFrom rlang .data
 calc_vpc_continuous <- function(sim, obs, loq, pi, ci, stratify, bins, bin_mid, verbose) {
   if(!is.null(sim)) {
     msg("Calculating statistics for simulated data...", verbose=verbose)
@@ -295,7 +296,7 @@ calc_vpc_continuous <- function(sim, obs, loq, pi, ci, stratify, bins, bin_mid, 
         q95.low = quantile(q95, ci[1]),
         q95.med = quantile(q95, 0.5),
         q95.up = quantile(q95, ci[2]),
-        bin_mid = mean(mean_idv)
+        bin_mid = mean(.data$mean_idv)
       )
 
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]

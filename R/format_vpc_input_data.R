@@ -78,6 +78,12 @@ format_vpc_input_data <- function(dat, cols, lloq, uloq, stratify, log_y, log_y_
 
 #' @describeIn format_vpc_input_data Prepare VPC data for future calculations
 #'   for time-to-event data
+#' @param rtte repeated time-to-event data? Default is FALSE (treat as
+#'   single-event TTE)
+#' @param rtte_calc_diff recalculate time (T/F)? When simulating in NONMEM, you
+#'   will probably need to set this to TRUE to recalculate the TIME to relative
+#'   times between events (unless you output the time difference between events
+#'   and specify that as independent variable to the vpc_tte() function.
 #' @return A named list with "dat" modified, as required, and "stratify" with
 #'   the stratification parameters
 #' @importFrom rlang .data
