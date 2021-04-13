@@ -22,7 +22,6 @@ vpc_tte(
   stratify = NULL,
   stratify_color = NULL,
   ci = c(0.05, 0.95),
-  plot = FALSE,
   xlab = "Time",
   ylab = "Survival (\%)",
   show = NULL,
@@ -73,8 +72,6 @@ aim for}
 \item{stratify_color}{character vector of stratification variables. Only 1 stratification variable can be supplied, cannot be used in conjunction with `stratify`.}
 
 \item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
-
-\item{plot}{Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.}
 
 \item{xlab}{label for x axis}
 

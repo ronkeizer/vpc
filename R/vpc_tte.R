@@ -17,7 +17,6 @@
 #' @param reverse_prob reverse the probability scale (i.e. plot 1-probability)
 #' @param stratify_color character vector of stratification variables. Only 1 stratification variable can be supplied, cannot be used in conjunction with `stratify`. 
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
-#' @param plot Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.
 #' @param as_percentage Show y-scale from 0-100 percent? TRUE by default, if FALSE then scale from 0-1.
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
@@ -56,7 +55,6 @@ vpc_tte <- function(sim = NULL,
                     stratify = NULL,
                     stratify_color = NULL,
                     ci = c(0.05, 0.95),
-                    plot = FALSE,
                     xlab = "Time",
                     ylab = "Survival (%)",
                     show = NULL,
@@ -184,7 +182,7 @@ vpc_tte <- function(sim = NULL,
     bins_data <- define_bins_tte(obs=obs, sim=sim, bins=bins, n_bins=n_bins, kmmc=kmmc, verbose=verbose)
     tmp_bins <- bins_data$tmp_bins
     msg("Calculating simulation stats...", verbose=verbose)
-    pb <- utils::txtProgressBar(min = 1, max = n_sim)
+    if (verbose) pb <- utils::txtProgressBar(min = 1, max = n_sim)
     for (i in 1:n_sim) {
       if (verbose) utils::setTxtProgressBar(pb, i)
       tmp <- sim %>% dplyr::filter(sim == i)
@@ -212,7 +210,7 @@ vpc_tte <- function(sim = NULL,
       tmp4$bin_mid <- (tmp4$bin_min + tmp4$bin_max) / 2
       all_dat <- dplyr::bind_rows(all_dat, cbind(i, tmp4)) ## RK: this can be done more efficient!
     }
-    close(pb)
+    if (verbose) close(pb)
     sim_km <- all_dat %>%
       dplyr::group_by_("strat", "bin") %>%
       dplyr::summarise (bin_mid = head(bin_mid,1),

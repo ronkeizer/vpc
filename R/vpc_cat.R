@@ -9,7 +9,6 @@
 #' @inheritParams define_bins
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
-#' @param plot Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.
 #' @param facet either "wrap", "columns", or "rows"
 #' @param labeller ggplot2 labeller function to be passed to underlying ggplot object
 #' @param vpcdb boolean whether to return the underlying vpcdb rather than the plot
@@ -62,7 +61,6 @@ vpc_cat  <- function(sim = NULL,
                      vpc_theme = NULL,
                      facet = "wrap",
                      labeller = NULL,
-                     plot = TRUE,
                      vpcdb = FALSE,
                      verbose = FALSE) {
   vpc_data <-

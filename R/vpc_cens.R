@@ -10,7 +10,6 @@
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
-#' @param plot Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.
 #' @param vpcdb boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
@@ -39,7 +38,6 @@ vpc_cens <- function(sim = NULL,
                      ci = c(0.05, 0.95),
                      uloq = NULL,
                      lloq = NULL,
-                     plot = FALSE,
                      xlab = "Time",
                      ylab = "Probability of <LOQ",
                      title = NULL,

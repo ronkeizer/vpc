@@ -20,7 +20,6 @@ vpc_cens(
   ci = c(0.05, 0.95),
   uloq = NULL,
   lloq = NULL,
-  plot = FALSE,
   xlab = "Time",
   ylab = "Probability of <LOQ",
   title = NULL,
@@ -65,8 +64,6 @@ aim for}
 \item{uloq}{Number or NULL indicating upper limit of quantification. Default is NULL.}
 
 \item{lloq}{Number or NULL indicating lower limit of quantification. Default is NULL.}
-
-\item{plot}{Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.}
 
 \item{xlab}{label for x axis}
 

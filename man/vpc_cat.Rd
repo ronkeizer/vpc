@@ -25,7 +25,6 @@ vpc_cat(
   vpc_theme = NULL,
   facet = "wrap",
   labeller = NULL,
-  plot = TRUE,
   vpcdb = FALSE,
   verbose = FALSE
 )
@@ -73,8 +72,6 @@ aim for}
 \item{facet}{either "wrap", "columns", or "rows"}
 
 \item{labeller}{ggplot2 labeller function to be passed to underlying ggplot object}
-
-\item{plot}{Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.}
 
 \item{vpcdb}{boolean whether to return the underlying vpcdb rather than the plot}
 
