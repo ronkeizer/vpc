@@ -4,10 +4,13 @@
 \alias{as_vpcdb}
 \title{Create a vpcdb object, and standardize parameter checking}
 \usage{
-as_vpcdb(..., facet = NULL, scales = NULL, labeller = NULL)
+as_vpcdb(..., type = NULL, facet = NULL, scales = NULL, labeller = NULL)
 }
 \arguments{
 \item{...}{Extra parameters (not checked) added to the object}
+
+\item{type}{The type of vpc (e.g. "continuous", "categorical", "censored", or
+"time-to-event")}
 
 \item{facet}{either "wrap", "columns", or "rows"}
 
