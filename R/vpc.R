@@ -5,6 +5,7 @@
 #' @inheritParams format_vpc_input_data
 #' @inheritParams read_vpc
 #' @inheritParams define_loq
+#' @inheritParams define_bins
 #' @inheritParams calc_vpc_continuous
 #' @inheritParams as_vpcdb
 #' @inheritParams plot_vpc
@@ -154,19 +155,15 @@ vpc_vpc <- function(sim = NULL,
     calc_vpc_continuous(
       sim=sim, obs=obs,
       pred_corr=pred_corr,
+      loq=loq_data,
       pi=pi, ci=ci,
       cols=cols,
       stratify=stratify,
-      bin_mid=bin_mid
+      bins=bins,
+      bin_mid=bin_mid,
+      verbose=verbose
     )
   # Wrapup ####
-  if(is.null(xlab)) {
-    xlab <- cols$obs$idv
-  }
-  if(is.null(ylab)) {
-    ylab <- cols$obs$dv
-  }
-
   # data combined and handed off to separate plotting function
   vpc_db <-
     as_vpcdb(
@@ -183,8 +180,8 @@ vpc_vpc <- function(sim = NULL,
       lloq = lloq,
       uloq = uloq,
       type = "continuous",
-      xlab = xlab,
-      ylab = ylab,
+      xlab = ifelse(is.null(xlab), cols$obs$idv, xlab),
+      ylab = ifelse(is.null(ylab), cols$obs$dv, ylab),
       show = show
     )
   if(vpcdb) {
@@ -204,6 +201,8 @@ vpc_vpc <- function(sim = NULL,
 #' 
 #' @inheritParams read_vpc
 #' @inheritParams define_loq
+#' @inheritParams define_bins
+#' @param loq The list output from \code{define_loq()}
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
 #' @param pi simulated prediction interval to plot. Default is c(0.05, 0.95),
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
@@ -211,42 +210,43 @@ vpc_vpc <- function(sim = NULL,
 #'   named "sim", each containing a sub-list with elements for mapping columns
 #'   names in the data to expected column names for use.
 #' @param stratify character vector of stratification variables.
+#' @param verbose show debugging information (TRUE or FALSE)
 #' @return A list with "sim" and "obs" (with \code{pred_corr} performed, if
 #'   requested) and "vpc_dat" and "aggr_obs".
-calc_vpc_continuous <- function(sim, obs, pred_corr, pi, ci, cols, stratify, bin_mid) {
+calc_vpc_continuous <- function(sim, obs, pred_corr, loq, pi, ci, cols, stratify, bins, bin_mid, verbose) {
   if(pred_corr) {
     if(!is.null(obs) & !cols$obs$pred %in% names(obs)) {
       msg("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...", verbose)
       if (!cols$obs$pred %in% names(sim)) {
-        stop("Error: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
+        stop(
+          "Prediction-correction: specified pred-variable for observed data (", cols$obs$pred,
+          ") not found in simulated dataset, not able to perform pred-correction!"
+        )
       } else {
         obs <- obs %>% dplyr::ungroup()
         obs[[cols$obs$pred]] <- unlist(sim[1:length(obs$id), cols$sim$pred])
         msg ("OK", verbose)
       }
-    } else {
-      if (!cols$sim$pred %in% names(sim)) {
-        stop("Warning: Prediction-correction: specified pred-variable not found in simulated dataset, not able to perform pred-correction!")
-      }
-    }
-    if(!is.null(obs)) {
-      obs$pred <- obs[[cols$obs$pred]]
-    }
-    if(!is.null(sim)) {
-      sim$pred <- sim[[cols$sim$pred]]
+    } else if (!cols$sim$pred %in% names(sim)) {
+      stop(
+        "Prediction-correction: specified pred-variable (", cols$sim$pred,
+        ") not found in simulated dataset, not able to perform pred-correction!"
+      )
     }
   }
   if(!is.null(obs)) {
     if(pred_corr) {
       msg("Performing prediction-correction on observed data...", verbose=verbose)
+      obs$pred <- obs[[cols$obs$pred]]
       obs <- obs %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(as.num(pred)))
       obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
     }
   }
   if(!is.null(sim)) {
-    sim$sim <- add_sim_index_number(sim, id = "id", sim_label=sim_cols$sim)
+    sim$sim <- add_sim_index_number(sim, id = "id", sim_label=cols$sim)
     if(pred_corr) {
       msg("Performing prediction-correction on simulated data...", verbose=verbose)
+      sim$pred <- sim[[cols$sim$pred]]
       sim <- sim %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(pred))
       sim[sim$pred != 0,]$dv <- pred_corr_lower_bnd + (sim[sim$pred != 0,]$dv - pred_corr_lower_bnd) * (sim[sim$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (sim[sim$pred != 0,]$pred - pred_corr_lower_bnd)
     }
@@ -254,16 +254,19 @@ calc_vpc_continuous <- function(sim, obs, pred_corr, pi, ci, cols, stratify, bin
   if(!is.null(sim)) {
     msg("Calculating statistics for simulated data...", verbose=verbose)
     
-    aggr_sim <- sim %>% 
+    aggr_sim <-
+      sim %>% 
       dplyr::group_by(strat, sim, bin) %>% 
       dplyr::summarise(
         q5 = quantile(dv, pi[1]),
         q50 = quantile(dv, 0.5),
         q95 = quantile(dv, pi[2]),
-        mn_idv = mean(idv)
+        mean_idv = mean(idv)
       )
     
-    vpc_dat <- aggr_sim %>% dplyr::group_by(strat, bin) %>% 
+    vpc_dat <-
+      aggr_sim %>%
+      dplyr::group_by(strat, bin) %>% 
       dplyr::summarise(
         q5.low = quantile(q5, ci[1]),
         q5.med = quantile(q5, 0.5),
@@ -274,13 +277,13 @@ calc_vpc_continuous <- function(sim, obs, pred_corr, pi, ci, cols, stratify, bin
         q95.low = quantile(q95, ci[1]),
         q95.med = quantile(q95, 0.5),
         q95.up = quantile(q95, ci[2]),
-        bin_mid = mean(mn_idv)
-      ) 
-    
+        bin_mid = mean(mean_idv)
+      )
+
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     if(bin_mid == "middle") {
-      vpc_dat$bin_mid <- apply(cbind(vpc_dat$bin_min, vpc_dat$bin_max), 1, mean)
+      vpc_dat$bin_mid <- (vpc_dat$bin_min + vpc_dat$bin_max)/2
     }
   } else {
     vpc_dat <- NULL
@@ -288,16 +291,18 @@ calc_vpc_continuous <- function(sim, obs, pred_corr, pi, ci, cols, stratify, bin
   if(!is.null(obs)) {
     msg("Calculating statistics for observed data...", verbose=verbose)
     tmp1 <- obs %>% dplyr::group_by(strat,bin)
-    if(!is.null(lloq) || !is.null(uloq)) {
-      aggr_obs <- tmp1 %>% 
+    if (!is.null(loq$cens_limit)) {
+      aggr_obs <-
+        tmp1 %>% 
         dplyr::summarise(
-          obs5 = quantile_cens(x=dv, probs=pi[1], limit = cens_limit, cens = cens_type),
-          obs50 = quantile_cens(x=dv, probs=0.5, limit = cens_limit, cens = cens_type),
-          obs95 = quantile_cens(x=dv, probs=pi[2], limit = cens_limit, cens = cens_type),
+          obs5 = quantile_cens(x=dv, probs=pi[1], limit = loq$cens_limit, cens = loq$cens_type),
+          obs50 = quantile_cens(x=dv, probs=0.5, limit = loq$cens_limit, cens = loq$cens_type),
+          obs95 = quantile_cens(x=dv, probs=pi[2], limit = loq$cens_limit, cens = loq$cens_type),
           bin_mid = mean(idv)
         )
     } else {
-      aggr_obs <- tmp1 %>% 
+      aggr_obs <-
+        tmp1 %>% 
         dplyr::summarise(
           obs5 = quantile(x=dv, probs=pi[1]),
           obs50 = quantile(x=dv, probs=0.5),
@@ -308,7 +313,7 @@ calc_vpc_continuous <- function(sim, obs, pred_corr, pi, ci, cols, stratify, bin
     aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
     aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
     if(bin_mid == "middle") {
-      aggr_obs$bin_mid <- apply(cbind(aggr_obs$bin_min, aggr_obs$bin_max), 1, mean)
+      aggr_obs$bin_mid <- (aggr_obs$bin_min + aggr_obs$bin_max)/2
     }
   } else {
     aggr_obs <- NULL
