@@ -146,49 +146,20 @@ vpc_tte <- function(sim = NULL,
 
   ## format obs data
   if(!is.null(obs)) {
-    obs$id <- obs[[cols$obs$id]]
-    if (length(obs[[cols$obs$id]]) == 0) {
-      msg("Warning: No ID column found, assuming 1 row per ID.", verbose)
-      obs$id <- 1:length(obs[,1])
-    }
-    obs$time <- as.num(obs[[cols$obs$idv]])
-    obs$dv <- as.num(obs[[cols$obs$dv]])
-    if(max(obs$dv) > 1) { # guessing DV definition if not just 0/1
-      if(max(obs$dv) == 2) { # common approach in NONMEM, 2 = censored
-        obs[obs$dv != 1,]$dv <- 0
-        msg("Warning: vpc_tte() expected the observed dependent variable to contain only 0 (censored, or no event observed) or 1 (event observed). Setting all observations != 1 to 0.", verbose)
-      } else {
-        obs[obs$dv != 1,]$dv <- 1 # some people use DV to indicate the event time.
-        msg("Warning: vpc_tte() expected the dependent variable to contain only 0 (censored, or no event observed) or 1 (event observed). Setting all observations != 1 to 1.", verbose)
-      }
-    }
-    if("cens" %in% tolower(colnames(obs))) { # some people use a 'cens' column to indicate censoring
-      msg(paste0("Detected column '",colnames(obs)[match("cens", tolower(colnames(obs)))],"' with censoring information in observation data, assuming 1=censored event, 0=observed event. Please transpose data if assumption not correct."), TRUE)
-      colnames(obs)[match("cens", tolower(colnames(obs)))] <- "cens"
-      obs[obs$cens == 1,]$dv <- 0
-    }
-    if(rtte) {
-      if(rtte_calc_diff) {
-        obs <- relative_times(obs)
-      }
-      obs <- obs %>%
-        dplyr::group_by_("id") %>%
-        dplyr::arrange_("id", "t") %>%
-        dplyr::mutate(rtte = 1:length(dv))
-#       obs %>% dplyr::group_by(id) %>% dplyr::mutate(rtte = cumsum(dv != 0))
-#       obs[obs$dv == 0,]$rtte <- obs[obs$dv == 0,]$rtte + 1 # these censored points actually "belong" to the next rtte strata
-      stratify_pars <- c(stratify_pars, "rtte")
-    } else {
-      obs <- obs %>%
-        dplyr::group_by_("id") %>%
-        dplyr::mutate(last_obs = 1*(1:length(time) == length(time)), repeat_obs = 1*(cumsum(dv) > 1)) %>%
-        dplyr::filter(dv == 1 | last_obs == 1) %>%
-        dplyr::filter(!duplicated(id))
-      obs$rtte <- 1
-    }
-    
-    # add stratification column and comput KM curve for observations
-    obs <- add_stratification(obs, stratify_pars)
+    obs_data <-
+      format_vpc_input_data_tte(
+        dat=obs,
+        cols=vpc_data$cols$obs,
+        stratify=stratify_pars,
+        rtte=rtte,
+        rtte_calc_diff=rtte_calc_diff,
+        what="observed",
+        verbose=verbose
+      )
+    obs <- obs_data$dat
+    stratify_pars <- obs_data$stratify
+
+    # add stratification column and compute KM curve for observations
     if(!is.null(kmmc) && kmmc %in% names(obs)) {
       obs_km <- compute_kmmc(obs, strat = "strat", reverse_prob = reverse_prob, kmmc=kmmc)
     } else {
@@ -207,59 +178,17 @@ vpc_tte <- function(sim = NULL,
 
   all_dat <- c()
   if(!is.null(sim)) {
-    # format sim data and compute KM curve CI for simulations
-    if (all(c(cols$sim$idv, cols$sim$id, cols$sim$dv) %in% names(sim))) {
-      sim$id <- sim[[cols$sim$id]]
-      sim$dv <- sim[[cols$sim$dv]]
-      sim$time <- sim[[cols$sim$idv]]
-    } else {
-      stop("Not all required variables were found, please check column definitions for id, dv and time.")
-    }
-    if(max(sim$dv) > 2) { # guessing DV definition if not just 0/1
-      if(max(sim$dv) == 2) { # common approach in NONMEM, 2 = censored
-        sim[sim$dv != 1,]$dv <- 1
-        msg("Warning: Expected simulated dependent variable to contain only 0 (censored, or no event simerved) or 1 (event simerved). Setting all simulated observations != 1 to 0.", verbose)
-      } else {
-        sim[sim$dv != 1,]$dv <- 1 # some people use DV to indicate the event time.
-        msg("Warning: Expected simulated dependent variable to contain only 0 (censored, or no event simerved) or 1 (event simerved). Setting all simulated observations != 1 to 1.", verbose)
-      }
-    }
-    if("nonmem" %in% class(sim)) { # necessary due to a bug in NONMEM simulation
-      sim <- sim[!(sim$time == 0 & sim$dv == 1),]
-    }
-    if(max(sim$dv) == 1) {
-      if (sum(sim$dv > 0 & sim$dv < 1) > 0) {
-        sim[sim$dv > 0  & sim$dv < 1,]$dv <- 0
-      }
-    }
-    if("cens" %in% tolower(names(sim$cens))) { # some people use a 'cens' column to indicate censoring
-      cat("Detected extra column with censoring information in simulation data.")
-      colnames(sim)[match("cens", tolower(colnames(sim)))] <- "cens"
-      sim[sim$cens == 1,]$dv <- 0
-    }
-    # add sim index number
-    sim$sim <- add_sim_index_number(sim, id = cols$sim$id, sim_label = cols$sim$sim)
-
-    # set last_observation and repeat_obs per sim&id
-    sim <- sim %>%
-      dplyr::group_by_("sim", "id") %>%
-      dplyr::mutate(last_obs = 1*(1:length(time) == length(time)), repeat_obs = 1*(cumsum(dv) > 1))
-
-    # filter out stuff and recalculate rtte times
-    sim <- sim[sim$dv == 1 | (sim$last_obs == 1 & sim$dv == 0),]
-    if(rtte) {
-      sim <- sim %>%
-        dplyr::group_by_("sim", "id") %>%
-        dplyr::arrange_("sim", "id", "time") %>%
-        dplyr::mutate(rtte = 1:length(dv)) %>%
-        dplyr::arrange_("sim", "id")
-      if(rtte_calc_diff) {
-        sim <- relative_times(sim, simulation=TRUE)
-      }
-    } else {
-      sim$sim_id <- paste0(sim$sim, "_", sim$id) # remove duplicate observations rows per id to filter out repeated obs
-      sim <- sim[!duplicated(sim$sim_id),]
-    }
+    sim_data <-
+      format_vpc_input_data_tte(
+        dat=sim,
+        cols=vpc_data$cols$sim,
+        stratify=stratify_pars,
+        rtte=rtte,
+        rtte_calc_diff=rtte_calc_diff,
+        what="simulated",
+        verbose=verbose
+      )
+    sim <- sim_data$dat
 
     n_sim <- length(unique(sim$sim))
     if(n_sim <= 1) {
