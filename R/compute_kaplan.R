@@ -16,13 +16,17 @@ compute_kaplan <- function(dat,
   strats <- unique(dat[[strat]])
   tmp <- c()
   include_ci <- FALSE
-  if(!is.null(ci)) {
+  if (!is.null(ci)) {
+    if(length(ci) == 2 && (round(ci[1],3) != round((1-ci[2]),3))) {
+      stop("Sorry, only symmetric confidence intervals can be computed. Please adjust the ci argument.")
+    }
     include_ci <- TRUE
     if(length(ci) == 2) { # when specified as c(0.05, 0.95)
-      ci = diff(ci)        
+      ci <- diff(ci)        
     }
   } else {
-    ci = 0.95
+    # TODO: Review 2021-04: Changed from 0.95 to match vpc_tte() default
+    ci <- 0.9
   }
   for (i in seq(strats)) {
     if(rtte_conditional) {

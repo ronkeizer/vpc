@@ -156,14 +156,9 @@ vpc_tte <- function(sim = NULL,
     if(!is.null(kmmc) && kmmc %in% names(obs)) {
       obs_km <- compute_kmmc(obs, strat = "strat", reverse_prob = reverse_prob, kmmc=kmmc)
     } else {
-      if(show$obs_ci) {
-        if(length(ci) == 2 && (round(ci[1],3) != round((1-ci[2]),3))) {
-          stop("Sorry, only symmetric confidence intervals can be computed. Please adjust the ci argument.")
-        }
-        obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob, rtte_conditional = rtte_conditional, ci = ci)
-      } else {
-        obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob, rtte_conditional = rtte_conditional)
-      }
+      # TODO: Review 2021-04: Always computing obs_km when obs is available
+      # (even if obs_ci is not in show)
+      obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob, rtte_conditional = rtte_conditional, ci = ci)
     }
   } else { # get bins from sim
     obs_km <- NULL
@@ -257,7 +252,9 @@ vpc_tte <- function(sim = NULL,
   }
 
   cens_dat <- NULL
-  if(show$obs_cens && !is.null(obs)) {
+  if(!is.null(obs)) {
+    # TODO: Review 2021-04: Always computing cens_dat when obs is available
+    # (even if obs_cens is not in show)
     cens_dat <- obs
     if(rtte) {
       if(!rtte_conditional || !rtte_calc_diff) {
@@ -287,23 +284,21 @@ vpc_tte <- function(sim = NULL,
   }
 
   if (!is.null(obs)) {
-    if (show$obs_cens) {
-      if(nrow(cens_dat)>0) {
-        cens_dat$y <- 1
-        cens_dat$strat1 <- NA
-        cens_dat$strat2 <- NA
-        for (j in 1:nrow(cens_dat[,1])) {
-          tmp <- obs_km[as.character(obs_km$strat) == as.character(cens_dat$strat[j]),]
-          cens_dat$y[j] <- rev(tmp$surv[(cens_dat$time[j] - tmp$time) > 0])[1]
-          if ("strat1" %in% names(tmp)) {
-            cens_dat$strat1[j] <- rev(tmp$strat1[(cens_dat$time[j] - tmp$time) > 0])[1]
-          }
-          if ("strat2" %in% names(tmp)) {
-            cens_dat$strat2[j] <- rev(tmp$strat2[(cens_dat$time[j] - tmp$time) > 0])[1]
-          }
+    if(nrow(cens_dat)>0) {
+      cens_dat$y <- 1
+      cens_dat$strat1 <- NA
+      cens_dat$strat2 <- NA
+      for (j in 1:nrow(cens_dat[,1])) {
+        tmp <- obs_km[as.character(obs_km$strat) == as.character(cens_dat$strat[j]),]
+        cens_dat$y[j] <- rev(tmp$surv[(cens_dat$time[j] - tmp$time) > 0])[1]
+        if ("strat1" %in% names(tmp)) {
+          cens_dat$strat1[j] <- rev(tmp$strat1[(cens_dat$time[j] - tmp$time) > 0])[1]
         }
-        cens_dat <- cens_dat[!is.na(cens_dat$y),]
+        if ("strat2" %in% names(tmp)) {
+          cens_dat$strat2[j] <- rev(tmp$strat2[(cens_dat$time[j] - tmp$time) > 0])[1]
+        }
       }
+      cens_dat <- cens_dat[!is.na(cens_dat$y),]
     }
   }
   if(!is.null(obs)) {
