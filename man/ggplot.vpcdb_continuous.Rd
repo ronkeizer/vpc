@@ -35,6 +35,18 @@ ggplot.vpcdb_time_to_event(
   environment = parent.frame()
 )
 }
+\arguments{
+\item{data}{Default dataset to use for plot. If not already a data.frame,
+will be converted to one by \code{\link[ggplot2:fortify]{fortify()}}. If not specified,
+must be supplied in each layer added to the plot.}
+
+\item{mapping}{Default list of aesthetic mappings to use for plot.
+If not specified, must be supplied in each layer added to the plot.}
+
+\item{...}{Other arguments passed on to methods. Not currently used.}
+
+\item{environment}{DEPRECATED. Used prior to tidy evaluation.}
+}
 \description{
 These functions are not to be called directly by users; they are for internal
 use.  Users should call \code{plot_vpc()}.

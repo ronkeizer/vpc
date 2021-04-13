@@ -327,8 +327,8 @@ vpc_tte <- function(sim = NULL,
       type = "time-to-event",
       as_percentage = as_percentage,
       tmp_bins = tmp_bins,
-      xlab = xlab,
-      ylab = ylab,
+      xlab = ifelse(is.null(xlab), cols$obs$idv, xlab),
+      ylab = ifelse(is.null(ylab), cols$obs$dv, ylab),
       show = show
     )
   if (vpcdb) {

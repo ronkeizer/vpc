@@ -122,7 +122,12 @@ plot_vpc_helper.vpcdb_continuous <- function(db, ...,
     geom_sim_pi_as_area_continuous(data=db, show=show$pi_as_area, smooth=smooth, vpc_theme=vpc_theme) +
     # The next several items are only shown if !show$pi_as_area to prevent
     # representing the same data multiple times.
-    geom_sim_median_ci(data=db, show=!show$pi_as_area & show$sim_median_ci, vpc_theme=vpc_theme) +
+    geom_sim_median_ci_continuous(
+      data=db,
+      show=!show$pi_as_area & show$sim_median_ci,
+      smooth=smooth,
+      vpc_theme=vpc_theme
+    ) +
     geom_sim_pi_continuous(data=db, show=!show$pi_as_area & show$pi, vpc_theme=vpc_theme) +
     # Since you can't have multiple geoms added together without a plot, the
     # lower and upper bounds are called twice with the `what` argument.
@@ -237,7 +242,9 @@ plot_vpc_helper.vpcdb_time_to_event <- function(db, ...,
 #' 
 #' These functions are not to be called directly by users; they are for internal
 #' use.  Users should call \code{plot_vpc()}.
-#' 
+#'
+#' @inheritParams ggplot2::ggplot
+#'
 #' @export
 ggplot.vpcdb_continuous <- function(data = NULL, mapping = NULL, ..., environment = parent.frame()) {
   if (!is.null(data$sim)) {
@@ -284,6 +291,7 @@ ggplot.vpcdb_time_to_event <- function(data = NULL, mapping = NULL, ..., environ
 #' @param data The vpcdb object
 #' @param show Should the geom be shown? (TRUE/FALSE)
 #' @param vpc_theme The theme to use
+#' @inheritParams plot_vpc
 #' @name vpc_ggplot
 NULL
 
@@ -579,9 +587,10 @@ geom_sim_pi_continuous <- function(data, show, vpc_theme) {
 
 #' @describeIn vpc_ggplot Show simulated prediction interval confidence interval
 #'   areas for continuous data
-geom_sim_pi_ci_continuous <- function(data, show, vpc_theme, what=c("q5", "q95")) {
+#' @param what Which interval should be shown (low = "q5" or high = "q95")
+geom_sim_pi_ci_continuous <- function(data, show, smooth, vpc_theme, what=c("q5", "q95")) {
   what <- match.arg(what)
-  ret <- geom_blank()
+  ret <- ggplot2::geom_blank()
   if (show && !is.null(data$sim) && ("q5.low" %in% names(data$vpc_dat))) {
     if (smooth) {
       mapping <-

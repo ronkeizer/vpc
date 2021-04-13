@@ -193,8 +193,8 @@ vpc_cat  <- function(sim = NULL,
       facet = facet,
       labeller = labeller,
       type = "categorical",
-      xlab = xlab,
-      ylab = ylab,
+      xlab = ifelse(is.null(xlab), cols$obs$idv, xlab),
+      ylab = ifelse(is.null(ylab), cols$obs$dv, ylab),
       show = show
     )
   if(vpcdb) {

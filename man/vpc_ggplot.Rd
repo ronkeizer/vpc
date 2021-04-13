@@ -55,7 +55,7 @@ geom_sim_pi_as_area_tte(data, show, smooth, vpc_theme)
 
 geom_sim_pi_continuous(data, show, vpc_theme)
 
-geom_sim_pi_ci_continuous(data, show, vpc_theme, what = c("q5", "q95"))
+geom_sim_pi_ci_continuous(data, show, smooth, vpc_theme, what = c("q5", "q95"))
 
 facet_continuous(data)
 
@@ -76,6 +76,10 @@ returned)}
 \item{vpc_theme}{The theme to use}
 
 \item{data}{The vpcdb object}
+
+\item{smooth}{"smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.}
+
+\item{what}{Which interval should be shown (low = "q5" or high = "q95")}
 }
 \description{
 A collection of internal ggplot helpers for VPC plotting
