@@ -4,7 +4,7 @@
 \alias{standardize_column}
 \title{Confirm that a column is in the data, and rename data to prepare that column for later use.}
 \usage{
-standardize_column(dat, cols, colname, coldesc, what)
+standardize_column(dat, cols, colname, coldesc, what, default)
 }
 \arguments{
 \item{dat}{An input data.frame or similar object}
@@ -17,6 +17,9 @@ standardize_column(dat, cols, colname, coldesc, what)
 \item{coldesc}{The description of the column (character scalar)}
 
 \item{what}{The description of the data (typically "observed" or "simulated")}
+
+\item{default}{A default value (scalar or vector) to use if the column is not
+found.}
 }
 \value{
 If \code{colname} is already named \code{colname} in \code{dat},

@@ -37,7 +37,7 @@ standardize_column <- function(dat, cols, colname, coldesc, what, default) {
         paste(colnames(dat), collapse = ", ")
       )
     } else {
-      message(
+      warning(
         "No column for ", coldesc,
         " indicator found in ", what, " data, using default value."
       )

@@ -66,9 +66,7 @@ vpc_vpc <- function(sim = NULL,
                     labeller = NULL,
                     vpcdb = FALSE,
                     verbose = FALSE, ...) {
-  if(verbose) {
-    message("Configuring and initializing...")
-  }
+  msg("Configuring and initializing...", verbose=verbose)
   vpc_data <-
     read_vpc(
       sim=sim, obs=obs, psn_folder=psn_folder,
@@ -102,9 +100,7 @@ vpc_vpc <- function(sim = NULL,
 
   ## parse data into specific format
   if(!is.null(vpc_data$obs)) {
-    if(verbose) {
-      message("Parsing observed data...")
-    }
+    msg("Parsing observed data...", verbose=verbose)
     vpc_data$obs <-
       format_vpc_input_data(
         dat=vpc_data$obs,
@@ -118,11 +114,9 @@ vpc_vpc <- function(sim = NULL,
       )
   }
   if(!is.null(vpc_data$sim)) {
-    if(verbose) {
-      message("Parsing simulated data...")
-    }
+    msg("Parsing simulated data...", verbose=verbose)
     if((!is.null(lloq) || !is.null(uloq)) && pred_corr) {
-      message("Prediction-correction cannot be used together with censored data (<LLOQ or >ULOQ). VPC plot will be shown for non-censored data only!")
+      warning("Prediction-correction cannot be used together with censored data (<LLOQ or >ULOQ). VPC plot will be shown for non-censored data only!")
       vpc_data$sim <-
         format_vpc_input_data(
           dat=vpc_data$sim,
@@ -184,7 +178,7 @@ vpc_vpc <- function(sim = NULL,
   }
   if(!is.null(obs)) {
     if(pred_corr) {
-      if(verbose) message("Performing prediction-correction on observed data...")
+      msg("Performing prediction-correction on observed data...", verbose=verbose)
       obs <- obs %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(as.num(pred)))
       obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
     }
@@ -192,13 +186,13 @@ vpc_vpc <- function(sim = NULL,
   if(!is.null(sim)) {
     sim$sim <- add_sim_index_number(sim, id = "id", sim_label=sim_cols$sim)
     if(pred_corr) {
-      if(verbose) message("Performing prediction-correction on simulated data...")
+      msg("Performing prediction-correction on simulated data...", verbose=verbose)
       sim <- sim %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(pred))
       sim[sim$pred != 0,]$dv <- pred_corr_lower_bnd + (sim[sim$pred != 0,]$dv - pred_corr_lower_bnd) * (sim[sim$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (sim[sim$pred != 0,]$pred - pred_corr_lower_bnd)
     }
   }
   if(!is.null(sim)) {
-    if(verbose) message("Calculating statistics for simulated data...")
+    msg("Calculating statistics for simulated data...", verbose=verbose)
 
     aggr_sim <- sim %>% 
       dplyr::group_by(strat, sim, bin) %>% 
@@ -232,9 +226,7 @@ vpc_vpc <- function(sim = NULL,
     vpc_dat <- NULL
   }
   if(!is.null(obs)) {
-    if(verbose) {
-      message("Calculating statistics for observed data...")
-    }
+    msg("Calculating statistics for observed data...", verbose=verbose)
     tmp1 <- obs %>% dplyr::group_by(strat,bin)
     if(!is.null(lloq) || !is.null(uloq)) {
       aggr_obs <- tmp1 %>% 
@@ -276,9 +268,6 @@ vpc_vpc <- function(sim = NULL,
     }
   }
   # data combined and handed off to separate plotting function
-  if(verbose & !vpcdb) {
-    message("Creating plot...")
-  }
   vpc_db <-
     as_vpcdb(
       sim = sim,

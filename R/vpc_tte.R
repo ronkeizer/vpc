@@ -89,7 +89,7 @@ vpc_tte <- function(sim = NULL,
       stop(paste0("Specified covariate ", kmmc, " not found among column names in simulated data."))
     }
   }
-  message("Initializing.")
+  msg("Initializing...", verbose=verbose)
 
   if(is.null(sim)) {
     show_default$obs_ci <- TRUE
@@ -196,7 +196,7 @@ vpc_tte <- function(sim = NULL,
     }
     bins_data <- define_bins_tte(obs=obs, sim=sim, bins=bins, n_bins=n_bins, kmmc=kmmc, verbose=verbose)
     tmp_bins <- bins_data$tmp_bins
-    message("Calculating simulation stats.")
+    msg("Calculating simulation stats...", verbose=verbose)
     pb <- utils::txtProgressBar(min = 1, max = n_sim)
     for (i in 1:n_sim) {
       utils::setTxtProgressBar(pb, i)

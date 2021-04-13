@@ -22,7 +22,7 @@ define_bins <- function(obs, sim, bins, n_bins, verbose=FALSE) {
     }
   }
   bins <- unique(bins)
-  if(verbose) message(paste0("Binning: ", paste(bins, collapse=' ')))
+  msg(paste0("Binning: ", paste(bins, collapse=' ')), verbose=verbose)
   if(!is.null(obs)) {
     obs <- bin_data(x=obs, bins=bins, idv="idv", labeled = labeled_bins)
   }
@@ -41,7 +41,7 @@ define_bins <- function(obs, sim, bins, n_bins, verbose=FALSE) {
 #' @inheritParams vpc_tte
 define_bins_tte <- function(obs, sim, bins, n_bins, kmmc, verbose=FALSE) {
   if(!is.null(bins) && bins != FALSE) {
-    message("Binning is not recommended for `vpc_tte()`, plot might not show correctly!")
+    warning("Binning is not recommended for `vpc_tte()`, plot might not show correctly!")
   }
   if(!is.null(kmmc) & (class(bins) == "logical" && bins == FALSE)) {
     msg("Tip: with KMMC-type plots, binning of simulated data is recommended. See documentation for the 'bins' argument for more information.", verbose)
