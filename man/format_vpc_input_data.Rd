@@ -2,6 +2,7 @@
 % Please edit documentation in R/format_vpc_input_data.R
 \name{format_vpc_input_data}
 \alias{format_vpc_input_data}
+\alias{format_vpc_input_data_tte}
 \title{Prepare VPC data for future calculations by standardizing column names and
 modifying the input data based on the limits of quantification,
 stratification, and logarithmic values.}
@@ -17,6 +18,16 @@ format_vpc_input_data(
   what = "observed",
   verbose = FALSE,
   pred_corr = FALSE
+)
+
+format_vpc_input_data_tte(
+  dat,
+  cols,
+  stratify,
+  rtte,
+  rtte_calc_diff,
+  what = "observed",
+  verbose = FALSE
 )
 }
 \arguments{
@@ -43,9 +54,18 @@ format_vpc_input_data(
 }
 \value{
 \code{dat} modified based on other inputs.
+
+A named list with "dat" modified, as required, and "stratify" with
+  the stratification parameters
 }
 \description{
 Prepare VPC data for future calculations by standardizing column names and
 modifying the input data based on the limits of quantification,
 stratification, and logarithmic values.
 }
+\section{Functions}{
+\itemize{
+\item \code{format_vpc_input_data_tte}: Prepare VPC data for future calculations
+for time-to-event data
+}}
+
