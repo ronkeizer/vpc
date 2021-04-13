@@ -3,14 +3,14 @@
 \docType{data}
 \name{show_default}
 \alias{show_default}
-\title{Defaults for show argument}
+\title{Defaults for show argument with various endpoint types}
 \format{
-An object of class \code{list} of length 11.
+An object of class \code{list} of length 4.
 }
 \usage{
 show_default
 }
 \description{
-Defaults for show argument
+Defaults for show argument with various endpoint types
 }
 \keyword{datasets}

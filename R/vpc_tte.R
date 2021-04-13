@@ -91,13 +91,6 @@ vpc_tte <- function(sim = NULL,
   }
   msg("Initializing...", verbose=verbose)
 
-  if(is.null(sim)) {
-    show_default$obs_ci <- TRUE
-  }
-
-  ## define what to show in plot
-  show <- vpc::replace_list_elements(show_default_tte, show)
-
   ## checking whether stratification columns are available
   msg("Stratifying data...", verbose=verbose)
   stratify_pars <-
@@ -345,14 +338,14 @@ vpc_tte <- function(sim = NULL,
       as_percentage = as_percentage,
       tmp_bins = tmp_bins,
       xlab = xlab,
-      ylab = ylab
+      ylab = ylab,
+      show = show
     )
   if (vpcdb) {
     return(vpc_db)
   } else {
     msg("Plotting...", verbose=verbose)
     pl <- plot_vpc(vpc_db,
-                   show = show,
                    vpc_theme = vpc_theme,
                    smooth = smooth,
                    log_y = FALSE,

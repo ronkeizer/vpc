@@ -80,9 +80,6 @@ vpc_cens <- function(sim = NULL,
   check_stratification_columns_available(data=obs, stratify=stratify_color, type="observation")
   check_stratification_columns_available(data=vpc_data$sim, stratify=stratify_color, type="simulation")
 
-  ## define what to show in plot
-  show <- replace_list_elements(show_default, show)
-
   ## parse data into specific format
   if(!is.null(obs)) {
     obs <-
@@ -181,14 +178,6 @@ vpc_cens <- function(sim = NULL,
   }
 
   ## plotting starts here
-  show$obs_dv = FALSE
-  show$obs_ci = FALSE
-  show$obs_median = TRUE
-  show$sim_median = FALSE
-  show$sim_median_ci = TRUE
-  show$pi_as_area = FALSE
-  show$pi_ci = FALSE
-  show$pi = FALSE
   vpc_db <-
     as_vpcdb(
       sim = sim,
@@ -203,14 +192,14 @@ vpc_cens <- function(sim = NULL,
       labeller = labeller,
       type = "censored",
       xlab = xlab,
-      ylab = ylab
+      ylab = ylab,
+      show = show
     )
   if(vpcdb) {
     return(vpc_db)
   } else {
     msg("Plotting...", verbose=verbose)
     pl <- plot_vpc(db = vpc_db,
-                   show = show, 
                    vpc_theme = vpc_theme,
                    smooth = smooth,
                    log_y = FALSE,

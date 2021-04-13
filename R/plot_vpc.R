@@ -35,8 +35,15 @@ plot_vpc <- function(db,
     vpc_theme <- new_vpc_theme()
   }
   idv_as_factor <- is.factor(db$vpc_dat$bin)
+  # Setup show using first the defaults, then the items from the db, then the argument
+  show_default_current <- show_default[[db$type]]
+  if (is.null(show_default_current)) {
+    stop("Invalid 'type' of `db`: ", db$type)
+  }
+  show_db <- replace_list_elements(show_default_current, db$show)
+  show <- replace_list_elements(show_db, show)
+
   if(db$type != "time-to-event") {
-    show <- replace_list_elements(show_default, show)
     if(!is.null(db$stratify)) {
       ## rename "strat" to original stratification variable names
       if(length(db$stratify) == 1) {
@@ -196,7 +203,6 @@ plot_vpc <- function(db,
     ## VPC for time-to-event data
     ################################################################
 
-    show <- replace_list_elements(show_default_tte, show)
     if(!is.null(db$stratify_pars)) {
       ## rename "strat" to original stratification variable names
       if(length(db$stratify_pars) == 1) {

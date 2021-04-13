@@ -90,9 +90,6 @@ vpc_vpc <- function(sim = NULL,
   cens_type <- loq_data$cens_type
   cens_limit <- loq_data$cens_limit
 
-  ## define what to show in plot
-  show <- replace_list_elements(show_default, show)
-
   ## checking whether stratification columns are available
   msg("Stratifying data...", verbose=verbose)
   check_stratification_columns_available(data=vpc_data$obs, stratify=stratify, type="observation")
@@ -284,14 +281,14 @@ vpc_vpc <- function(sim = NULL,
       uloq = uloq,
       type = "continuous",
       xlab = xlab,
-      ylab = ylab
+      ylab = ylab,
+      show = show
     )
   if(vpcdb) {
     return(vpc_db)
   } else {
     msg("Plotting...", verbose=verbose)
     pl <- plot_vpc(vpc_db,
-                   show = show,
                    vpc_theme = vpc_theme,
                    smooth = smooth,
                    log_y = log_y,
