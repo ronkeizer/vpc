@@ -4,36 +4,18 @@
 \alias{calc_vpc_continuous}
 \title{Calculate aggregate statistics for simulated and observed VPC data}
 \usage{
-calc_vpc_continuous(
-  sim,
-  obs,
-  pred_corr,
-  loq,
-  pi,
-  ci,
-  cols,
-  stratify,
-  bins,
-  bin_mid,
-  verbose
-)
+calc_vpc_continuous(sim, obs, loq, pi, ci, stratify, bins, bin_mid, verbose)
 }
 \arguments{
 \item{sim}{this is usually a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}.  However it can also be an object like a nlmixr or xpose object}
 
 \item{obs}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
-\item{pred_corr}{perform prediction-correction?}
-
 \item{loq}{The list output from \code{define_loq()}}
 
 \item{pi}{simulated prediction interval to plot. Default is c(0.05, 0.95),}
 
 \item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
-
-\item{cols}{A length 2, named list with one element named "obs" and the other
-named "sim", each containing a sub-list with elements for mapping columns
-names in the data to expected column names for use.}
 
 \item{stratify}{character vector of stratification variables.}
 
@@ -44,10 +26,13 @@ approaches available in classInterval() such as "jenks" (default) or
 \item{bin_mid}{either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.}
 
 \item{verbose}{show debugging information (TRUE or FALSE)}
+
+\item{cols}{A length 2, named list with one element named "obs" and the other
+named "sim", each containing a sub-list with elements for mapping columns
+names in the data to expected column names for use.}
 }
 \value{
-A list with "sim" and "obs" (with \code{pred_corr} performed, if
-  requested) and "vpc_dat" and "aggr_obs".
+A list with "vpc_dat" and "aggr_obs"
 }
 \description{
 Calculate aggregate statistics for simulated and observed VPC data

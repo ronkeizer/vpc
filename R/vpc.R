@@ -151,13 +151,19 @@ vpc_vpc <- function(sim = NULL,
   sim <- bins_data$sim
 
   # Calculations ####
-  calc_data <-
-    calc_vpc_continuous(
+  pred_corr_data <-
+    calc_pred_corr_continuous(
       sim=sim, obs=obs,
       pred_corr=pred_corr,
+      pred_corr_lower_bnd=pred_corr_lower_bnd,
+      cols=cols,
+      verbose=verbose
+    )
+  calc_data <-
+    calc_vpc_continuous(
+      sim=pred_corr_data$sim, obs=pred_corr_data$obs,
       loq=loq_data,
       pi=pi, ci=ci,
-      cols=cols,
       stratify=stratify,
       bins=bins,
       bin_mid=bin_mid,
@@ -167,12 +173,12 @@ vpc_vpc <- function(sim = NULL,
   # data combined and handed off to separate plotting function
   vpc_db <-
     as_vpcdb(
-      sim = calc_data$sim,
+      sim = pred_corr_data$sim,
       vpc_dat = calc_data$vpc_dat,
       smooth = smooth,
       stratify = stratify,
       aggr_obs = calc_data$aggr_obs,
-      obs = calc_data$obs,
+      obs = pred_corr_data$obs,
       bins = bins,
       facet = facet,
       scales = scales,       
@@ -197,23 +203,13 @@ vpc_vpc <- function(sim = NULL,
   }
 }
 
-#' Calculate aggregate statistics for simulated and observed VPC data
-#' 
+#' Perform prediction-correction
+#'
 #' @inheritParams read_vpc
 #' @inheritParams define_loq
-#' @inheritParams define_bins
-#' @param loq The list output from \code{define_loq()}
-#' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
-#' @param pi simulated prediction interval to plot. Default is c(0.05, 0.95),
-#' @param ci confidence interval to plot. Default is (0.05, 0.95)
-#' @param cols A length 2, named list with one element named "obs" and the other
-#'   named "sim", each containing a sub-list with elements for mapping columns
-#'   names in the data to expected column names for use.
-#' @param stratify character vector of stratification variables.
-#' @param verbose show debugging information (TRUE or FALSE)
 #' @return A list with "sim" and "obs" (with \code{pred_corr} performed, if
-#'   requested) and "vpc_dat" and "aggr_obs".
-calc_vpc_continuous <- function(sim, obs, pred_corr, loq, pi, ci, cols, stratify, bins, bin_mid, verbose) {
+#'   requested)
+calc_pred_corr_continuous <- function(sim, obs, pred_corr, pred_corr_lower_bnd, cols, verbose) {
   if(pred_corr) {
     if(!is.null(obs) & !cols$obs$pred %in% names(obs)) {
       msg("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...", verbose)
@@ -243,7 +239,7 @@ calc_vpc_continuous <- function(sim, obs, pred_corr, loq, pi, ci, cols, stratify
     }
   }
   if(!is.null(sim)) {
-    sim$sim <- add_sim_index_number(sim, id = "id", sim_label=cols$sim)
+    sim$sim <- add_sim_index_number(sim, id = "id", sim_label=cols$sim$sim)
     if(pred_corr) {
       msg("Performing prediction-correction on simulated data...", verbose=verbose)
       sim$pred <- sim[[cols$sim$pred]]
@@ -251,6 +247,27 @@ calc_vpc_continuous <- function(sim, obs, pred_corr, loq, pi, ci, cols, stratify
       sim[sim$pred != 0,]$dv <- pred_corr_lower_bnd + (sim[sim$pred != 0,]$dv - pred_corr_lower_bnd) * (sim[sim$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (sim[sim$pred != 0,]$pred - pred_corr_lower_bnd)
     }
   }
+  list(
+    sim=sim,
+    obs=obs
+  )
+}
+
+#' Calculate aggregate statistics for simulated and observed VPC data
+#' 
+#' @inheritParams read_vpc
+#' @inheritParams define_bins
+#' @param loq The list output from \code{define_loq()}
+#' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
+#' @param pi simulated prediction interval to plot. Default is c(0.05, 0.95),
+#' @param ci confidence interval to plot. Default is (0.05, 0.95)
+#' @param cols A length 2, named list with one element named "obs" and the other
+#'   named "sim", each containing a sub-list with elements for mapping columns
+#'   names in the data to expected column names for use.
+#' @param stratify character vector of stratification variables.
+#' @param verbose show debugging information (TRUE or FALSE)
+#' @return A list with "vpc_dat" and "aggr_obs"
+calc_vpc_continuous <- function(sim, obs, loq, pi, ci, stratify, bins, bin_mid, verbose) {
   if(!is.null(sim)) {
     msg("Calculating statistics for simulated data...", verbose=verbose)
     aggr_sim <-
@@ -318,8 +335,6 @@ calc_vpc_continuous <- function(sim, obs, pred_corr, loq, pi, ci, cols, stratify
   }
   
   list(
-    sim=sim,
-    obs=obs,
     vpc_dat=vpc_dat,
     aggr_obs=aggr_obs
   )
