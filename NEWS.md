@@ -1,3 +1,6 @@
+# vpc 1.2.2.9000
+- the ID column may now be a factor (fix #75)
+
 # vpc 1.2.2
 - fixes to account for changes in magrittr pipe function
 - added functionality and argument to handle scales
