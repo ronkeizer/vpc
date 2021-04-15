@@ -27,7 +27,15 @@ add_step <- function(dat = ., vars) {
     newdat %>% dplyr::arrange(bin, -step)
 }
 
-as.num <- function(x) { as.numeric(as.character(x)) }
+as.num <- function(x) {
+  if (is.numeric(x)) {
+    x
+  } else if (is.factor(x)) {
+    as.integer(x)
+  } else {
+    as.numeric(as.character(x))
+  }
+}
 
 convert_to_dense_grid <- function(dat, t = "t", id = "id", t_start = 0, t_step = 1, add = NULL) {
   t = seq(from=t_start, to=max(dat$t), by=t_step)
