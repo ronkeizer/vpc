@@ -13,11 +13,10 @@ quantile_cens <- function(x, probs = 0.5, limit = 1, cens = c("left", "right", "
     x[is.na(x)] <- Inf
     x[x>limit] <- Inf
   } else if (cens == "neither") {
-    # TODO: Review on 2021-04: quantile_cens can now just work like quantile
-    # (simplifying other code that checks if quantile_cens() or quantile()
-    # should be used).  To consider: Should NA values be considered missing or
-    # an error?
-
+    # To consider: Should NA values be considered missing or an error?
+    if (any(is.na(x))) {
+      stop("NA are not allowed when cens='neither'")
+    }
     # do nothing to x
   } else if (cens == "both") {
     stop("cens='both' is not yet supported") # nocov

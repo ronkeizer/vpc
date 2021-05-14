@@ -24,6 +24,14 @@ assert(
     unname(quantile(x=1:10, probs=0.3))
 )
 assert(
+  "quantile_cens returns an error when neither direction is censored and there is an NA in the data",
+  grepl(
+    x=as.character(try(vpc::quantile_cens(x=c(NA, 1), probs=0.3, cens="neither"), silent=TRUE)),
+    pattern="NA are not allowed when cens='neither'",
+    fixed=TRUE
+  )
+)
+assert(
   "quantile_cens returns an error for trying to censor both directions",
   tryCatch(
     vpc::quantile_cens(x=1:10, probs=0.3, cens="both", limit=6),
