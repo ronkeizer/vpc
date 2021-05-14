@@ -150,10 +150,6 @@ vpc_cens <- function(sim = NULL,
     tmp <- obs %>% 
       dplyr::group_by(strat,bin)
     aggr_obs <- tmp %>%
-      # TODO: For review in 2021-04: limit here was set to `lloq`, but it
-      # appears that it should have been set to `limit` which is now named
-      # `cens_limit`.  The change is so that uloq values could be correctly
-      # censored for right-censored data.
       dplyr::summarise(obs50 = loq_frac(dv, limit = cens_limit, cens = cens_type),
                        bin_mid = mean(idv)) %>%
       dplyr::ungroup()

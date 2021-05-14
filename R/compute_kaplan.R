@@ -25,7 +25,6 @@ compute_kaplan <- function(dat,
       ci <- diff(ci)        
     }
   } else {
-    # TODO: Review 2021-04: Changed from 0.95 to match vpc_tte() default
     ci <- 0.9
   }
   for (i in seq(strats)) {

@@ -26,8 +26,6 @@ filter_dv <- function(x, verbose = FALSE, ...) {
 }
 
 filter_dv_software <- list(
-  # TODO: Review 2021-04: name was "phx" here and "phoenix" elsewhere.
-  # Standardizing to "phoenix".
   "phoenix" = function(x, dv, verbose = FALSE, ...) {
     msg("Filtering rows with no DV values", verbose)
     x[!is.na(x[[dv]]),]
