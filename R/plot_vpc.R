@@ -223,17 +223,12 @@ plot_vpc_helper.vpcdb_time_to_event <- function(db, ...,
     geom_bin_sep(bins=db$tmp_bins, show=show$bin_sep, vpc_theme=vpc_theme) +
     guides_stratify_color(data=db) +
     ggplot2::labs(
-      # TODO: Review 2021-04: `title` was previously ignored.  It will now cause
-      # a title to be shown.
-
       # While title is not always used, it defaults to NULL which causes no
       # title to display.
       title=title,
       x=ifelse(!is.null(xlab), xlab, db$xlab),
       y=ifelse(!is.null(ylab), ylab, db$ylab)
     ) +
-    # TODO: Review 2021-04: added theme_plain() to align with continuous
-    # plotting
     theme_plain()
   return(pl)
 }
@@ -342,8 +337,6 @@ geom_obs_cens_dat_tte <- function(data) {
 #' @describeIn vpc_ggplot Show confidence interval for observed, continuous data
 geom_obs_ci_continuous <- function(data, show, vpc_theme) {
   if (show & !is.null(data$obs) && !is.null(data$aggr_obs[["obs5"]])) {
-    # TODO: Review 2021-04: Changed to geom_ribbon so that it could be a single
-    # geom (since you can't add two geoms together without a plot)
     ggplot2::geom_ribbon(
       data=data$aggr_obs,
       ggplot2::aes(x=bin_mid, ymin=obs5, ymax=obs95),

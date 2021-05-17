@@ -31,8 +31,6 @@ show_default <-
         sim_km = FALSE,
         obs_cens = TRUE
       ),
-    # TODO: Review 2021-04: "censored" values are now defaults, but possible to
-    # change rather than forced
     censored=
       list(
         obs_dv = FALSE,

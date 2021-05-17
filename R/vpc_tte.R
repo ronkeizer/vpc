@@ -151,8 +151,8 @@ vpc_tte <- function(sim = NULL,
     if(!is.null(kmmc) && kmmc %in% names(obs)) {
       obs_km <- compute_kmmc(obs, strat = "strat", reverse_prob = reverse_prob, kmmc=kmmc)
     } else {
-      # TODO: Review 2021-04: Always computing obs_km when obs is available
-      # (even if obs_ci is not in show)
+      # Obs data is still used to calculate bins, even though obs data not
+      # requested in plot
       obs_km <- compute_kaplan(obs, strat = "strat", reverse_prob = reverse_prob, rtte_conditional = rtte_conditional, ci = ci)
     }
   } else { # get bins from sim
@@ -248,8 +248,8 @@ vpc_tte <- function(sim = NULL,
 
   cens_dat <- NULL
   if(!is.null(obs)) {
-    # TODO: Review 2021-04: Always computing cens_dat when obs is available
-    # (even if obs_cens is not in show)
+    # Obs data is still used to calculate bins, even though obs data not
+    # requested in plot
     cens_dat <- obs
     if(rtte) {
       if(!rtte_conditional || !rtte_calc_diff) {

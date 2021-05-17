@@ -24,8 +24,6 @@ quantile_cens <- function(x, probs = 0.5, limit = 1, cens = c("left", "right", "
     stop("Invalid value for cens: ", cens) # nocov
   }
   q <- quantile(x, probs=probs)
-  # TODO: Review on 2021-04: NA_real_ instead of NA is returned to ensure that
-  # the return value is numeric
   ifelse(q %in% c(Inf, -Inf), NA_real_, q)
 }
 

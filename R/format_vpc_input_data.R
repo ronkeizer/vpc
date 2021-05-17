@@ -127,9 +127,6 @@ format_vpc_input_data_tte <- function(dat, cols, stratify, rtte, rtte_calc_diff,
   }
   dat$time <- as.num(dat$idv)
   if (what == "observed") {
-    # TODO: Review 2021-04: Added "sim" to "obs" to simplify code later (and it
-    # is removed below)
-
     # set sim to simplify code below
     dat$sim <- 1
   } else if (what == "simulated") {
@@ -155,8 +152,6 @@ format_vpc_input_data_tte <- function(dat, cols, stratify, rtte, rtte_calc_diff,
     }
     dat <- dat %>%
       dplyr::group_by(.data$sim, .data$id) %>%
-      # TODO: Review 2021-04: Throughout tte, column "t" was changed to "time" to
-      # match other parts of vpc
       dplyr::arrange(.data$sim, .data$id, .data$time) %>%
       dplyr::mutate(rtte = 1:length(dv))
     stratify <- c(stratify, "rtte")

@@ -7,7 +7,6 @@
 filter_dv <- function(x, verbose = FALSE, ...) {
   software_match <- intersect(class(x), names(filter_dv_software))
   if (length(software_match) > 1) {
-    # TODO: Review 2021-04: Matching the software is a bit stricter now
     warning(
       "Multiple software packages matched for filtering values, not filtering.  Software matched: ",
       paste(software_match, collapse=", ")

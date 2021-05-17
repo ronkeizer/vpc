@@ -1,4 +1,5 @@
 # vpc 1.2.2.9000
+- a major code refactoring occurred (fix #5)
 - the ID column may now be a factor (fix #75)
 
 # vpc 1.2.2
