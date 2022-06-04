@@ -1,6 +1,3 @@
-library(vpc)
-library(testit)
-
 mock_dat <- data.frame(1, 1, 1, 1)
 col_names <- c("SITE", "GENOTYPE", "RACE", "TRT")
 names(mock_dat) <- col_names

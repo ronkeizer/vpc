@@ -1,0 +1,6 @@
+library(testit)
+library(vpc)
+Sys.setenv("R_TESTS" = "")
+test_pkg("vpc")
+# devtools::load_all()
+# sapply(X=list.files(path="tests/testit/", full.names=TRUE), FUN=source, echo=TRUE)

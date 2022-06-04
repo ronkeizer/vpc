@@ -1,7 +1,3 @@
-library(vpc)
-library(testit)
-Sys.setenv("R_TESTS" = "")
-
 tmp <- simple_data
 obj <- vpc(sim = tmp$sim, obs = tmp$obs, vpcdb=TRUE)
 

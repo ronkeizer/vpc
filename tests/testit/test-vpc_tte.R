@@ -1,7 +1,3 @@
-library(vpc)
-library(testit)
-Sys.setenv("R_TESTS" = "")
-
 ## Test for bug AR 20171025 column name simulation dataset
 test <- vpc::rtte_sim_nm[1:200000,]
 test$bla <- test$t
@@ -14,7 +10,6 @@ obj <- vpc_tte(sim = test,  # stratified for covariate and study arm
                labeller = ggplot2::label_both)
 
 assert("vpc_tte no stratification succeeded","ggplot" %in% class(obj))
-
 
 obj <- vpc_tte(sim = vpc::rtte_sim_nm[1:200000,],  # stratified for covariate and study arm
                obs = vpc::rtte_obs_nm, 
@@ -37,4 +32,3 @@ obj2 <- vpc_tte(sim = vpc::rtte_sim_nm[1:500000,],  # stratified for covariate a
 pl2 <- plot_vpc(obj2)
 
 assert("vpc_tte without obs succeeded","ggplot" %in% class(pl2))
-

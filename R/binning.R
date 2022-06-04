@@ -11,7 +11,7 @@
 #' @param n_bins number of bins to use; either a positive integer or "auto". For
 #'   "density" the function might not return a solution with the exact number of
 #'   bins.
-#' @param verbose show warnings and other messages (TRUE or FALSE)
+#' @param verbose show debugging information (TRUE or FALSE)
 #' @param ... arguments passed on to underlying binning functions
 #' @return A vector of bin separators
 #' @export

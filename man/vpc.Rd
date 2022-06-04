@@ -52,15 +52,18 @@ vpc_vpc(
 
 \item{psn_folder}{instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder}
 
-\item{bins}{either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.}
+\item{bins}{either "density", "time", or "data", "none", or one of the
+approaches available in classInterval() such as "jenks" (default) or
+"pretty", or a numeric vector specifying the bin separators.}
 
-\item{n_bins}{when using the "auto" binning method, what number of bins to aim for}
+\item{n_bins}{when using the "auto" binning method, what number of bins to
+aim for}
 
 \item{bin_mid}{either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.}
 
-\item{obs_cols}{observation dataset column names (list elements: "dv", "idv", "id", "pred")}
+\item{obs_cols}{list for mapping observation data columns, e.g. `list(dv = "DV", id = "ID", idv = "TIME", pred="PRED")`}
 
-\item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred", "sim")}
+\item{sim_cols}{list for mapping simulation data columns, e.g. `list(dv = "DV", id = "ID", idv = "TIME", pred="PRED")`}
 
 \item{software}{name of software platform using (e.g. nonmem, phoenix)}
 
@@ -96,7 +99,9 @@ vpc_vpc(
 
 \item{facet}{either "wrap", "columns", or "rows"}
 
-\item{scales}{either "fixed" (default), "free_y", "free_x" or "free"}
+\item{scales}{Are scales shared across all facets (the default,
+\code{"fixed"}), or do they vary across rows (\code{"free_x"}),
+columns (\code{"free_y"}), or both rows and columns (\code{"free"})?}
 
 \item{labeller}{ggplot2 labeller function to be passed to underlying ggplot object}
 

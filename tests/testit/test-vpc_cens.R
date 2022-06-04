@@ -1,7 +1,3 @@
-library(vpc)
-library(testit)
-Sys.setenv("R_TESTS" = "")
-
 ## Test regular vpc in presence of lloq / uloq data
 obj1 <- vpc(sim = vpc::simple_data$sim, obs = vpc::simple_data$obs, uloq = 120, vpcdb = TRUE)
 obj2 <- vpc(sim = vpc::simple_data$sim, obs = vpc::simple_data$obs, lloq = 20, vpcdb = TRUE)
@@ -10,9 +6,9 @@ assert("4 values in upper percentile flagged as <lloq", vpc:::is_equal(sum(is.na
 assert("1 values in upper percentile flagged as <lloq", vpc:::is_equal(sum(is.na(obj2$aggr_obs$obs50)), 1))
 
 ## test vpc func
-obj <- vpc_cens(sim = vpc::simple_data$sim, 
-                obs = vpc::simple_data$obs, 
-              lloq = 30, n_bins = 8, vpcdb = TRUE)
+obj <- vpc_cens(sim = vpc::simple_data$sim,
+                obs = vpc::simple_data$obs,
+                lloq = 30, n_bins = 8, vpcdb = TRUE)
 
 #vpc_cens(sim = vpc::simple_data$sim, obs = vpc::simple_data$obs, lloq = 30)
 
@@ -28,4 +24,3 @@ assert("vpc_cens parsed data correctly", vpc:::is_equal(obs50, obj$aggr_obs$obs5
 assert("vpc_cens parsed data correctly", vpc:::is_equal(sim50, obj$vpc_dat$q50.med, relative=FALSE))
 assert("vpc_cens parsed data correctly", vpc:::is_equal(sim5, obj$vpc_dat$q50.low, relative=FALSE))
 assert("vpc_cens parsed data correctly", vpc:::is_equal(sim95, obj$vpc_dat$q50.up, relative=FALSE))
-

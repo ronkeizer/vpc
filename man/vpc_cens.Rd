@@ -20,7 +20,6 @@ vpc_cens(
   ci = c(0.05, 0.95),
   uloq = NULL,
   lloq = NULL,
-  plot = FALSE,
   xlab = "Time",
   ylab = "Probability of <LOQ",
   title = NULL,
@@ -33,25 +32,28 @@ vpc_cens(
 )
 }
 \arguments{
-\item{sim}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+\item{sim}{this is usually a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}.  However it can also be an object like a nlmixr or xpose object}
 
 \item{obs}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
 \item{psn_folder}{instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder}
 
-\item{bins}{either "density", "time", or "data", or a numeric vector specifying the bin separators.}
+\item{bins}{either "density", "time", or "data", "none", or one of the
+approaches available in classInterval() such as "jenks" (default) or
+"pretty", or a numeric vector specifying the bin separators.}
 
-\item{n_bins}{number of bins}
+\item{n_bins}{when using the "auto" binning method, what number of bins to
+aim for}
 
 \item{bin_mid}{either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.}
 
-\item{obs_cols}{observation dataset column names (list elements: "dv", "idv", "id", "pred")}
+\item{obs_cols}{list for mapping observation data columns, e.g. `list(dv = "DV", id = "ID", idv = "TIME", pred="PRED")`}
 
-\item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred")}
+\item{sim_cols}{list for mapping simulation data columns, e.g. `list(dv = "DV", id = "ID", idv = "TIME", pred="PRED")`}
 
 \item{software}{name of software platform using (e.g. nonmem, phoenix)}
 
-\item{show}{what to show in VPC (obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
+\item{show}{what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
 
 \item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
 
@@ -63,11 +65,9 @@ vpc_cens(
 
 \item{lloq}{Number or NULL indicating lower limit of quantification. Default is NULL.}
 
-\item{plot}{Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.}
+\item{xlab}{label for x axis}
 
-\item{xlab}{ylab as numeric vector of size 2}
-
-\item{ylab}{ylab as numeric vector of size 2}
+\item{ylab}{label for y axis}
 
 \item{title}{title}
 
@@ -84,7 +84,7 @@ vpc_cens(
 \item{verbose}{show debugging information (TRUE or FALSE)}
 }
 \value{
-a list containing calculated VPC information, and a ggplot2 object
+a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 }
 \description{
 Creates a VPC plot from observed and simulation data for censored data. Function can handle both left- (below lower limit of quantification) and right-censored (above upper limit of quantification) data.

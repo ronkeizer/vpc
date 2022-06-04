@@ -22,7 +22,6 @@ vpc_tte(
   stratify = NULL,
   stratify_color = NULL,
   ci = c(0.05, 0.95),
-  plot = FALSE,
   xlab = "Time",
   ylab = "Survival (\%)",
   show = NULL,
@@ -37,29 +36,36 @@ vpc_tte(
 )
 }
 \arguments{
-\item{sim}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
+\item{sim}{this is usually a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}.  However it can also be an object like a nlmixr or xpose object}
 
 \item{obs}{a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}}
 
 \item{psn_folder}{instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder}
 
-\item{rtte}{repeated time-to-event data? Default is FALSE (treat as single-event TTE)}
+\item{rtte}{repeated time-to-event data? Default is FALSE (treat as
+single-event TTE)}
 
-\item{rtte_calc_diff}{recalculate time (T/F)? When simulating in NONMEM, you will probably need to set this to TRUE to recalculate the TIME to relative times between events (unless you output the time difference between events and specify that as independent variable to the vpc_tte() function.}
+\item{rtte_calc_diff}{recalculate time (T/F)? When simulating in NONMEM, you
+will probably need to set this to TRUE to recalculate the TIME to relative
+times between events (unless you output the time difference between events
+and specify that as independent variable to the vpc_tte() function.}
 
 \item{rtte_conditional}{`TRUE` (default) or `FALSE`. Compute the probability for each event newly (`TRUE`), or calculate the absolute probability (`FALSE`, i.e. the "probability of a 1st, 2nd, 3rd event etc" rather than the "probability of an event happening").}
 
 \item{events}{numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events.}
 
-\item{bins}{either "density", "time", or "data", or a numeric vector specifying the bin separators.}
+\item{bins}{either "density", "time", or "data", "none", or one of the
+approaches available in classInterval() such as "jenks" (default) or
+"pretty", or a numeric vector specifying the bin separators.}
 
-\item{n_bins}{number of bins}
+\item{n_bins}{when using the "auto" binning method, what number of bins to
+aim for}
 
 \item{software}{name of software platform using (e.g. nonmem, phoenix)}
 
-\item{obs_cols}{observation dataset column names (list elements: "dv", "idv", "id", "pred")}
+\item{obs_cols}{list for mapping observation data columns, e.g. `list(dv = "DV", id = "ID", idv = "TIME", pred="PRED")`}
 
-\item{sim_cols}{simulation dataset column names (list elements: "dv", "idv", "id", "pred", "sim")}
+\item{sim_cols}{list for mapping simulation data columns, e.g. `list(dv = "DV", id = "ID", idv = "TIME", pred="PRED")`}
 
 \item{kmmc}{either NULL (for regular TTE vpc, default), or a variable name for a KMMC plot (e.g. "WT")}
 
@@ -71,13 +77,11 @@ vpc_tte(
 
 \item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
 
-\item{plot}{Boolean indicating whether to plot the ggplot2 object after creation. Default is FALSE.}
+\item{xlab}{label for x axis}
 
-\item{xlab}{label for x-axis}
+\item{ylab}{label for y axis}
 
-\item{ylab}{label for y-axis}
-
-\item{show}{what to show in VPC (obs_ci, obs_median, sim_median, sim_median_ci)}
+\item{show}{what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
 
 \item{as_percentage}{Show y-scale from 0-100 percent? TRUE by default, if FALSE then scale from 0-1.}
 
@@ -91,12 +95,12 @@ vpc_tte(
 
 \item{labeller}{ggplot2 labeller function to be passed to underlying ggplot object}
 
-\item{verbose}{TRUE or FALSE (default)}
+\item{verbose}{show debugging information (TRUE or FALSE)}
 
 \item{vpcdb}{Boolean whether to return the underlying vpcdb rather than the plot}
 }
 \value{
-a list containing calculated VPC information, and a ggplot2 object
+a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 }
 \description{
 This function can be used for either single time-to-event (TTE) or repeated time-to-event (RTTE) data.

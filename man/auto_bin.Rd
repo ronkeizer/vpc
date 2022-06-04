@@ -21,7 +21,7 @@ auto_bin(dat, type = "kmeans", n_bins = 8, verbose = FALSE, ...)
 "density" the function might not return a solution with the exact number of
 bins.}
 
-\item{verbose}{show warnings and other messages (TRUE or FALSE)}
+\item{verbose}{show debugging information (TRUE or FALSE)}
 
 \item{...}{arguments passed on to underlying binning functions}
 }

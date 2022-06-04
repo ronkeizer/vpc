@@ -1,6 +1,3 @@
-library(testit)
-library(vpc)
-
 nonmem_df <- data.frame(ID = 0, MDV = 0, DV = 0)
 phx_df <- data.frame(ID = 0, COBS = 0)
 

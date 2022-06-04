@@ -2,25 +2,13 @@
 #'
 #' Creates a VPC plot from observed and simulation data for categorical variables.
 #'
-#' @param sim a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
-#' @param obs a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
-#' @param psn_folder instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder
-#' @param bins either "density", "time", or "data", "none", or one of the approaches available in classInterval() such as "jenks" (default) or "pretty", or a numeric vector specifying the bin separators.
-#' @param n_bins when using the "auto" binning method, what number of bins to aim for
+#' @inheritParams format_vpc_input_data
+#' @inheritParams read_vpc
+#' @inheritParams plot_vpc
+#' @inheritParams as_vpcdb
+#' @inheritParams define_bins
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
-#' @param obs_cols observation dataset column names (list elements: "dv", "idv", "id", "pred")
-#' @param sim_cols simulation dataset column names (list elements: "dv", "idv", "id", "pred")
-#' @param show what to show in VPC (obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
-#' @param software name of software platform using (e.g. nonmem, phoenix)
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
-#' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.
-#' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.
-#' @param plot Boolean indicting whether to plot the ggplot2 object after creation. Default is FALSE.
-#' @param xlab label for x-axis
-#' @param ylab label for y-axis
-#' @param title title
-#' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
-#' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param facet either "wrap", "columns", or "rows"
 #' @param labeller ggplot2 labeller function to be passed to underlying ggplot object
 #' @param vpcdb boolean whether to return the underlying vpcdb rather than the plot
@@ -73,70 +61,49 @@ vpc_cat  <- function(sim = NULL,
                      vpc_theme = NULL,
                      facet = "wrap",
                      labeller = NULL,
-                     plot = TRUE,
                      vpcdb = FALSE,
                      verbose = FALSE) {
-
-  if(is.null(obs) & is.null(sim)) {
-    stop("At least a simulation or an observation dataset are required to create a plot!")
-  }
-  if(!is.null(psn_folder)) {
-    if(!is.null(obs)) {
-      obs <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="original.npctab")[1]))
-    }
-    if(!is.null(sim)) {
-      sim <- read_table_nm(paste0(psn_folder, "/m1/", dir(paste0(psn_folder, "/m1"), pattern="simulation.1.npctab")[1]))
-    }
-    software = "nonmem"
-  }
-  if (!is.null(obs)) {
-    software_type <- guess_software(software, obs)
-  } else {
-    software_type <- guess_software(software, sim)
-  }
-
-  ## define what to show in plot
-  show <- replace_list_elements(show_default, show)
-
-  ## define column names
-  cols <- define_data_columns(sim, obs, sim_cols, obs_cols, software_type)
-  if(!is.null(obs)) {
-    old_class <- class(obs)
-    class(obs) <- c(software_type, old_class)
-  }
-  if(!is.null(sim)) {
-    old_class <- class(sim)
-    class(sim) <- c(software_type, old_class)
-  }
-
+  vpc_data <-
+    read_vpc(
+      sim=sim, obs=obs, psn_folder=psn_folder,
+      software=software,
+      sim_cols=sim_cols, obs_cols=obs_cols
+    )
+  software_type <- vpc_data$software
+  cols <- vpc_data$cols
+  
   ## parse data into specific format
-  if(!is.null(obs)) {
-    obs <- filter_dv(obs, verbose)
-    obs <- format_vpc_input_data(obs, cols$obs, lloq, uloq, strat = NULL, bins, FALSE, 0, "observed", verbose)
+  if(!is.null(vpc_data$obs)) {
+    vpc_data$obs <-
+      format_vpc_input_data(
+        dat=vpc_data$obs,
+        cols=cols$obs,
+        lloq=lloq, uloq=uloq,
+        stratify=NULL,
+        log_y=FALSE, log_y_min=0,
+        what="observed",
+        verbose=verbose
+      )
   }
-  if(!is.null(sim)) {
-    sim <- filter_dv(sim, verbose)
-    sim <- format_vpc_input_data(sim, cols$sim, lloq, uloq, strat = NULL, bins, FALSE, 0, "simulated", verbose)
-    sim$sim <- add_sim_index_number(sim, id = "id")
+  if(!is.null(vpc_data$sim)) {
+    vpc_data$sim <-
+      format_vpc_input_data(
+        dat=vpc_data$sim,
+        cols=cols$sim,
+        lloq=lloq, uloq=uloq,
+        stratify=NULL,
+        log_y=FALSE, log_y_min=0,
+        what="simulated",
+        verbose=verbose
+      )
+    vpc_data$sim$sim <- add_sim_index_number(vpc_data$sim, id = "id")
   }
 
-  if (class(bins) != "numeric") {
-    if(!is.null(obs)) {
-      bins <- auto_bin(obs, bins, n_bins)
-    } else { # get from sim
-      bins <- auto_bin(sim, bins, n_bins)
-    }
-    if (is.null(bins)) {
-      msg("Automatic binning unsuccessful, try increasing the number of bins, or specify vector of bin separators manually.", verbose)
-    }
-  }
-  bins <- unique(bins)
-  if(!is.null(obs)) {
-    obs <- bin_data(obs, bins, "idv")
-  }
-  if(!is.null(sim)) {
-    sim <- bin_data(sim, bins, "idv")
-  }
+  # Binning ####
+  bins_data <- define_bins(obs=vpc_data$obs, sim=vpc_data$sim, bins=bins, n_bins=n_bins, verbose=verbose)
+  bins <- bins_data$bins
+  obs <- bins_data$obs
+  sim <- bins_data$sim
 
   ## parsing
   fact_perc <- function(x, fact) { sum(x == fact) / length(x) } # below lloq, default
@@ -214,31 +181,27 @@ vpc_cat  <- function(sim = NULL,
   }
 
   ## plotting starts here
-  show$median_ci = FALSE
-  show$obs_dv = FALSE
-  show$obs_ci = FALSE
-  show$sim_median = TRUE
-  show$sim_median_ci = TRUE
-  show$pi_as_area = FALSE
-  show$pi_ci = FALSE
-  show$pi = FALSE
-  vpc_db <- list(sim = sim,
-                 vpc_dat = vpc_dat,
-                 stratify = "strat", # the stratification is the various categories!
-                 stratify_original = "strat",
-                 aggr_obs = aggr_obs,
-                 obs = obs,
-                 bins = bins,
-                 facet = facet,
-                 labeller = labeller,
-                 type = "categorical",
-                 xlab = xlab,
-                 ylab = ylab)
+  vpc_db <-
+    as_vpcdb(
+      sim = sim,
+      vpc_dat = vpc_dat,
+      stratify = "strat", # the stratification is the various categories!
+      stratify_original = "strat",
+      aggr_obs = aggr_obs,
+      obs = obs,
+      bins = bins,
+      facet = facet,
+      labeller = labeller,
+      type = "categorical",
+      xlab = ifelse(is.null(xlab), cols$obs$idv, xlab),
+      ylab = ifelse(is.null(ylab), cols$obs$dv, ylab),
+      show = show
+    )
   if(vpcdb) {
     return(vpc_db)
   } else {
+    msg("Plotting...", verbose=verbose)
     pl <- plot_vpc(db = vpc_db,
-                   show = show,
                    vpc_theme = vpc_theme,
                    smooth = smooth,
                    log_y = FALSE,

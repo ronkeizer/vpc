@@ -4,16 +4,29 @@
 \alias{quantile_cens}
 \title{Calculate quantiles respecting the censored data}
 \usage{
-quantile_cens(x, p = 0.5, limit = 1, cens = "left")
+quantile_cens(
+  x,
+  probs = 0.5,
+  limit = 1,
+  cens = c("left", "right", "neither", "both")
+)
 }
 \arguments{
-\item{x}{data}
+\item{x}{numeric vector whose sample quantiles are wanted, or an
+    object of a class for which a method has been defined (see also
+    \sQuote{details}). \code{\link{NA}} and \code{NaN} values are not
+    allowed in numeric vectors unless \code{na.rm} is \code{TRUE}.}
 
-\item{p}{quantile}
+\item{probs}{numeric vector of probabilities with values in
+    \eqn{[0,1]}.  (Values up to \samp{2e-14} outside that
+    range are accepted and moved to the nearby endpoint.)}
 
-\item{limit}{censoring limit}
+\item{limit}{censoring limit (ignored if \code{cens="neither"})}
 
-\item{cens}{censoring direction (left/right)}
+\item{cens}{censoring direction}
+}
+\value{
+The quantile of \code{x} treating \code{NA} values as censored
 }
 \description{
 Calculate quantiles respecting the censored data

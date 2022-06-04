@@ -1,32 +1,59 @@
 #' Calculate quantiles respecting the censored data
 #' 
-#' @param x data
-#' @param p quantile
-#' @param limit censoring limit
-#' @param cens censoring direction (left/right)
-#' 
+#' @inheritParams stats::quantile
+#' @inheritParams loq_frac
+#' @return The quantile of \code{x} treating \code{NA} values as censored
 #' @export
-quantile_cens <- function(x, p = 0.5, limit = 1, cens = "left") {
-  if(cens %in% c("left", "lower", "bloq", "loq", "lloq")) {
+quantile_cens <- function(x, probs = 0.5, limit = 1, cens = c("left", "right", "neither", "both")) {
+  cens <- match.arg(cens)
+  if (cens == "left") {
     x[is.na(x)] <- -Inf
     x[x<limit] <- -Inf
-  } else {
+  } else if (cens == "right") {
     x[is.na(x)] <- Inf
     x[x>limit] <- Inf
+  } else if (cens == "neither") {
+    # To consider: Should NA values be considered missing or an error?
+    if (any(is.na(x))) {
+      stop("NA are not allowed when cens='neither'")
+    }
+    # do nothing to x
+  } else if (cens == "both") {
+    stop("cens='both' is not yet supported") # nocov
+  } else {
+    stop("Invalid value for cens: ", cens) # nocov
   }
-  q <- quantile(x, p)
-  ifelse(q %in% c(Inf, -Inf), NA, q)
+  q <- quantile(x, probs=probs)
+  ifelse(q %in% c(Inf, -Inf), NA_real_, q)
 }
 
-#' Calculate percentiles below / above lloq / uloq
+#' Calculate fraction of observations below lloq / above uloq
 #' 
-#' @param x data
-#' @param limit censoring limit
-#' @param cens censoring direction (left/right)
-loq_perc <- function(x, limit = 1, cens = "left") {
-  if(cens %in% c("left", "lower", "bloq", "loq", "lloq")) {
-    (sum(x < limit, na.rm=TRUE) + sum(is.na(x))) / length(x) 
+#' @param x A numeric vector
+#' @param limit censoring limit (ignored if \code{cens="neither"})
+#' @param cens censoring direction
+#' @return The fraction of observations (\code{NA} is counted as below/above)
+loq_frac <- function(x, limit = 1, cens = c("left", "right", "neither", "both")) {
+  cens <- match.arg(cens)
+  if (cens == "left") {
+    if (length(limit) != 1) {
+      stop("limit must be a scalar if cens='left'")
+    }
+    (sum(x < limit, na.rm=TRUE) + sum(is.na(x))) / length(x)
+  } else if (cens == "right") {
+    if (length(limit) != 1) {
+      stop("limit must be a scalar if cens='right'")
+    }
+    (sum(x > limit, na.rm=TRUE) + sum(is.na(x))) / length(x)
+  } else if (cens == "neither") {
+    # Zero by definition if no censoring occurs
+    0
+  } else if (cens == "both") {
+    if (length(limit) != 2) {
+      stop("limit must have 2 elements if cens='both'")
+    }
+    (sum((x < min(limit)) | (x > max(limit)), na.rm=TRUE) + sum(is.na(x))) / length(x)
   } else {
-    (sum(x > limit, na.rm=TRUE) + sum(is.na(x))) / length(x) 
+    stop("Invalid value for cens: ", cens) # nocov
   }
 }
