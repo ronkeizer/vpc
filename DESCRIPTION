@@ -25,6 +25,7 @@ LazyData: true
 URL: https://github.com/ronkeizer/vpc
 Suggests:
     knitr,
-    testit
+    testthat (>= 3.0.0)
 RoxygenNote: 7.1.1
 Encoding: UTF-8
+Config/testthat/edition: 3
