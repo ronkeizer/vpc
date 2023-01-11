@@ -73,7 +73,7 @@ stratification, and logarithmic values.
 }
 \section{Functions}{
 \itemize{
-\item \code{format_vpc_input_data_tte}: Prepare VPC data for future calculations
+\item \code{format_vpc_input_data_tte()}: Prepare VPC data for future calculations
 for time-to-event data
-}}
 
+}}

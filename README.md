@@ -1,4 +1,7 @@
-[![Build Status](https://travis-ci.org/ronkeizer/vpc.svg?branch=master)](https://travis-ci.org/ronkeizer/vpc)
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/ronkeizer/vpc/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ronkeizer/vpc/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/ronkeizer/vpc/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ronkeizer/vpc?branch=master)
+<!-- badges: end -->
 
 vpc
 ===
