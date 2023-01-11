@@ -1,6 +1,7 @@
 # vpc 1.2.2.9000
 - a major code refactoring occurred (fix #5)
 - the ID column may now be a factor (fix #75)
+- updates to work with ggplot2 version 3.4.0
 
 # vpc 1.2.2
 - fixes to account for changes in magrittr pipe function
