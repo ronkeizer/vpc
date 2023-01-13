@@ -6,7 +6,9 @@
 \usage{
 sim_data(
   design = cbind(id = c(1, 1, 1), idv = c(0, 1, 2)),
-  model = function(x) {     return(x$alpha + x$beta) },
+  model = function(x) {
+     return(x$alpha + x$beta)
+ },
   theta,
   omega_mat,
   par_names,

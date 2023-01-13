@@ -14,6 +14,6 @@ label_vpc_tte(labels, multi_line = TRUE, sep = ": ")
 \item{sep}{String separating variables and values.}
 }
 \description{
-Slight rewrite of ggplot2::label_both, to make sure that labels 
+Slight rewrite of ggplot2::label_both, to make sure that labels
 for events are ordered appropriately when doing facet_wrap.
 }
