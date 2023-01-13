@@ -1,7 +1,7 @@
 #' VPC function for left- or right-censored data (e.g. BLOQ data)
 #'
 #' Creates a VPC plot from observed and simulation data for censored data. Function can handle both left- (below lower limit of quantification) and right-censored (above upper limit of quantification) data.
-#' 
+#'
 #' @inheritParams format_vpc_input_data
 #' @inheritParams read_vpc
 #' @inheritParams plot_vpc
@@ -15,14 +15,14 @@
 #' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 #' @export
 #' @seealso \link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cat}
-#' @examples 
-#' 
+#' @examples
+#'
 #' ## See vpc.ronkeizer.com for more documentation and examples
 #' library(vpc)
-#' 
+#'
 #' vpc_cens(sim = simple_data$sim, obs = simple_data$obs, lloq = 30)
 #' vpc_cens(sim = simple_data$sim, obs = simple_data$obs, uloq = 120)
-#' 
+#'
 vpc_cens <- function(sim = NULL,
                      obs = NULL,
                      psn_folder = NULL,
@@ -127,7 +127,7 @@ vpc_cens <- function(sim = NULL,
 
   ## Parsing data to get the quantiles for the VPC
   if (!is.null(sim)) {
-    tmp1 <- sim %>% 
+    tmp1 <- sim %>%
       dplyr::group_by(strat, sim, bin)
     vpc_dat <- tmp1 %>%
       dplyr::summarise(ploq = loq_frac(dv, limit = cens_limit, cens = cens_type),
@@ -147,7 +147,7 @@ vpc_cens <- function(sim = NULL,
     vpc_dat <- NULL
   }
   if(!is.null(obs)) {
-    tmp <- obs %>% 
+    tmp <- obs %>%
       dplyr::group_by(strat,bin)
     aggr_obs <- tmp %>%
       dplyr::summarise(obs50 = loq_frac(dv, limit = cens_limit, cens = cens_type),

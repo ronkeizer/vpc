@@ -3,7 +3,7 @@
 #' @param x data
 #' @param ruv list describing the magnitude of errors. List arguments: "proportional", "additive", "exponential".
 #' @export
-#' @examples 
+#' @examples
 #' library(dplyr)
 #' ipred <- c(10, 8, 6, 4, 2, 0) %>% add_noise(ruv = list(proportional = 0.1, additive = 0.2))
 add_noise <- function(x, ruv = list(proportional = 0, additive = 0, exponential = 0)) {

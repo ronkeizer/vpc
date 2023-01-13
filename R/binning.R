@@ -103,11 +103,11 @@ find_nadirs <- function (x, thresh = 0) {
 }
 
 #' Function to bin data based on a vector of bin separators, e.g. for use in VPC
-#' 
+#'
 #' @param x data
 #' @param bins numeric vector specifying bin separators
 #' @param idv variable in the data specifies the independent variable (e.g. "time")
-#' @param labeled whether a labeled factor instead of integers should be returned 
+#' @param labeled whether a labeled factor instead of integers should be returned
 #' @export
 bin_data <- function(x, bins = c(0, 3, 5, 7), idv = "time", labeled = F) {
   if(!labeled) {

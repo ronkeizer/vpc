@@ -1,5 +1,5 @@
 #' Calculate quantiles respecting the censored data
-#' 
+#'
 #' @inheritParams stats::quantile
 #' @inheritParams loq_frac
 #' @return The quantile of \code{x} treating \code{NA} values as censored
@@ -28,7 +28,7 @@ quantile_cens <- function(x, probs = 0.5, limit = 1, cens = c("left", "right", "
 }
 
 #' Calculate fraction of observations below lloq / above uloq
-#' 
+#'
 #' @param x A numeric vector
 #' @param limit censoring limit (ignored if \code{cens="neither"})
 #' @param cens censoring direction

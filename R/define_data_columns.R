@@ -1,5 +1,5 @@
 #' Define data column defaults for various softwares
-#' 
+#'
 #' @param sim simulated data
 #' @param obs observed data
 #' @param sim_cols list for mapping simulation data columns, e.g. `list(dv = "DV", id = "ID", idv = "TIME", pred="PRED")`
@@ -26,5 +26,5 @@ define_data_columns <- function(sim, obs, sim_cols, obs_cols, software_type) {
   }
   obs_cols <- replace_list_elements(obs_cols_default, obs_cols)
   sim_cols <- replace_list_elements(sim_cols_default, sim_cols)
-  return(list(sim = sim_cols, obs = obs_cols))
+  list(sim = sim_cols, obs = obs_cols)
 }

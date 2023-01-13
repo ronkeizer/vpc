@@ -1,7 +1,7 @@
 #' Compute KMMC statistics
-#' 
+#'
 #' Kaplan-Meier Mean Covariate plots are a simulation-based diagnostic to study the influence of covariates and identify potential model misspecification.
-#' 
+#'
 #' @param dat data.frame with events
 #' @param strat vector of stratification variables
 #' @param reverse_prob reverse the probability (i.e. return `1-probability`)?

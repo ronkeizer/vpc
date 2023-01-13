@@ -1,5 +1,5 @@
 #' Confirm that a column is in the data, and rename data to prepare that column for later use.
-#' 
+#'
 #' @param dat An input data.frame or similar object
 #' @param cols A list with an element for colname giving the name for colname in
 #'   \code{dat}.
@@ -50,7 +50,7 @@ standardize_column <- function(dat, cols, colname, coldesc, what, default) {
 #' Prepare VPC data for future calculations by standardizing column names and
 #' modifying the input data based on the limits of quantification,
 #' stratification, and logarithmic values.
-#' 
+#'
 #' @inheritParams standardize_column
 #' @inheritParams define_loq
 #' @inheritParams add_stratification
@@ -167,7 +167,7 @@ format_vpc_input_data_tte <- function(dat, cols, stratify, rtte, rtte_calc_diff,
       dplyr::filter(!duplicated(id))
     dat$rtte <- 1
   }
-  
+
   if (what == "observed") {
     dat$sim <- NULL
   }

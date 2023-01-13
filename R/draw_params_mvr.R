@@ -1,5 +1,5 @@
 #' Draw parameters from multivariate distribution
-#' 
+#'
 #' @param ids vector of id numbers
 #' @param n_sim number of simulations
 #' @param theta theta vector

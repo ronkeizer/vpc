@@ -1,5 +1,5 @@
 #' Remove values that are not observed values from data
-#' 
+#'
 #' @param x A data.frame or similar object
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @param ... Passed to software-specific filtering function
@@ -20,7 +20,7 @@ filter_dv <- function(x, verbose = FALSE, ...) {
       "\n Object class: ", paste(class(x), collapse=", "),
       "\n Available filters: ", paste(names(filter_dv_software), collapse=", ")
     )
-    x    
+    x
   }
 }
 
@@ -33,16 +33,14 @@ filter_dv_software <- list(
     if ("EVID" %in% names(x)){
       msg("Filtering rows where EVID not 0", verbose)
       x <- x[x[["EVID"]] == 0,]
-    } 
+    }
     if("MDV" %in% names(x)) {
-      msg("Filtering rows where MDV not 0", verbose) 
+      msg("Filtering rows where MDV not 0", verbose)
       x <- x[x[["MDV"]] == 0,]
-    } 
+    }
     if(sum(c("EVID", "MDV") %in% names(x)) == 0) {
       msg("No MDV or EVID columns found to filter on", verbose)
     }
     return(x)
   }
 )
-
-

@@ -1,5 +1,5 @@
 #' Check and standardize limits of quantification
-#' 
+#'
 #' @param uloq Number or NULL indicating upper limit of quantification. Default is NULL.
 #' @param lloq Number or NULL indicating lower limit of quantification. Default is NULL.
 #' @param pred_corr perform prediction-correction?
