@@ -86,54 +86,54 @@ A collection of internal ggplot helpers for VPC plotting
 }
 \section{Functions}{
 \itemize{
-\item \code{geom_bin_sep}: Show rug plot of bin separators
+\item \code{geom_bin_sep()}: Show rug plot of bin separators
 
-\item \code{geom_hline_loq}: Generate hlines for the lloq/uloq
+\item \code{geom_hline_loq()}: Generate hlines for the lloq/uloq
 
-\item \code{geom_obs_cens_dat_tte}: Show the cens_dat for time-to-events
+\item \code{geom_obs_cens_dat_tte()}: Show the cens_dat for time-to-events
 
-\item \code{geom_obs_ci_continuous}: Show confidence interval for observed, continuous data
+\item \code{geom_obs_ci_continuous()}: Show confidence interval for observed, continuous data
 
-\item \code{geom_obs_ci_tte}: Show confidence interval for observed, time-to-event
+\item \code{geom_obs_ci_tte()}: Show confidence interval for observed, time-to-event
 data
 
-\item \code{geom_obs_dv_continuous}: Show observed data points
+\item \code{geom_obs_dv_continuous()}: Show observed data points
 
-\item \code{geom_obs_km}: Show observed Kaplan-Meier line
+\item \code{geom_obs_km()}: Show observed Kaplan-Meier line
 
-\item \code{geom_obs_median_continuous}: Show observed median line for continuous data
+\item \code{geom_obs_median_continuous()}: Show observed median line for continuous data
 
-\item \code{geom_sim_km}: Show simulated Kaplan-Meier curves for time-to-event
+\item \code{geom_sim_km()}: Show simulated Kaplan-Meier curves for time-to-event
 data
 
-\item \code{geom_sim_median_continuous}: Show simulated median line for continuous data
+\item \code{geom_sim_median_continuous()}: Show simulated median line for continuous data
 
-\item \code{geom_sim_median_tte}: Show simulated median line (or steps) for
+\item \code{geom_sim_median_tte()}: Show simulated median line (or steps) for
 time-to-event data
 
-\item \code{geom_sim_median_ci_continuous}: Show simulated median confidence interval for
+\item \code{geom_sim_median_ci_continuous()}: Show simulated median confidence interval for
 continuous data
 
-\item \code{geom_sim_pi_as_area_continuous}: Show simulated prediction interval area for continuous
+\item \code{geom_sim_pi_as_area_continuous()}: Show simulated prediction interval area for continuous
 data
 
-\item \code{geom_sim_pi_as_area_tte}: Show simulated prediction interval area for
+\item \code{geom_sim_pi_as_area_tte()}: Show simulated prediction interval area for
 time-to-event data
 
-\item \code{geom_sim_pi_continuous}: Show simulated prediction interval lines for
+\item \code{geom_sim_pi_continuous()}: Show simulated prediction interval lines for
 continuous data
 
-\item \code{geom_sim_pi_ci_continuous}: Show simulated prediction interval confidence interval
+\item \code{geom_sim_pi_ci_continuous()}: Show simulated prediction interval confidence interval
 areas for continuous data
 
-\item \code{facet_continuous}: Facet continuous data by stratification factors
+\item \code{facet_continuous()}: Facet continuous data by stratification factors
 
-\item \code{facet_tte}: Facet time-to-event data by stratification factors
+\item \code{facet_tte()}: Facet time-to-event data by stratification factors
 
-\item \code{guides_stratify_color}: Generate guides for stratification fill and colour
+\item \code{guides_stratify_color()}: Generate guides for stratification fill and colour
 
-\item \code{scale_x_log10_vpc}: Optionally show log-x scale
+\item \code{scale_x_log10_vpc()}: Optionally show log-x scale
 
-\item \code{scale_y_log10_vpc}: Optionally show log-y scale
+\item \code{scale_y_log10_vpc()}: Optionally show log-y scale
+
 }}
-

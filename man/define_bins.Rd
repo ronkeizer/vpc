@@ -35,6 +35,6 @@ Define bins for many types of data
 }
 \section{Functions}{
 \itemize{
-\item \code{define_bins_tte}: Define bins for time-to-event data
-}}
+\item \code{define_bins_tte()}: Define bins for time-to-event data
 
+}}
