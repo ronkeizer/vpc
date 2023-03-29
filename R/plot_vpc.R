@@ -1,8 +1,8 @@
 #' VPC plotting function
 #'
-#' This function performs no parsing of data, it just plots the already calculated statistics generated using one of the 
+#' This function performs no parsing of data, it just plots the already calculated statistics generated using one of the
 #' `vpc` functions.
-#' 
+#'
 #' @param db object created using the `vpc` function
 #' @param show what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
@@ -10,14 +10,14 @@
 #' @param log_x Boolean indicting whether x-axis should be shown as logarithmic. Default is FALSE.
 #' @param log_y Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.
 #' @param title title
-#' @param xlab label for x axis 
+#' @param xlab label for x axis
 #' @param ylab label for y axis
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @export
 #' @seealso \link{sim_data}, \link{vpc_cens}, \link{vpc_tte}, \link{vpc_cat}
-#' @examples 
+#' @examples
 #' ## See vpc.ronkeizer.com for more documentation and examples
-#' 
+#'
 #' library(vpc)
 #' vpc_db <- vpc(sim = simple_data$sim, obs = simple_data$obs, vpcdb = TRUE)
 #' plot_vpc(vpc_db, title = "My new vpc", x = "Custom x label")
@@ -57,7 +57,7 @@ plot_vpc <- function(db,
 }
 
 #' Helper function to simplify vpc plotting (not intended to be called directly)
-#' 
+#'
 #' @inheritParams plot_vpc
 #' @keywords internal
 #' @export
@@ -115,7 +115,7 @@ plot_vpc_helper.vpcdb_continuous <- function(db, ...,
   if (!is.null(db$obs) && !is.null(db$vpc_dat) && is.factor(db$vpc_dat$bin)) {
     db$aggr_obs$bin_mid <- db$aggr_obs$bin
   }
-  
+
   pl <-
     ggplot2::ggplot(data=db) +
     geom_sim_median_continuous(data=db, show=show$sim_median, vpc_theme=vpc_theme) +
@@ -209,7 +209,7 @@ plot_vpc_helper.vpcdb_time_to_event <- function(db, ...,
     }
   }
   if(!is.null(db$obs_km)) db$obs_km$bin_mid <- c(0, diff(db$obs_km$time))
-  
+
   show$pi_as_area <- TRUE
   pl <-
     ggplot2::ggplot(data=db, mapping=ggplot2::aes(x=bin_mid, y=qmed)) +
@@ -234,7 +234,7 @@ plot_vpc_helper.vpcdb_time_to_event <- function(db, ...,
 }
 
 #' Create a ggplot for each vpcdb type
-#' 
+#'
 #' These functions are not to be called directly by users; they are for internal
 #' use.  Users should call \code{plot_vpc()}.
 #'
@@ -282,7 +282,7 @@ ggplot.vpcdb_time_to_event <- function(data = NULL, mapping = NULL, ..., environ
 }
 
 #' A collection of internal ggplot helpers for VPC plotting
-#' 
+#'
 #' @param data The vpcdb object
 #' @param show Should the geom be shown? (TRUE/FALSE)
 #' @param vpc_theme The theme to use
@@ -314,7 +314,7 @@ geom_bin_sep <- function(bins, show, vpc_theme) {
 geom_hline_loq <- function(data, vpc_theme) {
   loq_values <- c(data$lloq, data$uloq)
   if(!is.null(loq_values)) {
-    ggplot2::geom_hline(yintercept = loq_values, colour=vpc_theme$loq_color) 
+    ggplot2::geom_hline(yintercept = loq_values, colour=vpc_theme$loq_color)
   } else {
     ggplot2::geom_blank()
   }
@@ -324,7 +324,7 @@ geom_hline_loq <- function(data, vpc_theme) {
 geom_obs_cens_dat_tte <- function(data) {
   if(!is.null(data$cens_dat) && nrow(data$cens_dat)>0) {
     ggplot2::geom_point(
-      data=data$cens_dat, 
+      data=data$cens_dat,
       ggplot2::aes(x=time, y = y),
       shape="|",
       size=2.5
@@ -343,7 +343,7 @@ geom_obs_ci_continuous <- function(data, show, vpc_theme) {
       colour=vpc_theme$obs_ci_color,
       fill=NA,
       linetype=vpc_theme$obs_ci_linetype,
-      size=vpc_theme$obs_ci_size,
+      linewidth=vpc_theme$obs_ci_linewidth,
       outline.type="both"
     )
   } else {
@@ -356,8 +356,8 @@ geom_obs_ci_continuous <- function(data, show, vpc_theme) {
 geom_obs_ci_tte <- function(data, show, vpc_theme) {
   if(show & !is.null(data$obs)) {
     ggplot2::geom_ribbon(
-      data=data$obs_km, 
-      ggplot2::aes(x=time, ymin=lower, ymax=upper, group=strat), 
+      data=data$obs_km,
+      ggplot2::aes(x=time, ymin=lower, ymax=upper, group=strat),
       fill=vpc_theme$obs_ci_fill,
       colour = NA
     )
@@ -400,16 +400,16 @@ geom_obs_km <- function(data) {
     if(!is.null(data$stratify_color)) {
       ret <-
         geom_fun(
-          data = data$obs_km, 
+          data = data$obs_km,
           ggplot2::aes(x=time, y=surv, colour=get(data$stratify_color[1])),
-          size=.8
+          linewidth=.8
         )
     } else {
       ret <-
         geom_fun(
-          data = data$obs_km, 
+          data = data$obs_km,
           ggplot2::aes(x=time, y=surv, group=strat),
-          size=.8
+          linewidth=.8
         )
     }
   } else {
@@ -423,10 +423,10 @@ geom_obs_median_continuous <- function(data, show, vpc_theme) {
   if (show & !is.null(data$aggr_obs)) {
     ggplot2::geom_line(
       data=data$aggr_obs,
-      ggplot2::aes(x=bin_mid, y=obs50), 
-      linetype=vpc_theme$obs_median_linetype, 
-      colour=vpc_theme$obs_median_color, 
-      size=vpc_theme$obs_median_size
+      ggplot2::aes(x=bin_mid, y=obs50),
+      linetype=vpc_theme$obs_median_linetype,
+      colour=vpc_theme$obs_median_color,
+      linewidth=vpc_theme$obs_median_linewidth
     )
   } else {
     ggplot2::geom_blank()
@@ -456,7 +456,7 @@ geom_sim_median_continuous <- function(data, show, vpc_theme) {
       ggplot2::aes(y=q50.med),
       colour=vpc_theme$sim_median_color,
       linetype=vpc_theme$sim_median_linetype,
-      size=vpc_theme$sim_median_size
+      linewidth=vpc_theme$sim_median_linewidth
     )
   } else {
     ggplot2::geom_blank()
@@ -522,16 +522,16 @@ geom_sim_pi_as_area_tte <- function(data, show, smooth, vpc_theme) {
       if(!is.null(data$stratify_color)) {
         ret <-
           ggplot2::geom_ribbon(
-            data = data$sim_km, 
-            ggplot2::aes(min = qmin, max=qmax, fill = get(data$stratify_color[1])), 
+            data = data$sim_km,
+            ggplot2::aes(min = qmin, max=qmax, fill = get(data$stratify_color[1])),
             alpha=vpc_theme$sim_median_alpha
           )
       } else {
         ret <-
           ggplot2::geom_ribbon(
-            data = data$sim_km, 
-            ggplot2::aes(ymin = qmin, ymax=qmax), 
-            fill = vpc_theme$sim_median_fill, 
+            data = data$sim_km,
+            ggplot2::aes(ymin = qmin, ymax=qmax),
+            fill = vpc_theme$sim_median_fill,
             alpha=vpc_theme$sim_median_alpha
           )
       }
@@ -539,16 +539,16 @@ geom_sim_pi_as_area_tte <- function(data, show, smooth, vpc_theme) {
       if(!is.null(data$stratify_color)) {
         ret <-
           ggplot2::geom_rect(
-            data = data$sim_km, 
-            ggplot2::aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax, fill = get(data$stratify_color[1])), 
+            data = data$sim_km,
+            ggplot2::aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax, fill = get(data$stratify_color[1])),
             alpha=vpc_theme$sim_median_alpha
           )
       } else {
         ret <-
           ggplot2::geom_rect(
-            data = data$sim_km, 
-            ggplot2::aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax), 
-            alpha=vpc_theme$sim_median_alpha, 
+            data = data$sim_km,
+            ggplot2::aes(xmin=bin_min, xmax=bin_max, ymin=qmin, ymax=qmax),
+            alpha=vpc_theme$sim_median_alpha,
             fill = vpc_theme$sim_median_fill
           )
       }
@@ -570,7 +570,7 @@ geom_sim_pi_continuous <- function(data, show, vpc_theme) {
       colour=vpc_theme$sim_pi_color,
       fill=NA,
       linetype=vpc_theme$sim_pi_linetype,
-      size=vpc_theme$sim_pi_size,
+      linewidth=vpc_theme$sim_pi_linewidth,
       outline.type="both"
     )
   } else {
@@ -630,7 +630,7 @@ facet_continuous <- function(data) {
         ret <-
           ggplot2::facet_wrap(
             stats::reformulate(data$stratify[1], NULL),
-            scales = data$scales, 
+            scales = data$scales,
             labeller = data$labeller
           )
       } else if (length(grep("row", data$facet))>0) {
