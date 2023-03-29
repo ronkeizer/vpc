@@ -1,5 +1,5 @@
 #' Defaults for show argument with various endpoint types
-#' 
+#'
 #' @export
 show_default <-
   list(

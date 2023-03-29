@@ -1,5 +1,5 @@
 #' Define bins for many types of data
-#' 
+#'
 #' @inheritParams read_vpc
 #' @param bins either "density", "time", or "data", "none", or one of the
 #'   approaches available in classInterval() such as "jenks" (default) or

@@ -2,7 +2,7 @@
 #'
 #' @examples
 #' vpc(simple_data$sim, simple_data$obs) + theme_plain()
-#' 
+#'
 #' @export
 theme_plain <-  function () {
   ggplot2::theme(
@@ -21,10 +21,10 @@ theme_plain <-  function () {
 }
 
 #' Empty ggplot2 theme
-#' 
-#' @examples 
+#'
+#' @examples
 #' vpc(simple_data$sim, simple_data$obs) + theme_empty()
-#' 
+#'
 #' @export
 theme_empty <- function () {
   ggplot2::theme(panel.grid.major = ggplot2::element_blank(),

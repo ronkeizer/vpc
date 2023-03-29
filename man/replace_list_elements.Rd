@@ -15,7 +15,7 @@ replace_list_elements(list, replacement)
 Replace list elements by name
 }
 \details{
-Finds and replaces list elements by name and throws an error if an 
+Finds and replaces list elements by name and throws an error if an
    element is not available in the original list. This is a local duplicate
    of the PKPDmisc copy for the VPC package to reduce dependency on PKPDmisc
    at this time.

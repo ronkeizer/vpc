@@ -78,6 +78,5 @@ read_table_nm <- function(
       tab_file <- tab_file[, !duplicated(colnames(tab_file))]
     }
 
-    return(tab_file)
-
+    tab_file
 }

@@ -71,7 +71,7 @@ vpc_cat  <- function(sim = NULL,
     )
   software_type <- vpc_data$software
   cols <- vpc_data$cols
-  
+
   ## parse data into specific format
   if(!is.null(vpc_data$obs)) {
     vpc_data$obs <-
@@ -110,30 +110,30 @@ vpc_cat  <- function(sim = NULL,
   obs$dv <- as.factor(obs$dv)
   lev <- levels(obs$dv)
   if (!is.null(sim)) {
-    tmp1 <- sim %>% 
-      dplyr::group_by(sim, bin) 
+    tmp1 <- sim %>%
+      dplyr::group_by(sim, bin)
     for (i in seq(lev)) {
       if (i == 1) {
-        aggr_sim <- tmp1 %>% 
+        aggr_sim <- tmp1 %>%
           dplyr::summarise(fact_perc(dv, lev[i]))
       } else {
         suppressMessages({
-          aggr_sim <- dplyr::bind_cols(aggr_sim, tmp1 %>% 
+          aggr_sim <- dplyr::bind_cols(aggr_sim, tmp1 %>%
                               dplyr::summarise(fact_perc(dv, lev[i])) %>%
                               dplyr::ungroup() %>%
                               dplyr::select(-sim, -bin))
         })
       }
     }
-    aggr_sim <- dplyr::bind_cols(aggr_sim, tmp1 %>% 
-                        dplyr::summarise(mean(idv)) %>% 
+    aggr_sim <- dplyr::bind_cols(aggr_sim, tmp1 %>%
+                        dplyr::summarise(mean(idv)) %>%
                         dplyr::ungroup() %>%
                         dplyr::select(-sim, -bin))
     colnames(aggr_sim) <- c("sim", "bin", paste0("fact_", lev), "mn_idv")
     tmp3 <- tidyr::pivot_longer(aggr_sim, names_to = "strat", cols = paste0("fact_", lev)) %>%
       dplyr::arrange(sim, strat, bin) %>%
       dplyr::mutate(strat = stringr::str_replace(strat, "fact_", ""))
-    vpc_dat <- tmp3 %>% 
+    vpc_dat <- tmp3 %>%
       dplyr::group_by(strat, bin) %>%
       dplyr::summarise(q50.low = quantile(value, ci[1]),
                        q50.med = quantile(value, 0.5),
@@ -152,16 +152,16 @@ vpc_cat  <- function(sim = NULL,
     tmp <- obs %>% dplyr::group_by(bin)
     for (i in seq(lev)) {
       if (i == 1) {
-        aggr_obs <- tmp %>% 
+        aggr_obs <- tmp %>%
           dplyr::summarise(fact_perc(dv, lev[i]))
       } else {
-        aggr_obs <- cbind(aggr_obs, tmp %>% 
-                            dplyr::summarise(fact_perc(dv, lev[i])) %>% 
+        aggr_obs <- cbind(aggr_obs, tmp %>%
+                            dplyr::summarise(fact_perc(dv, lev[i])) %>%
                             dplyr::ungroup() %>%
                             dplyr::select(-bin) )
       }
     }
-    tmp1 <- cbind(aggr_obs,  tmp %>% 
+    tmp1 <- cbind(aggr_obs,  tmp %>%
                                dplyr::summarise(mean(idv)) %>%
                                dplyr::ungroup() %>%
                                dplyr::select(-bin))

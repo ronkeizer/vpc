@@ -1,9 +1,9 @@
 #' VPC function for time-to-event (survival) data
-#' 
+#'
 #' This function can be used for either single time-to-event (TTE) or repeated time-to-event (RTTE) data.
 #'
 #' Creates a VPC plot from observed and simulation survival data
-#' 
+#'
 #' @inheritParams format_vpc_input_data
 #' @inheritParams read_vpc
 #' @inheritParams plot_vpc
@@ -13,7 +13,7 @@
 #' @param kmmc either NULL (for regular TTE vpc, default), or a variable name for a KMMC plot (e.g. "WT")
 #' @param events numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events.
 #' @param reverse_prob reverse the probability scale (i.e. plot 1-probability)
-#' @param stratify_color character vector of stratification variables. Only 1 stratification variable can be supplied, cannot be used in conjunction with `stratify`. 
+#' @param stratify_color character vector of stratification variables. Only 1 stratification variable can be supplied, cannot be used in conjunction with `stratify`.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param as_percentage Show y-scale from 0-100 percent? TRUE by default, if FALSE then scale from 0-1.
 #' @param verbose show debugging information (TRUE or FALSE)
@@ -23,10 +23,10 @@
 #' @seealso \link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cens}
 #' @examples
 #' ## See vpc-docs.ronkeizer.com for more documentation and examples.
-#' 
+#'
 #' ## Example for repeated) time-to-event data
 #' ## with NONMEM-like data (e.g. simulated using a dense grid)
-#' 
+#'
 #' data(rtte_obs_nm)
 #' data(rtte_sim_nm)
 #'
@@ -95,7 +95,7 @@ vpc_tte <- function(sim = NULL,
       stratify
     } else if (!is.null(stratify_color)) {
       if(length(stratify_color) != 1) {
-        stop("Sorry, please specify only a single stratification variable for `stratify_color`.")      
+        stop("Sorry, please specify only a single stratification variable for `stratify_color`.")
       }
       stratify_color
     } else {
@@ -192,7 +192,7 @@ vpc_tte <- function(sim = NULL,
         tmp3 <- compute_kaplan(tmp2, strat = "strat", reverse_prob = reverse_prob, rtte_conditional = rtte_conditional)
       }
       tmp3$time_strat <- paste0(tmp3$time, "_", tmp3$strat)
-      tmp4 <- expand.grid(time = c(0, unique(sim$time)), surv=NA, lower=NA, upper=NA, 
+      tmp4 <- expand.grid(time = c(0, unique(sim$time)), surv=NA, lower=NA, upper=NA,
                           strat = unique(tmp3$strat))
       tmp4$time_strat <- paste0(tmp4$time, "_", tmp4$strat)
       tmp4[match(tmp3$time_strat, tmp4$time_strat),]$surv <- tmp3$surv
@@ -253,7 +253,7 @@ vpc_tte <- function(sim = NULL,
     cens_dat <- obs
     if(rtte) {
       if(!rtte_conditional || !rtte_calc_diff) {
-        cens_dat <- cens_dat %>% 
+        cens_dat <- cens_dat %>%
           dplyr::mutate(time = t)
       }
     }

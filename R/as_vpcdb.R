@@ -1,5 +1,5 @@
 #' Create a vpcdb object, and standardize parameter checking
-#' 
+#'
 #' @param facet either "wrap", "columns", or "rows"
 #' @inheritParams ggplot2::facet_grid
 #' @param type The type of vpc (e.g. "continuous", "categorical", "censored", or

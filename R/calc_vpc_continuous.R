@@ -1,5 +1,5 @@
 #' Calculate aggregate statistics for simulated and observed VPC data
-#' 
+#'
 #' @inheritParams read_vpc
 #' @inheritParams define_bins
 #' @param loq The list output from \code{define_loq()}
@@ -14,20 +14,20 @@ calc_vpc_continuous <- function(sim, obs, loq, pi, ci, stratify, bins, bin_mid, 
   if(!is.null(sim)) {
     msg("Calculating statistics for simulated data...", verbose=verbose)
     aggr_sim <-
-      sim %>% 
-      dplyr::group_by(strat, sim, bin) %>% 
+      sim %>%
+      dplyr::group_by(strat, sim, bin) %>%
       dplyr::summarise(
         q5 = quantile(dv, pi[1]),
         q50 = quantile(dv, 0.5),
         q95 = quantile(dv, pi[2]),
         mean_idv = mean(idv)
       )
-    
+
     # TODO: Review 2021-04: Shouldn't this aggregation of sim use
     # quantile_cens()?
     vpc_dat <-
       aggr_sim %>%
-      dplyr::group_by(strat, bin) %>% 
+      dplyr::group_by(strat, bin) %>%
       dplyr::summarise(
         q5.low = quantile(q5, ci[1]),
         q5.med = quantile(q5, 0.5),
@@ -40,7 +40,7 @@ calc_vpc_continuous <- function(sim, obs, loq, pi, ci, stratify, bins, bin_mid, 
         q95.up = quantile(q95, ci[2]),
         bin_mid = mean(.data$mean_idv)
       )
-    
+
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
     if(bin_mid == "middle") {
@@ -76,7 +76,7 @@ calc_vpc_continuous <- function(sim, obs, loq, pi, ci, stratify, bins, bin_mid, 
       aggr_obs$strat2 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)]
     }
   }
-  
+
   list(
     vpc_dat=vpc_dat,
     aggr_obs=aggr_obs

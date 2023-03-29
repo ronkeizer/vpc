@@ -9,6 +9,9 @@ create_vpc_theme(...)
 \arguments{
 \item{...}{pass arguments to `new_vpc_theme`}
 }
+\value{
+The vpc theme
+}
 \description{
 Create new vpc theme
 }

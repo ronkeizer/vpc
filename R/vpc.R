@@ -1,7 +1,7 @@
 #' VPC function
 #'
 #' Creates a VPC plot from observed and simulation data
-#' 
+#'
 #' @inheritParams format_vpc_input_data
 #' @inheritParams read_vpc
 #' @inheritParams define_loq
@@ -181,7 +181,7 @@ vpc_vpc <- function(sim = NULL,
       obs = pred_corr_data$obs,
       bins = bins,
       facet = facet,
-      scales = scales,       
+      scales = scales,
       labeller = labeller,
       lloq = lloq,
       uloq = uloq,

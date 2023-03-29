@@ -66,7 +66,7 @@ relative_times <- function (dat, simulation = FALSE) {
   }
 }
 
-convert_from_dense_grid <- function (dat) { 
+convert_from_dense_grid <- function (dat) {
   ## Note RK: only for a single trial, requires a loop or ddply for multiple subproblems
   tmp <- dat %>% dplyr::group_by_("id")
   if("rtte" %in% names(dat)) {
