@@ -62,7 +62,7 @@ format_vpc_input_data <- function(dat, cols, lloq, uloq, stratify, log_y, log_y_
   dat <- standardize_column(dat=dat, cols=cols, colname="id", coldesc="id indicator", what=what)
   dat <- standardize_column(dat=dat, cols=cols, colname="dv", coldesc="dependent variable", what=what)
   dat <- standardize_column(dat=dat, cols=cols, colname="idv", coldesc="indepentent variable", what=what)
-  if (pred_corr) {
+  if (!pred_corr) {
     if (!is.null(uloq)) { dat$dv[dat$dv > uloq] <- uloq }
     if (!is.null(lloq)) { dat$dv[dat$dv < lloq] <- lloq }
   } else {
