@@ -6,7 +6,7 @@
 #' @export
 theme_plain <-  function () {
   ggplot2::theme(
-    text = ggplot2::element_text(family="mono"),
+    text = ggplot2::element_text(family="sans"),
     plot.title = ggplot2::element_text(family="sans", size = 16, vjust = 1.5),
     axis.title.x = ggplot2::element_text(family="sans",vjust=-0.25),
     axis.title.y = ggplot2::element_text(family="sans"),
