@@ -112,7 +112,7 @@ vpc_vpc <- function(sim = NULL,
   if(!is.null(vpc_data$sim)) {
     msg("Parsing simulated data...", verbose=verbose)
     if((!is.null(lloq) || !is.null(uloq)) && pred_corr) {
-      warning("Prediction-correction cannot be used together with censored data (<LLOQ or >ULOQ). VPC plot will be shown for non-censored data only!")
+      warning("Be careful using pred-correction together with censored data (<LLOQ or >ULOQ). VPC plot will be shown for non-censored data only!")
       vpc_data$sim <-
         format_vpc_input_data(
           dat=vpc_data$sim,

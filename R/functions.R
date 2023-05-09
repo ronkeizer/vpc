@@ -54,15 +54,15 @@ convert_to_dense_grid <- function(dat, t = "t", id = "id", t_start = 0, t_step =
 
 relative_times <- function (dat, simulation = FALSE) {
   if (simulation) {
-    tmp <- dat %>% dplyr::group_by_("sim", "id")
+    tmp <- dat %>% dplyr::group_by(sim, id)
   } else {
-    tmp <- dat %>% dplyr::group_by_("id")
+    tmp <- dat %>% dplyr::group_by(id)
   }
-  tmp2 <- tmp %>% dplyr::arrange_("time") %>% dplyr::mutate(time = c(time[1], diff(time)))
+  tmp2 <- tmp %>% dplyr::arrange(time) %>% dplyr::mutate(time = c(time[1], diff(time)))
   if (simulation) {
-    return(tmp2 %>% dplyr::arrange_("sim", "id", "time"))
+    return(tmp2 %>% dplyr::arrange(sim, id, time))
   } else {
-    return(tmp2 %>% dplyr::arrange_("id", "time"))
+    return(tmp2 %>% dplyr::arrange(id, time))
   }
 }
 

@@ -64,12 +64,11 @@ vpc_tte <- function(sim = NULL,
                     labeller = NULL,
                     verbose = FALSE,
                     vpcdb = FALSE) {
-  vpc_data <-
-    read_vpc(
-      sim=sim, obs=obs, psn_folder=psn_folder,
-      software=software,
-      sim_cols=sim_cols, obs_cols=obs_cols
-    )
+  vpc_data <- read_vpc(
+    sim=sim, obs=obs, psn_folder=psn_folder,
+    software=software,
+    sim_cols=sim_cols, obs_cols=obs_cols
+  )
   sim <- vpc_data$sim
   obs <- vpc_data$obs
   software_type <- vpc_data$software
@@ -185,7 +184,7 @@ vpc_tte <- function(sim = NULL,
       if (verbose) utils::setTxtProgressBar(pb, i)
       tmp <- sim %>% dplyr::filter(sim == i)
       tmp2 <- add_stratification(tmp %>%
-                                 dplyr::arrange_("id", "time"), stratify_pars)
+                                 dplyr::arrange(id, time), stratify_pars)
       if(!is.null(kmmc) && kmmc %in% names(obs)) {
         tmp3 <- compute_kmmc(tmp2, strat = "strat", reverse_prob = reverse_prob, kmmc = kmmc)
       } else {
@@ -210,7 +209,7 @@ vpc_tte <- function(sim = NULL,
     }
     if (verbose) close(pb)
     sim_km <- all_dat %>%
-      dplyr::group_by_("strat", "bin") %>%
+      dplyr::group_by(strat, bin) %>%
       dplyr::summarise (bin_mid = head(bin_mid,1),
                  bin_min = head(bin_min,1),
                  bin_max = head(bin_max,1),

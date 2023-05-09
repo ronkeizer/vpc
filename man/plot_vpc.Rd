@@ -39,7 +39,7 @@ plot_vpc(
 \item{verbose}{show debugging information (TRUE or FALSE)}
 }
 \description{
-This function performs no parsing of data, it just plots the already calculated statistics generated using one of the 
+This function performs no parsing of data, it just plots the already calculated statistics generated using one of the
 `vpc` functions.
 }
 \examples{

@@ -1,4 +1,4 @@
-test_that("vpc", {
+test_that("vpc for continuous data works", {
   tmp <- simple_data
   obj <- vpc(sim = tmp$sim, obs = tmp$obs, vpcdb=TRUE)
 
@@ -66,4 +66,13 @@ test_that("vpc", {
     plot_vpc(obj2), "ggplot"
     # "vpc plot succeeded"
   )
+})
+
+test_that("vpc for continuous data with pred-correction and censored data works", {
+  tmp <- simple_data
+  tmp$sim <- tmp$sim %>%
+    dplyr::mutate(DV = IPRED)
+  obj1 <- vpc(sim = tmp$sim, obs = tmp$obs, vpcdb=TRUE)
+  obj2 <- vpc(sim = tmp$sim, obs = tmp$obs, lloq = 1.1, vpcdb=TRUE)
+  expect_equal(as.numeric(tail(obj2$aggr_obs,1)), c(1, 11, NA_real_, 13.375, 67.56, 12, 10, 12.5875))
 })
