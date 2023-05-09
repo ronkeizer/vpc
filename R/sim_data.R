@@ -47,7 +47,7 @@ sim_data <- function (design = cbind(id = c(1,1,1), idv = c(0,1,2)),
 
   colnames(tmp) <- gsub("\\.x", "", colnames(tmp))
   tmp %>%
-    dplyr::arrange_("sim", "id", "time")
+    dplyr::arrange(sim, id, time)
 }
 
 sim_data_tte <- function (fit, t_cens = NULL, n = 100) {
