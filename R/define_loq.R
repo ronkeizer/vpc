@@ -21,10 +21,6 @@ define_loq <- function(lloq = NULL, uloq = NULL,
   if (require_loq & is.null(uloq) & is.null(lloq)) {
     stop("You have to specify either a lower limit of quantification (lloq=...) or an upper limit (uloq=...).")
   }
-  if ((!is.null(lloq) || !is.null(uloq)) && pred_corr) {
-    # TODO: Confirm what should happen based on discussion in issue #77
-    # message("Prediction-correction cannot be used together with censored data (<LLOQ or >ULOQ). VPC plot will be shown for non-censored data only!")
-  }
   cens_type <-
     if (is.null(lloq) & is.null(uloq)) {
       "neither"
