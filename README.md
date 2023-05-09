@@ -1,3 +1,5 @@
+![R-CMD-check](https://github.com/ronkeizer/vpc/actions/workflows/R-CMD-check.yaml/badge.svg)
+
 vpc
 ===
 
