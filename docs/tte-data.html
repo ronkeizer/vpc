@@ -1,0 +1,441 @@
+
+<!DOCTYPE HTML>
+<html lang="" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Time-to-event data · GitBook</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        
+        
+        
+    
+    <link rel="stylesheet" href="gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.css">
+                
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+        <link rel="stylesheet" href="styles/website.css">
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="stratification.html" />
+    
+    
+    <link rel="prev" href="categorical-data.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="Type to search" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        <li class="header">Getting started</li>
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    Introduction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="installation.html">
+            
+                <a href="installation.html">
+            
+                    
+                    Installation
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.3" data-path="overview-functionality.html">
+            
+                <a href="overview-functionality.html">
+            
+                    
+                    Overview
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Main functions</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="continuous-data.html">
+            
+                <a href="continuous-data.html">
+            
+                    
+                    Continuous data
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.2" data-path="censored-data.html">
+            
+                <a href="censored-data.html">
+            
+                    
+                    Censored data
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3" data-path="categorical-data.html">
+            
+                <a href="categorical-data.html">
+            
+                    
+                    Categorical data
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="2.4" data-path="tte-data.html">
+            
+                <a href="tte-data.html">
+            
+                    
+                    Time-to-event data
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">Customization</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="stratification.html">
+            
+                <a href="stratification.html">
+            
+                    
+                    Stratification
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2" data-path="binning.html">
+            
+                <a href="binning.html">
+            
+                    
+                    Binning
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3" data-path="pred-correction.html">
+            
+                <a href="pred-correction.html">
+            
+                    
+                    Prediction correction
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.4" data-path="appearance.html">
+            
+                <a href="appearance.html">
+            
+                    
+                    Appearance
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            Published with GitBook
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >Time-to-event data</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="time-to-event-data">Time-to-event data</h1>
+<p>Similar to the VPC for continuous data, the VPC for TTE data requires simulated data. In general, there are two distinct approach to simulate survival data:</p>
+<ul>
+<li><p><em>Hazard integration</em>: Integrate the hazard over time, and at <em>any possible</em> observation timepoint randomly draw a binary value based on the probability of observing the event. The disadvantage of this method is that it is slow due to the numerical solving of the ODEs. Also, a dataset with a dense design grid has to be used for simulation, i.e. one that has observation times at every possible timepoint that an event can occur for all individuals.</p>
+</li>
+<li><p><em>Direct sampling</em>: Sample event times directly from the distribution used to model the data (e.g. Weibull, exponential, Gompertz). Advantages of this approach is that it is much faster, and it does not require a dense grid. The disadvantage with this approach is however that the hazard is assumed constant over time, so models with time-dependent hazards cannot easily be simulated with this approach. This approach is straightforward in R but cannot easily be implemented in NONMEM. Example will follow soon.</p>
+</li>
+</ul>
+<p>An example for time-to-event data is shown below. The datasets are supplied with the <code>vpc</code> library.</p>
+<pre><code>data(rtte_obs_nm)
+data(rtte_sim_nm)
+</code></pre><p>Treat RTTE as TTE, no stratification:</p>
+<pre><code>vpc_tte(sim = rtte_sim_nm,
+        obs = rtte_obs_nm,
+        rtte = FALSE,
+        sim_cols = list(dv = &quot;dv&quot;, idv=&quot;t&quot;),
+        obs_cols = list(idv = &quot;dt&quot;))
+</code></pre><p>Stratified for covariate and study arm, and binned and smooth:</p>
+<pre><code>vpc_tte(sim = rtte_sim_nm,
+        obs = rtte_obs_nm,
+        stratify = c(&quot;sex&quot;,&quot;drug&quot;),
+        rtte = FALSE,
+        bins = &quot;kmeans&quot;,
+        n_bins = 20,
+        smooth = TRUE,
+        sim_cols = list(dv = &quot;dv&quot;, idv=&quot;t&quot;),
+        obs_cols = list(idv = &quot;dt&quot;))
+</code></pre><p>Stratified for event number (RTTE) and study arm:</p>
+<pre><code>vpc_tte(sim = rtte_sim_nm,
+        obs = rtte_obs_nm,
+        rtte = TRUE, rtte_calc_diff = TRUE, events = c(1:3),
+        stratify=c(&quot;drug&quot;),
+        bins = &quot;time&quot;,
+        n_bins = 20,
+        smooth = TRUE,
+        sim_cols = list(dv = &quot;dv&quot;, idv=&quot;t&quot;),
+        obs_cols = list(idv = &quot;t&quot;), verbose=TRUE)
+</code></pre><h2 id="notes-on-binning-and-smoothing">Notes on binning and smoothing</h2>
+<p>In principle, the <code>vpc_tte()</code> function does allow binning and <em>smoothing</em> like commonly applied to a regular <em>vpc</em>. However, the binning and smoothing often makes the bins go over the 0 - 100% interval and some elements of the confidence interval may not be shown correctly or even missing from the plot. It is therefore advised to not apply binning for time-to-event data, and to just use the <em>&apos;bins&apos;</em> generated from the simulated data. The bins are basically based on all unique timepoints for all events the simulations dataset.</p>
+<h2 id="kaplan-meier-mean-covariate-plots-kmmc">Kaplan-Meier Mean Covariate plots (KMMC)</h2>
+<p>KMMC plots have been <a href="https://www.page-meeting.org/default.asp?abstract=2564" target="_blank">presented by Andy Hooker</a> as a model diagnostic for covariate inclusion. They can be created using the same <code>vpc_tte()</code> function by specifying the relevant predictor to the <code>kmmc</code> argument, as shown below. In contrast to regular time-to-event VPCs, binning is recommended for the KMMC plot.</p>
+<pre><code>vpc_tte(sim = rtte_sim_nm,
+        obs = rtte_obs_nm,
+        rtte = FALSE,
+        bins=c(10, 20, 40, 60, 80, 100), # binning is recommended with KMMC
+        kmmc = &quot;sex&quot;,
+        sim_cols = list(dv = &quot;dv&quot;, idv=&quot;t&quot;),
+        obs_cols = list(idv = &quot;dt&quot;))
+</code></pre>
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="categorical-data.html" class="navigation navigation-prev " aria-label="Previous page: Categorical data">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="stratification.html" class="navigation navigation-next " aria-label="Next page: Stratification">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"Time-to-event data","level":"2.4","depth":1,"next":{"title":"Stratification","level":"3.1","depth":1,"path":"stratification.md","ref":"stratification.md","articles":[]},"previous":{"title":"Categorical data","level":"2.3","depth":1,"path":"categorical-data.md","ref":"categorical-data.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["mathjax","expandable-chapters","toc"],"pluginsConfig":{"toc":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"expandable-chapters":{}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"tte-data.md","mtime":"2017-11-14T22:24:40.000Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-14T22:26:04.796Z"},"basePath":".","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="gitbook/gitbook.js"></script>
+    <script src="gitbook/theme.js"></script>
+    
+        
+        <script src="https://cdn.mathjax.org/mathjax/2.6-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-mathjax/plugin.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-expandable-chapters/expandable-chapters.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+

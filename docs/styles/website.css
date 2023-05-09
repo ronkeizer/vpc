@@ -1,0 +1,74 @@
+h1 {
+  color: #266189;
+}
+
+h2, h3 {
+  color: #666 ;
+}
+
+.active a {
+  color: #266189;
+}
+
+div.book-summary, div.book-summary nav {
+  background:  #266189;
+  color: #fff;
+}
+
+/*div.font-settings {
+  display: none;
+}*/
+
+#book-search-input {
+  background:  #367199 !important;
+  color: #fff !important;
+}
+#book-search-input input {
+  color: #fff !important;
+}
+
+div.book-summary nav ul li a {
+  color: #fff !important ;
+}
+
+div.book-summary nav ul li a:hover {
+  color: #ddd !important ;
+  text-decoration: none !important;
+}
+
+h2 {
+  color: #aaa !important;
+}
+h4 {
+  font-size: 90% !important;
+  color: #666 !important;
+}
+table thead tr th {
+  display: none !important;
+}
+table tr, table td {
+  background: #fff !important;
+  border: 0px !important
+}
+
+.book-summary ul.summary li.header {
+  color: #efefef !important;
+}
+li.chapter {
+  margin-left: 25px !important;
+}
+/*ul.summary > li.chapter {
+  display: none !important;
+}*/
+.book-summary ul.summary li.header {
+  color: #d5d5d5 !important;
+}
+/*li[data-level="1.1"] {
+  display: none !important;
+}*/
+span.MathJax {
+  margin-left: 40px !important;
+}
+.gitbook-link {
+    display: none !important;
+}
