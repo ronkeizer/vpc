@@ -89,7 +89,7 @@ test_that("format_vpc_input_data returns the source data modified by lloq (NA if
 
 test_that("format_vpc_input_data returns the source data modified by lloq (lloq if pred_corr == TRUE)", {
   formatted_nonmem_df_lloq_yespredc <- formatted_nonmem_df
-  formatted_nonmem_df_lloq_yespredc$dv <- 2
+  formatted_nonmem_df_lloq_yespredc$dv <- NA_real_
   expect_equal(
     vpc:::format_vpc_input_data(
       dat=nonmem_df,
@@ -125,7 +125,7 @@ test_that("format_vpc_input_data returns the source data modified by uloq (NA if
 
 test_that("format_vpc_input_data returns the source data modified by uloq (uloq if pred_corr == TRUE)", {
   formatted_nonmem_df_uloq_yespredc <- formatted_nonmem_df
-  formatted_nonmem_df_uloq_yespredc$dv <- 0.5
+  formatted_nonmem_df_uloq_yespredc$dv <- NA_real_
   expect_equal(
     vpc:::format_vpc_input_data(
       dat=nonmem_df,

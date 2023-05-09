@@ -31,22 +31,42 @@ calc_pred_corr_continuous <- function(sim, obs, pred_corr, pred_corr_lower_bnd, 
   if(!is.null(obs)) {
     if(pred_corr) {
       msg("Performing prediction-correction on observed data...", verbose=verbose)
-      obs$pred <- obs[[cols$obs$pred]]
-      obs <- obs %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(as.num(pred)))
-      obs[obs$pred != 0,]$dv <- pred_corr_lower_bnd + (obs[obs$pred != 0,]$dv - pred_corr_lower_bnd) * (obs[obs$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (obs[obs$pred != 0,]$pred - pred_corr_lower_bnd)
+      obs <- pred_correction_core(obs, cols$obs$pred, pred_corr_lower_bnd)
     }
   }
   if(!is.null(sim)) {
     sim$sim <- add_sim_index_number(sim, id = "id", sim_label=cols$sim$sim)
     if(pred_corr) {
       msg("Performing prediction-correction on simulated data...", verbose=verbose)
-      sim$pred <- sim[[cols$sim$pred]]
-      sim <- sim %>% dplyr::group_by(strat, bin) %>% dplyr::mutate(pred_bin = median(pred))
-      sim[sim$pred != 0,]$dv <- pred_corr_lower_bnd + (sim[sim$pred != 0,]$dv - pred_corr_lower_bnd) * (sim[sim$pred != 0,]$pred_bin - pred_corr_lower_bnd) / (sim[sim$pred != 0,]$pred - pred_corr_lower_bnd)
+      sim <- pred_correction_core(obs, cols$sim$pred, pred_corr_lower_bnd)
     }
   }
   list(
     sim=sim,
     obs=obs
   )
+}
+
+#' Core prediction correction function
+#' 
+#' Perform pred-correction for predictions that were non-zero and
+#' were not missing observation. The latter can happen e.g. when 
+#' censored data is set to NA in `format_vpc_input_data()`.
+#' 
+#' @param data dataset, either `sim` or `obs` data.frame
+#' @param pred_col cols$obs$pred
+#' @inheritParams read_vpc
+#' 
+#' @returns data.frame
+pred_correction_core <- function(data, pred_col, pred_corr_lower_bnd) {
+  data$pred <- data[[pred_col]]
+  data <- data %>% 
+    dplyr::group_by(strat, bin) %>% 
+    dplyr::mutate(pred_bin = median(as.num(pred)))
+  row_idx <- data$pred != 0 & !is.na(data$dv)
+  data[row_idx,]$dv <- pred_corr_lower_bnd + 
+    (data[row_idx,]$dv - pred_corr_lower_bnd) * 
+    (data[row_idx,]$pred_bin - pred_corr_lower_bnd) / 
+    (data[row_idx,]$pred - pred_corr_lower_bnd)
+  data  
 }
