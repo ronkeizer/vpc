@@ -55,7 +55,7 @@ calc_pred_corr_continuous <- function(sim, obs, pred_corr, pred_corr_lower_bnd, 
 #' 
 #' @param data dataset, either `sim` or `obs` data.frame
 #' @param pred_col cols$obs$pred
-#' @inheritParams read_vpc
+#' @inheritParams calc_pred_corr_continuous
 #' 
 #' @returns data.frame
 pred_correction_core <- function(data, pred_col, pred_corr_lower_bnd) {

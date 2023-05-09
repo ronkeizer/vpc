@@ -10,6 +10,8 @@ pred_correction_core(data, pred_col, pred_corr_lower_bnd)
 \item{data}{dataset, either `sim` or `obs` data.frame}
 
 \item{pred_col}{cols$obs$pred}
+
+\item{pred_corr_lower_bnd}{lower bound for the prediction-correction}
 }
 \value{
 data.frame
