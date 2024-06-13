@@ -99,5 +99,5 @@ vpc_cens(sim = simple_data$sim, obs = simple_data$obs, uloq = 120)
 
 }
 \seealso{
-\link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cat}
+\link{vpc}, \link{vpc_tte}, \link{vpc_cat}
 }

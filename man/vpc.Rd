@@ -126,5 +126,5 @@ vpc(sim = simple_data$sim, obs = simple_data$obs, lloq = 20)
 
 }
 \seealso{
-\link{sim_data}, \link{vpc_cens}, \link{vpc_tte}, \link{vpc_cat}
+\link{vpc_cens}, \link{vpc_tte}, \link{vpc_cat}
 }

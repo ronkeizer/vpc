@@ -296,7 +296,7 @@ NULL
 geom_bin_sep <- function(bins, show, vpc_theme) {
   ret <- ggplot2::geom_blank()
   if (show) {
-    if(!(inherits(bins, "logical") && bins == FALSE)) {
+    if(! (inherits(bins, "logical") && !bins) ) {
       bdat <- data.frame(cbind(x = bins, y = NA))
       ret <-
         ggplot2::geom_rug(
