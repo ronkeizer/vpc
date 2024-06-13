@@ -31,7 +31,7 @@ auto_bin.numeric <- function(dat, type = "kmeans", n_bins = 8, verbose = FALSE, 
   # use R's native binning approaches?
   if(!is.null(type) && type %in% c("jenks", "kmeans", "pretty", "quantile", "hclust", "sd", "bclust", "fisher")) {
     suppressWarnings({
-      if(class(n_bins) != "numeric" | is.null(n_bins)) {
+      if(! inherits(n_bins, "numeric") | is.null(n_bins)) {
         bins <- classInt::classIntervals(dat, style = type)
       } else {
         bins <- classInt::classIntervals(dat, n = n_bins, style = type)

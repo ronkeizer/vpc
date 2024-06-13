@@ -24,7 +24,7 @@ add_stratification <- function (dat, stratify, verbose = FALSE) {
       msg("Specified stratification column name not found, not performing stratification.", verbose)
     }
   }
-  if(class(dat$strat) != "factor") {
+  if(! inherits(dat$strat, "factor")) {
     dat$strat <- as.factor(dat$strat)
   }
   dat
