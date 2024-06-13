@@ -110,5 +110,5 @@ sim <- do.call("rbind", lapply(1:200, sim_trial, n = 20))
 vpc_cat(sim = sim, obs = obs)
 }
 \seealso{
-\link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cens}
+\link{vpc}, \link{vpc_tte}, \link{vpc_cens}
 }
