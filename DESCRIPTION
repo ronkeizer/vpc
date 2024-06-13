@@ -7,6 +7,7 @@ Authors@R:
     person("Ron", "Keizer", email="ronkeizer@gmail.com", role=c("aut", "cre")),
     person("Bill", "Denney", email="wdenney@humanpredictions.com", role="aut", comment=c(ORCID="0000-0002-5759-428X"))
   )
+Maintainer: Ron Keizer <ron@insight-rx.com>
 Description: Visual predictive checks are a commonly used diagnostic plot in pharmacometrics, showing how certain statistics (percentiles) for observed data compare to those same statistics for data simulated from a model. The package can generate VPCs for continuous, categorical, censored, and (repeated) time-to-event data.
 Depends:
     R (>= 3.1.0)

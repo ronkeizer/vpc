@@ -31,7 +31,7 @@ plot_vpc <- function(db,
                      ylab = NULL,
                      title = NULL,
                      verbose = FALSE) {
-  if(is.null(vpc_theme) || (class(vpc_theme) != "vpc_theme")) {
+  if(is.null(vpc_theme) || !inherits(vpc_theme, "vpc_theme")) {
     vpc_theme <- new_vpc_theme()
   }
   # Setup show using first the defaults, then the items from the db, then the argument
@@ -296,7 +296,7 @@ NULL
 geom_bin_sep <- function(bins, show, vpc_theme) {
   ret <- ggplot2::geom_blank()
   if (show) {
-    if(!(class(bins) == "logical" && bins == FALSE)) {
+    if(! (inherits(bins, "logical") && !bins) ) {
       bdat <- data.frame(cbind(x = bins, y = NA))
       ret <-
         ggplot2::geom_rug(
