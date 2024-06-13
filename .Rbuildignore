@@ -6,6 +6,7 @@
 .RData
 .Rhistory
 .git/
+docs/
 README.MD
 cran-comments.md
 revdep
