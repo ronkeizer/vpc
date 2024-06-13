@@ -3,7 +3,7 @@
 \name{ggplot2_label_variable}
 \alias{ggplot2_label_variable}
 \title{Function copied from ggplot2:::label_variable, with addition of `%||%`. 
-Copied here since CRAN does not allow use of `:::`.}
+Copied here since CRAN does not like use of `:::`.}
 \usage{
 ggplot2_label_variable(labels, multi_line = TRUE)
 }
@@ -14,5 +14,5 @@ ggplot2_label_variable(labels, multi_line = TRUE)
 }
 \description{
 Function copied from ggplot2:::label_variable, with addition of `%||%`. 
-Copied here since CRAN does not allow use of `:::`.
+Copied here since CRAN does not like use of `:::`.
 }
