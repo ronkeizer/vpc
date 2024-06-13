@@ -38,7 +38,7 @@ calc_pred_corr_continuous <- function(sim, obs, pred_corr, pred_corr_lower_bnd, 
     sim$sim <- add_sim_index_number(sim, id = "id", sim_label=cols$sim$sim)
     if(pred_corr) {
       msg("Performing prediction-correction on simulated data...", verbose=verbose)
-      sim <- pred_correction_core(obs, cols$sim$pred, pred_corr_lower_bnd)
+      sim <- pred_correction_core(sim, cols$sim$pred, pred_corr_lower_bnd)
     }
   }
   list(

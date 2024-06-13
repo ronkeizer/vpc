@@ -11,7 +11,7 @@
 #'   binned simulated data.  Additionally, "tmp_bins" is added for tte data.
 define_bins <- function(obs, sim, bins, n_bins, verbose=FALSE) {
   labeled_bins <- bins[1] == "percentiles"
-  if (class(bins) != "numeric") {
+  if (!inherits(bins, "numeric")) {
     if (!is.null(obs)) {
       bins <- auto_bin(obs, bins, n_bins)
     } else { # get from sim
@@ -43,7 +43,7 @@ define_bins_tte <- function(obs, sim, bins, n_bins, kmmc, verbose=FALSE) {
   if(!is.null(bins) && bins != FALSE) {
     warning("Binning is not recommended for `vpc_tte()`, plot might not show correctly!")
   }
-  if(!is.null(kmmc) & (class(bins) == "logical" && bins == FALSE)) {
+  if(!is.null(kmmc) & (inherits(bins, "logical") && !bins)) {
     msg("Tip: with KMMC-type plots, binning of simulated data is recommended. See documentation for the 'bins' argument for more information.", verbose)
   }
 
@@ -52,11 +52,11 @@ define_bins_tte <- function(obs, sim, bins, n_bins, kmmc, verbose=FALSE) {
   } else {
     tmp_bins <- unique(c(0, sort(unique(sim$time)), max(sim$time)))
     all_dat <- c()
-    if(!(class(bins) == "logical" && bins == FALSE)) {
-      if(class(bins) == "logical" && bins == TRUE) {
+    if(!(inherits(bins, "logical") && !bins)) {
+      if(inherits(bins, "logical") && bins) {
         bins <- "time"
       }
-      if(class(bins) == "character") {
+      if(inherits(bins, "character")) {
         if (bins == "obs") {
           tmp_bins <- unique(c(0, sort(unique(obs$time)), max(obs$time)))
         } else {
@@ -66,7 +66,7 @@ define_bins_tte <- function(obs, sim, bins, n_bins, kmmc, verbose=FALSE) {
           tmp_bins <- unique(c(0, auto_bin(sim %>% dplyr::mutate(idv=time), type=bins, n_bins = n_bins-1), max(sim$time)))
         }
       }
-      if(class(bins) == "numeric") {
+      if(inherits(bins, "numeric")) {
         tmp_bins <- unique(c(0, bins, max(obs$time)))
       }
     }

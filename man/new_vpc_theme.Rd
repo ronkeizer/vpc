@@ -48,7 +48,7 @@ theme1 <- new_vpc_theme(update = list(
   obs_ci_color = "#aa0000",
   obs_alpha = .3,
   sim_pi_fill = "#cc8833",
-  sim_pi_size = 2
+  sim_pi_linewidth = 2
 ))
 vpc(simple_data$sim, simple_data$obs, vpc_theme = theme1)
 
