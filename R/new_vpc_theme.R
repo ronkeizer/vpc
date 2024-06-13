@@ -36,7 +36,7 @@
 #'   obs_ci_color = "#aa0000",
 #'   obs_alpha = .3,
 #'   sim_pi_fill = "#cc8833",
-#'   sim_pi_size = 2
+#'   sim_pi_linewidth = 2
 #' ))
 #' vpc(simple_data$sim, simple_data$obs, vpc_theme = theme1)
 #'
@@ -76,13 +76,12 @@ new_vpc_theme <- function (update = NULL) {
 #    stop(paste0("Please specify a list with plot elements to update. Available elements: \n  - ", paste(n, collapse="\n  - ")))
     return(tmp)
   }
-  remap <-
-    list(
-      obs_median_size="obs_median_linewidth",
-      obs_ci_size="obs_ci_linewidth",
-      sim_pi_size="sim_pi_linewidth",
-      sim_median_size="sim_median_linewidth"
-    )
+  remap <- list(
+    obs_median_size="obs_median_linewidth",
+    obs_ci_size="obs_ci_linewidth",
+    sim_pi_size="sim_pi_linewidth",
+    sim_median_size="sim_median_linewidth"
+  )
   if(!is.null(update) & length(names(update)) > 0) {
     for(i in seq(names(update))) {
       current_name <- names(update)[i]

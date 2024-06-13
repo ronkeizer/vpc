@@ -6,10 +6,10 @@
 #' @export
 theme_plain <-  function () {
   ggplot2::theme(
-    text = ggplot2::element_text(family="sans"),
-    plot.title = ggplot2::element_text(family="sans", size = 16, vjust = 1.5),
-    axis.title.x = ggplot2::element_text(family="sans",vjust=-0.25),
-    axis.title.y = ggplot2::element_text(family="sans"),
+    text = ggplot2::element_text(),
+    plot.title = ggplot2::element_text(size = 16, vjust = 1.5),
+    axis.title.x = ggplot2::element_text(vjust=-0.25),
+    axis.title.y = ggplot2::element_text(),
     legend.background = ggplot2::element_rect(fill = "white"),
     #legend.position = c(0.14, 0.80),
     panel.grid.major = ggplot2::element_line(colour = "#e5e5e5"),

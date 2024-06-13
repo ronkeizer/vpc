@@ -161,7 +161,8 @@ vpc_vpc <- function(sim = NULL,
     )
   calc_data <-
     calc_vpc_continuous(
-      sim=pred_corr_data$sim, obs=pred_corr_data$obs,
+      sim=pred_corr_data$sim, 
+      obs=pred_corr_data$obs,
       loq=loq_data,
       pi=pi, ci=ci,
       stratify=stratify,
