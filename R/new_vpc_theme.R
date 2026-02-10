@@ -4,29 +4,29 @@
 #'
 #' @details
 #' This function creates a theme that customizes how the VPC looks, i.e. colors, fills, transparencies, linetypes, sizes, etc. The following arguments can be specified in the input list:
-#' \itemize{
-#'  \item{obs_color}: color for observations points
-#'  \item{obs_size}: size for observation points
-#'  \item{obs_median_color}: color for median observation line
-#'  \item{obs_median_linetype}: linetype for median observation line
-#'  \item{obs_median_linewidth}: linewidth for median observation line
-#'  \item{obs_ci_fill}: color for observation CI fill
-#'  \item{obs_ci_color}: color for observation CI lines
-#'  \item{obs_ci_linetype}: linetype for observation CI lines
-#'  \item{obs_ci_linewidth}: linewidth for observations CI lines
-#'  \item{sim_pi_fill}: fill color for simulated prediction interval areas
-#'  \item{sim_pi_alpha}: transparency for simulated prediction interval areas
-#'  \item{sim_pi_color}: color for simulated prediction interval lines
-#'  \item{sim_pi_linetype}: linetype for simulated prediction interval lines
-#'  \item{sim_pi_linewidth}: linewidth for simulated prediction interval lines
-#'  \item{sim_median_fill}: fill color for simulated median area
-#'  \item{sim_median_alpha}: transparency for simulated median area
-#'  \item{sim_median_color}: color for simulated median line
-#'  \item{sim_median_linetype}: linetype for simulated median line
-#'  \item{sim_median_linewidth}: linewidth for simulated median line
-#'  \item{bin_separators_color}: color for bin separator lines, NA for don't plot
-#'  \item{bin_separators_location}: where to plot bin separators ("t" for top, "b" for bottom)
-#'  \item{loq_color}: color of line showing limit of quantification
+#' \describe{
+#'  \item{obs_color}{color for observations points}
+#'  \item{obs_size}{size for observation points}
+#'  \item{obs_median_color}{color for median observation line}
+#'  \item{obs_median_linetype}{linetype for median observation line}
+#'  \item{obs_median_linewidth}{linewidth for median observation line}
+#'  \item{obs_ci_fill}{color for observation CI fill}
+#'  \item{obs_ci_color}{color for observation CI lines}
+#'  \item{obs_ci_linetype}{linetype for observation CI lines}
+#'  \item{obs_ci_linewidth}{linewidth for observations CI lines}
+#'  \item{sim_pi_fill}{fill color for simulated prediction interval areas}
+#'  \item{sim_pi_alpha}{transparency for simulated prediction interval areas}
+#'  \item{sim_pi_color}{color for simulated prediction interval lines}
+#'  \item{sim_pi_linetype}{linetype for simulated prediction interval lines}
+#'  \item{sim_pi_linewidth}{linewidth for simulated prediction interval lines}
+#'  \item{sim_median_fill}{fill color for simulated median area}
+#'  \item{sim_median_alpha}{transparency for simulated median area}
+#'  \item{sim_median_color}{color for simulated median line}
+#'  \item{sim_median_linetype}{linetype for simulated median line}
+#'  \item{sim_median_linewidth}{linewidth for simulated median line}
+#'  \item{bin_separators_color}{color for bin separator lines, NA for don't plot}
+#'  \item{bin_separators_location}{where to plot bin separators ("t" for top, "b" for bottom)}
+#'  \item{loq_color}{color of line showing limit of quantification}
 #' }
 #' @return A list with vpc theme specifiers
 #' @export

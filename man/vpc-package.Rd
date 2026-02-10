@@ -2,6 +2,7 @@
 % Please edit documentation in R/vpc-package.R
 \docType{package}
 \name{vpc-package}
+\alias{-package}
 \alias{vpc-package}
 \title{VPC package}
 \description{

@@ -14,7 +14,7 @@
 #' @param ylab label for y axis
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @export
-#' @seealso \link{sim_data}, \link{vpc_cens}, \link{vpc_tte}, \link{vpc_cat}
+#' @seealso \link{vpc_cens}, \link{vpc_tte}, \link{vpc_cat}
 #' @examples
 #' ## See vpc.ronkeizer.com for more documentation and examples
 #'

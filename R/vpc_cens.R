@@ -14,7 +14,7 @@
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 #' @export
-#' @seealso \link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cat}
+#' @seealso \link{vpc}, \link{vpc_tte}, \link{vpc_cat}
 #' @examples
 #'
 #' ## See vpc.ronkeizer.com for more documentation and examples
