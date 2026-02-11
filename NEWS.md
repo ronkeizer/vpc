@@ -1,4 +1,11 @@
-# vpc 1.2.2.9000
+# vpc 1.2.4
+- replaced defunct dplyr functions (`group_by_()`, `arrange_()`, `do()`) with
+  modern equivalents (`group_by()`, `arrange()`, `slice()`) using `.data` pronoun
+- fixed Rd documentation: changed `\itemize` with incorrect `\item{}` syntax to
+  `\describe` with proper `\item{name}{description}` format in `new_vpc_theme()`
+- removed broken `\link{sim_data}` cross-references from documentation
+
+# vpc 1.2.3
 - a major code refactoring occurred (fix #5)
 - the ID column may now be a factor (fix #75)
 - updates to work with ggplot2 version 3.4.0

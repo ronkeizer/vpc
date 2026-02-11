@@ -14,7 +14,7 @@
 #' @param ... Other arguments sent to other methods (like xpose or nlmixr);  Note these arguments are not used in the default vpc and are ignored by the default method.
 #' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 #' @export
-#' @seealso \link{sim_data}, \link{vpc_cens}, \link{vpc_tte}, \link{vpc_cat}
+#' @seealso \link{vpc_cens}, \link{vpc_tte}, \link{vpc_cat}
 #' @examples
 #'
 #' ## See vpc.ronkeizer.com for more documentation and examples
