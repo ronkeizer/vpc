@@ -2,12 +2,25 @@
 % Please edit documentation in R/vpc-package.R
 \docType{package}
 \name{vpc-package}
-\alias{-package}
 \alias{vpc-package}
-\title{VPC package}
+\title{vpc: Create Visual Predictive Checks}
 \description{
-Create Visual Predictive Checks in R
+Visual predictive checks are a commonly used diagnostic plot in pharmacometrics, showing how certain statistics (percentiles) for observed data compare to those same statistics for data simulated from a model. The package can generate VPCs for continuous, categorical, censored, and (repeated) time-to-event data.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/ronkeizer/vpc}
+}
+
 }
 \author{
-Ron Keizer \email{ronkeizer@gmail.com}
+\strong{Maintainer}: Ron Keizer \email{ronkeizer@gmail.com}
+
+Authors:
+\itemize{
+  \item Bill Denney \email{wdenney@humanpredictions.com} (\href{https://orcid.org/0000-0002-5759-428X}{ORCID})
 }
+
+}
+\keyword{internal}
