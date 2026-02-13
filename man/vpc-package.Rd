@@ -15,7 +15,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Ron Keizer \email{ronkeizer@gmail.com}
+\strong{Maintainer}: Ron Keizer \email{ron@insight-rx.com}
 
 Authors:
 \itemize{
