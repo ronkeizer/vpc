@@ -4,7 +4,7 @@ Version: 1.2.4
 Date: 2026-02-10
 Authors@R:
   c(
-    person("Ron", "Keizer", email="ronkeizer@gmail.com", role=c("aut", "cre")),
+    person("Ron", "Keizer", email="ron@insight-rx.com", role=c("aut", "cre")),
     person("Bill", "Denney", email="wdenney@humanpredictions.com", role="aut", comment=c(ORCID="0000-0002-5759-428X"))
   )
 Maintainer: Ron Keizer <ron@insight-rx.com>
