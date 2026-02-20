@@ -25,7 +25,7 @@ standardize_column <- function(dat, cols, colname, coldesc, what, default) {
     if (colname %in% colnames(dat) & !(cols[[colname]] == colname)) {
       # If there is a column with the expected name, but it is not actually the
       # column to use, name it with ".old" at the end.
-      colnames[match(colname, colnames(dat))] <- paste0(colname, ".old")
+      colnames(dat)[match(colname, colnames(dat))] <- paste0(colname, ".old")
     }
     colnames(dat)[match(cols[[colname]], colnames(dat))] <- colname
   }

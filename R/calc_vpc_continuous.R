@@ -17,9 +17,9 @@ calc_vpc_continuous <- function(sim, obs, loq, pi, ci, stratify, bins, bin_mid, 
       sim %>%
       dplyr::group_by(strat, sim, bin) %>%
       dplyr::summarise(
-        q5 = quantile(dv, pi[1]),
-        q50 = quantile(dv, 0.5),
-        q95 = quantile(dv, pi[2]),
+        q5 = quantile(dv, pi[1], na.rm = TRUE),
+        q50 = quantile(dv, 0.5, na.rm = TRUE),
+        q95 = quantile(dv, pi[2], na.rm = TRUE),
         mean_idv = mean(idv)
       )
 

@@ -20,7 +20,7 @@
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
 #' @return a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
 #' @export
-#' @seealso \link{sim_data}, \link{vpc}, \link{vpc_tte}, \link{vpc_cens}
+#' @seealso \link{vpc}, \link{vpc_tte}, \link{vpc_cens}
 #' @examples
 #' ## See vpc-docs.ronkeizer.com for more documentation and examples.
 #'
