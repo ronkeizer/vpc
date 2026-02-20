@@ -1,12 +1,7 @@
-#' VPC package
-#'
-#' Create Visual Predictive Checks in R
-#'
-#' @docType package
-#' @name vpc-package
-#' @author Ron Keizer \email{ronkeizer@@gmail.com}
+#' @keywords internal
 #' @importFrom stats density median model.matrix na.omit quantile rnorm rweibull step time
 #' @importFrom utils head read.table tail
+"_PACKAGE"
 
 ## to avoid warnings related to dplyr/ggplot usage:
 globalVariables(c(".", "comp", "strat", "strat2", "bin", "pred", "dv", "idv", "q5", "q50",

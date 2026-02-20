@@ -14,3 +14,4 @@ Rplots.pdf
 ^CRAN-RELEASE$
 ^\.github$
 ^codecov\.yml$
+.claude/
