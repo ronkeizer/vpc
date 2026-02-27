@@ -29,16 +29,16 @@ calc_vpc_continuous <- function(sim, obs, loq, pi, ci, stratify, bins, bin_mid, 
       aggr_sim %>%
       dplyr::group_by(strat, bin) %>%
       dplyr::summarise(
-        q5.low = quantile(q5, ci[1]),
-        q5.med = quantile(q5, 0.5),
-        q5.up = quantile(q5, ci[2]),
-        q50.low = quantile(q50, ci[1]),
-        q50.med = quantile(q50, 0.5),
-        q50.up = quantile(q50, ci[2]),
-        q95.low = quantile(q95, ci[1]),
-        q95.med = quantile(q95, 0.5),
-        q95.up = quantile(q95, ci[2]),
-        bin_mid = mean(.data$mean_idv)
+        q5.low = quantile(q5, ci[1], na.rm = TRUE),
+        q5.med = quantile(q5, 0.5, na.rm = TRUE),
+        q5.up = quantile(q5, ci[2], na.rm = TRUE),
+        q50.low = quantile(q50, ci[1], na.rm = TRUE),
+        q50.med = quantile(q50, 0.5, na.rm = TRUE),
+        q50.up = quantile(q50, ci[2], na.rm = TRUE),
+        q95.low = quantile(q95, ci[1], na.rm = TRUE),
+        q95.med = quantile(q95, 0.5, na.rm = TRUE),
+        q95.up = quantile(q95, ci[2], na.rm = TRUE),
+        bin_mid = mean(.data$mean_idv, na.rm = TRUE)
       )
 
     vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
