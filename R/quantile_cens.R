@@ -23,7 +23,7 @@ quantile_cens <- function(x, probs = 0.5, limit = 1, cens = c("left", "right", "
   } else {
     stop("Invalid value for cens: ", cens) # nocov
   }
-  q <- quantile(x, probs=probs)
+  q <- quantile(x, probs=probs, na.rm=TRUE)
   ifelse(q %in% c(Inf, -Inf), NA_real_, q)
 }
 
