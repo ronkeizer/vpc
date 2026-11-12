@@ -1,4 +1,4 @@
-# vpc 1.2.8
+# vpc 1.2.9
 - `vpc()` with `pred_corr = TRUE` and `lloq`/`uloq`: observed and simulated
   data are now handled identically. Censoring is determined on the uncorrected
   DV, only non-censored values are prediction-corrected, and censored values
@@ -6,6 +6,11 @@
   calculating percentiles. Prediction-corrected observed values are no longer
   compared to the (uncorrected) limit of quantification again. The procedure
   is documented in `?vpc` (#104)
+
+# vpc 1.2.8
+- added `ci_sim` argument to `vpc_tte()` to specify the confidence interval
+  of the Kaplan-Meier curves from the simulated data, which was previously
+  fixed at 90% (fix #102). The `ci` argument only applies to the observed data.
 
 # vpc 1.2.7
 - the ID column may now be character (or any non-numeric type), e.g. as
