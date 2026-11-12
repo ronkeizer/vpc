@@ -54,7 +54,6 @@ vpc_tte <- function(sim = NULL,
                     stratify = NULL,
                     stratify_color = NULL,
                     ci = c(0.05, 0.95),
-                    ci_sim = c(0.05, 0.95),
                     xlab = "Time",
                     ylab = "Survival (%)",
                     show = NULL,
@@ -65,7 +64,8 @@ vpc_tte <- function(sim = NULL,
                     facet = "wrap",
                     labeller = NULL,
                     verbose = FALSE,
-                    vpcdb = FALSE) {
+                    vpcdb = FALSE,
+                    ci_sim = c(0.05, 0.95)) {
   if(!is.numeric(ci_sim) || length(ci_sim) != 2 || any(is.na(ci_sim)) ||
      any(ci_sim < 0 | ci_sim > 1) || ci_sim[1] >= ci_sim[2]) {
     stop("`ci_sim` should be a numeric vector of length 2 with increasing values between 0 and 1, e.g. c(0.05, 0.95).")

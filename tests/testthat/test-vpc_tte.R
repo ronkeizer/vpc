@@ -83,3 +83,23 @@ test_that("vpc_tte() validates ci_sim", {
   expect_error(vpc_tte(sim = vpc::rtte_sim_nm, ci_sim = c(-0.1, 0.9)), "ci_sim")
   expect_error(vpc_tte(sim = vpc::rtte_sim_nm, ci_sim = c("a", "b")), "ci_sim")
 })
+
+test_that("vpc_tte() keeps positional argument order (ci_sim appended last)", {
+  expect_equal(
+    names(formals(vpc_tte)),
+    c("sim", "obs", "psn_folder", "rtte", "rtte_calc_diff", "rtte_conditional",
+      "events", "bins", "n_bins", "software", "obs_cols", "sim_cols", "kmmc",
+      "reverse_prob", "stratify", "stratify_color", "ci", "xlab", "ylab",
+      "show", "as_percentage", "title", "smooth", "vpc_theme", "facet",
+      "labeller", "verbose", "vpcdb", "ci_sim")
+  )
+  # xlab passed positionally (18th argument) must still be treated as xlab
+  sim <- vpc::rtte_sim_nm[vpc::rtte_sim_nm$sim <= 5, ]
+  pl <- suppressWarnings(
+    vpc_tte(sim, vpc::rtte_obs_nm, NULL, FALSE, TRUE, TRUE, NULL, FALSE, 10,
+            "auto", list(idv = "t"), list(dv = "dv", idv = "t"), NULL, FALSE,
+            NULL, NULL, c(0.05, 0.95), "Positional time label")
+  )
+  expect_s3_class(pl, "ggplot")
+  expect_equal(pl$labels$x, "Positional time label")
+})
