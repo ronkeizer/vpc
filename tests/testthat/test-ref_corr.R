@@ -276,3 +276,17 @@ test_that("obs PRED fallback checks record order (pcVPC)", {
     "order of records"
   )
 })
+
+## Regression test from PR #117 review (round 3)
+test_that("one PRED vector is used for all replicates (as Pharmpy)", {
+  fx <- refcorr_vpc_data()
+  obj <- rc_vpc(fx)
+  fx2 <- fx
+  fx2$sim$PRED[fx2$sim$sim == 3] <- fx2$sim$PRED[fx2$sim$sim == 3] * 1.5
+  expect_warning(obj2 <- rc_vpc(fx2), "PRED differs between `obs` and `sim` replicates")
+  expect_equal(obj2$obs$dv, obj$obs$dv)
+  expect_equal(sim_sorted_dv(obj2), sim_sorted_dv(obj))
+  fx3 <- fx
+  fx3$ref$PRED[fx3$ref$sim == 2] <- fx3$ref$PRED[fx3$ref$sim == 2] * 2
+  expect_warning(rc_vpc(fx3), "PRED differs between `sim_ref` replicates")
+})

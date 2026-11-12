@@ -43,7 +43,9 @@ calc_ref_corr_continuous <- function(sim, obs, sim_ref, lower_bnd = 0, log_dv = 
   sim_mat <- records_to_matrix(sim, sim_idx, "sim")
   ref_mat <- records_to_matrix(sim_ref, ref_idx, "sim_ref")
   sim_pred <- matrix(as.num(sim[[cols$sim$pred]][sim_mat$order]), nrow = nrow(sim_mat$dv))
-  pred_ref <- as.num(sim_ref[[cols$sim$pred]][ref_mat$order][seq_len(nrow(ref_mat$dv))])
+  ref_pred <- matrix(as.num(sim_ref[[cols$sim$pred]][ref_mat$order]), nrow = nrow(ref_mat$dv))
+  pred_ref <- ref_pred[, 1]
+  check_pred_constant(ref_pred, pred_ref, "`sim_ref` replicates")
   n_rec <- nrow(sim_mat$dv)
   if(nrow(ref_mat$dv) != n_rec) {
     stop("Reference-correction: number of records per replicate differs between `sim` (", n_rec,
@@ -62,6 +64,11 @@ calc_ref_corr_continuous <- function(sim, obs, sim_ref, lower_bnd = 0, log_dv = 
       stop("Reference-correction: order of records (`id`, `idv`) differs between `obs` and `sim`.")
     }
   }
+  ## PRED is a population prediction, so one PRED vector is used for all
+  ## replicates (as in PsN/Pharmpy): from obs if available, else first replicate
+  pred <- if(!is.null(obs)) as.num(obs[[cols$obs$pred]]) else sim_pred[, 1]
+  check_pred_constant(sim_pred, pred, if(!is.null(obs)) "`obs` and `sim` replicates" else "`sim` replicates")
+  sim_pred <- matrix(pred, nrow = n_rec, ncol = ncol(sim_pred))
   msg("Performing reference-correction...", verbose = verbose)
   res <- ref_correction_core(
     sim_dv = sim_mat$dv,
@@ -69,7 +76,7 @@ calc_ref_corr_continuous <- function(sim, obs, sim_ref, lower_bnd = 0, log_dv = 
     ref_dv = ref_mat$dv,
     pred_ref = pred_ref,
     obs_dv = if(!is.null(obs)) as.num(obs$dv) else NULL,
-    obs_pred = if(!is.null(obs)) as.num(obs[[cols$obs$pred]]) else NULL,
+    obs_pred = if(!is.null(obs)) pred else NULL,
     lower_bnd = lower_bnd,
     log_dv = log_dv
   )
@@ -232,4 +239,21 @@ is_censored <- function(dv, lloq = NULL, uloq = NULL) {
   if(!is.null(lloq)) cens <- cens | (!is.na(dv) & dv < lloq)
   if(!is.null(uloq)) cens <- cens | (!is.na(dv) & dv > uloq)
   cens
+}
+
+#' Warn when PRED differs between replicates
+#'
+#' @param pred_mat matrix (records x replicates) of PRED
+#' @param pred vector (records) of PRED that will be used
+#' @param what label for warning message
+#' @return NULL, invisibly
+check_pred_constant <- function(pred_mat, pred, what) {
+  if(!isTRUE(all.equal(c(pred_mat), rep(pred, ncol(pred_mat)), tolerance = 1e-4))) {
+    warning(
+      "Reference-correction: PRED differs between ", what, ". ",
+      "PRED should be identical for each record; check record alignment. ",
+      "Using PRED from ", if(grepl("obs", what)) "`obs`" else "first replicate", "."
+    )
+  }
+  invisible(NULL)
 }
