@@ -9,6 +9,21 @@
 #' @inheritParams calc_vpc_continuous
 #' @inheritParams as_vpcdb
 #' @inheritParams plot_vpc
+#' @inheritParams define_pred_corr_method
+#' @param pred_corr_method Form of the prediction-correction applied when
+#'   \code{pred_corr = TRUE}: \code{"multiplicative"} (default; Bergstrand et
+#'   al., AAPS J 2011, optionally using \code{pred_corr_lower_bnd}) or
+#'   \code{"additive"}. The additive form is intended for
+#'   log-transform-both-sides (LTBS) models, and computes \code{dv + (pred_bin -
+#'   pred)}, where \code{pred_bin} is the median prediction in the bin. It
+#'   assumes that \code{dv} and \code{pred} in both the observed and simulated
+#'   data are \emph{already on the log scale}; no transformation is performed
+#'   internally, so correction, quantiles and plot are all on the log scale.
+#'   Consequently, \code{log_y} cannot be used together with it, and
+#'   \code{pred_corr_lower_bnd} is ignored. Note that for many LTBS workflows,
+#'   the default multiplicative correction on linear-scale data combined with
+#'   \code{log_y = TRUE} is already adequate; use the additive form when the
+#'   correction specifically needs to be evaluated on the log scale.
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @param ... Other arguments sent to other methods (like xpose or nlmixr);  Note these arguments are not used in the default vpc and are ignored by the default method.
@@ -49,6 +64,8 @@ vpc_vpc <- function(sim = NULL,
                     stratify = NULL,
                     pred_corr = FALSE,
                     pred_corr_lower_bnd = 0,
+                    pred_corr_method = c("multiplicative", "additive"),
+                    ltbs = FALSE,
                     pi = c(0.05, 0.95),
                     ci = c(0.05, 0.95),
                     uloq = NULL,
@@ -88,6 +105,12 @@ vpc_vpc <- function(sim = NULL,
   pred_corr_lower_bnd <- loq_data$pred_corr_lower_bnd
   cens_type <- loq_data$cens_type
   cens_limit <- loq_data$cens_limit
+  pred_corr_method <-
+    define_pred_corr_method(
+      pred_corr_method=pred_corr_method, ltbs=ltbs,
+      pred_corr=pred_corr, pred_corr_lower_bnd=pred_corr_lower_bnd,
+      log_y=log_y
+    )
 
   ## checking whether stratification columns are available
   msg("Stratifying data...", verbose=verbose)
@@ -156,6 +179,7 @@ vpc_vpc <- function(sim = NULL,
       sim=sim, obs=obs,
       pred_corr=pred_corr,
       pred_corr_lower_bnd=pred_corr_lower_bnd,
+      pred_corr_method=pred_corr_method,
       cols=cols,
       verbose=verbose
     )

@@ -1,6 +1,14 @@
-# vpc 1.2.5
+# vpc 1.2.6
 - stratification by two variables now respects the factor level order of the
   stratification variables (fix #101)
+
+# vpc 1.2.5
+- added `pred_corr_method = c("multiplicative", "additive")` argument to `vpc()`,
+  with `ltbs = TRUE` as a convenience alias for `"additive"`. The additive
+  prediction-correction (`dv + (pred_bin - pred)`) is intended for
+  log-transform-both-sides (LTBS) models and expects `dv` and `pred` to already
+  be on the log scale. `pred_corr_lower_bnd` is ignored and `log_y = TRUE` is
+  not allowed with this method (#111)
 
 # vpc 1.2.4
 - replaced defunct dplyr functions (`group_by_()`, `arrange_()`, `do()`) with
