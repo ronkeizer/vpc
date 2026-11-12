@@ -1,3 +1,11 @@
+# vpc 1.3.2
+- Added visual regression tests (#9): `tests/testthat/test-plots.R` uses
+  `vdiffr` to snapshot the VPC plots (continuous, pcVPC, LLOQ/log-y,
+  stratified, censored, categorical, time-to-event) as SVGs in
+  `tests/testthat/_snaps/plots/`. Review intended changes side by side with
+  `testthat::snapshot_review("plots")`. `vdiffr` is a new suggested package;
+  the visual tests are skipped on CRAN or when it is not installed.
+
 # vpc 1.3.1
 - `auto_bin()` / `bins = "data"`: the lowest observations were not assigned to
   any bin (and thus silently excluded from the VPC). All data are now binned,
