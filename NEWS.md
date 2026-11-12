@@ -1,4 +1,4 @@
-# vpc 1.3.3
+# vpc 1.3.5
 - Bins can now be determined per stratum (#11). With `bin_by_strata = TRUE` in
   `vpc()` and `vpc_cens()`, automatic binning methods are applied to the data
   of each stratum separately. Manual bins can be specified per stratum by
@@ -16,6 +16,21 @@
   determined by `stratify` only. Previously the color variable was added only
   after the data were stratified, so it was ignored (color only) or
   mislabeled as a facet (facet and color).
+
+# vpc 1.3.4
+- Continuous VPCs: the observed lower and upper percentile lines are now drawn
+  as separate lines instead of as the outline of one ribbon. Before, when one
+  observed percentile was censored (`NA`, e.g. below `lloq`) in a bin, the
+  other percentile was not drawn in that bin either (#122)
+
+# vpc 1.3.3
+- new `show = list(outlier_areas = TRUE)` for continuous VPCs: highlights
+  (in red) the areas where an observed percentile falls outside the
+  confidence interval of the corresponding simulated percentile, as in
+  Monolix VPCs. Also available in `vpc_cens()` (fraction below/above LOQ)
+  and `vpc_cat()` (fraction per category). Works with `smooth = TRUE/FALSE`,
+  stratification, and log axes. Color and transparency are set with the new
+  `outlier_fill` and `outlier_alpha` elements of `new_vpc_theme()` (#8)
 
 # vpc 1.3.2
 - Added visual regression tests (#9): `tests/testthat/test-plots.R` uses

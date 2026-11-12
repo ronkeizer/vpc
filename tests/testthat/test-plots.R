@@ -78,3 +78,20 @@ test_that("time-to-event VPC plots are stable", {
     ))
   )
 })
+
+test_that("outlier area plots are stable", {
+  obs <- simple_data$obs
+  obs$DV[obs$TIME > 4] <- obs$DV[obs$TIME > 4] * 1.6
+  vdiffr::expect_doppelganger(
+    "vpc outlier_areas",
+    vpc(sim = simple_data$sim, obs = obs, show = list(outlier_areas = TRUE))
+  )
+  vdiffr::expect_doppelganger(
+    "vpc outlier_areas binned",
+    vpc(sim = simple_data$sim, obs = obs, show = list(outlier_areas = TRUE), smooth = FALSE)
+  )
+  vdiffr::expect_doppelganger(
+    "vpc_cens outlier_areas",
+    vpc_cens(sim = simple_data$sim, obs = obs, lloq = 30, show = list(outlier_areas = TRUE))
+  )
+})

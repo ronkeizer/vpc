@@ -60,7 +60,15 @@ one value per stratum (named or ordered as for \code{bins}).}
 
 \item{software}{name of software platform using (e.g. nonmem, phoenix)}
 
-\item{show}{what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
+\item{show}{what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci,
+obs_median, sim_median, sim_median_ci, outlier_areas). \code{outlier_areas}
+(default \code{FALSE}) highlights the areas where an observed percentile falls
+outside the confidence interval of the corresponding simulated percentile
+(the "red areas" in Monolix VPCs). For \code{vpc_cens()} and
+\code{vpc_cat()}, this is the observed fraction (below LOQ, or per
+category) compared to the CI of the simulated fraction. Styled with the
+\code{outlier_fill} and \code{outlier_alpha} elements of
+\code{vpc_theme}.}
 
 \item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
 

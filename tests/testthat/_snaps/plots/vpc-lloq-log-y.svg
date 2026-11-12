@@ -44,9 +44,8 @@
 <polyline points='103.12,85.25 114.90,57.37 138.44,39.84 161.99,30.57 185.53,31.34 209.07,32.44 232.62,33.45 279.71,38.10 373.89,49.20 468.07,60.96 656.42,78.39 ' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt;' />
 <polyline points='656.42,91.77 468.07,73.55 373.89,62.11 279.71,52.15 232.62,47.74 209.07,46.92 185.53,48.97 161.99,51.24 138.44,58.17 114.90,77.29 103.12,103.83 ' style='stroke-width: 1.07; stroke: none; stroke-linecap: butt;' />
 <polyline points='103.12,134.28 114.90,100.73 138.44,82.63 161.99,74.87 185.53,76.48 209.07,79.16 232.62,83.40 279.71,89.82 373.89,106.24 468.07,122.23 ' style='stroke-width: 2.13; stroke-linecap: butt;' />
-<polygon points='114.90,56.41 138.44,39.89 161.99,34.25 185.53,34.54 209.07,30.01 232.62,30.57 279.71,41.48 279.71,142.31 232.62,116.39 209.07,106.51 185.53,103.75 161.99,100.36 138.44,104.76 114.90,132.70 ' style='stroke-width: 0.00; stroke: none; stroke-linecap: butt; fill: none;' />
-<polyline points='114.90,56.41 138.44,39.89 161.99,34.25 185.53,34.54 209.07,30.01 232.62,30.57 279.71,41.48 ' style='stroke-width: 1.07; stroke-dasharray: 5.69,5.69; stroke-linecap: butt;' />
-<polyline points='279.71,142.31 232.62,116.39 209.07,106.51 185.53,103.75 161.99,100.36 138.44,104.76 114.90,132.70 ' style='stroke-width: 1.07; stroke-dasharray: 5.69,5.69; stroke-linecap: butt;' />
+<polyline points='114.90,132.70 138.44,104.76 161.99,100.36 185.53,103.75 209.07,106.51 232.62,116.39 279.71,142.31 ' style='stroke-width: 1.07; stroke-dasharray: 5.69,5.69; stroke-linecap: butt;' />
+<polyline points='103.12,83.50 114.90,56.41 138.44,39.89 161.99,34.25 185.53,34.54 209.07,30.01 232.62,30.57 279.71,41.48 373.89,56.67 468.07,67.01 656.42,86.16 ' style='stroke-width: 1.07; stroke-dasharray: 5.69,5.69; stroke-linecap: butt;' />
 <line x1='75.46' y1='5.48' x2='75.46' y2='21.67' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <line x1='109.01' y1='5.48' x2='109.01' y2='21.67' style='stroke-width: 1.07; stroke-linecap: butt;' />
 <line x1='126.67' y1='5.48' x2='126.67' y2='21.67' style='stroke-width: 1.07; stroke-linecap: butt;' />

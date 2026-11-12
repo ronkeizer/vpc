@@ -359,3 +359,26 @@ test_that("missing strata do not collide with a stratum with the literal value \
   expect_equal(db2$aggr_obs$bin_max[db2$aggr_obs$strat %in% "NA"], c(10, 50))
   expect_s3_class(ggplot2::ggplot_build(plot_vpc(db2)), "ggplot_built")
 })
+
+test_that("outlier areas work with per-stratum bins and color stratification", {
+  d <- strat_test_data()
+  for (smooth in c(TRUE, FALSE)) {
+    db <- vpc(sim = d$sim, obs = d$obs, stratify = "GRP", bins = "time", n_bins = 4,
+              bin_by_strata = TRUE, vpcdb = TRUE)
+    areas <- calc_outlier_areas(db$vpc_dat, db$aggr_obs, smooth = smooth)
+    if (!smooth && !is.null(areas)) {
+      # rectangles follow the bins of their own stratum
+      for (s in unique(as.character(areas$strat))) {
+        expect_true(all(areas$xmin[areas$strat == s] %in% db$bins[[s]]))
+      }
+    }
+    pl <- plot_vpc(db, show = list(outlier_areas = TRUE), smooth = smooth)
+    expect_s3_class(ggplot2::ggplot_build(pl), "ggplot_built")
+    db <- vpc_cens(sim = d$sim, obs = d$obs, lloq = 30, stratify_color = "GRP",
+                   bins = "time", n_bins = 4, bin_by_strata = TRUE, vpcdb = TRUE)
+    areas <- calc_outlier_areas(db$vpc_dat, db$aggr_obs, smooth = smooth)
+    if (!is.null(areas)) expect_true("GRP" %in% names(areas))
+    pl <- plot_vpc(db, show = list(outlier_areas = TRUE), smooth = smooth)
+    expect_s3_class(ggplot2::ggplot_build(pl), "ggplot_built")
+  }
+})
