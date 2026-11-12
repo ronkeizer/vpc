@@ -1,3 +1,7 @@
+# vpc 1.2.6
+- stratification by two variables now respects the factor level order of the
+  stratification variables (fix #101)
+
 # vpc 1.2.5
 - added `pred_corr_method = c("multiplicative", "additive")` argument to `vpc()`,
   with `ltbs = TRUE` as a convenience alias for `"additive"`. The additive

@@ -1,6 +1,6 @@
 Package: vpc
 Title: Create Visual Predictive Checks
-Version: 1.2.5
+Version: 1.2.6
 Date: 2026-11-12
 Authors@R:
   c(
