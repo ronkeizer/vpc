@@ -40,10 +40,10 @@ approaches available in classInterval() such as "jenks" (default) or
 
 \item{pred_corr}{Was prediction-correction applied to \code{sim} and
 \code{obs}? When \code{TRUE} and a limit of quantification is used,
-censored values are expected to be \code{NA} (censoring determined on the
-uncorrected scale), and quantiles for both observed and simulated data are
-computed treating those \code{NA} values as censored (below all other
-values for \code{lloq}, above for \code{uloq}). Prediction-corrected
+censored values are expected to be \code{-Inf} (\code{lloq}) or
+\code{Inf} (\code{uloq}), with censoring determined on the uncorrected
+scale, and quantiles for both observed and simulated data are computed
+treating those values as censored. Prediction-corrected
 values are not compared to the limit again, since the limit applies to the
 uncorrected scale. A quantile that falls in the censored part of the
 distribution is returned as \code{NA}.}

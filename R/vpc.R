@@ -173,7 +173,8 @@ vpc_vpc <- function(sim = NULL,
         log_y=log_y_fmt, log_y_min=log_y_min,
         what="observed",
         verbose=verbose,
-        pred_corr=pred_corr
+        pred_corr=pred_corr,
+        drop_missing=!ref_corr
       )
   }
   if(!is.null(vpc_data$sim)) {
@@ -199,7 +200,8 @@ vpc_vpc <- function(sim = NULL,
         log_y=log_y_fmt, log_y_min=log_y_min,
         what="simulated",
         verbose=verbose,
-        pred_corr=pred_corr
+        pred_corr=pred_corr,
+        drop_missing=!ref_corr
       )
   }
   if(ref_corr) {
@@ -212,7 +214,8 @@ vpc_vpc <- function(sim = NULL,
         stratify=NULL,
         log_y=FALSE,
         what="reference simulation",
-        verbose=verbose
+        verbose=verbose,
+        drop_missing=FALSE
       )
     ref_corr_data <-
       calc_ref_corr_continuous(
@@ -224,12 +227,17 @@ vpc_vpc <- function(sim = NULL,
         lloq=lloq, uloq=uloq,
         verbose=verbose
       )
-    vpc_data$sim <- ref_corr_data$sim
+    ## records need to be aligned for reference-correction, so missing
+    ## values are only removed after correction
+    vpc_data$sim <- drop_missing_dv(ref_corr_data$sim, what = "simulated")
     vpc_data$obs <- ref_corr_data$obs
+    if(!is.null(vpc_data$obs)) {
+      vpc_data$obs <- drop_missing_dv(vpc_data$obs, what = "observed")
+    }
     if(log_y) {
-      vpc_data$sim$dv[!is.na(vpc_data$sim$dv) & vpc_data$sim$dv < log_y_min] <- log_y_min
+      vpc_data$sim$dv[is.finite(vpc_data$sim$dv) & vpc_data$sim$dv < log_y_min] <- log_y_min
       if(!is.null(vpc_data$obs)) {
-        vpc_data$obs$dv[!is.na(vpc_data$obs$dv) & vpc_data$obs$dv < log_y_min] <- log_y_min
+        vpc_data$obs$dv[is.finite(vpc_data$obs$dv) & vpc_data$obs$dv < log_y_min] <- log_y_min
       }
     }
   }
@@ -269,14 +277,15 @@ vpc_vpc <- function(sim = NULL,
     )
   # Wrapup ####
   # data combined and handed off to separate plotting function
+  # (censored values, internally -Inf/Inf, are returned as NA)
   vpc_db <-
     as_vpcdb(
-      sim = pred_corr_data$sim,
+      sim = cens_to_na(pred_corr_data$sim),
       vpc_dat = calc_data$vpc_dat,
       smooth = smooth,
       stratify = stratify,
       aggr_obs = calc_data$aggr_obs,
-      obs = pred_corr_data$obs,
+      obs = cens_to_na(pred_corr_data$obs),
       bins = bins,
       facet = facet,
       scales = scales,

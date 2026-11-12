@@ -114,12 +114,12 @@ test_that("vpc applies additive (LTBS) correction to both observed and simulated
 
 test_that("calc_vpc_continuous treats censored values consistently for obs and sim with pred_corr", {
   loq <- define_loq(lloq = 1, require_loq = FALSE)
-  # censored values are NA (determined on uncorrected scale); corrected values
+  # censored values are -Inf (determined on uncorrected scale); corrected values
   # may legitimately be below the lloq (0.5) and must not be censored again
-  obs <- data.frame(strat = 1, bin = 1, idv = 1:5, dv = c(NA, NA, 0.5, 3, 4))
+  obs <- data.frame(strat = 1, bin = 1, idv = 1:5, dv = c(-Inf, -Inf, 0.5, 3, 4))
   sim <- data.frame(
     strat = 1, bin = 1, idv = rep(1:5, 2), sim = rep(1:2, each = 5),
-    dv = c(NA, NA, 0.5, 3, 4, NA, NA, 0.5, 3, 4)
+    dv = c(-Inf, -Inf, 0.5, 3, 4, -Inf, -Inf, 0.5, 3, 4)
   )
   res <- calc_vpc_continuous(
     sim = sim, obs = obs, loq = loq, pi = c(0.05, 0.95), ci = c(0.05, 0.95),
@@ -136,9 +136,11 @@ test_that("calc_vpc_continuous treats censored values consistently for obs and s
   expect_equal(res$vpc_dat$q95.med, res$aggr_obs$obs95)
 
   # without pred_corr, behavior is unchanged: obs values < lloq are censored,
-  # sim NAs are dropped
+  # sim is not censored (missing sim values are ignored)
+  sim_npc <- sim
+  sim_npc$dv[is.infinite(sim_npc$dv)] <- NA
   res_npc <- calc_vpc_continuous(
-    sim = sim, obs = obs, loq = loq, pi = c(0.05, 0.95), ci = c(0.05, 0.95),
+    sim = sim_npc, obs = obs, loq = loq, pi = c(0.05, 0.95), ci = c(0.05, 0.95),
     stratify = NULL, bins = c(0, 10), bin_mid = "mean", verbose = FALSE
   )
   expect_true(is.na(res_npc$aggr_obs$obs50))

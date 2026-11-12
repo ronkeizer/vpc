@@ -83,23 +83,28 @@ calc_ref_corr_continuous <- function(sim, obs, sim_ref, lower_bnd = 0, log_dv = 
     sim_pred = sim_pred,
     ref_dv = ref_mat$dv,
     pred_ref = pred_ref,
-    obs_dv = if(!is.null(obs)) as.num(obs$dv) else NULL,
+    ## censored observations (-Inf/Inf) are not corrected
+    obs_dv = if(!is.null(obs)) ifelse(is.finite(as.num(obs$dv)), as.num(obs$dv), NA_real_) else NULL,
     obs_pred = if(!is.null(obs)) pred else NULL,
     lower_bnd = lower_bnd,
     log_dv = log_dv
   )
   sim_censored <- is_censored(sim$dv, lloq = lloq, uloq = uloq)
+  sim_censored_dv <- censor_dv(sim$dv, lloq = lloq, uloq = uloq)[sim_censored]
   sim$dv[sim_mat$order] <- as.vector(res$sim)
-  sim$dv[sim_censored] <- NA
+  sim$dv[sim_censored] <- sim_censored_dv
   if(!is.null(obs)) {
-    obs_dv_in <- obs$dv
+    obs_dv_in <- as.num(obs$dv)
     obs$dv <- res$obs
+    obs_censored <- is.infinite(obs_dv_in)
+    obs$dv[obs_censored] <- obs_dv_in[obs_censored]
   }
-  ## records with a non-missing DV for which the correction failed are dropped
-  ## (missing DV is kept, as it may indicate censoring)
+  ## records with a non-missing, non-censored DV for which the correction
+  ## failed are dropped (missing DV is kept here, and removed later)
   sim_bad <- rep(FALSE, nrow(sim))
   sim_bad[sim_mat$order] <- !is.na(as.vector(sim_mat$dv)) & !is.finite(as.vector(res$sim))
-  obs_bad <- if(!is.null(obs)) !is.na(obs_dv_in) & !is.finite(res$obs) else logical(0)
+  sim_bad[sim_censored] <- FALSE
+  obs_bad <- if(!is.null(obs)) is.finite(obs_dv_in) & !is.finite(res$obs) else logical(0)
   n_bad <- sum(sim_bad) + sum(obs_bad)
   if(n_bad > 0) {
     warning(

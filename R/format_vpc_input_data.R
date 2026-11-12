@@ -57,23 +57,46 @@ standardize_column <- function(dat, cols, colname, coldesc, what, default) {
 #' @param log_y Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.
 #' @param log_y_min minimal value when using log_y argument. Default is 1e-3.
 #' @param verbose show debugging information (TRUE or FALSE)
-#' @return \code{dat} modified based on other inputs.
-format_vpc_input_data <- function(dat, cols, lloq, uloq, stratify, log_y, log_y_min, what = "observed", verbose = FALSE, pred_corr = FALSE) {
+#' @param drop_missing Remove records with a missing (\code{NA}) dependent
+#'   variable (with a warning)? Missing values are never treated as censored.
+#' @return \code{dat} modified based on other inputs. Values below \code{lloq}
+#'   are set to \code{-Inf} and values above \code{uloq} to \code{Inf}
+#'   (censored).
+format_vpc_input_data <- function(dat, cols, lloq, uloq, stratify, log_y, log_y_min, what = "observed", verbose = FALSE, pred_corr = FALSE, drop_missing = TRUE) {
   dat <- standardize_column(dat=dat, cols=cols, colname="id", coldesc="id indicator", what=what)
   dat <- standardize_column(dat=dat, cols=cols, colname="dv", coldesc="dependent variable", what=what)
   dat <- standardize_column(dat=dat, cols=cols, colname="idv", coldesc="indepentent variable", what=what)
-  # if (pred_corr) {
-  #   if (!is.null(uloq)) { dat$dv[dat$dv > uloq] <- uloq }
-  #   if (!is.null(lloq)) { dat$dv[dat$dv < lloq] <- lloq }
-  # } else {
-    if (!is.null(uloq)) { dat$dv[dat$dv > uloq] <- NA }
-    if (!is.null(lloq)) { dat$dv[dat$dv < lloq] <- NA }
-  # }
+  if (drop_missing) {
+    dat <- drop_missing_dv(dat, what = what)
+  }
+  dat$dv <- censor_dv(dat$dv, lloq = lloq, uloq = uloq)
   if (log_y) {
-    dat$dv[dat$dv < log_y_min] <- log_y_min
+    dat$dv[is.finite(dat$dv) & dat$dv < log_y_min] <- log_y_min
   }
   dat <- add_stratification(dat=dat, stratify=stratify, verbose=verbose)
   return(dat)
+}
+
+#' Remove records with a missing dependent variable
+#'
+#' Missing (\code{NA}) values of the dependent variable are not treated as
+#' censored. Censored values should be supplied as their actual (or any)
+#' value below \code{lloq} / above \code{uloq}.
+#'
+#' @param dat data.frame with a standardized \code{dv} column
+#' @param what The description of the data (typically "observed" or "simulated")
+#' @return \code{dat} without records with a missing \code{dv}
+#' @noRd
+drop_missing_dv <- function(dat, what = "observed") {
+  missing_dv <- is.na(dat$dv)
+  if (any(missing_dv)) {
+    warning(
+      sum(missing_dv), " record(s) with a missing (NA) dependent variable removed from ", what, " data. ",
+      "Missing values are not treated as censored: to count values as censored, supply a value below `lloq` (or above `uloq`)."
+    )
+    dat <- dat[!missing_dv, , drop = FALSE]
+  }
+  dat
 }
 
 #' @describeIn format_vpc_input_data Prepare VPC data for future calculations

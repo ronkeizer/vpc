@@ -341,3 +341,28 @@ test_that("ltbs = TRUE selects log-scale rcVPC and rejects log_y", {
   expect_equal(obj$obs$dv[order(obj$obs$rec)], exp$obs, tolerance = 1e-8)
   expect_error(rc_vpc(fx, ltbs = TRUE, log_y = TRUE), "log_y")
 })
+
+test_that("missing DV is kept aligned during correction, then dropped (#80)", {
+  fx <- refcorr_vpc_data()
+  obj <- suppressWarnings(rc_vpc(fx, lloq = 0.5))
+  fx_na <- fx
+  na_rec <- which(fx$obs$dv >= 0.5)[1:2]
+  fx_na$obs$dv[na_rec] <- NA
+  warns <- character(0)
+  obj_na <- withCallingHandlers(
+    rc_vpc(fx_na, lloq = 0.5),
+    warning = function(w) {
+      warns <<- c(warns, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_true(any(grepl(
+    "2 record(s) with a missing (NA) dependent variable removed from observed data",
+    warns, fixed = TRUE
+  )))
+  expect_equal(nrow(obj_na$obs), nrow(fx$obs) - 2)
+  keep <- !(seq_len(nrow(fx$obs)) %in% na_rec)
+  expect_equal(obj_na$obs$dv, obj$obs$dv[keep])
+  ## missing values are not counted as censored
+  expect_equal(is.na(obj_na$obs$dv), fx$obs$dv[keep] < 0.5)
+})
