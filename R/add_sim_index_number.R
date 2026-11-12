@@ -2,13 +2,21 @@
 #'
 #' @description Add simulation index number to simulation when not present
 #' @param sim a data.frame containing the simulation data
-#' @param id character specifying the column name in the data.frame
+#' @param id character specifying the column name in the data.frame. The
+#'   column itself may be numeric, character, or factor.
 #' @param sim_label label to indicate simulation index (if available)
 add_sim_index_number <- function (sim, id = "id", sim_label = "sim") { # for multiple simulations in a single dataframe, add an index number for every simulation
   if(!is.null(sim_label) && sim_label %in% colnames(sim)) { # Keep simulation index column if already present
     return(sim[[sim_label]])
   }
-  sim[[id]] <- as.num(sim[[id]])
+  ids <- sim[[id]]
+  if (!is.numeric(ids)) {
+    # Support non-numeric (character / factor) ID columns, e.g. from nlmixr2,
+    # by mapping each ID to an integer in order of first appearance.
+    ids <- as.character(ids)
+    ids <- match(ids, unique(ids))
+  }
+  sim[[id]] <- ids
   sim_id <- cumsum(unlist(sapply(rle(sim[[id]])$lengths, FUN = function(w) seq(length(w), w, 1))) < 2)
   sim$sim <- 1
   for(i in unique(sim[[id]])){

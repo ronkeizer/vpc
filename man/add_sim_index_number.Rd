@@ -9,7 +9,8 @@ add_sim_index_number(sim, id = "id", sim_label = "sim")
 \arguments{
 \item{sim}{a data.frame containing the simulation data}
 
-\item{id}{character specifying the column name in the data.frame}
+\item{id}{character specifying the column name in the data.frame. The
+column itself may be numeric, character, or factor.}
 
 \item{sim_label}{label to indicate simulation index (if available)}
 }

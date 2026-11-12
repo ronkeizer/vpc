@@ -1,3 +1,8 @@
+# vpc 1.2.7
+- the ID column may now be character (or any non-numeric type), e.g. as
+  produced by nlmixr2. Previously non-numeric IDs were coerced to `NA` when
+  deriving the simulation index, causing an error (fix #103)
+
 # vpc 1.2.6
 - stratification by two variables now respects the factor level order of the
   stratification variables (fix #101)
