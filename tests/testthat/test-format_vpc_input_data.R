@@ -69,9 +69,9 @@ test_that("format_vpc_input_data returns the source data unmodified when lloq, u
   )
 })
 
-test_that("format_vpc_input_data returns the source data modified by lloq (NA if pred_corr == FALSE)", {
+test_that("format_vpc_input_data returns the source data modified by lloq (-Inf if pred_corr == FALSE)", {
   formatted_nonmem_df_lloq_nopredc <- formatted_nonmem_df
-  formatted_nonmem_df_lloq_nopredc$dv <- NA_real_
+  formatted_nonmem_df_lloq_nopredc$dv <- -Inf
   expect_equal(
     vpc:::format_vpc_input_data(
       dat=nonmem_df,
@@ -87,9 +87,9 @@ test_that("format_vpc_input_data returns the source data modified by lloq (NA if
   )
 })
 
-test_that("format_vpc_input_data returns the source data modified by lloq (lloq if pred_corr == TRUE)", {
+test_that("format_vpc_input_data returns the source data modified by lloq (-Inf if pred_corr == TRUE)", {
   formatted_nonmem_df_lloq_yespredc <- formatted_nonmem_df
-  formatted_nonmem_df_lloq_yespredc$dv <- NA_real_
+  formatted_nonmem_df_lloq_yespredc$dv <- -Inf
   expect_equal(
     vpc:::format_vpc_input_data(
       dat=nonmem_df,
@@ -105,9 +105,9 @@ test_that("format_vpc_input_data returns the source data modified by lloq (lloq 
   )
 })
 
-test_that("format_vpc_input_data returns the source data modified by uloq (NA if pred_corr == FALSE)", {
+test_that("format_vpc_input_data returns the source data modified by uloq (Inf if pred_corr == FALSE)", {
   formatted_nonmem_df_uloq_nopredc <- formatted_nonmem_df
-  formatted_nonmem_df_uloq_nopredc$dv <- NA_real_
+  formatted_nonmem_df_uloq_nopredc$dv <- Inf
   expect_equal(
     vpc:::format_vpc_input_data(
       dat=nonmem_df,
@@ -123,9 +123,9 @@ test_that("format_vpc_input_data returns the source data modified by uloq (NA if
   )
 })
 
-test_that("format_vpc_input_data returns the source data modified by uloq (uloq if pred_corr == TRUE)", {
+test_that("format_vpc_input_data returns the source data modified by uloq (Inf if pred_corr == TRUE)", {
   formatted_nonmem_df_uloq_yespredc <- formatted_nonmem_df
-  formatted_nonmem_df_uloq_yespredc$dv <- NA_real_
+  formatted_nonmem_df_uloq_yespredc$dv <- Inf
   expect_equal(
     vpc:::format_vpc_input_data(
       dat=nonmem_df,

@@ -33,9 +33,11 @@ named "sim", each containing a sub-list with elements for mapping columns
 names in the data to expected column names for use.}
 
 \item{lloq, uloq}{limits of quantification. Simulated values outside these
-limits are set to \code{NA} after correction, so that the variability
-correction is based on all simulated data. Observed data is expected to
-be censored already.}
+limits are set to \code{-Inf} (below \code{lloq}) or \code{Inf} (above
+\code{uloq}) after correction, so that the variability correction is
+based on all simulated data. Observed data is expected to be censored
+(\code{-Inf}/\code{Inf}) already; censored observations are not
+corrected.}
 
 \item{verbose}{show debugging information (TRUE or FALSE)}
 }
