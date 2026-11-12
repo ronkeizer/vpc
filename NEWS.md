@@ -1,14 +1,43 @@
 # vpc 1.3.0
 - added reference-corrected VPC (rcVPC; Ibrahim et al., AAPS J 2025) via new
-  `sim_ref` argument to `vpc()`, with `ref_corr_log` for log-scale DV. The lower
-  bound is taken from `pred_corr_lower_bnd`. Validated against Pharmpy's PsN
-  implementation (#105)
-- pcVPC with `lloq`/`uloq`: pred-corrected observations are no longer compared
-  to the uncorrected limit again when calculating observed percentiles; only
-  values censored before correction are treated as censored
+  `sim_ref` argument to `vpc()`. `pred_corr_method = "additive"` (or
+  `ltbs = TRUE`) selects the log-scale equations, and the lower bound is taken
+  from `pred_corr_lower_bnd`. Censored data is handled as for pcVPC. Validated
+  against Pharmpy's PsN implementation (#105)
 - pcVPC: when PRED is taken from the simulated data, the first replicate is
   used if its records (`id`, `idv`) match the observed data; otherwise a
   warning is given and the previous behaviour (first rows) is used
+
+# vpc 1.2.9
+- `vpc()` with `pred_corr = TRUE` and `lloq`/`uloq`: observed and simulated
+  data are now handled identically. Censoring is determined on the uncorrected
+  DV, only non-censored values are prediction-corrected, and censored values
+  are retained as censored (instead of being dropped for simulated data) when
+  calculating percentiles. Prediction-corrected observed values are no longer
+  compared to the (uncorrected) limit of quantification again. The procedure
+  is documented in `?vpc` (#104)
+
+# vpc 1.2.8
+- added `ci_sim` argument to `vpc_tte()` to specify the confidence interval
+  of the Kaplan-Meier curves from the simulated data, which was previously
+  fixed at 90% (fix #102). The `ci` argument only applies to the observed data.
+
+# vpc 1.2.7
+- the ID column may now be character (or any non-numeric type), e.g. as
+  produced by nlmixr2. Previously non-numeric IDs were coerced to `NA` when
+  deriving the simulation index, causing an error (fix #103)
+
+# vpc 1.2.6
+- stratification by two variables now respects the factor level order of the
+  stratification variables (fix #101)
+
+# vpc 1.2.5
+- added `pred_corr_method = c("multiplicative", "additive")` argument to `vpc()`,
+  with `ltbs = TRUE` as a convenience alias for `"additive"`. The additive
+  prediction-correction (`dv + (pred_bin - pred)`) is intended for
+  log-transform-both-sides (LTBS) models and expects `dv` and `pred` to already
+  be on the log scale. `pred_corr_lower_bnd` is ignored and `log_y = TRUE` is
+  not allowed with this method (#111)
 
 # vpc 1.2.4
 - replaced defunct dplyr functions (`group_by_()`, `arrange_()`, `do()`) with

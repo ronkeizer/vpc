@@ -96,3 +96,74 @@ test_that("all simulated dataset-indices of equal length", {
   h <- hist(s)
   expect_equal(length(unique(h$counts)), 1)
 })
+
+test_that("add_sim_index_number supports non-numeric ids (#103)", {
+  sim <- data.frame(
+    id = rep(rep(c(3, 1, 2), each = 2), times = 4),
+    dv = 1
+  )
+  expected <- rep(1:4, each = 6)
+  expect_equal(add_sim_index_number(sim), expected)
+
+  sim_chr <- sim
+  sim_chr$id <- paste0("subj_", sim$id)
+  expect_equal(add_sim_index_number(sim_chr), expected)
+
+  sim_fct <- sim
+  sim_fct$id <- factor(paste0("subj_", sim$id))
+  expect_equal(add_sim_index_number(sim_fct), expected)
+})
+
+test_that("vpc() works with character ids (#103)", {
+  tmp <- simple_data
+  obs <- tmp$obs
+  sim <- tmp$sim
+  obs_chr <- obs
+  sim_chr <- sim
+  obs_chr$ID <- paste0("subj_", obs$ID)
+  sim_chr$ID <- paste0("subj_", sim$ID)
+
+  set.seed(1)
+  ref <- vpc(sim = sim, obs = obs, pred_corr = TRUE, vpcdb = TRUE)
+  set.seed(1)
+  obj <- vpc(sim = sim_chr, obs = obs_chr, pred_corr = TRUE, vpcdb = TRUE)
+  expect_equal(obj$vpc_dat, ref$vpc_dat)
+  expect_equal(obj$aggr_obs, ref$aggr_obs)
+})
+
+test_that("vpc_cat() works with character ids (#103)", {
+  tmp <- simple_data
+  cat <- cut(tmp$obs$DV, breaks = c(-1, 10, 40, 1000))
+  tmp$obs$DV <- match(cat, levels(cat))
+  cat2 <- cut(tmp$sim$DV, breaks = c(-1, 10, 40, 1000))
+  tmp$sim$DV <- match(cat2, levels(cat2))
+  ref <- vpc_cat(sim = tmp$sim, obs = tmp$obs, vpcdb = TRUE)
+
+  tmp$obs$ID <- paste0("subj_", tmp$obs$ID)
+  tmp$sim$ID <- paste0("subj_", tmp$sim$ID)
+  obj <- vpc_cat(sim = tmp$sim, obs = tmp$obs, vpcdb = TRUE)
+  expect_equal(obj$vpc_dat, ref$vpc_dat)
+  expect_equal(obj$aggr_obs, ref$aggr_obs)
+})
+
+test_that("vpc_tte() works with character ids (#103)", {
+  sim <- vpc::rtte_sim_nm[1:200000, ]
+  sim$sim <- NULL # force derivation of the simulation index from the id column
+  obs <- vpc::rtte_obs_nm
+  suppressWarnings({
+    set.seed(1)
+    ref <- vpc_tte(sim = sim, obs = obs, rtte = FALSE,
+                   sim_cols = list(dv = "dv", idv = "t"),
+                   obs_cols = list(idv = "t"), vpcdb = TRUE)
+  })
+  sim$id <- paste0("subj_", sim$id)
+  obs$id <- paste0("subj_", obs$id)
+  suppressWarnings({
+    set.seed(1)
+    obj <- vpc_tte(sim = sim, obs = obs, rtte = FALSE,
+                   sim_cols = list(dv = "dv", idv = "t"),
+                   obs_cols = list(idv = "t"), vpcdb = TRUE)
+  })
+  expect_equal(obj$sim_km, ref$sim_km)
+  expect_equal(obj$obs_km, ref$obs_km)
+})

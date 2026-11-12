@@ -14,7 +14,8 @@
 #' @param events numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events.
 #' @param reverse_prob reverse the probability scale (i.e. plot 1-probability)
 #' @param stratify_color character vector of stratification variables. Only 1 stratification variable can be supplied, cannot be used in conjunction with `stratify`.
-#' @param ci confidence interval to plot. Default is (0.05, 0.95)
+#' @param ci confidence interval for the Kaplan-Meier estimate of the observed data (shown when `show = list(obs_ci = TRUE)`). Default is (0.05, 0.95)
+#' @param ci_sim quantiles of the Kaplan-Meier curves from the simulated data that define the simulated confidence interval (shaded area). Default is (0.05, 0.95), i.e. a 90\% interval.
 #' @param as_percentage Show y-scale from 0-100 percent? TRUE by default, if FALSE then scale from 0-1.
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
@@ -63,7 +64,12 @@ vpc_tte <- function(sim = NULL,
                     facet = "wrap",
                     labeller = NULL,
                     verbose = FALSE,
-                    vpcdb = FALSE) {
+                    vpcdb = FALSE,
+                    ci_sim = c(0.05, 0.95)) {
+  if(!is.numeric(ci_sim) || length(ci_sim) != 2 || any(is.na(ci_sim)) ||
+     any(ci_sim < 0 | ci_sim > 1) || ci_sim[1] >= ci_sim[2]) {
+    stop("`ci_sim` should be a numeric vector of length 2 with increasing values between 0 and 1, e.g. c(0.05, 0.95).")
+  }
   vpc_data <- read_vpc(
     sim=sim, obs=obs, psn_folder=psn_folder,
     software=software,
@@ -213,8 +219,8 @@ vpc_tte <- function(sim = NULL,
       dplyr::summarise (bin_mid = head(bin_mid,1),
                  bin_min = head(bin_min,1),
                  bin_max = head(bin_max,1),
-                 qmin = quantile(surv, 0.05),
-                 qmax = quantile(surv, 0.95),
+                 qmin = quantile(surv, ci_sim[1]),
+                 qmax = quantile(surv, ci_sim[2]),
                  qmed = median(surv),
 #                         lower_med = median(lower, 0.05),
 #                         upper_med = median(upper, 0.05),
@@ -262,35 +268,22 @@ vpc_tte <- function(sim = NULL,
 
   if (!is.null(stratify_original)) {
     if (length(stratify_pars) == 2) {
-      if(!is.null(sim_km)) {
-        sim_km$strat1 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)-1]
-        sim_km$strat2 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)]
-      }
-      if(!is.null(obs_km)) {
-        obs_km$strat1 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)-1]
-        obs_km$strat2 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)]
-      }
-      if(!is.null(cens_dat)) {
-        cens_dat$strat1 <- unlist(strsplit(as.character(cens_dat$strat), ", "))[(1:length(cens_dat$strat)*2)-1]
-        cens_dat$strat2 <- unlist(strsplit(as.character(cens_dat$strat), ", "))[(1:length(cens_dat$strat)*2)]
-      }
+      sim_km <- add_strat_columns(sim_km, stratify_pars, obs, sim)
+      obs_km <- add_strat_columns(obs_km, stratify_pars, obs, sim)
+      cens_dat <- add_strat_columns(cens_dat, stratify_pars, obs, sim)
     }
   }
 
   if (!is.null(obs)) {
     if(nrow(cens_dat)>0) {
       cens_dat$y <- 1
-      cens_dat$strat1 <- NA
-      cens_dat$strat2 <- NA
+      # strat1/strat2 were already added (with original factor levels) above
+      # when stratifying by 2 variables
+      if (!"strat1" %in% names(cens_dat)) cens_dat$strat1 <- NA
+      if (!"strat2" %in% names(cens_dat)) cens_dat$strat2 <- NA
       for (j in 1:nrow(cens_dat[,1])) {
         tmp <- obs_km[as.character(obs_km$strat) == as.character(cens_dat$strat[j]),]
         cens_dat$y[j] <- rev(tmp$surv[(cens_dat$time[j] - tmp$time) > 0])[1]
-        if ("strat1" %in% names(tmp)) {
-          cens_dat$strat1[j] <- rev(tmp$strat1[(cens_dat$time[j] - tmp$time) > 0])[1]
-        }
-        if ("strat2" %in% names(tmp)) {
-          cens_dat$strat2[j] <- rev(tmp$strat2[(cens_dat$time[j] - tmp$time) > 0])[1]
-        }
       }
       cens_dat <- cens_dat[!is.na(cens_dat$y),]
     }

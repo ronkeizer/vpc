@@ -4,7 +4,12 @@
 \alias{pred_correction_core}
 \title{Core prediction correction function}
 \usage{
-pred_correction_core(data, pred_col, pred_corr_lower_bnd)
+pred_correction_core(
+  data,
+  pred_col,
+  pred_corr_lower_bnd = 0,
+  pred_corr_method = "multiplicative"
+)
 }
 \arguments{
 \item{data}{dataset, either `sim` or `obs` data.frame}
@@ -12,12 +17,31 @@ pred_correction_core(data, pred_col, pred_corr_lower_bnd)
 \item{pred_col}{cols$obs$pred}
 
 \item{pred_corr_lower_bnd}{lower bound for the prediction-correction}
+
+\item{pred_corr_method}{Form of the prediction-correction, either
+\code{"multiplicative"} (default) or \code{"additive"}. See
+\code{\link{vpc}} for details.}
 }
 \value{
 data.frame
 }
 \description{
-Perform pred-correction for predictions that were non-zero and
-were not missing observation. The latter can happen e.g. when 
-censored data is set to NA in `format_vpc_input_data()`.
+Perform pred-correction for observations that were not missing.
+Missing observations can occur e.g. when censored data is set to NA
+in `format_vpc_input_data()`.
+}
+\details{
+Two forms of correction are available:
+\describe{
+  \item{multiplicative}{(Bergstrand et al., AAPS J 2011) Rows with a
+  prediction of zero are left uncorrected.
+  \deqn{pcDV = lb + (DV - lb) \frac{PRED_{bin} - lb}{PRED - lb}}{pcDV = lb + (DV - lb) * (PRED_bin - lb) / (PRED - lb)}
+  where \eqn{lb} is \code{pred_corr_lower_bnd}.}
+  \item{additive}{For log-transform-both-sides (LTBS) models, where
+  \code{dv} and \code{pred} are already on the log scale.
+  \deqn{pcDV = DV + (PRED_{bin} - PRED)}{pcDV = DV + (PRED_bin - PRED)}
+  \code{pred_corr_lower_bnd} is not used.}
+}
+In both cases \eqn{PRED_{bin}}{PRED_bin} is the median of \code{pred}
+within the stratum and bin.
 }

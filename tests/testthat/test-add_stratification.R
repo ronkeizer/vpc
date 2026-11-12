@@ -1,0 +1,53 @@
+test_that("add_stratification orders combined strata by factor levels", {
+  dat <- data.frame(
+    x = factor(c("a", "b", "c", "a"), levels = c("b", "a", "c")),
+    y = factor(c("d", "e", "f", "e"), levels = c("e", "d", "f"))
+  )
+  out <- add_stratification(dat, c("x", "y"))
+  expect_s3_class(out$strat, "factor")
+  expect_equal(levels(out$strat), c("b, e", "a, e", "a, d", "c, f"))
+  expect_equal(as.character(out$strat), c("a, d", "b, e", "c, f", "a, e"))
+})
+
+test_that("add_stratification sorts non-factor columns", {
+  dat <- data.frame(x = c(2, 1, 10), y = c("b", "a", "a"))
+  out <- add_stratification(dat, c("x", "y"))
+  expect_equal(levels(out$strat), c("1, a", "2, b", "10, a"))
+})
+
+test_that("add_strat_columns preserves factor levels of original columns", {
+  dat <- data.frame(
+    x = factor(c("a", "b", "c", "a"), levels = c("b", "a", "c")),
+    y = factor(c("d", "e", "f", "e"), levels = c("e", "d", "f"))
+  )
+  dat <- add_stratification(dat, c("x", "y"))
+  summ <- data.frame(strat = unique(dat$strat), val = 1:4)
+  out <- add_strat_columns(summ, c("x", "y"), dat)
+  expect_equal(levels(out$strat1), c("b", "a", "c"))
+  expect_equal(levels(out$strat2), c("e", "d", "f"))
+  expect_equal(as.character(out$strat1), c("a", "b", "c", "a"))
+  expect_equal(as.character(out$strat2), c("d", "e", "f", "e"))
+  expect_null(add_strat_columns(NULL, c("x", "y"), dat))
+})
+
+test_that("vpc with 2 stratification variables respects factor order (#101)", {
+  obs <- simple_data$obs
+  sim <- simple_data$sim
+  ids <- sort(unique(obs$ID))
+  set.seed(1)
+  xfac <- factor(sample(c("a", "b", "c"), length(ids), replace = TRUE), levels = c("b", "a", "c"))
+  yfac <- factor(sample(c("d", "e", "f"), length(ids), replace = TRUE), levels = c("e", "d", "f"))
+  obs$xfac <- xfac[match(obs$ID, ids)]
+  obs$yfac <- yfac[match(obs$ID, ids)]
+  sim$xfac <- xfac[match(sim$ID, ids)]
+  sim$yfac <- yfac[match(sim$ID, ids)]
+  vpc_db <- vpc(sim = sim, obs = obs, stratify = c("xfac", "yfac"), vpcdb = TRUE)
+  expect_equal(levels(vpc_db$vpc_dat$strat1), c("b", "a", "c"))
+  expect_equal(levels(vpc_db$vpc_dat$strat2), c("e", "d", "f"))
+  expect_equal(levels(vpc_db$aggr_obs$strat1), c("b", "a", "c"))
+  expect_equal(levels(vpc_db$aggr_obs$strat2), c("e", "d", "f"))
+  p <- vpc(sim = sim, obs = obs, stratify = c("xfac", "yfac"))
+  built <- ggplot2::ggplot_build(p)
+  expect_equal(levels(built$layout$layout$xfac), c("b", "a", "c"))
+  expect_equal(levels(built$layout$layout$yfac), c("e", "d", "f"))
+})

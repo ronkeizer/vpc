@@ -14,5 +14,8 @@ add_stratification(dat, stratify, verbose = FALSE)
 \item{verbose}{verbosity (`TRUE` or `FALSE`)}
 }
 \description{
-Adds stratification to data set
+When two stratification variables are supplied, the combined `strat` column
+is a factor whose levels are ordered by the levels of the first variable,
+then by the levels of the second variable. Factor level order of the
+original columns is respected; non-factor columns are sorted.
 }

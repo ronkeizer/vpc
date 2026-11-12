@@ -32,7 +32,8 @@ vpc_tte(
   facet = "wrap",
   labeller = NULL,
   verbose = FALSE,
-  vpcdb = FALSE
+  vpcdb = FALSE,
+  ci_sim = c(0.05, 0.95)
 )
 }
 \arguments{
@@ -75,7 +76,7 @@ aim for}
 
 \item{stratify_color}{character vector of stratification variables. Only 1 stratification variable can be supplied, cannot be used in conjunction with `stratify`.}
 
-\item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
+\item{ci}{confidence interval for the Kaplan-Meier estimate of the observed data (shown when `show = list(obs_ci = TRUE)`). Default is (0.05, 0.95)}
 
 \item{xlab}{label for x axis}
 
@@ -98,6 +99,8 @@ aim for}
 \item{verbose}{show debugging information (TRUE or FALSE)}
 
 \item{vpcdb}{Boolean whether to return the underlying vpcdb rather than the plot}
+
+\item{ci_sim}{quantiles of the Kaplan-Meier curves from the simulated data that define the simulated confidence interval (shaded area). Default is (0.05, 0.95), i.e. a 90\% interval.}
 }
 \value{
 a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
