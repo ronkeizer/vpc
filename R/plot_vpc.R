@@ -366,11 +366,12 @@ geom_obs_ci_tte <- function(data, show, vpc_theme) {
   }
 }
 
-#' @describeIn vpc_ggplot Show observed data points
+#' @describeIn vpc_ggplot Show observed data points (censored values, stored
+#'   as \code{-Inf}/\code{Inf}, are not shown)
 geom_obs_dv_continuous <- function(data, show, vpc_theme) {
   if(show & !is.null(data$obs)) {
     ggplot2::geom_point(
-      data=data$obs,
+      data=data$obs[!is.infinite(data$obs$dv), , drop = FALSE],
       ggplot2::aes(x=idv, y = dv),
       size=vpc_theme$obs_size,
       colour=vpc_theme$obs_color,

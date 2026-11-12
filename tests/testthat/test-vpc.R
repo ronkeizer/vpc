@@ -108,22 +108,30 @@ test_that("missing DV is dropped with a warning and never treated as censored (#
   )
 })
 
-test_that("censored values are returned as NA in the vpcdb (#80)", {
+test_that("censored values are returned as -Inf/Inf in the vpcdb and not plotted (#80)", {
   obs <- simple_data$obs[simple_data$obs$MDV == 0, ]
   sim <- simple_data$sim[simple_data$sim$MDV == 0, ]
   db <- vpc(sim = sim, obs = obs, lloq = 20, vpcdb = TRUE)
-  expect_false(any(is.infinite(db$obs$dv)))
-  expect_equal(is.na(db$obs$dv), obs$DV < 20)
+  expect_false(anyNA(db$obs$dv))
+  expect_equal(db$obs$dv == -Inf, obs$DV < 20)
+  db_u <- vpc(sim = sim, obs = obs, uloq = 100, vpcdb = TRUE)
+  expect_equal(db_u$obs$dv == Inf, obs$DV > 100)
+  # censored observations are not drawn
+  lyr <- geom_obs_dv_continuous(db, show = TRUE, vpc_theme = new_vpc_theme())
+  expect_equal(nrow(lyr$data), sum(obs$DV >= 20))
+  expect_true(all(is.finite(lyr$data$dv)))
+  db_show <- vpc(sim = sim, obs = obs, lloq = 20, show = list(obs_dv = TRUE), vpcdb = TRUE)
+  expect_silent(ggplot2::ggplot_build(plot_vpc(db_show)))
   # log_y floor does not overwrite censored values
   db_log <- vpc(sim = sim, obs = obs, lloq = 20, log_y = TRUE, log_y_min = 25, vpcdb = TRUE)
-  expect_equal(is.na(db_log$obs$dv), obs$DV < 20)
-  expect_true(all(db_log$obs$dv[!is.na(db_log$obs$dv)] >= 25))
-  # pcVPC
+  expect_equal(db_log$obs$dv == -Inf, obs$DV < 20)
+  expect_true(all(db_log$obs$dv[is.finite(db_log$obs$dv)] >= 25))
+  expect_s3_class(plot_vpc(db_log), "ggplot")
+  # pcVPC: censoring direction is kept although lloq is cleared
   db_pc <- suppressWarnings(vpc(sim = sim, obs = obs, lloq = 20, pred_corr = TRUE, vpcdb = TRUE))
-  expect_false(any(is.infinite(db_pc$obs$dv)))
-  expect_false(any(is.infinite(db_pc$sim$dv)))
-  expect_equal(is.na(db_pc$obs$dv), obs$DV < 20)
+  expect_equal(db_pc$obs$dv == -Inf, obs$DV < 20)
+  expect_equal(db_pc$sim$dv == -Inf, sim$DV < 20)
   # vpc_cens
   db_cens <- vpc_cens(sim = sim, obs = obs, lloq = 20, vpcdb = TRUE)
-  expect_equal(is.na(db_cens$obs$dv), obs$DV < 20)
+  expect_equal(db_cens$obs$dv == -Inf, obs$DV < 20)
 })

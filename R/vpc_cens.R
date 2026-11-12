@@ -171,13 +171,13 @@ vpc_cens <- function(sim = NULL,
   ## plotting starts here
   vpc_db <-
     as_vpcdb(
-      sim = cens_to_na(sim),
+      sim = sim,
       vpc_dat = vpc_dat,
       stratify = stratify,
       stratify_original = stratify_original,
       stratify_color = stratify_color,
       aggr_obs = aggr_obs,
-      obs = cens_to_na(obs),
+      obs = obs,
       bins = bins,
       facet = facet,
       labeller = labeller,

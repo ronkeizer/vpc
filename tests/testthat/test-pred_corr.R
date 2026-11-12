@@ -159,7 +159,7 @@ test_that("vpc with pred_corr and lloq uses the same censoring for obs and sim",
     db <- vpc(sim = sim1, obs = obs, pred_corr = TRUE, lloq = 5, vpcdb = TRUE),
     "Censoring is determined on the uncorrected"
   )
-  expect_true(any(is.na(db$obs$dv)))
+  expect_true(any(db$obs$dv == -Inf))
   expect_equal(db$vpc_dat$q5.med, db$aggr_obs$obs5)
   expect_equal(db$vpc_dat$q50.med, db$aggr_obs$obs50)
   expect_equal(db$vpc_dat$q95.med, db$aggr_obs$obs95)

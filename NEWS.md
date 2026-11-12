@@ -8,14 +8,19 @@
     `lloq`/`uloq`, but was silently counted as censored with `lloq`/`uloq`.
     To count a value as censored, supply a value below `lloq` (or above
     `uloq`). For rcVPC, missing values are removed after correction, so that
-    records stay aligned.
+    records stay aligned; missing values in `sim_ref` give a warning and are
+    ignored in the variability correction.
   - `quantile_cens()` treats `-Inf`/`Inf` (and values beyond `limit`) as
     censored and ignores `NA` (previously `NA` was counted as censored, or
     gave an error for `cens = "neither"`).
   - `vpc_cens()`: missing values are excluded from the fraction below/above
     the limit of quantification.
-  - censored values are still returned as `NA` in the `vpcdb` output, and
-    the `log_y` floor no longer applies to censored values.
+  - censored values are returned as `-Inf`/`Inf` (previously `NA`) in
+    `obs$dv`/`sim$dv` of the `vpcdb` output, so the censoring direction is
+    kept, also for prediction-/reference-corrected VPCs. `plot_vpc()` does not
+    draw censored observations. Code that uses `is.na()` on the `vpcdb` data
+    to find censored values should use `is.infinite()` instead.
+  - the `log_y` floor no longer applies to censored values.
 
 # vpc 1.3.1
 - `auto_bin()` / `bins = "data"`: the lowest observations were not assigned to

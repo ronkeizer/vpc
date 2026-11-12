@@ -97,7 +97,8 @@ A collection of internal ggplot helpers for VPC plotting
 \item \code{geom_obs_ci_tte()}: Show confidence interval for observed, time-to-event
 data
 
-\item \code{geom_obs_dv_continuous()}: Show observed data points
+\item \code{geom_obs_dv_continuous()}: Show observed data points (censored values, stored
+as \code{-Inf}/\code{Inf}, are not shown)
 
 \item \code{geom_obs_km()}: Show observed Kaplan-Meier line
 

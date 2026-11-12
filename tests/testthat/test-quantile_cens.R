@@ -116,10 +116,8 @@ test_that("loq_frac counts -Inf/Inf as censored and ignores NA (#80)", {
   expect_equal(vpc:::loq_frac(x=c(Inf, NA, 3, 4), limit=5, cens="right"), 1/3)
 })
 
-test_that("censor_dv and cens_to_na", {
+test_that("censor_dv", {
   expect_equal(vpc:::censor_dv(c(NA, 0.5, 2, 10), lloq = 1), c(NA, -Inf, 2, 10))
   expect_equal(vpc:::censor_dv(c(NA, 0.5, 2, 10), uloq = 5), c(NA, 0.5, 2, Inf))
   expect_equal(vpc:::censor_dv(c(0.5, 2)), c(0.5, 2))
-  expect_equal(vpc:::cens_to_na(data.frame(dv = c(-Inf, 1, Inf)))$dv, c(NA, 1, NA))
-  expect_null(vpc:::cens_to_na(NULL))
 })

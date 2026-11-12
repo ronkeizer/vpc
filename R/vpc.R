@@ -217,6 +217,15 @@ vpc_vpc <- function(sim = NULL,
         verbose=verbose,
         drop_missing=FALSE
       )
+    ## records need to be aligned for reference-correction, so missing values
+    ## in the reference simulation cannot be dropped
+    n_missing_ref <- sum(is.na(sim_ref_dat$dv))
+    if(n_missing_ref > 0) {
+      warning(
+        n_missing_ref, " record(s) with a missing (NA) dependent variable in reference simulation data. ",
+        "These are ignored when calculating the variability correction."
+      )
+    }
     ref_corr_data <-
       calc_ref_corr_continuous(
         sim=vpc_data$sim, obs=vpc_data$obs,
@@ -277,15 +286,15 @@ vpc_vpc <- function(sim = NULL,
     )
   # Wrapup ####
   # data combined and handed off to separate plotting function
-  # (censored values, internally -Inf/Inf, are returned as NA)
+  # (censored values are kept as -Inf/Inf, plot_vpc() does not draw them)
   vpc_db <-
     as_vpcdb(
-      sim = cens_to_na(pred_corr_data$sim),
+      sim = pred_corr_data$sim,
       vpc_dat = calc_data$vpc_dat,
       smooth = smooth,
       stratify = stratify,
       aggr_obs = calc_data$aggr_obs,
-      obs = cens_to_na(pred_corr_data$obs),
+      obs = pred_corr_data$obs,
       bins = bins,
       facet = facet,
       scales = scales,

@@ -50,7 +50,7 @@ Each step is its own file in `R/`:
 ### Correction subtleties (recent work, see NEWS 1.3.0)
 - `pred_corr` and `sim_ref` cannot be combined.
 - rcVPC aligns records **by position**: `obs` and every replicate in `sim` and `sim_ref` must have identical records in the same order. Sim data is censored *after* reference correction. The `log_y` floor is applied after correction, not inside `format_vpc_input_data`.
-- Censored values are `-Inf`/`Inf` internally and only converted back to NA (`cens_to_na()`) for the vpcdb/plot. After any correction, `lloq`/`uloq` are cleared and only `-Inf`/`Inf` count as censored. Corrected values are never compared to the uncorrected limits again. For rcVPC, missing DV is kept until after correction (records must stay aligned), then dropped.
+- Censored values are `-Inf`/`Inf` throughout, including in the returned vpcdb (`obs`/`sim`); `geom_obs_dv_continuous()` skips them when drawing points. After any correction, `lloq`/`uloq` are cleared and only `-Inf`/`Inf` count as censored. Corrected values are never compared to the uncorrected limits again. For rcVPC, missing DV is kept until after correction (records must stay aligned), then dropped; missing DV in `sim_ref` gives a warning and is ignored in the variability correction.
 - For pcVPC, when PRED comes from the sim data, the first replicate is used, and its `id`/`idv` order must match `obs`.
 
 ### Tests

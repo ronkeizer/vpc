@@ -20,9 +20,11 @@
 #' @param lower_bnd lower bound of the population prediction (\code{lb}).
 #' @param log_dv is the dependent variable on log scale?
 #' @param lloq,uloq limits of quantification. Simulated values outside these
-#'   limits are set to \code{NA} after correction, so that the variability
-#'   correction is based on all simulated data. Observed data is expected to
-#'   be censored already.
+#'   limits are set to \code{-Inf} (below \code{lloq}) or \code{Inf} (above
+#'   \code{uloq}) after correction, so that the variability correction is
+#'   based on all simulated data. Observed data is expected to be censored
+#'   (\code{-Inf}/\code{Inf}) already; censored observations are not
+#'   corrected.
 #' @return A list with "sim" and "obs", with \code{dv} reference-corrected.
 calc_ref_corr_continuous <- function(sim, obs, sim_ref, lower_bnd = 0, log_dv = FALSE, cols,
                                      lloq = NULL, uloq = NULL, verbose = FALSE) {

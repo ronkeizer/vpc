@@ -86,18 +86,3 @@ censor_dv <- function(dv, lloq = NULL, uloq = NULL) {
   if (!is.null(uloq)) dv[!is.na(dv) & dv > uloq] <- Inf
   dv
 }
-
-#' Set censored values (\code{-Inf}/\code{Inf}) to \code{NA}
-#'
-#' Used before returning data to the user (vpcdb) or plotting, so that
-#' censored values are not drawn at the edge of the plot.
-#'
-#' @param dat data.frame with a \code{dv} column, or \code{NULL}
-#' @return \code{dat} with infinite \code{dv} values set to \code{NA}
-#' @noRd
-cens_to_na <- function(dat) {
-  if (!is.null(dat) && is.numeric(dat$dv)) {
-    dat$dv[is.infinite(dat$dv)] <- NA
-  }
-  dat
-}
