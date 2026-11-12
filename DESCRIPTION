@@ -1,6 +1,6 @@
 Package: vpc
 Title: Create Visual Predictive Checks
-Version: 1.2.7
+Version: 1.2.8
 Date: 2026-11-12
 Authors@R:
   c(
@@ -28,6 +28,6 @@ Suggests:
     covr,
     knitr,
     testthat (>= 3.0.0)
-RoxygenNote: 7.3.3
 Encoding: UTF-8
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.0
