@@ -1,3 +1,8 @@
+# vpc 1.2.8
+- added `ci_sim` argument to `vpc_tte()` to specify the confidence interval
+  of the Kaplan-Meier curves from the simulated data, which was previously
+  fixed at 90% (fix #102). The `ci` argument only applies to the observed data.
+
 # vpc 1.2.7
 - the ID column may now be character (or any non-numeric type), e.g. as
   produced by nlmixr2. Previously non-numeric IDs were coerced to `NA` when
