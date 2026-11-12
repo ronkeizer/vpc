@@ -16,7 +16,12 @@
 #'                      ruv = list(proportional = 0.1, additive = 0.1))
 pk_oral_1cmt <- function (t, tau = 24, dose=120, ka = 1, ke = 1, cl = 10, ruv = NULL) {
   v = cl / ke
-  tmp <- (dose/v) * (ka/(ka-ke)) * (exp(-ke*t) - exp(-ka*(t)))
+  if (isTRUE(all.equal(ka, ke))) {
+    # limit of the general solution for ka -> ke
+    tmp <- (dose/v) * ke * t * exp(-ke*t)
+  } else {
+    tmp <- (dose/v) * (ka/(ka-ke)) * (exp(-ke*t) - exp(-ka*(t)))
+  }
   if(!is.null(ruv)) {
     tmp <- add_noise (tmp, ruv)
   }
@@ -41,9 +46,11 @@ pk_oral_1cmt <- function (t, tau = 24, dose=120, ka = 1, ke = 1, cl = 10, ruv = 
 #'                    ruv = list(proportional = 0.1, additive = 0.1))
 pk_iv_1cmt <- function (t, t_inf = 1, tau = 24, dose=120, CL = 0.345, Vc = 1.75, ruv = NULL) {
   k <- CL / Vc
-  tmp <- c()
-  tmp <- c(tmp, (dose / (CL * t_inf)) * (1-exp(-k*t[t < t_inf])) )
-  tmp <- c(tmp, (dose / (CL * t_inf)) * (1-exp(-k*t_inf)) * exp(-k*(t[t >= t_inf] - t_inf)) )
+  tmp <- ifelse(
+    t < t_inf,
+    (dose / (CL * t_inf)) * (1-exp(-k*t)),
+    (dose / (CL * t_inf)) * (1-exp(-k*t_inf)) * exp(-k*(t - t_inf))
+  )
   if(!is.null(ruv)) {
     tmp <- add_noise (tmp, ruv)
   }

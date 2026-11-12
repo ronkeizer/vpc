@@ -60,7 +60,8 @@ auto_bin.numeric <- function(dat, type = "kmeans", n_bins = 8, verbose = FALSE, 
     stop("Specified binning method not recognized!")
   } else {
     if (type == "time") {
-      tmp <- levels(cut(x = unique(dat), breaks = n_bins, right = TRUE))
+      # n_bins equally sized intervals on the time scale
+      tmp <- levels(cut(x = unique(dat), breaks = n_bins - 1, right = TRUE))
       tmp <- gsub("\\(", "", tmp)
       tmp <- gsub("\\]", "", tmp)
       tmp2 <- unlist(strsplit(tmp, ","))
@@ -69,15 +70,11 @@ auto_bin.numeric <- function(dat, type = "kmeans", n_bins = 8, verbose = FALSE, 
       return(bins)
     }
     if (type == "data") {
+      # n_bins intervals with (approximately) equal numbers of data points,
+      # making sure the lowest separator includes the smallest value
       sorted <- sort(dat)
-      tmp <- levels(cut(x = 1:length(sorted), breaks = n_bins, right = TRUE))
-      tmp <- gsub("\\(", "", tmp)
-      tmp <- gsub("\\]", "", tmp)
-      tmp2 <- unlist(strsplit(tmp, ","))
-      sel <- 1:(length(tmp2)/2)*2 - 1
-      idx <- as.num(tmp2[sel])
-      idx[idx < 0] <- 0
-      bins <- c(sorted[idx], max(dat)*1.001)
+      idx <- floor(seq(0, length(sorted), length.out = n_bins))[-n_bins] + 1
+      bins <- unique(c(sorted[idx], max(dat)*1.001))
       return(bins)
     }
     if (type == "percentiles") {

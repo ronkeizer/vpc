@@ -1,3 +1,16 @@
+# vpc 1.2.10
+- `auto_bin()` / `bins = "data"`: the lowest observations were not assigned to
+  any bin (and thus silently excluded from the VPC). All data are now binned,
+  with bins containing approximately equal numbers of observations.
+- `auto_bin()` with `type = "time"` or `"data"` now returns the requested
+  number of bins (previously `n_bins + 1`).
+- `vpc_tte()` with `kmmc` and stratification: the KMMC curve is now computed
+  per stratum, instead of showing the pooled curve in every panel.
+- `pk_iv_1cmt()` now returns concentrations in the order of the supplied
+  times, and `pk_oral_1cmt()` no longer returns `NaN` when `ka == ke` (incl.
+  the defaults).
+- removed unused internal helpers and improved test coverage (#94)
+
 # vpc 1.2.9
 - `vpc()` with `pred_corr = TRUE` and `lloq`/`uloq`: observed and simulated
   data are now handled identically. Censoring is determined on the uncorrected
