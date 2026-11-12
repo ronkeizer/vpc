@@ -260,8 +260,40 @@ test_that("corrected observations are not re-censored against raw LLOQ", {
 
 test_that("new vpc_vpc() arguments do not shift positional arguments", {
   f <- names(formals(vpc_vpc))
-  expect_equal(f[(length(f) - 1):length(f)], c("sim_ref", "..."))
   expect_equal(which(f == "pi"), 16)
+  expect_equal(which(f == "sim_ref"), 32)
+  expect_equal(which(f == "..."), 33)
+  # arguments added later (e.g. `bin_by_strata`, #11) come after `...`, so
+  # they can only be supplied by name
+  expect_equal(f[length(f)], "bin_by_strata")
+})
+
+test_that("sim_ref supplied by position still gives a reference-corrected VPC", {
+  fx <- refcorr_vpc_data()
+  named <- vpc_vpc(
+    sim = fx$sim, obs = fx$obs, sim_ref = fx$ref,
+    obs_cols = fx$obs_cols, sim_cols = fx$sim_cols,
+    software = "nonmem", vpcdb = TRUE
+  )
+  # all arguments up to and including `sim_ref` by position
+  f <- formals(vpc_vpc)
+  pos <- lapply(f[seq_len(which(names(f) == "sim_ref") - 1)], eval)
+  pos$sim <- fx$sim
+  pos$obs <- fx$obs
+  pos["psn_folder"] <- list(NULL)
+  pos$obs_cols <- fx$obs_cols
+  pos$sim_cols <- fx$sim_cols
+  pos$software <- "nonmem"
+  pos$vpcdb <- TRUE
+  positional <- do.call(vpc_vpc, c(unname(pos), list(fx$ref)))
+  expect_equal(positional$vpc_dat, named$vpc_dat)
+  expect_equal(positional$aggr_obs, named$aggr_obs)
+  uncorrected <- vpc_vpc(
+    sim = fx$sim, obs = fx$obs,
+    obs_cols = fx$obs_cols, sim_cols = fx$sim_cols,
+    software = "nonmem", vpcdb = TRUE
+  )
+  expect_false(isTRUE(all.equal(positional$vpc_dat, uncorrected$vpc_dat)))
 })
 
 test_that("obs PRED fallback warns on record mismatch (pcVPC)", {

@@ -117,9 +117,9 @@ vpc_vpc <- function(sim = NULL,
                     labeller = NULL,
                     vpcdb = FALSE,
                     verbose = FALSE,
-                    bin_by_strata = FALSE,
                     sim_ref = NULL,
-                    ...) {
+                    ...,
+                    bin_by_strata = FALSE) {
   msg("Configuring and initializing...", verbose=verbose)
   vpc_data <-
     read_vpc(
