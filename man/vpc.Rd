@@ -135,6 +135,30 @@ a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 obj
 \description{
 Creates a VPC plot from observed and simulation data
 }
+\section{Prediction-correction with censored data}{
+ When \code{pred_corr =
+  TRUE} is combined with \code{lloq} or \code{uloq}, the following steps are
+  performed, identically for observed and simulated data:
+  \enumerate{
+    \item Values below \code{lloq} (or above \code{uloq}) are flagged as
+    censored based on the \emph{uncorrected} DV.
+    \item The median prediction per bin (\code{pred_bin}) is calculated
+    from the predictions of \emph{all} records in the bin, including
+    censored ones.
+    \item Only non-censored values are prediction-corrected.
+    \item Percentiles are calculated per bin (and per simulation) with the
+    censored values retained and ranked below (\code{lloq}) or above
+    (\code{uloq}) all non-censored values, i.e. they are not dropped. The
+    corrected values are not compared to the limit of quantification again.
+    Percentiles that fall within the censored part of the distribution are
+    returned as \code{NA} and not shown.
+  }
+  Since prediction-corrected values are no longer on the scale of the limit
+  of quantification, the LLOQ/ULOQ line is not drawn. Note that percentiles
+  are calculated using \code{stats::quantile()} with its default method
+  (\code{type = 7}), which may differ from other software (e.g. PsN).
+}
+
 \examples{
 
 ## See vpc.ronkeizer.com for more documentation and examples
