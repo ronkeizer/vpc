@@ -1,3 +1,9 @@
+# vpc 1.3.4
+- Continuous VPCs: the observed lower and upper percentile lines are now drawn
+  as separate lines instead of as the outline of one ribbon. Before, when one
+  observed percentile was censored (`NA`, e.g. below `lloq`) in a bin, the
+  other percentile was not drawn in that bin either (#122)
+
 # vpc 1.3.3
 - new `show = list(outlier_areas = TRUE)` for continuous VPCs: highlights
   (in red) the areas where an observed percentile falls outside the
