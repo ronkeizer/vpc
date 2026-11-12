@@ -42,6 +42,7 @@ vpc_vpc(
   labeller = NULL,
   vpcdb = FALSE,
   verbose = FALSE,
+  sim_ref = NULL,
   ...
 )
 }
@@ -90,7 +91,11 @@ Consequently, \code{log_y} cannot be used together with it, and
 \code{pred_corr_lower_bnd} is ignored. Note that for many LTBS workflows,
 the default multiplicative correction on linear-scale data combined with
 \code{log_y = TRUE} is already adequate; use the additive form when the
-correction specifically needs to be evaluated on the log scale.}
+correction specifically needs to be evaluated on the log scale.
+For reference-correction (\code{sim_ref}), \code{"additive"} (or
+\code{ltbs = TRUE}) likewise indicates that \code{dv} and \code{pred}
+are on the log scale, and selects the log-scale equations (Eq. 3/4 of
+Ibrahim et al. 2025).}
 
 \item{ltbs}{Convenience alias: \code{TRUE} is equivalent to
 \code{pred_corr_method = "additive"}.}
@@ -128,6 +133,24 @@ columns (\code{"free_y"}), or both rows and columns (\code{"free"})?}
 \item{vpcdb}{Boolean whether to return the underlying vpcdb rather than the plot}
 
 \item{verbose}{show debugging information (TRUE or FALSE)}
+
+\item{sim_ref}{simulations of a reference dataset, for a reference-corrected
+VPC (rcVPC). Same format, columns and record order as \code{sim}, but
+simulated from a dataset in which selected independent variables (dose,
+covariates, time, ...) were set to reference values. Providing
+\code{sim_ref} enables reference-correction (Ibrahim et al., AAPS J 2025,
+\doi{10.1208/s12248-025-01065-2}): observed and simulated DV are normalized
+to the population prediction (\code{pred} column) and variability of the
+reference dataset, per record and before binning. Records are matched by
+position, so \code{obs} and every replicate in \code{sim} and
+\code{sim_ref} must contain the same records in the same order. The lower
+bound is taken from \code{pred_corr_lower_bnd}. The correction is
+undefined for DV at or below the lower bound (e.g. DV <= 0 with the
+default bound of 0); such records are excluded with a warning, also when
+\code{log_y = TRUE} (they are not set to \code{log_y_min}). A correction without the
+variability component (Eq. 1 only) can be done manually by multiplying DV
+in \code{obs} and \code{sim} by \code{PRED_REF / PRED} before calling
+\code{vpc()}.}
 }
 \value{
 a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
@@ -157,6 +180,9 @@ Creates a VPC plot from observed and simulation data
   of quantification, the LLOQ/ULOQ line is not drawn. Note that percentiles
   are calculated using \code{stats::quantile()} with its default method
   (\code{type = 7}), which may differ from other software (e.g. PsN).
+  Reference-correction (\code{sim_ref}) handles censored data the same
+  way, except that simulated values are censored after correction, so that
+  the variability correction is based on all simulated data.
 }
 
 \examples{
@@ -167,6 +193,13 @@ library(vpc)
 # Basic commands:
 vpc(sim = simple_data$sim, obs = simple_data$obs)
 vpc(sim = simple_data$sim, obs = simple_data$obs, lloq = 20)
+
+# Reference-corrected VPC: `sim_ref` holds simulations of a reference
+# dataset (same records, with e.g. dose and covariates set to reference
+# values), including the population prediction in the `pred` column.
+\dontrun{
+vpc(sim = sim, obs = obs, sim_ref = sim_ref)
+}
 
 }
 \seealso{

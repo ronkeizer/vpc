@@ -13,18 +13,8 @@
 calc_pred_corr_continuous <- function(sim, obs, pred_corr, pred_corr_lower_bnd, cols, verbose,
                                       pred_corr_method = "multiplicative") {
   if(pred_corr) {
-    if(!is.null(obs) & !cols$obs$pred %in% names(obs)) {
-      msg("Warning: Prediction-correction: specified pred-variable not found in observation dataset, trying to get from simulated dataset...", verbose)
-      if (!cols$obs$pred %in% names(sim)) {
-        stop(
-          "Prediction-correction: specified pred-variable for observed data (", cols$obs$pred,
-          ") not found in simulated dataset, not able to perform pred-correction!"
-        )
-      } else {
-        obs <- obs %>% dplyr::ungroup()
-        obs[[cols$obs$pred]] <- unlist(sim[1:length(obs$id), cols$sim$pred])
-        msg ("OK", verbose)
-      }
+    if(!is.null(obs)) {
+      obs <- ensure_obs_pred(sim = sim, obs = obs, cols = cols, verbose = verbose)
     } else if (!cols$sim$pred %in% names(sim)) {
       stop(
         "Prediction-correction: specified pred-variable (", cols$sim$pred,
