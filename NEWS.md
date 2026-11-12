@@ -1,3 +1,7 @@
+# vpc 1.2.5
+- stratification by two variables now respects the factor level order of the
+  stratification variables (fix #101)
+
 # vpc 1.2.4
 - replaced defunct dplyr functions (`group_by_()`, `arrange_()`, `do()`) with
   modern equivalents (`group_by()`, `arrange()`, `slice()`) using `.data` pronoun
