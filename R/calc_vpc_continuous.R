@@ -8,36 +8,63 @@
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param stratify character vector of stratification variables.
 #' @param verbose show debugging information (TRUE or FALSE)
+#' @param pred_corr Was prediction-correction applied to \code{sim} and
+#'   \code{obs}? When \code{TRUE} and a limit of quantification is used,
+#'   censored values are expected to be \code{NA} (censoring determined on the
+#'   uncorrected scale), and quantiles for both observed and simulated data are
+#'   computed treating those \code{NA} values as censored (below all other
+#'   values for \code{lloq}, above for \code{uloq}). Prediction-corrected
+#'   values are not compared to the limit again, since the limit applies to the
+#'   uncorrected scale. A quantile that falls in the censored part of the
+#'   distribution is returned as \code{NA}.
 #' @return A list with "vpc_dat" and "aggr_obs"
 #' @importFrom rlang .data
-calc_vpc_continuous <- function(sim, obs, loq, pi, ci, stratify, bins, bin_mid, verbose) {
+calc_vpc_continuous <- function(sim, obs, loq, pi, ci, stratify, bins, bin_mid, verbose,
+                                pred_corr = FALSE) {
+  cens_type <- loq$cens_type
+  cens_limit <- loq$cens_limit
+  pc_cens <- isTRUE(pred_corr) && cens_type %in% c("left", "right")
+  if (pc_cens) {
+    # With prediction-correction, censoring was determined on the uncorrected
+    # DV (censored values are NA). Corrected values must not be compared to the
+    # (uncorrected) limit again, so use an infinite limit: only the NA values
+    # are then treated as censored.
+    cens_limit <- if (cens_type == "left") -Inf else Inf
+  }
+  if (pc_cens) {
+    sim_quantile <- function(x, probs) {
+      quantile_cens(x = x, probs = probs, limit = cens_limit, cens = cens_type)
+    }
+  } else {
+    sim_quantile <- function(x, probs) {
+      quantile(x, probs, na.rm = TRUE)
+    }
+  }
   if(!is.null(sim)) {
     msg("Calculating statistics for simulated data...", verbose=verbose)
     aggr_sim <-
       sim %>%
       dplyr::group_by(strat, sim, bin) %>%
       dplyr::summarise(
-        q5 = quantile(dv, pi[1], na.rm = TRUE),
-        q50 = quantile(dv, 0.5, na.rm = TRUE),
-        q95 = quantile(dv, pi[2], na.rm = TRUE),
+        q5 = sim_quantile(dv, pi[1]),
+        q50 = sim_quantile(dv, 0.5),
+        q95 = sim_quantile(dv, pi[2]),
         mean_idv = mean(idv)
       )
 
-    # TODO: Review 2021-04: Shouldn't this aggregation of sim use
-    # quantile_cens()?
     vpc_dat <-
       aggr_sim %>%
       dplyr::group_by(strat, bin) %>%
       dplyr::summarise(
-        q5.low = quantile(q5, ci[1], na.rm = TRUE),
-        q5.med = quantile(q5, 0.5, na.rm = TRUE),
-        q5.up = quantile(q5, ci[2], na.rm = TRUE),
-        q50.low = quantile(q50, ci[1], na.rm = TRUE),
-        q50.med = quantile(q50, 0.5, na.rm = TRUE),
-        q50.up = quantile(q50, ci[2], na.rm = TRUE),
-        q95.low = quantile(q95, ci[1], na.rm = TRUE),
-        q95.med = quantile(q95, 0.5, na.rm = TRUE),
-        q95.up = quantile(q95, ci[2], na.rm = TRUE),
+        q5.low = sim_quantile(q5, ci[1]),
+        q5.med = sim_quantile(q5, 0.5),
+        q5.up = sim_quantile(q5, ci[2]),
+        q50.low = sim_quantile(q50, ci[1]),
+        q50.med = sim_quantile(q50, 0.5),
+        q50.up = sim_quantile(q50, ci[2]),
+        q95.low = sim_quantile(q95, ci[1]),
+        q95.med = sim_quantile(q95, 0.5),
+        q95.up = sim_quantile(q95, ci[2]),
         bin_mid = mean(.data$mean_idv, na.rm = TRUE)
       )
 
@@ -55,9 +82,9 @@ calc_vpc_continuous <- function(sim, obs, loq, pi, ci, stratify, bins, bin_mid, 
       obs %>%
       dplyr::group_by(strat,bin) %>%
       dplyr::summarise(
-        obs5 = quantile_cens(x=dv, probs=pi[1], limit = loq$cens_limit, cens = loq$cens_type),
-        obs50 = quantile_cens(x=dv, probs=0.5, limit = loq$cens_limit, cens = loq$cens_type),
-        obs95 = quantile_cens(x=dv, probs=pi[2], limit = loq$cens_limit, cens = loq$cens_type),
+        obs5 = quantile_cens(x=dv, probs=pi[1], limit = cens_limit, cens = cens_type),
+        obs50 = quantile_cens(x=dv, probs=0.5, limit = cens_limit, cens = cens_type),
+        obs95 = quantile_cens(x=dv, probs=pi[2], limit = cens_limit, cens = cens_type),
         bin_mid = mean(idv)
       )
     aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]

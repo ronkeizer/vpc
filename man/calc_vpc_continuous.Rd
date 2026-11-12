@@ -4,7 +4,18 @@
 \alias{calc_vpc_continuous}
 \title{Calculate aggregate statistics for simulated and observed VPC data}
 \usage{
-calc_vpc_continuous(sim, obs, loq, pi, ci, stratify, bins, bin_mid, verbose)
+calc_vpc_continuous(
+  sim,
+  obs,
+  loq,
+  pi,
+  ci,
+  stratify,
+  bins,
+  bin_mid,
+  verbose,
+  pred_corr = FALSE
+)
 }
 \arguments{
 \item{sim}{this is usually a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}.  However it can also be an object like a nlmixr or xpose object}
@@ -26,6 +37,16 @@ approaches available in classInterval() such as "jenks" (default) or
 \item{bin_mid}{either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.}
 
 \item{verbose}{show debugging information (TRUE or FALSE)}
+
+\item{pred_corr}{Was prediction-correction applied to \code{sim} and
+\code{obs}? When \code{TRUE} and a limit of quantification is used,
+censored values are expected to be \code{NA} (censoring determined on the
+uncorrected scale), and quantiles for both observed and simulated data are
+computed treating those \code{NA} values as censored (below all other
+values for \code{lloq}, above for \code{uloq}). Prediction-corrected
+values are not compared to the limit again, since the limit applies to the
+uncorrected scale. A quantile that falls in the censored part of the
+distribution is returned as \code{NA}.}
 }
 \value{
 A list with "vpc_dat" and "aggr_obs"

@@ -111,3 +111,54 @@ test_that("vpc applies additive (LTBS) correction to both observed and simulated
     "log_y"
   )
 })
+
+test_that("calc_vpc_continuous treats censored values consistently for obs and sim with pred_corr", {
+  loq <- define_loq(lloq = 1, require_loq = FALSE)
+  # censored values are NA (determined on uncorrected scale); corrected values
+  # may legitimately be below the lloq (0.5) and must not be censored again
+  obs <- data.frame(strat = 1, bin = 1, idv = 1:5, dv = c(NA, NA, 0.5, 3, 4))
+  sim <- data.frame(
+    strat = 1, bin = 1, idv = rep(1:5, 2), sim = rep(1:2, each = 5),
+    dv = c(NA, NA, 0.5, 3, 4, NA, NA, 0.5, 3, 4)
+  )
+  res <- calc_vpc_continuous(
+    sim = sim, obs = obs, loq = loq, pi = c(0.05, 0.95), ci = c(0.05, 0.95),
+    stratify = NULL, bins = c(0, 10), bin_mid = "mean", verbose = FALSE,
+    pred_corr = TRUE
+  )
+  # median of c(-Inf, -Inf, 0.5, 3, 4) is 0.5 (not censored again)
+  expect_equal(res$aggr_obs$obs50, 0.5)
+  expect_true(is.na(res$aggr_obs$obs5))
+  expect_equal(res$aggr_obs$obs95, quantile(c(-Inf, -Inf, 0.5, 3, 4), 0.95)[[1]])
+  # simulated data get the same treatment (censored values not dropped)
+  expect_equal(res$vpc_dat$q50.med, res$aggr_obs$obs50)
+  expect_true(is.na(res$vpc_dat$q5.med))
+  expect_equal(res$vpc_dat$q95.med, res$aggr_obs$obs95)
+
+  # without pred_corr, behavior is unchanged: obs values < lloq are censored,
+  # sim NAs are dropped
+  res_npc <- calc_vpc_continuous(
+    sim = sim, obs = obs, loq = loq, pi = c(0.05, 0.95), ci = c(0.05, 0.95),
+    stratify = NULL, bins = c(0, 10), bin_mid = "mean", verbose = FALSE
+  )
+  expect_true(is.na(res_npc$aggr_obs$obs50))
+  expect_equal(unname(res_npc$vpc_dat$q50.med), 3)
+})
+
+test_that("vpc with pred_corr and lloq uses the same censoring for obs and sim", {
+  obs <- simple_data$obs[simple_data$obs$MDV == 0, ]
+  sim <- simple_data$sim[simple_data$sim$MDV == 0, ]
+  obs$PRED <- sim$PRED[sim$REP == 1]
+  # use first simulated replicate as "observed" data: obs and sim statistics
+  # must then be computed identically
+  obs$DV <- sim$DV[sim$REP == 1]
+  sim1 <- sim[sim$REP == 1, ]
+  expect_warning(
+    db <- vpc(sim = sim1, obs = obs, pred_corr = TRUE, lloq = 5, vpcdb = TRUE),
+    "Censoring is determined on the uncorrected"
+  )
+  expect_true(any(is.na(db$obs$dv)))
+  expect_equal(db$vpc_dat$q5.med, db$aggr_obs$obs5)
+  expect_equal(db$vpc_dat$q50.med, db$aggr_obs$obs50)
+  expect_equal(db$vpc_dat$q95.med, db$aggr_obs$obs95)
+})
