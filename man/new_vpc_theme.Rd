@@ -40,6 +40,8 @@ This function creates a theme that customizes how the VPC looks, i.e. colors, fi
  \item{bin_separators_color}{color for bin separator lines, NA for don't plot}
  \item{bin_separators_location}{where to plot bin separators ("t" for top, "b" for bottom)}
  \item{loq_color}{color of line showing limit of quantification}
+ \item{outlier_fill}{fill color for areas where an observed percentile is outside the simulated CI (shown with \code{show = list(outlier_areas = TRUE)})}
+ \item{outlier_alpha}{transparency for those areas}
 }
 }
 \examples{
