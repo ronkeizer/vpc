@@ -10,10 +10,10 @@
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @param pred_corr Was prediction-correction applied to \code{sim} and
 #'   \code{obs}? When \code{TRUE} and a limit of quantification is used,
-#'   censored values are expected to be \code{NA} (censoring determined on the
-#'   uncorrected scale), and quantiles for both observed and simulated data are
-#'   computed treating those \code{NA} values as censored (below all other
-#'   values for \code{lloq}, above for \code{uloq}). Prediction-corrected
+#'   censored values are expected to be \code{-Inf} (\code{lloq}) or
+#'   \code{Inf} (\code{uloq}), with censoring determined on the uncorrected
+#'   scale, and quantiles for both observed and simulated data are computed
+#'   treating those values as censored. Prediction-corrected
 #'   values are not compared to the limit again, since the limit applies to the
 #'   uncorrected scale. A quantile that falls in the censored part of the
 #'   distribution is returned as \code{NA}.
@@ -26,17 +26,22 @@ calc_vpc_continuous <- function(sim, obs, loq, pi, ci, stratify, bins, bin_mid, 
   pc_cens <- isTRUE(pred_corr) && cens_type %in% c("left", "right")
   if (pc_cens) {
     # With prediction-correction, censoring was determined on the uncorrected
-    # DV (censored values are NA). Corrected values must not be compared to the
-    # (uncorrected) limit again, so use an infinite limit: only the NA values
-    # are then treated as censored.
+    # DV (censored values are -Inf/Inf). Corrected values must not be compared
+    # to the (uncorrected) limit again, so use an infinite limit: only the
+    # infinite values are then treated as censored.
     cens_limit <- if (cens_type == "left") -Inf else Inf
   }
   if (pc_cens) {
+    # per-replicate quantiles keep censored quantiles as -Inf/Inf, so that
+    # they are counted as censored when aggregated over replicates
+    sim_quantile_rep <- function(x, probs) {
+      quantile_cens_inf(x = x, probs = probs, limit = cens_limit, cens = cens_type)
+    }
     sim_quantile <- function(x, probs) {
       quantile_cens(x = x, probs = probs, limit = cens_limit, cens = cens_type)
     }
   } else {
-    sim_quantile <- function(x, probs) {
+    sim_quantile_rep <- sim_quantile <- function(x, probs) {
       quantile(x, probs, na.rm = TRUE)
     }
   }
@@ -46,9 +51,9 @@ calc_vpc_continuous <- function(sim, obs, loq, pi, ci, stratify, bins, bin_mid, 
       sim %>%
       dplyr::group_by(strat, sim, bin) %>%
       dplyr::summarise(
-        q5 = sim_quantile(dv, pi[1]),
-        q50 = sim_quantile(dv, 0.5),
-        q95 = sim_quantile(dv, pi[2]),
+        q5 = sim_quantile_rep(dv, pi[1]),
+        q50 = sim_quantile_rep(dv, 0.5),
+        q95 = sim_quantile_rep(dv, pi[2]),
         mean_idv = mean(idv)
       )
 

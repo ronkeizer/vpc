@@ -26,8 +26,13 @@ quantile_cens(
 \item{cens}{censoring direction}
 }
 \value{
-The quantile of \code{x} treating \code{NA} values as censored
+The quantile of \code{x}, or \code{NA_real_} if the quantile falls
+  in the censored part of the distribution.
 }
 \description{
-Calculate quantiles respecting the censored data
+Censored values are represented as \code{-Inf} (left-censored, below the
+lower limit of quantification) or \code{Inf} (right-censored, above the
+upper limit of quantification). Values beyond \code{limit} are also treated
+as censored. \code{NA} values are treated as missing (not censored) and are
+ignored.
 }

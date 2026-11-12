@@ -26,9 +26,9 @@ pred_correction_core(
 data.frame
 }
 \description{
-Perform pred-correction for observations that were not missing.
-Missing observations can occur e.g. when censored data is set to NA
-in `format_vpc_input_data()`.
+Perform pred-correction for observations that are not censored.
+Censored observations are set to `-Inf` (below `lloq`) or `Inf` (above
+`uloq`) in `format_vpc_input_data()` and are left as is.
 }
 \details{
 Two forms of correction are available:

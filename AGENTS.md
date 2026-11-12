@@ -38,7 +38,7 @@ Each step is its own file in `R/`:
 
 1. `read_vpc()` loads `sim`/`obs`/`sim_ref`, or reads them from a PsN folder (`psn_folder/m1/*.npctab`). It calls `guess_software()`, which detects `nonmem`, `phoenix`, `PKPDsim`, or `other` from the column names. The software string is prepended to the data's class. `define_data_columns()` then maps it to default column names: for example, NONMEM uses `DV/ID/TIME/PRED/NSIM`, and "other" uses lowercase `dv/id/time/pred/sim`. Users override these with `obs_cols`/`sim_cols`.
 2. `define_loq()` resolves `lloq`/`uloq` into `cens_type`/`cens_limit`.
-3. `format_vpc_input_data()` renames the columns to the internal standard names (`id`, `idv`, `dv`, `pred`, `sim`), applies stratification and LOQ censoring (censored values become NA), and applies the log floor. `add_sim_index_number()` builds the replicate index when the sim data has no index column.
+3. `format_vpc_input_data()` renames the columns to the internal standard names (`id`, `idv`, `dv`, `pred`, `sim`), drops records with missing (NA) DV with a warning (NA is never censored), applies LOQ censoring (values below `lloq` become `-Inf`, above `uloq` become `Inf`), stratification, and the log floor (finite values only). `add_sim_index_number()` builds the replicate index when the sim data has no index column.
 4. Corrections:
    - **rcVPC**: `calc_ref_corr_continuous()` runs *before* binning, per record.
    - **pcVPC**: `calc_pred_corr_continuous()` runs *after* binning, because it needs the per-bin median PRED.
@@ -50,7 +50,7 @@ Each step is its own file in `R/`:
 ### Correction subtleties (recent work, see NEWS 1.3.0)
 - `pred_corr` and `sim_ref` cannot be combined.
 - rcVPC aligns records **by position**: `obs` and every replicate in `sim` and `sim_ref` must have identical records in the same order. Sim data is censored *after* reference correction. The `log_y` floor is applied after correction, not inside `format_vpc_input_data`.
-- After any correction, `lloq`/`uloq` are cleared and only NA counts as censored. Corrected values are never compared to the uncorrected limits again.
+- Censored values are `-Inf`/`Inf` throughout, including in the returned vpcdb (`obs`/`sim`); `geom_obs_dv_continuous()` skips them when drawing points. After any correction, `lloq`/`uloq` are cleared and only `-Inf`/`Inf` count as censored. Corrected values are never compared to the uncorrected limits again. For rcVPC, missing DV is kept until after correction (records must stay aligned), then dropped; missing DV in `sim_ref` gives a warning and is ignored in the variability correction.
 - For pcVPC, when PRED comes from the sim data, the first replicate is used, and its `id`/`idv` order must match `obs`.
 
 ### Tests

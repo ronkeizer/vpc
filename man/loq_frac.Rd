@@ -14,8 +14,11 @@ loq_frac(x, limit = 1, cens = c("left", "right", "neither", "both"))
 \item{cens}{censoring direction}
 }
 \value{
-The fraction of observations (\code{NA} is counted as below/above)
+The fraction of non-missing observations below/above the limit
 }
 \description{
-Calculate fraction of observations below lloq / above uloq
+Censored values are expected as \code{-Inf} (below lloq) or \code{Inf}
+(above uloq), but values beyond \code{limit} are also counted. \code{NA}
+values are treated as missing and excluded from both the numerator and the
+denominator.
 }

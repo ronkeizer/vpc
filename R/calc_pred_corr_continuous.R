@@ -43,9 +43,9 @@ calc_pred_corr_continuous <- function(sim, obs, pred_corr, pred_corr_lower_bnd, 
 
 #' Core prediction correction function
 #' 
-#' Perform pred-correction for observations that were not missing.
-#' Missing observations can occur e.g. when censored data is set to NA
-#' in `format_vpc_input_data()`.
+#' Perform pred-correction for observations that are not censored.
+#' Censored observations are set to `-Inf` (below `lloq`) or `Inf` (above
+#' `uloq`) in `format_vpc_input_data()` and are left as is.
 #'
 #' Two forms of correction are available:
 #' \describe{
@@ -74,11 +74,11 @@ pred_correction_core <- function(data, pred_col, pred_corr_lower_bnd = 0,
     dplyr::group_by(strat, bin) %>% 
     dplyr::mutate(pred_bin = median(as.num(pred)))
   if (pred_corr_method == "additive") {
-    row_idx <- !is.na(data$pred) & !is.na(data$dv)
+    row_idx <- !is.na(data$pred) & is.finite(data$dv)
     data[row_idx,]$dv <- data[row_idx,]$dv +
       (data[row_idx,]$pred_bin - data[row_idx,]$pred)
   } else {
-    row_idx <- data$pred != 0 & !is.na(data$dv)
+    row_idx <- data$pred != 0 & is.finite(data$dv)
     data[row_idx,]$dv <- pred_corr_lower_bnd + 
       (data[row_idx,]$dv - pred_corr_lower_bnd) * 
       (data[row_idx,]$pred_bin - pred_corr_lower_bnd) / 

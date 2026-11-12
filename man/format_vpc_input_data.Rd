@@ -17,7 +17,8 @@ format_vpc_input_data(
   log_y_min,
   what = "observed",
   verbose = FALSE,
-  pred_corr = FALSE
+  pred_corr = FALSE,
+  drop_missing = TRUE
 )
 
 format_vpc_input_data_tte(
@@ -52,6 +53,9 @@ format_vpc_input_data_tte(
 
 \item{pred_corr}{perform prediction-correction?}
 
+\item{drop_missing}{Remove records with a missing (\code{NA}) dependent
+variable (with a warning)? Missing values are never treated as censored.}
+
 \item{rtte}{repeated time-to-event data? Default is FALSE (treat as
 single-event TTE)}
 
@@ -61,7 +65,9 @@ times between events (unless you output the time difference between events
 and specify that as independent variable to the vpc_tte() function.}
 }
 \value{
-\code{dat} modified based on other inputs.
+\code{dat} modified based on other inputs. Values below \code{lloq}
+  are set to \code{-Inf} and values above \code{uloq} to \code{Inf}
+  (censored).
 
 A named list with "dat" modified, as required, and "stratify" with
   the stratification parameters

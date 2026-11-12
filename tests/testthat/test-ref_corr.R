@@ -164,7 +164,7 @@ test_that("vpc() with sim_ref and lloq keeps censored data out", {
                obs_cols = fx$obs_cols, sim_cols = fx$sim_cols, software = "nonmem", vpcdb = TRUE),
     "censored"
   )
-  expect_true(all(is.na(obj$obs$dv[fx$obs$dv < 0.5])))
+  expect_true(all(obj$obs$dv[fx$obs$dv < 0.5] == -Inf))
 })
 
 ## Regression tests from PR #117 review (round 1)
@@ -218,13 +218,16 @@ test_that("censoring does not change correction of uncensored values", {
   suppressWarnings(obj_lloq <- rc_vpc(fx, lloq = 0.5))
   keep_obs <- fx$obs$dv >= 0.5
   expect_equal(obj_lloq$obs$dv[keep_obs], obj$obs$dv[keep_obs])
-  expect_true(all(is.na(obj_lloq$obs$dv[!keep_obs])))
+  expect_true(all(obj_lloq$obs$dv[!keep_obs] == -Inf))
   raw_sim <- fx$sim$dv[order(fx$sim$sim, fx$sim$rec)]
   expect_equal(sim_sorted_dv(obj_lloq)[raw_sim >= 0.5], sim_sorted_dv(obj)[raw_sim >= 0.5])
-  expect_true(all(is.na(sim_sorted_dv(obj_lloq)[raw_sim < 0.5])))
+  expect_true(all(sim_sorted_dv(obj_lloq)[raw_sim < 0.5] == -Inf))
   suppressWarnings(obj_uloq <- rc_vpc(fx, uloq = 2))
   keep_obs <- fx$obs$dv <= 2
   expect_equal(obj_uloq$obs$dv[keep_obs], obj$obs$dv[keep_obs])
+  expect_true(all(obj_uloq$obs$dv[!keep_obs] == Inf))
+  raw_sim_u <- sim_sorted_dv(obj_uloq)[raw_sim > 2]
+  expect_true(all(raw_sim_u == Inf))
 })
 
 test_that("log_y floor is applied after correction only", {
@@ -249,13 +252,13 @@ test_that("corrected observations are not re-censored against raw LLOQ", {
   fx <- refcorr_vpc_data()
   suppressWarnings(obj <- rc_vpc(fx, lloq = 1, bins = c(0, 1.5, 3, 6, 10, 13)))
   manual <- obj$obs %>%
-    dplyr::mutate(x = ifelse(is.na(dv), -Inf, dv)) %>%
+    dplyr::mutate(x = dv) %>%
     dplyr::group_by(strat, bin) %>%
     dplyr::summarise(obs50 = stats::quantile(x, 0.5), .groups = "drop")
   manual$obs50[is.infinite(manual$obs50)] <- NA
   expect_equal(obj$aggr_obs$obs50, unname(manual$obs50))
   ## at least one valid record is corrected to below the raw LLOQ
-  expect_true(any(!is.na(obj$obs$dv) & obj$obs$dv < 1))
+  expect_true(any(is.finite(obj$obs$dv) & obj$obs$dv < 1))
 })
 
 test_that("new vpc_vpc() arguments do not shift positional arguments", {
@@ -372,4 +375,39 @@ test_that("ltbs = TRUE selects log-scale rcVPC and rejects log_y", {
   exp <- expected_case(fx, "log")
   expect_equal(obj$obs$dv[order(obj$obs$rec)], exp$obs, tolerance = 1e-8)
   expect_error(rc_vpc(fx, ltbs = TRUE, log_y = TRUE), "log_y")
+})
+
+test_that("missing DV is kept aligned during correction, then dropped (#80)", {
+  fx <- refcorr_vpc_data()
+  obj <- suppressWarnings(rc_vpc(fx, lloq = 0.5))
+  fx_na <- fx
+  na_rec <- which(fx$obs$dv >= 0.5)[1:2]
+  fx_na$obs$dv[na_rec] <- NA
+  warns <- character(0)
+  obj_na <- withCallingHandlers(
+    rc_vpc(fx_na, lloq = 0.5),
+    warning = function(w) {
+      warns <<- c(warns, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_true(any(grepl(
+    "2 record(s) with a missing (NA) dependent variable removed from observed data",
+    warns, fixed = TRUE
+  )))
+  expect_equal(nrow(obj_na$obs), nrow(fx$obs) - 2)
+  keep <- !(seq_len(nrow(fx$obs)) %in% na_rec)
+  expect_equal(obj_na$obs$dv, obj$obs$dv[keep])
+  ## missing values are not counted as censored
+  expect_false(anyNA(obj_na$obs$dv))
+  expect_equal(obj_na$obs$dv == -Inf, fx$obs$dv[keep] < 0.5)
+})
+
+test_that("missing DV in reference simulation gives a warning (#80)", {
+  fx <- refcorr_vpc_data()
+  fx$ref$dv[1] <- NA
+  expect_warning(
+    rc_vpc(fx),
+    "1 record\\(s\\) with a missing \\(NA\\) dependent variable in reference simulation data"
+  )
 })

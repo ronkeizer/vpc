@@ -77,6 +77,65 @@ test_that("vpc for continuous data with pred-correction and censored data works"
   expect_equal(as.numeric(tail(obj2$aggr_obs,1)), c(1, 11, NA_real_, 13.375, 67.56, 12, 10, 12.5875))
 })
 
+test_that("missing DV is dropped with a warning and never treated as censored (#80)", {
+  obs <- simple_data$obs[simple_data$obs$MDV == 0, ]
+  sim <- simple_data$sim[simple_data$sim$MDV == 0, ]
+  obs_na <- obs
+  obs_na$DV[1:5] <- NA
+  # without lloq: previously an error from quantile_cens()
+  expect_warning(
+    db <- vpc(sim = sim, obs = obs_na, vpcdb = TRUE),
+    "5 record\\(s\\) with a missing \\(NA\\) dependent variable removed from observed data"
+  )
+  expect_equal(nrow(db$obs), nrow(obs) - 5)
+  db_ref <- vpc(sim = sim, obs = obs[-(1:5), ], vpcdb = TRUE)
+  expect_equal(db$aggr_obs, db_ref$aggr_obs)
+
+  # with lloq: NA is not counted as censored, same result as dropping the rows
+  expect_warning(
+    db <- vpc(sim = sim, obs = obs_na, lloq = 20, vpcdb = TRUE),
+    "removed from observed data"
+  )
+  db_ref <- vpc(sim = sim, obs = obs[-(1:5), ], lloq = 20, vpcdb = TRUE)
+  expect_equal(db$aggr_obs, db_ref$aggr_obs)
+
+  # missing simulated DV
+  sim_na <- sim
+  sim_na$DV[1:3] <- NA
+  expect_warning(
+    vpc(sim = sim_na, obs = obs, vpcdb = TRUE),
+    "3 record\\(s\\) with a missing \\(NA\\) dependent variable removed from simulated data"
+  )
+})
+
+test_that("censored values are returned as -Inf/Inf in the vpcdb and not plotted (#80)", {
+  obs <- simple_data$obs[simple_data$obs$MDV == 0, ]
+  sim <- simple_data$sim[simple_data$sim$MDV == 0, ]
+  db <- vpc(sim = sim, obs = obs, lloq = 20, vpcdb = TRUE)
+  expect_false(anyNA(db$obs$dv))
+  expect_equal(db$obs$dv == -Inf, obs$DV < 20)
+  db_u <- vpc(sim = sim, obs = obs, uloq = 100, vpcdb = TRUE)
+  expect_equal(db_u$obs$dv == Inf, obs$DV > 100)
+  # censored observations are not drawn
+  lyr <- geom_obs_dv_continuous(db, show = TRUE, vpc_theme = new_vpc_theme())
+  expect_equal(nrow(lyr$data), sum(obs$DV >= 20))
+  expect_true(all(is.finite(lyr$data$dv)))
+  db_show <- vpc(sim = sim, obs = obs, lloq = 20, show = list(obs_dv = TRUE), vpcdb = TRUE)
+  expect_silent(ggplot2::ggplot_build(plot_vpc(db_show)))
+  # log_y floor does not overwrite censored values
+  db_log <- vpc(sim = sim, obs = obs, lloq = 20, log_y = TRUE, log_y_min = 25, vpcdb = TRUE)
+  expect_equal(db_log$obs$dv == -Inf, obs$DV < 20)
+  expect_true(all(db_log$obs$dv[is.finite(db_log$obs$dv)] >= 25))
+  expect_s3_class(plot_vpc(db_log), "ggplot")
+  # pcVPC: censoring direction is kept although lloq is cleared
+  db_pc <- suppressWarnings(vpc(sim = sim, obs = obs, lloq = 20, pred_corr = TRUE, vpcdb = TRUE))
+  expect_equal(db_pc$obs$dv == -Inf, obs$DV < 20)
+  expect_equal(db_pc$sim$dv == -Inf, sim$DV < 20)
+  # vpc_cens
+  db_cens <- vpc_cens(sim = sim, obs = obs, lloq = 20, vpcdb = TRUE)
+  expect_equal(db_cens$obs$dv == -Inf, obs$DV < 20)
+})
+
 test_that("observed upper percentile is drawn when lower percentile is censored (#122)", {
   db <- vpc(simple_data$sim, simple_data$obs, lloq = 1, vpcdb = TRUE)
   aggr <- as.data.frame(db$aggr_obs)
