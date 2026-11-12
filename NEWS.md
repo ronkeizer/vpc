@@ -1,7 +1,15 @@
-# vpc 1.2.5
+# vpc 1.2.6
 - added `ci_sim` argument to `vpc_tte()` to specify the confidence interval
   of the Kaplan-Meier curves from the simulated data, which was previously
   fixed at 90% (fix #102). The `ci` argument only applies to the observed data.
+
+# vpc 1.2.5
+- added `pred_corr_method = c("multiplicative", "additive")` argument to `vpc()`,
+  with `ltbs = TRUE` as a convenience alias for `"additive"`. The additive
+  prediction-correction (`dv + (pred_bin - pred)`) is intended for
+  log-transform-both-sides (LTBS) models and expects `dv` and `pred` to already
+  be on the log scale. `pred_corr_lower_bnd` is ignored and `log_y = TRUE` is
+  not allowed with this method (#111)
 
 # vpc 1.2.4
 - replaced defunct dplyr functions (`group_by_()`, `arrange_()`, `do()`) with

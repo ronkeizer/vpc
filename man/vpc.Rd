@@ -24,6 +24,8 @@ vpc_vpc(
   stratify = NULL,
   pred_corr = FALSE,
   pred_corr_lower_bnd = 0,
+  pred_corr_method = c("multiplicative", "additive"),
+  ltbs = FALSE,
   pi = c(0.05, 0.95),
   ci = c(0.05, 0.95),
   uloq = NULL,
@@ -74,6 +76,24 @@ aim for}
 \item{pred_corr}{perform prediction-correction?}
 
 \item{pred_corr_lower_bnd}{lower bound for the prediction-correction}
+
+\item{pred_corr_method}{Form of the prediction-correction applied when
+\code{pred_corr = TRUE}: \code{"multiplicative"} (default; Bergstrand et
+al., AAPS J 2011, optionally using \code{pred_corr_lower_bnd}) or
+\code{"additive"}. The additive form is intended for
+log-transform-both-sides (LTBS) models, and computes \code{dv + (pred_bin -
+pred)}, where \code{pred_bin} is the median prediction in the bin. It
+assumes that \code{dv} and \code{pred} in both the observed and simulated
+data are \emph{already on the log scale}; no transformation is performed
+internally, so correction, quantiles and plot are all on the log scale.
+Consequently, \code{log_y} cannot be used together with it, and
+\code{pred_corr_lower_bnd} is ignored. Note that for many LTBS workflows,
+the default multiplicative correction on linear-scale data combined with
+\code{log_y = TRUE} is already adequate; use the additive form when the
+correction specifically needs to be evaluated on the log scale.}
+
+\item{ltbs}{Convenience alias: \code{TRUE} is equivalent to
+\code{pred_corr_method = "additive"}.}
 
 \item{pi}{simulated prediction interval to plot. Default is c(0.05, 0.95),}
 
