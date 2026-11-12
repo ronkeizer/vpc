@@ -8,8 +8,11 @@
 #'   obs_median, sim_median, sim_median_ci, outlier_areas). \code{outlier_areas}
 #'   (default \code{FALSE}) highlights the areas where an observed percentile falls
 #'   outside the confidence interval of the corresponding simulated percentile
-#'   (the "red areas" in Monolix VPCs). Styled with the \code{outlier_fill} and
-#'   \code{outlier_alpha} elements of \code{vpc_theme}.
+#'   (the "red areas" in Monolix VPCs). For \code{vpc_cens()} and
+#'   \code{vpc_cat()}, this is the observed fraction (below LOQ, or per
+#'   category) compared to the CI of the simulated fraction. Styled with the
+#'   \code{outlier_fill} and \code{outlier_alpha} elements of
+#'   \code{vpc_theme}.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param log_x Boolean indicting whether x-axis should be shown as logarithmic. Default is FALSE.

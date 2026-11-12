@@ -69,3 +69,29 @@ test_that("vpc shows outlier areas only when requested", {
   expect_true(any(vapply(p3$layers, function(l) identical(l$aes_params$fill, "orange"), logical(1))))
   expect_silent(ggplot2::ggplot_build(p1))
 })
+
+test_that("vpc_cens and vpc_cat show outlier areas when requested", {
+  obs <- simple_data$obs
+  obs$DV[obs$TIME > 4] <- obs$DV[obs$TIME > 4] * 1.6
+  red_layers <- function(p) {
+    p$layers[vapply(p$layers, function(l) identical(l$aes_params$fill, "#dd0000"), logical(1))]
+  }
+  p0 <- vpc_cens(sim = simple_data$sim, obs = obs, lloq = 30)
+  expect_length(red_layers(p0), 0)
+  p1 <- vpc_cens(sim = simple_data$sim, obs = obs, lloq = 30, show = list(outlier_areas = TRUE))
+  expect_length(red_layers(p1), 1)
+  expect_silent(ggplot2::ggplot_build(p1))
+  p2 <- vpc_cens(sim = simple_data$sim, obs = obs, lloq = 30, stratify = "ISM",
+                 smooth = FALSE, show = list(outlier_areas = TRUE))
+  expect_s3_class(red_layers(p2)[[1]]$geom, "GeomRect")
+  expect_true("ISM" %in% names(red_layers(p2)[[1]]$data))
+
+  obs$DV_CAT <- cut(obs$DV, c(-Inf, 25, 75, Inf), labels = FALSE)
+  sim <- simple_data$sim
+  sim$DV_CAT <- cut(sim$DV, c(-Inf, 25, 75, Inf), labels = FALSE)
+  p3 <- vpc_cat(sim = sim, obs = obs, obs_cols = list(dv = "DV_CAT"),
+                sim_cols = list(dv = "DV_CAT"), show = list(outlier_areas = TRUE))
+  areas <- red_layers(p3)[[1]]$data
+  expect_true(all(areas$ymin >= 0 & areas$ymax <= 1))
+  expect_true(length(unique(areas$strat)) > 1)
+})
