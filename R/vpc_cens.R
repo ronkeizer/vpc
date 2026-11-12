@@ -78,6 +78,22 @@ vpc_cens <- function(sim = NULL,
   check_stratification_columns_available(data=obs, stratify=stratify_color, type="observation")
   check_stratification_columns_available(data=vpc_data$sim, stratify=stratify_color, type="simulation")
 
+  ## the color stratification variable is part of the stratification used for
+  ## the calculations (and binning), so combine before formatting the data
+  stratify_original <- stratify
+  if(!is.null(stratify_color)) {
+    if (is.null(stratify)) {
+      stratify <- stratify_color
+    }
+    if (length(stratify_color) > 1) {
+      stop("Error: please specify only 1 stratification variable for color!")
+    }
+    if (!stratify_color %in% stratify) {
+      stratify_original <- stratify
+      stratify <- c(stratify, stratify_color)
+    }
+  }
+
   ## parse data into specific format
   if(!is.null(obs)) {
     obs <-
@@ -104,20 +120,6 @@ vpc_cens <- function(sim = NULL,
       )
     # add sim index number
     vpc_data$sim$sim <- add_sim_index_number(vpc_data$sim)
-  }
-
-  stratify_original <- stratify
-  if(!is.null(stratify_color)) {
-    if (is.null(stratify)) {
-      stratify <- stratify_color
-    }
-    if (length(stratify_color) > 1) {
-      stop("Error: please specify only 1 stratification variable for color!")
-    }
-    if (!stratify_color %in% stratify) {
-      stratify_original <- stratify
-      stratify <- c(stratify, stratify_color)
-    }
   }
 
   # Binning ####

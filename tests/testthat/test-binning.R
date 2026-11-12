@@ -249,3 +249,50 @@ test_that("vpc_cat() does not accept per-stratum bins", {
   expect_error(vpc_cat(sim = tmp$sim, obs = tmp$obs, bins = list(c(0, 3, 30)), vpcdb = TRUE),
                "not supported")
 })
+
+test_that("bin_by_strata in vpc_cens() includes the color stratification", {
+  d <- strat_test_data()
+  d$obs$SEX <- ifelse(d$obs$ID %% 3 == 0, "M", "F")
+  d$sim$SEX <- ifelse(d$sim$ID %% 3 == 0, "M", "F")
+  # color stratification only
+  db <- vpc_cens(sim = d$sim, obs = d$obs, lloq = 30, stratify_color = "GRP",
+                 bins = "time", n_bins = 4, bin_by_strata = TRUE, vpcdb = TRUE)
+  expect_named(db$bins, c("A", "B"))
+  expect_false(isTRUE(all.equal(db$bins$A, db$bins$B)))
+  expect_setequal(as.character(unique(db$vpc_dat$strat)), c("A", "B"))
+  expect_s3_class(ggplot2::ggplot_build(plot_vpc(db)), "ggplot_built")
+  # facet and color stratification
+  db <- vpc_cens(sim = d$sim, obs = d$obs, lloq = 30, stratify = "SEX",
+                 stratify_color = "GRP", bins = "time", n_bins = 4,
+                 bin_by_strata = TRUE, vpcdb = TRUE)
+  expect_named(db$bins, c("F, A", "F, B", "M, A", "M, B"))
+  expect_equal(db$bins[["M, B"]][5], max(d$obs$TIME[d$obs$MDV == 0 & d$obs$SEX == "M" & d$obs$GRP == "B"]) * 1.001)
+  v <- db$vpc_dat[db$vpc_dat$strat == "M, B", ]
+  expect_equal(unique(v$strat1), "M")
+  expect_equal(unique(v$strat2), "B")
+  expect_equal(v$bin_max, db$bins[["M, B"]][v$bin + 1])
+  expect_s3_class(ggplot2::ggplot_build(plot_vpc(db)), "ggplot_built")
+})
+
+test_that("missing values of the stratification variable are binned as their own stratum", {
+  d <- strat_test_data()
+  d$obs$GRP[d$obs$ID %in% c(1, 2)] <- NA
+  d$sim$GRP[d$sim$ID %in% c(1, 2)] <- NA
+  db <- vpc(sim = d$sim, obs = d$obs, stratify = "GRP", bins = "time",
+            n_bins = 3, bin_by_strata = TRUE, vpcdb = TRUE)
+  expect_named(db$bins, c("A", "B", "NA"))
+  expect_true(all(is.finite(unlist(db$bins))))
+  expect_false(any(is.na(db$obs$bin)))
+  expect_false(any(is.na(db$sim$bin)))
+  expect_false(any(is.na(db$vpc_dat$bin_min)))
+  expect_false(any(is.na(db$aggr_obs$bin_max)))
+  bsep <- bin_separators_data(db)
+  expect_true(anyNA(bsep$GRP))
+  expect_s3_class(ggplot2::ggplot_build(plot_vpc(db)), "ggplot_built")
+  # manual bins, with the missing stratum named "NA"
+  db2 <- vpc(sim = d$sim, obs = d$obs, stratify = "GRP",
+             bins = list(A = c(0, 5, 30), B = c(0, 10, 60), "NA" = c(0, 30)),
+             vpcdb = TRUE)
+  expect_false(any(is.na(db2$obs$bin)))
+  expect_equal(db2$aggr_obs$bin_max[is.na(db2$aggr_obs$strat)], 30)
+})

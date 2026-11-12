@@ -327,8 +327,12 @@ geom_bin_sep <- function(bins, show, vpc_theme) {
 bin_separators_data <- function(db) {
   if (!is.list(db$bins)) return(db$bins)
   strata <- names(db$bins)
+  strat <- rep(strata, lengths(db$bins))
+  # missing values of the stratification variable are binned as stratum "NA"
+  has_na <- anyNA(db$obs$strat) || anyNA(db$sim$strat)
+  if (has_na) strat[strat == "NA"] <- NA
   bdat <- data.frame(
-    strat = factor(rep(strata, lengths(db$bins)), levels = strata),
+    strat = factor(strat, levels = setdiff(strata, if (has_na) "NA")),
     x = unlist(db$bins, use.names = FALSE)
   )
   if (length(db$stratify) == 1) {

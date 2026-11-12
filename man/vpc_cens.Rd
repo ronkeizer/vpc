@@ -97,7 +97,11 @@ one value per stratum (named or ordered as for \code{bins}).}
 (\code{TRUE}), or use the same bins for all strata (\code{FALSE},
 default)? When \code{TRUE}, automatic binning methods are applied to the
 data of each stratum separately. Specifying \code{bins} as a list
-implies \code{bin_by_strata = TRUE}.}
+implies \code{bin_by_strata = TRUE}. Missing values of the
+stratification variable form their own stratum, named \code{"NA"}.
+Binning by stratum is available for all automatic binning methods except
+\code{"percentiles"} (which labels the bins by their interval instead of
+plotting them on the numeric scale of the independent variable).}
 }
 \value{
 a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)

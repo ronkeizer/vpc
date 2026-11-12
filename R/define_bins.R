@@ -19,7 +19,11 @@
 #'   (\code{TRUE}), or use the same bins for all strata (\code{FALSE},
 #'   default)? When \code{TRUE}, automatic binning methods are applied to the
 #'   data of each stratum separately. Specifying \code{bins} as a list
-#'   implies \code{bin_by_strata = TRUE}.
+#'   implies \code{bin_by_strata = TRUE}. Missing values of the
+#'   stratification variable form their own stratum, named \code{"NA"}.
+#'   Binning by stratum is available for all automatic binning methods except
+#'   \code{"percentiles"} (which labels the bins by their interval instead of
+#'   plotting them on the numeric scale of the independent variable).
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @return A list with named elements: "bins", the bin separator values (a
 #'   named list with one numeric vector per stratum when binning by stratum);
@@ -72,9 +76,9 @@ define_bins_by_strata <- function(obs, sim, bins, n_bins, verbose=FALSE) {
     }
     if (!is.numeric(bins_s)) {
       dat_s <- NULL
-      if (!is.null(obs)) dat_s <- obs[as.character(obs$strat) == s, , drop = FALSE]
+      if (!is.null(obs)) dat_s <- obs[strat_key(obs$strat) == s, , drop = FALSE]
       if ((is.null(dat_s) || nrow(dat_s) == 0) && !is.null(sim)) {
-        dat_s <- sim[as.character(sim$strat) == s, , drop = FALSE]
+        dat_s <- sim[strat_key(sim$strat) == s, , drop = FALSE]
       }
       bins_s <- auto_bin(dat_s, bins_s, n_bins_s)
       if (is.null(bins_s)) {
@@ -92,12 +96,25 @@ define_bins_by_strata <- function(obs, sim, bins, n_bins, verbose=FALSE) {
   )
 }
 
+#' Stratum identifier used for per-stratum binning
+#'
+#' The stratum as character, with missing values of the stratification
+#' variable as their own stratum, named "NA".
+#' @noRd
+strat_key <- function(strat) {
+  key <- as.character(strat)
+  key[is.na(key)] <- "NA"
+  key
+}
+
 #' Levels of the stratification column across observed and simulated data
 #' @noRd
 strata_levels <- function(obs, sim) {
   get_levels <- function(x) {
     if (is.null(x)) return(character(0))
-    if (is.factor(x$strat)) levels(droplevels(x$strat)) else as.character(unique(x$strat))
+    lev <- if (is.factor(x$strat)) levels(droplevels(x$strat)) else as.character(unique(stats::na.omit(x$strat)))
+    if (anyNA(x$strat)) lev <- c(lev, "NA")
+    lev
   }
   unique(c(get_levels(obs), get_levels(sim)))
 }
@@ -126,7 +143,7 @@ select_strat_element <- function(x, s, strata, name) {
 bin_data_by_strata <- function(x, bins) {
   if (is.null(x)) return(x)
   bin <- rep(NA_integer_, nrow(x))
-  strat <- as.character(x$strat)
+  strat <- strat_key(x$strat)
   for (s in names(bins)) {
     idx <- which(strat == s)
     if (length(idx) > 0) {
@@ -148,7 +165,7 @@ bin_data_by_strata <- function(x, bins) {
 bin_boundaries <- function(bins, bin, strat = NULL) {
   bin <- as.integer(bin)
   if (is.list(bins)) {
-    strat <- as.character(strat)
+    strat <- strat_key(strat)
     bin_min <- bin_max <- rep(NA_real_, length(bin))
     for (s in intersect(unique(strat), names(bins))) {
       idx <- which(strat == s)
