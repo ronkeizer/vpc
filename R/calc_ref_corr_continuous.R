@@ -32,17 +32,23 @@ calc_ref_corr_continuous <- function(sim, obs, sim_ref, lower_bnd = 0, log_dv = 
   if(!cols$sim$pred %in% names(sim_ref)) {
     stop("Reference-correction: pred-variable (", cols$sim$pred, ") not found in reference simulation (`sim_ref`).")
   }
+  ## compute the replicate index once and store it, so it is reused downstream
+  ## (and remains correct if rows are dropped below)
+  sim_idx <- add_sim_index_number(sim, id = "id", sim_label = cols$sim$sim)
+  sim[[cols$sim$sim]] <- sim_idx
   if(!is.null(obs)) {
-    obs <- ensure_obs_pred(sim = sim, obs = obs, cols = cols, verbose = verbose)
+    obs <- ensure_obs_pred(sim = sim, obs = obs, cols = cols, require_sim_pred = FALSE, verbose = verbose)
   } else if (!cols$sim$pred %in% names(sim)) {
     stop("Reference-correction: pred-variable (", cols$sim$pred, ") not found in simulated dataset.")
   }
-
-  sim_idx <- add_sim_index_number(sim, id = "id", sim_label = cols$sim$sim)
   ref_idx <- add_sim_index_number(sim_ref, id = "id", sim_label = cols$sim$sim)
   sim_mat <- records_to_matrix(sim, sim_idx, "sim")
   ref_mat <- records_to_matrix(sim_ref, ref_idx, "sim_ref")
-  sim_pred <- matrix(as.num(sim[[cols$sim$pred]][sim_mat$order]), nrow = nrow(sim_mat$dv))
+  sim_pred <- if(cols$sim$pred %in% names(sim)) {
+    matrix(as.num(sim[[cols$sim$pred]][sim_mat$order]), nrow = nrow(sim_mat$dv))
+  } else {
+    NULL
+  }
   ref_pred <- matrix(as.num(sim_ref[[cols$sim$pred]][ref_mat$order]), nrow = nrow(ref_mat$dv))
   pred_ref <- ref_pred[, 1]
   check_pred_constant(ref_pred, pred_ref, "`sim_ref` replicates")
@@ -67,8 +73,10 @@ calc_ref_corr_continuous <- function(sim, obs, sim_ref, lower_bnd = 0, log_dv = 
   ## PRED is a population prediction, so one PRED vector is used for all
   ## replicates (as in PsN/Pharmpy): from obs if available, else first replicate
   pred <- if(!is.null(obs)) as.num(obs[[cols$obs$pred]]) else sim_pred[, 1]
-  check_pred_constant(sim_pred, pred, if(!is.null(obs)) "`obs` and `sim` replicates" else "`sim` replicates")
-  sim_pred <- matrix(pred, nrow = n_rec, ncol = ncol(sim_pred))
+  if(!is.null(sim_pred)) {
+    check_pred_constant(sim_pred, pred, if(!is.null(obs)) "`obs` and `sim` replicates" else "`sim` replicates")
+  }
+  sim_pred <- matrix(pred, nrow = n_rec, ncol = ncol(sim_mat$dv))
   msg("Performing reference-correction...", verbose = verbose)
   res <- ref_correction_core(
     sim_dv = sim_mat$dv,
@@ -123,12 +131,14 @@ records_to_matrix <- function(data, sim_idx, what) {
   ord <- order(match(sim_idx, unique(sim_idx)), seq_along(sim_idx))
   n_rec <- as.numeric(n_per_sim[1])
   dv <- matrix(as.num(data$dv[ord]), nrow = n_rec)
-  ids <- matrix(as.character(data$id[ord]), nrow = n_rec)
-  idv <- matrix(as.num(data$idv[ord]), nrow = n_rec)
-  if(!all(ids == ids[, 1]) || !isTRUE(all.equal(c(idv), rep(idv[, 1], ncol(idv))))) {
+  n_rep <- length(n_per_sim)
+  ids <- data$id[ord]
+  idv <- as.num(data$idv[ord])
+  first <- seq_len(n_rec)
+  if(!all(ids == rep(ids[first], n_rep)) || !isTRUE(all.equal(idv, rep(idv[first], n_rep)))) {
     stop("Reference-correction: order of records (`id`, `idv`) differs between replicates in `", what, "`.")
   }
-  list(dv = dv, id = ids[, 1], idv = idv[, 1], order = ord)
+  list(dv = dv, id = ids[first], idv = idv[first], order = ord)
 }
 
 #' Core reference-correction function
@@ -159,7 +169,13 @@ ref_correction_core <- function(sim_dv, sim_pred, ref_dv, pred_ref,
       lb + (dv - lb) * factor
     }
   }
-  row_sd <- function(m) apply(m, 1, stats::sd, na.rm = TRUE)
+  row_sd <- function(m) {
+    n <- rowSums(!is.na(m))
+    mu <- rowSums(m, na.rm = TRUE) / n
+    v <- rowSums((m - mu)^2, na.rm = TRUE) / (n - 1)
+    v[n < 2] <- NA
+    sqrt(v)
+  }
   rc_sim <- correct(sim_dv, sim_pred)
   if(log_dv) {
     sd_ref <- row_sd(ref_dv)
@@ -187,12 +203,15 @@ ref_correction_core <- function(sim_dv, sim_pred, ref_dv, pred_ref,
 #' Make sure observed data has a pred column
 #'
 #' If the pred-column is not in the observed data, take it from the first
-#' replicate of the simulated data. Records in that replicate must be in the
-#' same order (\code{id}, \code{idv}) as in the observed data.
+#' replicate of the simulated data. If records in that replicate do not match
+#' the observed data (\code{id}, \code{idv}), a warning is given and the first
+#' \code{nrow(obs)} rows of the simulated data are used (previous behaviour).
 #'
 #' @inheritParams calc_pred_corr_continuous
+#' @param require_sim_pred stop if the pred-column is missing from the
+#'   simulated data, even if the observed data has it?
 #' @return \code{obs}, with pred column
-ensure_obs_pred <- function(sim, obs, cols, verbose = FALSE) {
+ensure_obs_pred <- function(sim, obs, cols, require_sim_pred = TRUE, verbose = FALSE) {
   if(!cols$obs$pred %in% names(obs)) {
     msg("Warning: specified pred-variable not found in observation dataset, trying to get from simulated dataset...", verbose)
     if (!cols$sim$pred %in% names(sim)) {
@@ -203,23 +222,22 @@ ensure_obs_pred <- function(sim, obs, cols, verbose = FALSE) {
     }
     sim_idx <- add_sim_index_number(sim, id = "id", sim_label = cols$sim$sim)
     first_rep <- sim[sim_idx == sim_idx[1], , drop = FALSE]
-    if(nrow(first_rep) != nrow(obs)) {
-      stop(
-        "Cannot take pred-variable for observed data from simulated data: number of records in ",
-        "first replicate (", nrow(first_rep), ") differs from observed data (", nrow(obs), ")."
+    aligned <- nrow(first_rep) == nrow(obs) &&
+      all(as.character(first_rep$id) == as.character(obs$id)) &&
+      isTRUE(all.equal(as.num(first_rep$idv), as.num(obs$idv), check.attributes = FALSE))
+    if(!aligned) {
+      warning(
+        "Pred-variable for observed data taken from simulated data, but records in the first ",
+        "replicate (`id`, `idv`) do not match the observed data. Using the first ", nrow(obs),
+        " rows of the simulated data; PRED may be misaligned. Consider adding the ",
+        "pred-variable to the observed data."
       )
-    }
-    if(!all(as.character(first_rep$id) == as.character(obs$id)) ||
-       !isTRUE(all.equal(as.num(first_rep$idv), as.num(obs$idv), check.attributes = FALSE))) {
-      stop(
-        "Cannot take pred-variable for observed data from simulated data: order of records ",
-        "(`id`, `idv`) in first replicate differs from observed data."
-      )
+      first_rep <- sim[seq_len(nrow(obs)), , drop = FALSE]
     }
     obs <- obs %>% dplyr::ungroup()
     obs[[cols$obs$pred]] <- unlist(first_rep[[cols$sim$pred]])
     msg("OK", verbose)
-  } else if (!cols$sim$pred %in% names(sim)) {
+  } else if (require_sim_pred && !cols$sim$pred %in% names(sim)) {
     stop(
       "Specified pred-variable (", cols$sim$pred,
       ") not found in simulated dataset, not able to perform correction!"
@@ -246,11 +264,14 @@ is_censored <- function(dv, lloq = NULL, uloq = NULL) {
 #' @param pred_mat matrix (records x replicates) of PRED
 #' @param pred vector (records) of PRED that will be used
 #' @param what label for warning message
+#' @param tolerance maximum relative difference per value
 #' @return NULL, invisibly
-check_pred_constant <- function(pred_mat, pred, what) {
-  if(!isTRUE(all.equal(c(pred_mat), rep(pred, ncol(pred_mat)), tolerance = 1e-4))) {
+check_pred_constant <- function(pred_mat, pred, what, tolerance = 1e-4) {
+  rel_diff <- abs(pred_mat - pred) / pmax(abs(pred), .Machine$double.eps)
+  n_diff <- sum(rel_diff > tolerance, na.rm = TRUE)
+  if(n_diff > 0) {
     warning(
-      "Reference-correction: PRED differs between ", what, ". ",
+      "Reference-correction: PRED differs between ", what, " for ", n_diff, " values. ",
       "PRED should be identical for each record; check record alignment. ",
       "Using PRED from ", if(grepl("obs", what)) "`obs`" else "first replicate", "."
     )

@@ -4,7 +4,7 @@
 \alias{check_pred_constant}
 \title{Warn when PRED differs between replicates}
 \usage{
-check_pred_constant(pred_mat, pred, what)
+check_pred_constant(pred_mat, pred, what, tolerance = 1e-04)
 }
 \arguments{
 \item{pred_mat}{matrix (records x replicates) of PRED}
@@ -12,6 +12,8 @@ check_pred_constant(pred_mat, pred, what)
 \item{pred}{vector (records) of PRED that will be used}
 
 \item{what}{label for warning message}
+
+\item{tolerance}{maximum relative difference per value}
 }
 \value{
 NULL, invisibly

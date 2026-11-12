@@ -7,7 +7,8 @@
   to the uncorrected limit again when calculating observed percentiles; only
   values censored before correction are treated as censored
 - pcVPC: when PRED is taken from the simulated data, the first replicate is
-  used and its record order (`id`, `idv`) must match the observed data
+  used if its records (`id`, `idv`) match the observed data; otherwise a
+  warning is given and the previous behaviour (first rows) is used
 
 # vpc 1.2.4
 - replaced defunct dplyr functions (`group_by_()`, `arrange_()`, `do()`) with

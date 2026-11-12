@@ -264,16 +264,16 @@ test_that("new vpc_vpc() arguments do not shift positional arguments", {
   expect_equal(which(f == "pi"), 14)
 })
 
-test_that("obs PRED fallback checks record order (pcVPC)", {
+test_that("obs PRED fallback warns on record mismatch (pcVPC)", {
   fx <- refcorr_vpc_data()
   fx$obs$PRED <- NULL
   first <- which(fx$sim$sim == 1)[1:2]
   fx$sim[first, ] <- fx$sim[rev(first), ]
-  expect_error(
+  expect_warning(
     vpc(sim = fx$sim, obs = fx$obs, pred_corr = TRUE,
         obs_cols = fx$obs_cols, sim_cols = fx$sim_cols,
         software = "nonmem", vpcdb = TRUE),
-    "order of records"
+    "do not match the observed data"
   )
 })
 
@@ -289,4 +289,44 @@ test_that("one PRED vector is used for all replicates (as Pharmpy)", {
   fx3 <- fx
   fx3$ref$PRED[fx3$ref$sim == 2] <- fx3$ref$PRED[fx3$ref$sim == 2] * 2
   expect_warning(rc_vpc(fx3), "PRED differs between `sim_ref` replicates")
+})
+
+## Regression tests from /code-review
+test_that("replicate index is kept when failed rows are dropped", {
+  fx <- refcorr_vpc_data()
+  fx$sim$sim_orig <- fx$sim$sim
+  fx$sim$sim <- NULL  # index derived from id runs
+  fx$sim$dv[fx$sim$sim_orig == 2 & fx$sim$id == 1] <- -1  # whole id fails correction
+  expect_warning(obj <- rc_vpc(fx), "non-finite")
+  expect_equal(as.numeric(table(obj$sim$sim)), c(30, 25, rep(30, 18)))
+  expect_equal(obj$sim$sim, obj$sim$sim_orig)
+})
+
+test_that("sim PRED is optional when obs has PRED", {
+  fx <- refcorr_vpc_data()
+  obj <- rc_vpc(fx)
+  fx$sim$PRED <- NULL
+  obj2 <- rc_vpc(fx)
+  expect_equal(obj2$obs$dv, obj$obs$dv)
+  expect_equal(sim_sorted_dv(obj2), sim_sorted_dv(obj))
+})
+
+test_that("PRED check detects a single misaligned value", {
+  pred <- seq(1, 2, length.out = 1000)
+  m <- matrix(pred, nrow = 1000, ncol = 50)
+  expect_silent(check_pred_constant(m, pred, "x"))
+  m[c(1, 2), 7] <- m[c(2, 1), 7]
+  expect_warning(check_pred_constant(m, pred, "x"), "for 2 values")
+})
+
+test_that("vectorised row SD handles missing values (< 2 values gives NA)", {
+  fx <- refcorr_fixture()
+  inp <- core_inputs(fx)
+  inp$ref_dv[1, 1:3] <- NA
+  inp$ref_dv[2, ] <- NA
+  inp$ref_dv[3, -1] <- NA
+  res <- do.call(ref_correction_core, c(inp, lower_bnd = 0, log_dv = FALSE))
+  expect_true(all(is.na(res$sim[2:3, ])))
+  expect_false(anyNA(res$sim[-(2:3), ]))
+  expect_equal(nrow(res$sim), nrow(inp$sim_dv))
 })

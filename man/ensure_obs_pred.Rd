@@ -4,7 +4,7 @@
 \alias{ensure_obs_pred}
 \title{Make sure observed data has a pred column}
 \usage{
-ensure_obs_pred(sim, obs, cols, verbose = FALSE)
+ensure_obs_pred(sim, obs, cols, require_sim_pred = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{sim}{this is usually a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}.  However it can also be an object like a nlmixr or xpose object}
@@ -15,6 +15,9 @@ ensure_obs_pred(sim, obs, cols, verbose = FALSE)
 named "sim", each containing a sub-list with elements for mapping columns
 names in the data to expected column names for use.}
 
+\item{require_sim_pred}{stop if the pred-column is missing from the
+simulated data, even if the observed data has it?}
+
 \item{verbose}{show debugging information (TRUE or FALSE)}
 }
 \value{
@@ -22,6 +25,7 @@ names in the data to expected column names for use.}
 }
 \description{
 If the pred-column is not in the observed data, take it from the first
-replicate of the simulated data. Records in that replicate must be in the
-same order (\code{id}, \code{idv}) as in the observed data.
+replicate of the simulated data. If records in that replicate do not match
+the observed data (\code{id}, \code{idv}), a warning is given and the first
+\code{nrow(obs)} rows of the simulated data are used (previous behaviour).
 }

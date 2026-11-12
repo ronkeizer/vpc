@@ -121,7 +121,10 @@ to the population prediction (\code{pred} column) and variability of the
 reference dataset, per record and before binning. Records are matched by
 position, so \code{obs} and every replicate in \code{sim} and
 \code{sim_ref} must contain the same records in the same order. The lower
-bound is taken from \code{pred_corr_lower_bnd}. A correction without the
+bound is taken from \code{pred_corr_lower_bnd}. The correction is
+undefined for DV at or below the lower bound (e.g. DV <= 0 with the
+default bound of 0); such records are excluded with a warning, also when
+\code{log_y = TRUE} (they are not set to \code{log_y_min}). A correction without the
 variability component (Eq. 1 only) can be done manually by multiplying DV
 in \code{obs} and \code{sim} by \code{PRED_REF / PRED} before calling
 \code{vpc()}.}
