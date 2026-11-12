@@ -68,3 +68,19 @@ test_that("add_stratification keeps missing values distinct from literal \"NA\" 
   expect_equal(cols$strat1, dat$x)
   expect_equal(cols$strat2, dat$y)
 })
+
+test_that("add_stratification keeps strata distinct when values contain the separator", {
+  dat <- data.frame(
+    x = c("a, b", "a", "a\\", "a"),
+    y = c("c", "b, c", ", c", "\\, c")
+  )
+  out <- add_stratification(dat, c("x", "y"))
+  expect_equal(nlevels(out$strat), 4)
+  expect_equal(as.character(out$strat)[1:2], c("a\\, b, c", "a, b\\, c"))
+  # labels of values without commas or backslashes are unchanged
+  expect_equal(as.character(add_stratification(data.frame(x = "a b", y = 1), c("x", "y"))$strat), "a b, 1")
+  # original values are recovered per stratum
+  cols <- add_strat_columns(data.frame(strat = out$strat), c("x", "y"), out)
+  expect_equal(cols$strat1, dat$x)
+  expect_equal(cols$strat2, dat$y)
+})

@@ -407,3 +407,26 @@ test_that("bin_by_strata keeps missing and literal \"NA\" values distinct with t
   expect_false(any(is.na(db$obs$bin)))
   expect_s3_class(ggplot2::ggplot_build(plot_vpc(db)), "ggplot_built")
 })
+
+test_that("bin_by_strata keeps strata distinct when values contain the separator", {
+  d <- strat_test_data()
+  # ("a, b", "c") for even IDs vs ("a", "b, c") for odd IDs
+  d$obs$V1 <- ifelse(d$obs$GRP == "A", "a, b", "a")
+  d$sim$V1 <- ifelse(d$sim$GRP == "A", "a, b", "a")
+  d$obs$V2 <- ifelse(d$obs$GRP == "A", "c", "b, c")
+  d$sim$V2 <- ifelse(d$sim$GRP == "A", "c", "b, c")
+  db <- vpc(sim = d$sim, obs = d$obs, stratify = c("V1", "V2"), bins = "time",
+            n_bins = 3, bin_by_strata = TRUE, vpcdb = TRUE)
+  expect_length(db$bins, 2)
+  expect_setequal(names(db$bins), c("a\\, b, c", "a, b\\, c"))
+  # stratum ("a", "b, c") (GRP B) has twice the time range of ("a, b", "c")
+  expect_equal(max(db$bins[["a, b\\, c"]]), max(d$obs$TIME[d$obs$MDV == 0 & d$obs$GRP == "B"]) * 1.001)
+  expect_equal(max(db$bins[["a\\, b, c"]]), max(d$obs$TIME[d$obs$MDV == 0 & d$obs$GRP == "A"]) * 1.001)
+  expect_setequal(paste(db$aggr_obs$strat1, db$aggr_obs$strat2, sep = "|"), c("a, b|c", "a|b, c"))
+  # manual bins addressed by the stratum names
+  bins <- list(c(0, 30), c(0, 10, 60))
+  names(bins) <- c("a\\, b, c", "a, b\\, c")
+  db2 <- vpc(sim = d$sim, obs = d$obs, stratify = c("V1", "V2"), bins = bins, vpcdb = TRUE)
+  expect_equal(db2$aggr_obs$bin_max[db2$aggr_obs$strat1 == "a"], c(10, 60))
+  expect_s3_class(ggplot2::ggplot_build(plot_vpc(db2)), "ggplot_built")
+})

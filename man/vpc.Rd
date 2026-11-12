@@ -65,7 +65,8 @@ with one element (a binning method or numeric vector of bin separators)
 per stratum. The list should be named by stratum (the value of the
 stratification variable, or for two stratification variables the two
 values separated by a comma and a space, e.g. \code{"1, female"}, with
-missing values shown as \code{"<NA>"}), or
+missing values shown as \code{"<NA>"} and commas or backslashes within
+values escaped by a backslash), or
 be unnamed with one element per stratum in the order of the strata.}
 
 \item{n_bins}{when using the "auto" binning method, what number of bins to

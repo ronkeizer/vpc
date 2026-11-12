@@ -12,7 +12,9 @@
   literal value `"NA"`). Not available for `bins = "percentiles"`.
 - With two stratification variables, missing values are now labeled `"<NA>"`
   in the combined stratum (e.g. `"<NA>, X"`), so they are no longer merged
-  with the literal value `"NA"` (`"NA, X"`) when calculating the VPC.
+  with the literal value `"NA"` (`"NA, X"`) when calculating the VPC. Commas
+  and backslashes within values are escaped in the combined stratum, so e.g.
+  `("a, b", "c")` and `("a", "b, c")` are no longer merged.
 - `vpc_cens()` with `stratify_color`: the color stratification is now
   implemented. The observed fraction and simulated CI are calculated per
   color stratum and drawn in separate colors (with legend), while facets are

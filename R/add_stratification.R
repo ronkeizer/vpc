@@ -6,7 +6,9 @@
 #' original columns is respected; non-factor columns are sorted. Missing
 #' values are labeled \code{"<NA>"} in the combined stratum, so that e.g.
 #' \code{(NA, "x")} (\code{"<NA>, x"}) remains distinct from
-#' \code{("NA", "x")} (\code{"NA, x"}); see \code{strat_value_label()}.
+#' \code{("NA", "x")} (\code{"NA, x"}). Commas and backslashes in values are
+#' escaped (\code{"\\,"} and \code{"\\\\"}), so that e.g. \code{("a, b", "c")}
+#' and \code{("a", "b, c")} remain distinct strata.
 #'
 #' @param dat An input data.frame or similar object
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
@@ -38,15 +40,23 @@ add_stratification <- function (dat, stratify, verbose = FALSE) {
 
 #' Label of the values of a stratification variable in a combined stratum
 #'
-#' Missing values are labeled `"<NA>"`. To keep the labels unique (and
-#' independent of the data, so that observed and simulated data are labeled
-#' consistently), literal values of the form `"<NA>"`, `"<<NA>>"`, etc. are
-#' wrapped in one more pair of angle brackets. Other values are unchanged.
+#' The labels are combined with `", "` into the stratum, and are chosen such
+#' that distinct combinations of values always give distinct strata. They are
+#' independent of the data, so that observed and simulated data (which are
+#' stratified separately) are labeled consistently:
+#' - backslashes and commas in values are escaped (`\\` and `\,`), so the
+#'   separator is unambiguous, e.g. `("a, b", "c")` gives `"a\, b, c"` and
+#'   `("a", "b, c")` gives `"a, b\, c"`;
+#' - missing values are labeled `"<NA>"`, and literal values of the form
+#'   `"<NA>"`, `"<<NA>>"`, etc. are wrapped in one more pair of angle brackets.
+#' Other values are unchanged.
 #' @param x vector of values
 #' @return character vector of labels
 #' @noRd
 strat_value_label <- function(x) {
   x <- as.character(x)
+  x <- gsub("\\", "\\\\", x, fixed = TRUE)
+  x <- gsub(",", "\\,", x, fixed = TRUE)
   lit <- !is.na(x) & grepl("^<+NA>+$", x)
   x[lit] <- paste0("<", x[lit], ">")
   x[is.na(x)] <- "<NA>"
