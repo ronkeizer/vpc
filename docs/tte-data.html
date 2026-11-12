@@ -38,17 +38,17 @@
 
     
         
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
         <link rel="stylesheet" href="styles/website.css">
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
         
     
 
@@ -233,7 +233,7 @@
                 <a href="pred-correction.html">
             
                     
-                    Prediction correction
+                    Prediction / reference correction
             
                 </a>
             
@@ -336,10 +336,18 @@ data(rtte_sim_nm)
         smooth = TRUE,
         sim_cols = list(dv = &quot;dv&quot;, idv=&quot;t&quot;),
         obs_cols = list(idv = &quot;t&quot;), verbose=TRUE)
+</code></pre><h2 id="confidence-intervals">Confidence intervals</h2>
+<p>The <code>ci</code> argument sets the confidence interval of the Kaplan-Meier curve of the observed data, and <code>ci_sim</code> (default <code>c(0.05, 0.95)</code>) the confidence interval of the Kaplan-Meier curves from the simulated data:</p>
+<pre><code>vpc_tte(sim = rtte_sim_nm,
+        obs = rtte_obs_nm,
+        rtte = FALSE,
+        ci_sim = c(0.025, 0.975),       # 95% interval of the simulated curves
+        sim_cols = list(dv = &quot;dv&quot;, idv=&quot;t&quot;),
+        obs_cols = list(idv = &quot;dt&quot;))
 </code></pre><h2 id="notes-on-binning-and-smoothing">Notes on binning and smoothing</h2>
 <p>In principle, the <code>vpc_tte()</code> function does allow binning and <em>smoothing</em> like commonly applied to a regular <em>vpc</em>. However, the binning and smoothing often makes the bins go over the 0 - 100% interval and some elements of the confidence interval may not be shown correctly or even missing from the plot. It is therefore advised to not apply binning for time-to-event data, and to just use the <em>&apos;bins&apos;</em> generated from the simulated data. The bins are basically based on all unique timepoints for all events the simulations dataset.</p>
 <h2 id="kaplan-meier-mean-covariate-plots-kmmc">Kaplan-Meier Mean Covariate plots (KMMC)</h2>
-<p>KMMC plots have been <a href="https://www.page-meeting.org/default.asp?abstract=2564" target="_blank">presented by Andy Hooker</a> as a model diagnostic for covariate inclusion. They can be created using the same <code>vpc_tte()</code> function by specifying the relevant predictor to the <code>kmmc</code> argument, as shown below. In contrast to regular time-to-event VPCs, binning is recommended for the KMMC plot.</p>
+<p>KMMC plots have been <a href="https://www.page-meeting.org/default.asp?abstract=2564" target="_blank">presented by Andy Hooker</a> as a model diagnostic for covariate inclusion. They can be created using the same <code>vpc_tte()</code> function by specifying the relevant predictor to the <code>kmmc</code> argument, as shown below. In contrast to regular time-to-event VPCs, binning is recommended for the KMMC plot. When stratified, the KMMC curve is computed per stratum.</p>
 <pre><code>vpc_tte(sim = rtte_sim_nm,
         obs = rtte_obs_nm,
         rtte = FALSE,
@@ -390,7 +398,7 @@ data(rtte_sim_nm)
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Time-to-event data","level":"2.4","depth":1,"next":{"title":"Stratification","level":"3.1","depth":1,"path":"stratification.md","ref":"stratification.md","articles":[]},"previous":{"title":"Categorical data","level":"2.3","depth":1,"path":"categorical-data.md","ref":"categorical-data.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["mathjax","expandable-chapters","toc"],"pluginsConfig":{"toc":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"expandable-chapters":{}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"tte-data.md","mtime":"2017-11-14T22:24:40.000Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-14T22:26:04.796Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Time-to-event data","level":"2.4","depth":1,"next":{"title":"Stratification","level":"3.1","depth":1,"path":"stratification.md","ref":"stratification.md","articles":[]},"previous":{"title":"Categorical data","level":"2.3","depth":1,"path":"categorical-data.md","ref":"categorical-data.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["mathjax","expandable-chapters","toc"],"pluginsConfig":{"toc":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false},"expandable-chapters":{}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"}},"file":{"path":"tte-data.md","mtime":"2026-11-12T22:43:42.642Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2026-11-12T22:48:49.945Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

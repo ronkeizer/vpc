@@ -38,17 +38,17 @@
 
     
         
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
         <link rel="stylesheet" href="styles/website.css">
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
         
     
 
@@ -233,7 +233,7 @@
                 <a href="pred-correction.html">
             
                     
-                    Prediction correction
+                    Prediction / reference correction
             
                 </a>
             
@@ -300,14 +300,23 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="censored-data">Censored data</h1>
-<p>The <code>vpc_cens()</code> function can be used to create a VPC for the probability of left- or right-censoring such as in the case of data being lower than the lower limit of quantification (<lloq) or="" being="" above="" the="" upper="" limit="" of="" quantification="" (="">ULOQ).</lloq)></p>
-<p>There is no need to add a variable to the dataset to flag the censored cases, the function only requires the <code>lloq</code> or <code>uloq</code>. Make sure you set the <code>lloq</code> or <code>bloq</code> cases to any value below or above the limit, respectively.</p>
+<p>The <code>vpc_cens()</code> function can be used to create a VPC for the probability of left- or right-censoring such as in the case of data being lower than the lower limit of quantification (&lt;LLOQ) or being above the upper limit of quantification (&gt;ULOQ).</p>
+<p>There is no need to add a variable to the dataset to flag the censored cases, the function only requires the <code>lloq</code> or <code>uloq</code>. Make sure you set the censored cases to any value below <code>lloq</code> or above <code>uloq</code>, respectively.</p>
 <p><em>Note: do <strong>not</strong> set the values exactly at the limit, since then these values will be assumed to be actually measured at the limit.</em></p>
-<p>The example below artificially induces an LLOQ of 5 for the above model / dataset, and generates a VPC for the probability of left-censoring.</p>
+<p><em>Note: missing values (<code>NA</code>) are <strong>not</strong> treated as censored. Records with a missing dependent variable are removed with a warning. To count a value as censored, supply a value below <code>lloq</code> (or above <code>uloq</code>).</em></p>
+<p>The example below artificially induces an LLOQ of 30 for the example dataset, and generates a VPC for the probability of left-censoring.</p>
 <pre><code>vpc_cens(sim = simple_data$sim, obs = simple_data$obs, lloq = 30)
-</code></pre><p>The vpc for the uncensored (contionuous) data will show the censoring limit as a horizontal line, and will also visualize the uncensored simulated data below <code>lloq</code> or above <code>uloq</code>:</p>
+</code></pre><p>The vpc for the uncensored (continuous) data will show the censoring limit as a horizontal line, and will also visualize the uncensored simulated data below <code>lloq</code> or above <code>uloq</code>:</p>
 <pre><code>vpc(sim = simple_data$sim, obs = simple_data$obs, lloq = 30)
-</code></pre>
+</code></pre><p>Observed percentiles that fall within the censored part of the distribution are not shown. The lower and upper observed percentile lines are drawn separately, so a censored lower percentile in a bin does not hide the upper one.</p>
+<h2 id="stratification">Stratification</h2>
+<p><code>vpc_cens()</code> supports faceting with <code>stratify</code>, and coloring with <code>stratify_color</code>. With <code>stratify_color</code>, the observed fraction and simulated confidence interval are calculated per color stratum and drawn in separate colors:</p>
+<pre><code>vpc_cens(sim = sim, obs = obs, lloq = 5, stratify_color = &quot;dose&quot;)
+</code></pre><p>Bins can also be determined per stratum with <code>bin_by_strata = TRUE</code>, see <a href="binning.html">Binning</a>.</p>
+<h2 id="censored-values-in-the-vpcdb-object">Censored values in the vpcdb object</h2>
+<p>Internally, censored values are represented as <code>-Inf</code> (below <code>lloq</code>) or <code>Inf</code> (above <code>uloq</code>), also after prediction- or reference-correction. They are returned that way in <code>obs$dv</code> and <code>sim$dv</code> of the vpcdb object (<code>vpcdb = TRUE</code>), and are not drawn by <code>plot_vpc()</code>. Code that used <code>is.na()</code> to find censored values in the vpcdb data should use <code>is.infinite()</code> instead. The <code>log_y</code> floor (<code>log_y_min</code>) does not apply to censored values.</p>
+<p><code>quantile_cens()</code> follows the same conventions: <code>-Inf</code>/<code>Inf</code> (and values beyond <code>limit</code>) are censored, and <code>NA</code> is ignored.</p>
+
                                 
                                 </section>
                             
@@ -350,7 +359,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Censored data","level":"2.2","depth":1,"next":{"title":"Categorical data","level":"2.3","depth":1,"path":"categorical-data.md","ref":"categorical-data.md","articles":[]},"previous":{"title":"Continuous data","level":"2.1","depth":1,"path":"continuous-data.md","ref":"continuous-data.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["mathjax","expandable-chapters","toc"],"pluginsConfig":{"toc":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"expandable-chapters":{}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"censored-data.md","mtime":"2017-09-25T18:28:20.000Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-14T22:26:04.796Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Censored data","level":"2.2","depth":1,"next":{"title":"Categorical data","level":"2.3","depth":1,"path":"categorical-data.md","ref":"categorical-data.md","articles":[]},"previous":{"title":"Continuous data","level":"2.1","depth":1,"path":"continuous-data.md","ref":"continuous-data.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["mathjax","expandable-chapters","toc"],"pluginsConfig":{"toc":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false},"expandable-chapters":{}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"}},"file":{"path":"censored-data.md","mtime":"2026-11-12T22:43:42.353Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2026-11-12T22:48:49.945Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>

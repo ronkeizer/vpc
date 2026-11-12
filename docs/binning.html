@@ -38,17 +38,17 @@
 
     
         
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
         <link rel="stylesheet" href="styles/website.css">
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
         
     
 
@@ -233,7 +233,7 @@
                 <a href="pred-correction.html">
             
                     
-                    Prediction correction
+                    Prediction / reference correction
             
                 </a>
             
@@ -302,14 +302,29 @@
                                 <h1 id="binning">Binning</h1>
 <p>The vpc functions provides various options for binning (<code>bins=</code> argument):</p>
 <ul>
-<li><code>time</code>:  Divide bins equally over time (or whatever independent variable is used). Recommended only when there is no observable clustering in the indenpendent variable.</li>
-<li><code>data</code>: Divide bins equally over the amount of data ordered by independent variable. Recommended only when data are for nominal timepoints <em>and</em> all datapoints are available.</li>
+<li><code>time</code>:  Divide bins equally over time (or whatever independent variable is used). Recommended only when there is no observable clustering in the independent variable.</li>
+<li><code>data</code>: Divide bins equally over the amount of data ordered by independent variable, i.e. each bin contains approximately the same number of observations. Recommended only when data are for nominal timepoints <em>and</em> all datapoints are available.</li>
 <li><code>density</code>: Divide bins based on data-density, i.e. place the bin-separators at nadirs in the density function. An approximate number of bins can be specified, but it is not certain that the algorithm will strictly use the specified number. More info in <code>?auto_bin()</code>.</li>
 <li><code>jenks</code>: Default and recommended method. Jenk&apos;s natural breaks optimization, similar to K-means clustering.</li>
 <li><code>kmeans</code>: K-means clustering.</li>
 <li><code>pretty</code>, <code>quantile</code>, <code>hclust</code>, <code>sd</code>, <code>bclust</code>, <code>fisher</code>. Methods provided by the <code>classInt</code> package, see the package help for more information.</li>
+<li>a numeric vector with the bin separators, e.g. <code>bins = c(0, 2, 4, 6, 8, 12, 24)</code>.</li>
 </ul>
-<p>Automatic determination of <em>optimal</em> bin number (as described e.g. by Lavielle et al. and Sonehag et al.) will be provided soon.</p>
+<p>The number of bins is set with <code>n_bins</code>. With the default <code>n_bins = &quot;auto&quot;</code>, the <code>classInt</code> methods determine the number of bins themselves, while <code>time</code>, <code>data</code>, and <code>density</code> revert to 8 bins.</p>
+<h2 id="binning-per-stratum">Binning per stratum</h2>
+<p>By default, the same bins are used for all strata. When the design differs between strata (e.g. different sampling schedules per study or dose group), the bins can be determined per stratum instead, with <code>bin_by_strata = TRUE</code> in <code>vpc()</code> and <code>vpc_cens()</code>. The automatic binning method is then applied to the data of each stratum separately:</p>
+<pre><code>vpc(sim = sim, obs = obs, stratify = &quot;study&quot;, bin_by_strata = TRUE)
+</code></pre><p>Manual bins can be given per stratum by passing a list to <code>bins</code>, named by stratum (or unnamed, in the order of the strata). A list can also mix binning methods and numeric separators. Passing a list implies <code>bin_by_strata = TRUE</code>:</p>
+<pre><code>vpc(sim = sim, obs = obs, stratify = &quot;study&quot;,
+    bins = list(A = c(0, 2, 6, 24), B = &quot;jenks&quot;))
+</code></pre><p><code>n_bins</code> can likewise be given per stratum, e.g. <code>n_bins = list(A = 5, B = 8)</code>. The bin separators shown in the plot are drawn per panel.</p>
+<p>Some notes:</p>
+<ul>
+<li>With two stratification variables, the stratum name is the two values separated by a comma and a space, e.g. <code>&quot;1, female&quot;</code>. Missing values are shown as <code>&quot;&lt;NA&gt;&quot;</code>, and commas or backslashes within values are escaped by a backslash.</li>
+<li>Missing values of the stratification variable form their own stratum. For manual bins, use an <code>NA</code> name (or <code>&quot;NA&quot;</code>, when no stratum has the literal value <code>&quot;NA&quot;</code>).</li>
+<li>With per-stratum binning, <code>db$bins</code> in the vpcdb object (<code>vpcdb = TRUE</code>) is a named list with one vector of bin separators per stratum.</li>
+<li>Per-stratum binning is not available for <code>bins = &quot;percentiles&quot;</code>.</li>
+</ul>
 
                                 
                                 </section>
@@ -342,7 +357,7 @@
                 </a>
                 
                 
-                <a href="pred-correction.html" class="navigation navigation-next " aria-label="Next page: Prediction correction">
+                <a href="pred-correction.html" class="navigation navigation-next " aria-label="Next page: Prediction / reference correction">
                     <i class="fa fa-angle-right"></i>
                 </a>
                 
@@ -353,7 +368,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Binning","level":"3.2","depth":1,"next":{"title":"Prediction correction","level":"3.3","depth":1,"path":"pred-correction.md","ref":"pred-correction.md","articles":[]},"previous":{"title":"Stratification","level":"3.1","depth":1,"path":"stratification.md","ref":"stratification.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["mathjax","expandable-chapters","toc"],"pluginsConfig":{"toc":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"expandable-chapters":{}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"binning.md","mtime":"2017-09-25T18:30:29.000Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-14T22:26:04.796Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Binning","level":"3.2","depth":1,"next":{"title":"Prediction / reference correction","level":"3.3","depth":1,"path":"pred-correction.md","ref":"pred-correction.md","articles":[]},"previous":{"title":"Stratification","level":"3.1","depth":1,"path":"stratification.md","ref":"stratification.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["mathjax","expandable-chapters","toc"],"pluginsConfig":{"toc":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false},"expandable-chapters":{}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"}},"file":{"path":"binning.md","mtime":"2026-11-12T22:43:42.054Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2026-11-12T22:48:49.945Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
