@@ -60,13 +60,10 @@ auto_bin.numeric <- function(dat, type = "kmeans", n_bins = 8, verbose = FALSE, 
     stop("Specified binning method not recognized!")
   } else {
     if (type == "time") {
-      # n_bins equally sized intervals on the time scale
-      tmp <- levels(cut(x = unique(dat), breaks = n_bins - 1, right = TRUE))
-      tmp <- gsub("\\(", "", tmp)
-      tmp <- gsub("\\]", "", tmp)
-      tmp2 <- unlist(strsplit(tmp, ","))
-      sel <- 1:(length(tmp2)/2)*2 - 1
-      bins <- c(as.num(tmp2[sel]), upper_bin_separator(dat))
+      # n_bins equally sized intervals on the time scale. Computed directly
+      # (not parsed from cut() labels, which are rounded and can exclude data)
+      bins <- seq(min(dat), max(dat), length.out = n_bins)
+      bins[n_bins] <- upper_bin_separator(dat)
       return(bins)
     }
     if (type == "data") {

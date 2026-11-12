@@ -13,6 +13,20 @@ test_that("auto_bin 'time' creates the requested number of equally wide bins", {
   }
 })
 
+test_that("auto_bin 'time' bins all data regardless of the time range", {
+  # separators must not be rounded, which could exclude the first observations
+  for (x in list(1006:1100, 1000:1010, seq(0.0013, 0.0099, by = 0.0001))) {
+    bins <- auto_bin(x, type = "time", n_bins = 4)
+    expect_equal(n_unbinned(x, bins), 0)
+    expect_equal(bins[1], min(x))
+    expect_equal(diff(bins)[1:3], rep(diff(range(x)) / 4, 3))
+  }
+  # a single bin covering all data
+  bins <- auto_bin(1:10, type = "time", n_bins = 1)
+  expect_length(bins, 2)
+  expect_equal(n_unbinned(1:10, bins), 0)
+})
+
 test_that("auto_bin 'data' creates bins with equal numbers of observations and bins all data", {
   x <- 1:30
   for (n in 2:6) {
