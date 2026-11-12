@@ -59,8 +59,6 @@ vpc_vpc <- function(sim = NULL,
                     stratify = NULL,
                     pred_corr = FALSE,
                     pred_corr_lower_bnd = 0,
-                    sim_ref = NULL,
-                    ref_corr_log = FALSE,
                     pi = c(0.05, 0.95),
                     ci = c(0.05, 0.95),
                     uloq = NULL,
@@ -76,7 +74,10 @@ vpc_vpc <- function(sim = NULL,
                     scales = "fixed",
                     labeller = NULL,
                     vpcdb = FALSE,
-                    verbose = FALSE, ...) {
+                    verbose = FALSE,
+                    sim_ref = NULL,
+                    ref_corr_log = FALSE,
+                    ...) {
   msg("Configuring and initializing...", verbose=verbose)
   vpc_data <-
     read_vpc(
@@ -183,6 +184,11 @@ vpc_vpc <- function(sim = NULL,
   if(any_corr) {
     uloq <- NULL
     lloq <- NULL
+    ## censored values were set to NA before correction (obs) or after
+    ## correction (sim). Corrected values should not be compared to the
+    ## uncorrected limits again, so only NA is treated as censored.
+    if(loq_data$cens_type == "left") loq_data$cens_limit <- -Inf
+    if(loq_data$cens_type == "right") loq_data$cens_limit <- Inf
   }
 
   # Binning ####

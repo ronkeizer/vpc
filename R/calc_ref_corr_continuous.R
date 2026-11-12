@@ -180,8 +180,8 @@ ref_correction_core <- function(sim_dv, sim_pred, ref_dv, pred_ref,
 #' Make sure observed data has a pred column
 #'
 #' If the pred-column is not in the observed data, take it from the first
-#' replicate of the simulated data. Assumes records in that replicate are in
-#' the same order as in the observed data.
+#' replicate of the simulated data. Records in that replicate must be in the
+#' same order (\code{id}, \code{idv}) as in the observed data.
 #'
 #' @inheritParams calc_pred_corr_continuous
 #' @return \code{obs}, with pred column
@@ -200,6 +200,13 @@ ensure_obs_pred <- function(sim, obs, cols, verbose = FALSE) {
       stop(
         "Cannot take pred-variable for observed data from simulated data: number of records in ",
         "first replicate (", nrow(first_rep), ") differs from observed data (", nrow(obs), ")."
+      )
+    }
+    if(!all(as.character(first_rep$id) == as.character(obs$id)) ||
+       !isTRUE(all.equal(as.num(first_rep$idv), as.num(obs$idv), check.attributes = FALSE))) {
+      stop(
+        "Cannot take pred-variable for observed data from simulated data: order of records ",
+        "(`id`, `idv`) in first replicate differs from observed data."
       )
     }
     obs <- obs %>% dplyr::ungroup()

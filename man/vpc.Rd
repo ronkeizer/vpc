@@ -24,8 +24,6 @@ vpc_vpc(
   stratify = NULL,
   pred_corr = FALSE,
   pred_corr_lower_bnd = 0,
-  sim_ref = NULL,
-  ref_corr_log = FALSE,
   pi = c(0.05, 0.95),
   ci = c(0.05, 0.95),
   uloq = NULL,
@@ -42,6 +40,8 @@ vpc_vpc(
   labeller = NULL,
   vpcdb = FALSE,
   verbose = FALSE,
+  sim_ref = NULL,
+  ref_corr_log = FALSE,
   ...
 )
 }
@@ -77,25 +77,6 @@ aim for}
 
 \item{pred_corr_lower_bnd}{lower bound for the prediction-correction}
 
-\item{sim_ref}{simulations of a reference dataset, for a reference-corrected
-VPC (rcVPC). Same format, columns and record order as \code{sim}, but
-simulated from a dataset in which selected independent variables (dose,
-covariates, time, ...) were set to reference values. Providing
-\code{sim_ref} enables reference-correction (Ibrahim et al., AAPS J 2025,
-\doi{10.1208/s12248-025-01065-2}): observed and simulated DV are normalized
-to the population prediction (\code{pred} column) and variability of the
-reference dataset, per record and before binning. Records are matched by
-position, so \code{obs} and every replicate in \code{sim} and
-\code{sim_ref} must contain the same records in the same order. The lower
-bound is taken from \code{pred_corr_lower_bnd}. A correction without the
-variability component (Eq. 1 only) can be done manually by multiplying DV
-in \code{obs} and \code{sim} by \code{PRED_REF / PRED} before calling
-\code{vpc()}.}
-
-\item{ref_corr_log}{for reference-correction (\code{sim_ref}): is the
-dependent variable on log scale (e.g. log-transform-both-sides models)?
-Default is FALSE.}
-
 \item{pi}{simulated prediction interval to plot. Default is c(0.05, 0.95),}
 
 \item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
@@ -129,6 +110,25 @@ columns (\code{"free_y"}), or both rows and columns (\code{"free"})?}
 \item{vpcdb}{Boolean whether to return the underlying vpcdb rather than the plot}
 
 \item{verbose}{show debugging information (TRUE or FALSE)}
+
+\item{sim_ref}{simulations of a reference dataset, for a reference-corrected
+VPC (rcVPC). Same format, columns and record order as \code{sim}, but
+simulated from a dataset in which selected independent variables (dose,
+covariates, time, ...) were set to reference values. Providing
+\code{sim_ref} enables reference-correction (Ibrahim et al., AAPS J 2025,
+\doi{10.1208/s12248-025-01065-2}): observed and simulated DV are normalized
+to the population prediction (\code{pred} column) and variability of the
+reference dataset, per record and before binning. Records are matched by
+position, so \code{obs} and every replicate in \code{sim} and
+\code{sim_ref} must contain the same records in the same order. The lower
+bound is taken from \code{pred_corr_lower_bnd}. A correction without the
+variability component (Eq. 1 only) can be done manually by multiplying DV
+in \code{obs} and \code{sim} by \code{PRED_REF / PRED} before calling
+\code{vpc()}.}
+
+\item{ref_corr_log}{for reference-correction (\code{sim_ref}): is the
+dependent variable on log scale (e.g. log-transform-both-sides models)?
+Default is FALSE.}
 }
 \value{
 a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)

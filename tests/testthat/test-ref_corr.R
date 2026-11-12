@@ -243,3 +243,36 @@ test_that("non-finite corrections are reported and excluded", {
   expect_false(1 %in% obj$obs$rec)
   expect_equal(nrow(obj$obs), nrow(fx$obs) - 1)
 })
+
+## Regression tests from PR #117 review (round 2)
+test_that("corrected observations are not re-censored against raw LLOQ", {
+  fx <- refcorr_vpc_data()
+  suppressWarnings(obj <- rc_vpc(fx, lloq = 1, bins = c(0, 1.5, 3, 6, 10, 13)))
+  manual <- obj$obs %>%
+    dplyr::mutate(x = ifelse(is.na(dv), -Inf, dv)) %>%
+    dplyr::group_by(strat, bin) %>%
+    dplyr::summarise(obs50 = stats::quantile(x, 0.5), .groups = "drop")
+  manual$obs50[is.infinite(manual$obs50)] <- NA
+  expect_equal(obj$aggr_obs$obs50, unname(manual$obs50))
+  ## at least one valid record is corrected to below the raw LLOQ
+  expect_true(any(!is.na(obj$obs$dv) & obj$obs$dv < 1))
+})
+
+test_that("new vpc_vpc() arguments do not shift positional arguments", {
+  f <- names(formals(vpc_vpc))
+  expect_equal(f[(length(f) - 2):length(f)], c("sim_ref", "ref_corr_log", "..."))
+  expect_equal(which(f == "pi"), 14)
+})
+
+test_that("obs PRED fallback checks record order (pcVPC)", {
+  fx <- refcorr_vpc_data()
+  fx$obs$PRED <- NULL
+  first <- which(fx$sim$sim == 1)[1:2]
+  fx$sim[first, ] <- fx$sim[rev(first), ]
+  expect_error(
+    vpc(sim = fx$sim, obs = fx$obs, pred_corr = TRUE,
+        obs_cols = fx$obs_cols, sim_cols = fx$sim_cols,
+        software = "nonmem", vpcdb = TRUE),
+    "order of records"
+  )
+})
