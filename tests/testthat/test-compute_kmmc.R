@@ -71,3 +71,26 @@ test_that("vpc_tte() errors when the KMMC covariate is missing", {
     "not found among column names in simulated data"
   )
 })
+
+test_that("vpc_tte() KMMC curves of strata with different time grids do not mix", {
+  # stratum a has events at t = 1, 2; stratum b only at t = 5, 6
+  obs <- data.frame(
+    id = 1:4,
+    time = c(1, 2, 5, 6),
+    dv = 1,
+    WT = c(10, 20, 100, 200),
+    grp = c("a", "a", "b", "b")
+  )
+  sim <- do.call(rbind, lapply(1:3, function(i) cbind(sim = i, obs)))
+  db <- suppressWarnings(
+    vpc_tte(sim = sim, obs = obs, kmmc = "WT", stratify = "grp", vpcdb = TRUE)
+  )
+  sim_km <- as.data.frame(db$sim_km)
+  sim_km <- sim_km[!is.na(sim_km$bin), ]
+  km_a <- sim_km[grepl("a", sim_km$strat), ]
+  km_b <- sim_km[grepl("b", sim_km$strat), ]
+  # before the first event in stratum b, all its subjects are at risk
+  expect_equal(sort(unique(km_b$qmed)), c(150, 200))
+  expect_equal(km_b$qmed[km_b$bin_max <= 5], c(150, 150, 150))
+  expect_equal(sort(unique(km_a$qmed)), c(15, 20))
+})

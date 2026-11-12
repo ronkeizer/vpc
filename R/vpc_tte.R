@@ -205,7 +205,13 @@ vpc_tte <- function(sim = NULL,
 #       tmp4[match(tmp3$time_strat, tmp4$time_strat),]$upper <- tmp3$upper
       tmp4 <- tmp4 %>%
         dplyr::arrange(strat, time)
-      tmp4$surv <- locf(tmp4$surv)
+      # carry values forward within each stratum only, since strata (e.g. in
+      # KMMC plots) can have different time grids
+      tmp4 <- tmp4 %>%
+        dplyr::group_by(strat) %>%
+        dplyr::mutate(surv = locf(surv)) %>%
+        dplyr::ungroup() %>%
+        as.data.frame()
       tmp4[,c("bin", "bin_min", "bin_max", "bin_mid")] <- 0
       tmp4$bin <- cut(tmp4$time, breaks = tmp_bins, labels = FALSE, right = TRUE)
       tmp4$bin_min <- tmp_bins[tmp4$bin]

@@ -66,6 +66,22 @@ test_that("auto_bin 'density' places separators at nadirs between clusters", {
   expect_equal(as.vector(table(binned$bin)), c(50, 50, 50))
 })
 
+test_that("automatic bins include all data for negative independent variables", {
+  x <- -30:-1
+  for (type in c("time", "data")) {
+    for (n in 2:5) {
+      bins <- auto_bin(x, type = type, n_bins = n)
+      expect_equal(n_unbinned(x, bins), 0, info = paste(type, n))
+    }
+  }
+  set.seed(7)
+  y <- c(rnorm(50, -10, 0.1), rnorm(50, -5, 0.1), rnorm(50, -1, 0.1))
+  bins <- auto_bin(y, type = "density", n_bins = 3)
+  expect_equal(n_unbinned(y, bins), 0)
+  # positive data keep the previous upper separator
+  expect_equal(max(auto_bin(1:30, type = "data", n_bins = 3)), 30 * 1.001)
+})
+
 test_that("auto_bin with no binning returns unique values", {
   expect_equal(auto_bin(c(1, 1, 2, 3, 3), type = "none"), c(1, 2, 3))
   expect_message(auto_bin(1:3, type = "none", verbose = TRUE), "No binning")
