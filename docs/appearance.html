@@ -323,7 +323,7 @@ outlier_areas = FALSE # highlight where observed percentiles fall outside the si
 <pre><code>vpc(sim, obs, show = list(outlier_areas = TRUE))
 </code></pre><p>Color and transparency are set with the <code>outlier_fill</code> and <code>outlier_alpha</code> elements of <code>new_vpc_theme()</code>.</p>
 <h2 id="theming">Theming</h2>
-<p>Besides showing / hiding specific elements, colors, fills, transparency (alpha), and linetypes and sizes can be changed easily using the <code>vpc_theme</code> argument and function. More general plot theming can be accomplished by supplying a ggplot2 theme to the <code>ggplot_theme</code> argument.</p>
+<p>Besides showing / hiding specific elements, colors, fills, transparency (alpha), and linetypes and sizes can be changed easily using the <code>vpc_theme</code> argument and function. More general plot theming can be accomplished by adding a ggplot2 theme to the plot (see below).</p>
 <pre><code>vpc(sim, obs,
     vpc_theme = new_vpc_theme (list(
        sim_pi_fill = &quot;#aa6666&quot;, sim_pi_alpha = 0.15,
@@ -355,7 +355,7 @@ sim_median_size = 1,
 bin_separators_color = &quot;#000000&quot;,
 outlier_fill = &quot;#dd0000&quot;,
 outlier_alpha = 0.5
-</code></pre><p>If you&apos;d like to add additional lower-level theming using ggplot-elements, you can just use the standard <a href="http://docs.ggplot2.org/current/theme.html" target="_blank">theming features</a> available in
+</code></pre><p>If you&apos;d like to add additional lower-level theming using ggplot-elements, you can just use the standard <a href="https://ggplot2.tidyverse.org/reference/theme.html" target="_blank">theming features</a> available in
 ggplot2, e.g.:</p>
 <pre><code>vpc(sim, obs) + theme_bw()
 </code></pre>
@@ -397,7 +397,7 @@ ggplot2, e.g.:</p>
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Appearance","level":"3.4","depth":1,"previous":{"title":"Prediction / reference correction","level":"3.3","depth":1,"path":"pred-correction.md","ref":"pred-correction.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["mathjax","expandable-chapters","toc"],"pluginsConfig":{"toc":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false},"expandable-chapters":{}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"}},"file":{"path":"appearance.md","mtime":"2026-11-12T22:43:42.550Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2026-11-12T22:48:49.945Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Appearance","level":"3.4","depth":1,"previous":{"title":"Prediction / reference correction","level":"3.3","depth":1,"path":"pred-correction.md","ref":"pred-correction.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["mathjax","expandable-chapters","toc"],"pluginsConfig":{"toc":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false},"expandable-chapters":{}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"}},"file":{"path":"appearance.md","mtime":"2026-11-12T23:15:20.417Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2026-11-12T23:16:59.695Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
