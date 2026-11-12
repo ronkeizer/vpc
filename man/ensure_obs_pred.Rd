@@ -22,5 +22,6 @@ names in the data to expected column names for use.}
 }
 \description{
 If the pred-column is not in the observed data, take it from the first
-replicate of the simulated data.
+replicate of the simulated data. Assumes records in that replicate are in
+the same order as in the observed data.
 }

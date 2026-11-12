@@ -111,6 +111,9 @@ vpc_vpc <- function(sim = NULL,
   check_stratification_columns_available(data=vpc_data$sim, stratify=stratify, type="simulation")
 
   ## parse data into specific format
+  any_corr <- pred_corr || ref_corr
+  ## for reference-correction, the log_y floor is applied after correction
+  log_y_fmt <- log_y && !ref_corr
   if(!is.null(vpc_data$obs)) {
     msg("Parsing observed data...", verbose=verbose)
     vpc_data$obs <-
@@ -119,41 +122,32 @@ vpc_vpc <- function(sim = NULL,
         cols=cols$obs,
         lloq=lloq, uloq=uloq,
         stratify=stratify,
-        log_y=log_y, log_y_min=log_y_min,
+        log_y=log_y_fmt, log_y_min=log_y_min,
         what="observed",
         verbose=verbose,
         pred_corr=pred_corr
       )
   }
-  any_corr <- pred_corr || ref_corr
   if(!is.null(vpc_data$sim)) {
     msg("Parsing simulated data...", verbose=verbose)
-    if((!is.null(lloq) || !is.null(uloq)) && any_corr) {
+    censor_sim <- (!is.null(lloq) || !is.null(uloq)) && any_corr
+    if(censor_sim) {
       warning("Be careful using pred- or reference-correction together with censored data (<LLOQ or >ULOQ). VPC plot will be shown for non-censored data only!")
-      vpc_data$sim <-
-        format_vpc_input_data(
-          dat=vpc_data$sim,
-          cols=cols$sim,
-          lloq=lloq, uloq=uloq,
-          stratify=stratify,
-          log_y=log_y, log_y_min=log_y_min,
-          what="simulated",
-          verbose=verbose,
-          pred_corr=pred_corr
-        )
-    } else {
-      vpc_data$sim <-
-        format_vpc_input_data(
-          dat=vpc_data$sim,
-          cols=cols$sim,
-          lloq=NULL, uloq=NULL,
-          stratify=stratify,
-          log_y=log_y, log_y_min=log_y_min,
-          what="simulated",
-          verbose=verbose,
-          pred_corr=pred_corr
-        )
     }
+    ## for reference-correction, simulated data is censored after correction,
+    ## so that the variability correction uses all simulated data
+    vpc_data$sim <-
+      format_vpc_input_data(
+        dat=vpc_data$sim,
+        cols=cols$sim,
+        lloq=if(censor_sim && !ref_corr) lloq else NULL,
+        uloq=if(censor_sim && !ref_corr) uloq else NULL,
+        stratify=stratify,
+        log_y=log_y_fmt, log_y_min=log_y_min,
+        what="simulated",
+        verbose=verbose,
+        pred_corr=pred_corr
+      )
   }
   if(ref_corr) {
     msg("Parsing reference simulation data...", verbose=verbose)
@@ -174,13 +168,16 @@ vpc_vpc <- function(sim = NULL,
         lower_bnd=pred_corr_lower_bnd,
         log_dv=ref_corr_log,
         cols=cols,
+        lloq=lloq, uloq=uloq,
         verbose=verbose
       )
     vpc_data$sim <- ref_corr_data$sim
     vpc_data$obs <- ref_corr_data$obs
     if(log_y) {
-      vpc_data$sim$dv[vpc_data$sim$dv < log_y_min] <- log_y_min
-      if(!is.null(vpc_data$obs)) vpc_data$obs$dv[vpc_data$obs$dv < log_y_min] <- log_y_min
+      vpc_data$sim$dv[!is.na(vpc_data$sim$dv) & vpc_data$sim$dv < log_y_min] <- log_y_min
+      if(!is.null(vpc_data$obs)) {
+        vpc_data$obs$dv[!is.na(vpc_data$obs$dv) & vpc_data$obs$dv < log_y_min] <- log_y_min
+      }
     }
   }
   if(any_corr) {

@@ -166,3 +166,80 @@ test_that("vpc() with sim_ref and lloq keeps censored data out", {
   )
   expect_true(all(is.na(obj$obs$dv[fx$obs$dv < 0.5])))
 })
+
+## Regression tests from PR #117 review (round 1)
+rc_vpc <- function(fx, ...) {
+  vpc(sim = fx$sim, obs = fx$obs, sim_ref = fx$ref,
+      obs_cols = fx$obs_cols, sim_cols = fx$sim_cols,
+      software = "nonmem", vpcdb = TRUE, ...)
+}
+sim_sorted_dv <- function(obj) obj$sim$dv[order(obj$sim$sim, obj$sim$rec)]
+
+test_that("interleaved simulation rows give same result", {
+  fx <- refcorr_vpc_data()
+  obj <- rc_vpc(fx)
+  fx2 <- fx
+  set.seed(1)
+  fx2$sim <- fx$sim[sample(nrow(fx$sim)), ]
+  fx2$sim <- fx2$sim[order(fx2$sim$rec), ]  # rows interleaved across replicates
+  fx2$ref <- fx$ref[order(fx$ref$rec, -fx$ref$sim), ]
+  obj2 <- rc_vpc(fx2)
+  expect_equal(obj2$obs$dv, obj$obs$dv)
+  expect_equal(sim_sorted_dv(obj2), sim_sorted_dv(obj))
+})
+
+test_that("obs PRED fallback uses first replicate with interleaved sims", {
+  fx <- refcorr_vpc_data()
+  obj <- rc_vpc(fx)
+  fx$obs$PRED <- NULL
+  fx$sim <- fx$sim[order(fx$sim$rec, fx$sim$sim), ]
+  obj2 <- rc_vpc(fx)
+  expect_equal(obj2$obs$dv, obj$obs$dv)
+})
+
+test_that("misaligned idv is detected for sim, but allowed for sim_ref", {
+  fx <- refcorr_vpc_data()
+  fx_bad <- fx
+  swap <- fx_bad$sim$rec %in% c(1, 2)
+  fx_bad$sim$time[swap] <- rev(fx_bad$sim$time[swap])[order(rev(fx_bad$sim$sim[swap]))]
+  fx_bad$sim$time[fx_bad$sim$rec == 1 & fx_bad$sim$sim == 1] <- 99
+  expect_error(rc_vpc(fx_bad), "idv")
+  fx_obs <- fx
+  fx_obs$obs$time[1:2] <- fx_obs$obs$time[2:1]
+  expect_error(rc_vpc(fx_obs), "idv")
+  fx_ref <- fx
+  fx_ref$ref$time <- 500  # e.g. reference at steady state
+  expect_equal(rc_vpc(fx_ref)$obs$dv, rc_vpc(fx)$obs$dv)
+})
+
+test_that("censoring does not change correction of uncensored values", {
+  fx <- refcorr_vpc_data()
+  obj <- rc_vpc(fx)
+  suppressWarnings(obj_lloq <- rc_vpc(fx, lloq = 0.5))
+  keep_obs <- fx$obs$dv >= 0.5
+  expect_equal(obj_lloq$obs$dv[keep_obs], obj$obs$dv[keep_obs])
+  expect_true(all(is.na(obj_lloq$obs$dv[!keep_obs])))
+  raw_sim <- fx$sim$dv[order(fx$sim$sim, fx$sim$rec)]
+  expect_equal(sim_sorted_dv(obj_lloq)[raw_sim >= 0.5], sim_sorted_dv(obj)[raw_sim >= 0.5])
+  expect_true(all(is.na(sim_sorted_dv(obj_lloq)[raw_sim < 0.5])))
+  suppressWarnings(obj_uloq <- rc_vpc(fx, uloq = 2))
+  keep_obs <- fx$obs$dv <= 2
+  expect_equal(obj_uloq$obs$dv[keep_obs], obj$obs$dv[keep_obs])
+})
+
+test_that("log_y floor is applied after correction only", {
+  fx <- refcorr_vpc_data()
+  obj <- rc_vpc(fx)
+  obj_log <- rc_vpc(fx, log_y = TRUE, log_y_min = 0.5)
+  above <- obj$obs$dv >= 0.5
+  expect_equal(obj_log$obs$dv[above], obj$obs$dv[above])
+  expect_true(all(obj_log$obs$dv[!above] == 0.5))
+})
+
+test_that("non-finite corrections are reported and excluded", {
+  fx <- refcorr_vpc_data()
+  fx$obs$dv[1] <- -1  # below lower bound 0 -> log of negative
+  expect_warning(obj <- rc_vpc(fx), "non-finite")
+  expect_false(1 %in% obj$obs$rec)
+  expect_equal(nrow(obj$obs), nrow(fx$obs) - 1)
+})

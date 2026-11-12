@@ -11,6 +11,8 @@ calc_ref_corr_continuous(
   lower_bnd = 0,
   log_dv = FALSE,
   cols,
+  lloq = NULL,
+  uloq = NULL,
   verbose = FALSE
 )
 }
@@ -30,6 +32,11 @@ with standardized \code{id} and \code{dv} columns plus the pred column).}
 named "sim", each containing a sub-list with elements for mapping columns
 names in the data to expected column names for use.}
 
+\item{lloq, uloq}{limits of quantification. Simulated values outside these
+limits are set to \code{NA} after correction, so that the variability
+correction is based on all simulated data. Observed data is expected to
+be censored already.}
+
 \item{verbose}{show debugging information (TRUE or FALSE)}
 }
 \value{
@@ -46,5 +53,8 @@ correction is applied per record, before binning.
 \details{
 Records are matched by position: \code{obs}, each replicate in \code{sim},
 and each replicate in \code{sim_ref} must contain the same records in the
-same order.
+same order. Alignment is checked on \code{id} and \code{idv} for
+\code{obs} and \code{sim} replicates, and on \code{id} only for
+\code{sim_ref}, since the independent variable (e.g. time) may be
+deliberately changed in the reference dataset.
 }

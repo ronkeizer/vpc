@@ -14,8 +14,8 @@ records_to_matrix(data, sim_idx, what)
 \item{what}{label used in error messages}
 }
 \value{
-list with \code{dv} (matrix), \code{id} (ids of first replicate),
-  and \code{order} (row indices of \code{data} in matrix order)
+list with \code{dv} (matrix), \code{id} and \code{idv} (of first
+  replicate), and \code{order} (row indices of \code{data} in matrix order)
 }
 \description{
 Reshape simulated records into a records x replicates matrix
