@@ -38,17 +38,17 @@
 
     
         
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
         <link rel="stylesheet" href="styles/website.css">
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
         
     
 
@@ -233,7 +233,7 @@
                 <a href="pred-correction.html">
             
                     
-                    Prediction correction
+                    Prediction / reference correction
             
                 </a>
             
@@ -300,9 +300,17 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="stratification">Stratification</h1>
-<p>Example with stratifcation by covariate <code>sex</code>:</p>
+<p>Example with stratification by covariate <code>sex</code>:</p>
 <pre><code>vpc (sim = sim, obs = obs, stratify = c(&quot;sex&quot;), facet = &quot;rows&quot;)
-</code></pre><p>The <code>vpc_</code> functions in this packages allow stratification by 2 variables (horizontal and vertical faceting). If more strata are desired, a new combined variable should be defined that defines the factors.</p>
+</code></pre><p><code>vpc()</code>, <code>vpc_cens()</code>, and <code>vpc_tte()</code> allow stratification by 2 variables (horizontal and vertical faceting); for repeated time-to-event data (<code>vpc_tte(rtte = TRUE)</code>) only 1 variable is supported. (<code>vpc_cat()</code> has no <code>stratify</code> argument, since its panels are the categories.) If more strata are desired, a new combined variable should be defined that defines the factors. When the stratification variables are factors, the order of the panels follows the factor levels.</p>
+<p>Missing values of a stratification variable form their own stratum. With two stratification variables, they are labeled <code>&quot;&lt;NA&gt;&quot;</code> in the combined stratum (e.g. <code>&quot;&lt;NA&gt;, X&quot;</code>), so that they are kept separate from a literal value <code>&quot;NA&quot;</code>.</p>
+<p>By default the same bins are used for every stratum. To determine bins separately for each stratum, use <code>bin_by_strata = TRUE</code>, see <a href="binning.html">Binning</a>.</p>
+<h2 id="stratification-by-color">Stratification by color</h2>
+<p><code>vpc_cens()</code> and <code>vpc_tte()</code> also accept a <code>stratify_color</code> argument (a single variable). The VPC statistics are then calculated per value of that variable and drawn in separate colors (with a legend) within the same panel.</p>
+<p>In <code>vpc_cens()</code>, <code>stratify_color</code> can be combined with <code>stratify</code>, in which case the facets are determined by <code>stratify</code> only:</p>
+<pre><code>vpc_cens(sim = sim, obs = obs, lloq = 5,
+         stratify = &quot;study&quot;, stratify_color = &quot;dose&quot;)
+</code></pre><p>In <code>vpc_tte()</code>, <code>stratify_color</code> is an alternative to <code>stratify</code>, and the two cannot be combined.</p>
 <p><em>Note: The output from the <code>vpc()</code> functions are ggplot2-objects, and they can easily be extended and themed using the well-known functions from the ggplot2 package. One cautionary note however is that you should refrain from applying any additional faceting functions after the VPC has been created. In other words, faceting should be done using the <code>vpc()</code> functions (<code>stratify</code>=... argument). Otherwise you will end up with funky (in the best case) or misleading (in the worst case) plots.</em></p>
 
                                 
@@ -347,7 +355,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Stratification","level":"3.1","depth":1,"next":{"title":"Binning","level":"3.2","depth":1,"path":"binning.md","ref":"binning.md","articles":[]},"previous":{"title":"Time-to-event data","level":"2.4","depth":1,"path":"tte-data.md","ref":"tte-data.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["mathjax","expandable-chapters","toc"],"pluginsConfig":{"toc":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"expandable-chapters":{}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"stratification.md","mtime":"2016-09-09T18:41:37.000Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-14T22:26:04.796Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Stratification","level":"3.1","depth":1,"next":{"title":"Binning","level":"3.2","depth":1,"path":"binning.md","ref":"binning.md","articles":[]},"previous":{"title":"Time-to-event data","level":"2.4","depth":1,"path":"tte-data.md","ref":"tte-data.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["mathjax","expandable-chapters","toc"],"pluginsConfig":{"toc":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false},"expandable-chapters":{}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"}},"file":{"path":"stratification.md","mtime":"2026-11-12T23:15:20.416Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2026-11-12T23:16:59.695Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
