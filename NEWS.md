@@ -1,4 +1,4 @@
-# vpc 1.2.6
+# vpc 1.2.7
 - `vpc()` with `pred_corr = TRUE` and `lloq`/`uloq`: observed and simulated
   data are now handled identically. Censoring is determined on the uncorrected
   DV, only non-censored values are prediction-corrected, and censored values
@@ -6,6 +6,10 @@
   calculating percentiles. Prediction-corrected observed values are no longer
   compared to the (uncorrected) limit of quantification again. The procedure
   is documented in `?vpc` (#104)
+
+# vpc 1.2.6
+- stratification by two variables now respects the factor level order of the
+  stratification variables (fix #101)
 
 # vpc 1.2.5
 - added `pred_corr_method = c("multiplicative", "additive")` argument to `vpc()`,
