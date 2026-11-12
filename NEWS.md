@@ -1,4 +1,4 @@
-# vpc 1.2.10
+# vpc 1.3.1
 - `auto_bin()` / `bins = "data"`: the lowest observations were not assigned to
   any bin (and thus silently excluded from the VPC). All data are now binned,
   with bins containing approximately equal numbers of observations. The
@@ -13,6 +13,16 @@
   times, and `pk_oral_1cmt()` no longer returns `NaN` when `ka == ke` (incl.
   the defaults).
 - removed unused internal helpers and improved test coverage (#94)
+
+# vpc 1.3.0
+- added reference-corrected VPC (rcVPC; Ibrahim et al., AAPS J 2025) via new
+  `sim_ref` argument to `vpc()`. `pred_corr_method = "additive"` (or
+  `ltbs = TRUE`) selects the log-scale equations, and the lower bound is taken
+  from `pred_corr_lower_bnd`. Censored data is handled as for pcVPC. Validated
+  against Pharmpy's PsN implementation (#105)
+- pcVPC: when PRED is taken from the simulated data, the first replicate is
+  used if its records (`id`, `idv`) match the observed data; otherwise a
+  warning is given and the previous behaviour (first rows) is used
 
 # vpc 1.2.9
 - `vpc()` with `pred_corr = TRUE` and `lloq`/`uloq`: observed and simulated

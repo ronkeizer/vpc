@@ -4,7 +4,16 @@
 \alias{read_vpc}
 \title{Read in VPC data}
 \usage{
-read_vpc(sim, obs, psn_folder, software, sim_cols, obs_cols, verbose = FALSE)
+read_vpc(
+  sim,
+  obs,
+  psn_folder,
+  software,
+  sim_cols,
+  obs_cols,
+  sim_ref = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{sim}{this is usually a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}.  However it can also be an object like a nlmixr or xpose object}
@@ -19,10 +28,28 @@ read_vpc(sim, obs, psn_folder, software, sim_cols, obs_cols, verbose = FALSE)
 
 \item{obs_cols}{list for mapping observation data columns, e.g. `list(dv = "DV", id = "ID", idv = "TIME", pred="PRED")`}
 
+\item{sim_ref}{simulations of a reference dataset, for a reference-corrected
+VPC (rcVPC). Same format, columns and record order as \code{sim}, but
+simulated from a dataset in which selected independent variables (dose,
+covariates, time, ...) were set to reference values. Providing
+\code{sim_ref} enables reference-correction (Ibrahim et al., AAPS J 2025,
+\doi{10.1208/s12248-025-01065-2}): observed and simulated DV are normalized
+to the population prediction (\code{pred} column) and variability of the
+reference dataset, per record and before binning. Records are matched by
+position, so \code{obs} and every replicate in \code{sim} and
+\code{sim_ref} must contain the same records in the same order. The lower
+bound is taken from \code{pred_corr_lower_bnd}. The correction is
+undefined for DV at or below the lower bound (e.g. DV <= 0 with the
+default bound of 0); such records are excluded with a warning, also when
+\code{log_y = TRUE} (they are not set to \code{log_y_min}). A correction without the
+variability component (Eq. 1 only) can be done manually by multiplying DV
+in \code{obs} and \code{sim} by \code{PRED_REF / PRED} before calling
+\code{vpc()}.}
+
 \item{verbose}{show debugging information (TRUE or FALSE)}
 }
 \value{
-A list with names of "sim", "obs", "software", and "cols"
+A list with names of "sim", "obs", "sim_ref", "software", and "cols"
 }
 \description{
 Read in VPC data
