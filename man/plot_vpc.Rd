@@ -20,7 +20,12 @@ plot_vpc(
 \arguments{
 \item{db}{object created using the `vpc` function}
 
-\item{show}{what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)}
+\item{show}{what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci,
+obs_median, sim_median, sim_median_ci, outlier_areas). \code{outlier_areas}
+(default \code{FALSE}) highlights the areas where an observed percentile falls
+outside the confidence interval of the corresponding simulated percentile
+(the "red areas" in Monolix VPCs). Styled with the \code{outlier_fill} and
+\code{outlier_alpha} elements of \code{vpc_theme}.}
 
 \item{vpc_theme}{theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()}
 

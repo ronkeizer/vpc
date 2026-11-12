@@ -1,3 +1,11 @@
+# vpc 1.3.2
+- new `show = list(outlier_areas = TRUE)` for continuous VPCs: highlights
+  (in red) the areas where an observed percentile falls outside the
+  confidence interval of the corresponding simulated percentile, as in
+  Monolix VPCs. Works with `smooth = TRUE/FALSE`, stratification, and log
+  axes. Color and transparency are set with the new `outlier_fill` and
+  `outlier_alpha` elements of `new_vpc_theme()` (#8)
+
 # vpc 1.3.1
 - `auto_bin()` / `bins = "data"`: the lowest observations were not assigned to
   any bin (and thus silently excluded from the VPC). All data are now binned,

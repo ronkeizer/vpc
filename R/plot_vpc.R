@@ -4,7 +4,12 @@
 #' `vpc` functions.
 #'
 #' @param db object created using the `vpc` function
-#' @param show what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
+#' @param show what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci,
+#'   obs_median, sim_median, sim_median_ci, outlier_areas). \code{outlier_areas}
+#'   (default \code{FALSE}) highlights the areas where an observed percentile falls
+#'   outside the confidence interval of the corresponding simulated percentile
+#'   (the "red areas" in Monolix VPCs). Styled with the \code{outlier_fill} and
+#'   \code{outlier_alpha} elements of \code{vpc_theme}.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param log_x Boolean indicting whether x-axis should be shown as logarithmic. Default is FALSE.
@@ -144,6 +149,14 @@ plot_vpc_helper.vpcdb_continuous <- function(db, ...,
       smooth=smooth,
       vpc_theme=vpc_theme,
       what="q95"
+    ) +
+    geom_outlier_areas_continuous(
+      data=db,
+      show=isTRUE(show$outlier_areas),
+      smooth=smooth,
+      log_x=log_x,
+      log_y=log_y,
+      vpc_theme=vpc_theme
     ) +
     geom_obs_median_continuous(data=db, show=show$obs_median, vpc_theme=vpc_theme) +
     geom_obs_ci_continuous(data=db, show=show$obs_ci, vpc_theme=vpc_theme) +
@@ -615,6 +628,44 @@ geom_sim_pi_ci_continuous <- function(data, show, smooth, vpc_theme, what=c("q5"
           alpha=vpc_theme$sim_pi_alpha,
           fill = vpc_theme$sim_pi_fill
         )
+    }
+  }
+  ret
+}
+
+#' @describeIn vpc_ggplot Show areas where the observed percentiles fall
+#'   outside the confidence interval of the simulated percentiles (continuous
+#'   data)
+geom_outlier_areas_continuous <- function(data, show, smooth, vpc_theme, log_x = FALSE, log_y = FALSE) {
+  ret <- ggplot2::geom_blank()
+  if (show && !is.null(data$sim) && !is.null(data$obs)) {
+    areas <- calc_outlier_areas(
+      vpc_dat = data$vpc_dat,
+      aggr_obs = data$aggr_obs,
+      smooth = smooth,
+      log_x = log_x,
+      log_y = log_y
+    )
+    if (!is.null(areas)) {
+      fill <- if (is.null(vpc_theme$outlier_fill)) "#dd0000" else vpc_theme$outlier_fill
+      alpha <- if (is.null(vpc_theme$outlier_alpha)) 0.5 else vpc_theme$outlier_alpha
+      if (smooth) {
+        ret <- ggplot2::geom_ribbon(
+          data = areas,
+          mapping = ggplot2::aes(x = x, ymin = ymin, ymax = ymax, group = group),
+          inherit.aes = FALSE,
+          fill = fill,
+          alpha = alpha
+        )
+      } else {
+        ret <- ggplot2::geom_rect(
+          data = areas,
+          mapping = ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, group = group),
+          inherit.aes = FALSE,
+          fill = fill,
+          alpha = alpha
+        )
+      }
     }
   }
   ret
