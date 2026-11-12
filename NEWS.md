@@ -1,8 +1,13 @@
-# vpc 1.2.5
+# vpc 1.3.0
 - added reference-corrected VPC (rcVPC; Ibrahim et al., AAPS J 2025) via new
   `sim_ref` argument to `vpc()`, with `ref_corr_log` for log-scale DV. The lower
   bound is taken from `pred_corr_lower_bnd`. Validated against Pharmpy's PsN
   implementation (#105)
+- pcVPC with `lloq`/`uloq`: pred-corrected observations are no longer compared
+  to the uncorrected limit again when calculating observed percentiles; only
+  values censored before correction are treated as censored
+- pcVPC: when PRED is taken from the simulated data, the first replicate is
+  used and its record order (`id`, `idv`) must match the observed data
 
 # vpc 1.2.4
 - replaced defunct dplyr functions (`group_by_()`, `arrange_()`, `do()`) with
