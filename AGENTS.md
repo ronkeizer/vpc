@@ -55,3 +55,5 @@ Each step is its own file in `R/`:
 
 ### Tests
 `tests/testthat/`, with one file per component. `test-ref_corr.R` checks rcVPC against anchor values computed with Pharmpy's PsN rcVPC implementation. Those values are stored in `tests/testthat/fixtures/refcorr/`, and the README there explains how to regenerate them: `make_inputs.R` produces the inputs, then `pharmpy_expected.py` runs in the `pmx:latest` Docker image. Bundled example datasets (`simple_data`, `rtte_obs_nm`, `rtte_sim_nm`) are in `data/`.
+
+`test-plots.R` holds visual regression tests: `vdiffr::expect_doppelganger()` compares each plot with an SVG snapshot in `tests/testthat/_snaps/plots/`. Any change to plot output (including tiny theme tweaks) fails these tests. If the change is intended, inspect it with `testthat::snapshot_review("plots")` (old vs new, side by side) and accept with `testthat::snapshot_accept("plots")`, then commit the updated `.svg` files. Never accept snapshots without looking at them. A `ggplot2` upgrade can also change the SVGs; re-check and re-accept in that case. vdiffr skips these tests on CRAN.

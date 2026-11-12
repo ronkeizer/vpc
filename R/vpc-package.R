@@ -11,6 +11,6 @@ globalVariables(c(".", "comp", "strat", "strat2", "bin", "pred", "dv", "idv", "q
                   "mn_idv", "value", "mn_idv", "ploq", "bin_mid", "bin_min",
                   "bin_max", "surv", "qmed", "strat_sim", "qmin", "qmax", "strat_color",
                   "y", "lower", "upper", "x", "classIntervals", "idx", "obs", "rtte",
-                  "sim"))
+                  "sim", "xmin", "xmax", "ymin", "ymax", "group"))
 
 NULL

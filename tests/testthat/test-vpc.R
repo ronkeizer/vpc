@@ -135,3 +135,21 @@ test_that("censored values are returned as -Inf/Inf in the vpcdb and not plotted
   db_cens <- vpc_cens(sim = sim, obs = obs, lloq = 20, vpcdb = TRUE)
   expect_equal(db_cens$obs$dv == -Inf, obs$DV < 20)
 })
+
+test_that("observed upper percentile is drawn when lower percentile is censored (#122)", {
+  db <- vpc(simple_data$sim, simple_data$obs, lloq = 1, vpcdb = TRUE)
+  aggr <- as.data.frame(db$aggr_obs)
+  last <- nrow(aggr)
+  expect_true(is.na(aggr$obs5[last]))
+  expect_false(is.na(aggr$obs95[last]))
+
+  pl <- vpc(simple_data$sim, simple_data$obs, lloq = 1)
+  built <- expect_no_warning(ggplot2::ggplot_build(pl))
+  # find the observed percentile line layers by their y values
+  line_data <- built$data[vapply(pl$layers, function(l) inherits(l$geom, "GeomLine"), logical(1))]
+  ys <- lapply(line_data, function(d) d$y)
+  upper <- Filter(function(y) length(y) == last && isTRUE(all.equal(y, aggr$obs95)), ys)
+  expect_length(upper, 1)
+  lower <- Filter(function(y) length(y) == last && isTRUE(all.equal(y[-last], aggr$obs5[-last])), ys)
+  expect_length(lower, 1)
+})

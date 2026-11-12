@@ -27,6 +27,8 @@
 #'  \item{bin_separators_color}{color for bin separator lines, NA for don't plot}
 #'  \item{bin_separators_location}{where to plot bin separators ("t" for top, "b" for bottom)}
 #'  \item{loq_color}{color of line showing limit of quantification}
+#'  \item{outlier_fill}{fill color for areas where an observed percentile is outside the simulated CI (shown with \code{show = list(outlier_areas = TRUE)})}
+#'  \item{outlier_alpha}{transparency for those areas}
 #' }
 #' @return A list with vpc theme specifiers
 #' @export
@@ -69,7 +71,10 @@ new_vpc_theme <- function (update = NULL) {
     sim_median_linewidth = 1,
 
     bin_separators_color = "#000000",
-    loq_color = "#990000"
+    loq_color = "#990000",
+
+    outlier_fill = "#dd0000",
+    outlier_alpha = 0.5
   ), class = "vpc_theme")
   n <- names(tmp)
   if(is.null(update)) {

@@ -15,7 +15,8 @@ show_default <-
         pi_as_area = FALSE,
         bin_sep = TRUE,
         sim_km = FALSE,
-        obs_cens = TRUE
+        obs_cens = TRUE,
+        outlier_areas = FALSE
       ),
     categorical=
       list(
@@ -29,7 +30,8 @@ show_default <-
         pi_as_area = FALSE,
         bin_sep = TRUE,
         sim_km = FALSE,
-        obs_cens = TRUE
+        obs_cens = TRUE,
+        outlier_areas = FALSE
       ),
     censored=
       list(
@@ -43,7 +45,8 @@ show_default <-
         pi_as_area = FALSE,
         bin_sep = TRUE,
         sim_km = FALSE,
-        obs_cens = TRUE
+        obs_cens = TRUE,
+        outlier_areas = FALSE
       ),
     "time-to-event"=
       list (
@@ -57,6 +60,7 @@ show_default <-
         pi_as_area = FALSE,
         bin_sep = TRUE,
         sim_km = FALSE,
-        obs_cens = TRUE
+        obs_cens = TRUE,
+        outlier_areas = FALSE
       )
   )

@@ -4,7 +4,15 @@
 #' `vpc` functions.
 #'
 #' @param db object created using the `vpc` function
-#' @param show what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci, obs_median, sim_median, sim_median_ci)
+#' @param show what to show in VPC (obs_dv, obs_ci, pi, pi_as_area, pi_ci,
+#'   obs_median, sim_median, sim_median_ci, outlier_areas). \code{outlier_areas}
+#'   (default \code{FALSE}) highlights the areas where an observed percentile falls
+#'   outside the confidence interval of the corresponding simulated percentile
+#'   (the "red areas" in Monolix VPCs). For \code{vpc_cens()} and
+#'   \code{vpc_cat()}, this is the observed fraction (below LOQ, or per
+#'   category) compared to the CI of the simulated fraction. Styled with the
+#'   \code{outlier_fill} and \code{outlier_alpha} elements of
+#'   \code{vpc_theme}.
 #' @param vpc_theme theme to be used in VPC. Expects list of class vpc_theme created with function vpc_theme()
 #' @param smooth "smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.
 #' @param log_x Boolean indicting whether x-axis should be shown as logarithmic. Default is FALSE.
@@ -144,6 +152,14 @@ plot_vpc_helper.vpcdb_continuous <- function(db, ...,
       smooth=smooth,
       vpc_theme=vpc_theme,
       what="q95"
+    ) +
+    geom_outlier_areas_continuous(
+      data=db,
+      show=isTRUE(show$outlier_areas),
+      smooth=smooth,
+      log_x=log_x,
+      log_y=log_y,
+      vpc_theme=vpc_theme
     ) +
     geom_obs_median_continuous(data=db, show=show$obs_median, vpc_theme=vpc_theme) +
     geom_obs_ci_continuous(data=db, show=show$obs_ci, vpc_theme=vpc_theme) +
@@ -337,15 +353,20 @@ geom_obs_cens_dat_tte <- function(data) {
 #' @describeIn vpc_ggplot Show confidence interval for observed, continuous data
 geom_obs_ci_continuous <- function(data, show, vpc_theme) {
   if (show & !is.null(data$obs) && !is.null(data$aggr_obs[["obs5"]])) {
-    ggplot2::geom_ribbon(
-      data=data$aggr_obs,
-      ggplot2::aes(x=bin_mid, ymin=obs5, ymax=obs95),
-      colour=vpc_theme$obs_ci_color,
-      fill=NA,
-      linetype=vpc_theme$obs_ci_linetype,
-      linewidth=vpc_theme$obs_ci_linewidth,
-      outline.type="both"
-    )
+    # Draw lower and upper percentiles as separate lines (not as a ribbon
+    # outline) so that a censored (NA) value in one percentile does not hide
+    # the other percentile in that bin (#122). `na.rm = TRUE` keeps interior
+    # NAs as gaps in the line without a warning.
+    lapply(c("obs5", "obs95"), function(col) {
+      ggplot2::geom_line(
+        data=data$aggr_obs,
+        ggplot2::aes(x=bin_mid, y=.data[[col]]),
+        colour=vpc_theme$obs_ci_color,
+        linetype=vpc_theme$obs_ci_linetype,
+        linewidth=vpc_theme$obs_ci_linewidth,
+        na.rm=TRUE
+      )
+    })
   } else {
     ggplot2::geom_blank()
   }
@@ -616,6 +637,44 @@ geom_sim_pi_ci_continuous <- function(data, show, smooth, vpc_theme, what=c("q5"
           alpha=vpc_theme$sim_pi_alpha,
           fill = vpc_theme$sim_pi_fill
         )
+    }
+  }
+  ret
+}
+
+#' @describeIn vpc_ggplot Show areas where the observed percentiles fall
+#'   outside the confidence interval of the simulated percentiles (continuous
+#'   data)
+geom_outlier_areas_continuous <- function(data, show, smooth, vpc_theme, log_x = FALSE, log_y = FALSE) {
+  ret <- ggplot2::geom_blank()
+  if (show && !is.null(data$sim) && !is.null(data$obs)) {
+    areas <- calc_outlier_areas(
+      vpc_dat = data$vpc_dat,
+      aggr_obs = data$aggr_obs,
+      smooth = smooth,
+      log_x = log_x,
+      log_y = log_y
+    )
+    if (!is.null(areas)) {
+      fill <- if (is.null(vpc_theme$outlier_fill)) "#dd0000" else vpc_theme$outlier_fill
+      alpha <- if (is.null(vpc_theme$outlier_alpha)) 0.5 else vpc_theme$outlier_alpha
+      if (smooth) {
+        ret <- ggplot2::geom_ribbon(
+          data = areas,
+          mapping = ggplot2::aes(x = x, ymin = ymin, ymax = ymax, group = group),
+          inherit.aes = FALSE,
+          fill = fill,
+          alpha = alpha
+        )
+      } else {
+        ret <- ggplot2::geom_rect(
+          data = areas,
+          mapping = ggplot2::aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, group = group),
+          inherit.aes = FALSE,
+          fill = fill,
+          alpha = alpha
+        )
+      }
     }
   }
   ret

@@ -18,6 +18,7 @@
 \alias{geom_sim_pi_as_area_tte}
 \alias{geom_sim_pi_continuous}
 \alias{geom_sim_pi_ci_continuous}
+\alias{geom_outlier_areas_continuous}
 \alias{facet_continuous}
 \alias{facet_tte}
 \alias{guides_stratify_color}
@@ -57,6 +58,15 @@ geom_sim_pi_continuous(data, show, vpc_theme)
 
 geom_sim_pi_ci_continuous(data, show, smooth, vpc_theme, what = c("q5", "q95"))
 
+geom_outlier_areas_continuous(
+  data,
+  show,
+  smooth,
+  vpc_theme,
+  log_x = FALSE,
+  log_y = FALSE
+)
+
 facet_continuous(data)
 
 facet_tte(data)
@@ -80,6 +90,10 @@ returned)}
 \item{smooth}{"smooth" the VPC (connect bin midpoints) or show bins as rectangular boxes. Default is TRUE.}
 
 \item{what}{Which interval should be shown (low = "q5" or high = "q95")}
+
+\item{log_x}{Boolean indicting whether x-axis should be shown as logarithmic. Default is FALSE.}
+
+\item{log_y}{Boolean indicting whether y-axis should be shown as logarithmic. Default is FALSE.}
 }
 \description{
 A collection of internal ggplot helpers for VPC plotting
@@ -126,6 +140,10 @@ continuous data
 
 \item \code{geom_sim_pi_ci_continuous()}: Show simulated prediction interval confidence interval
 areas for continuous data
+
+\item \code{geom_outlier_areas_continuous()}: Show areas where the observed percentiles fall
+outside the confidence interval of the simulated percentiles (continuous
+data)
 
 \item \code{facet_continuous()}: Facet continuous data by stratification factors
 

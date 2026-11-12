@@ -1,4 +1,4 @@
-# vpc 1.3.2
+# vpc 1.3.5
 - Consistent handling of censored and missing data (#80). Censored values are
   now represented internally as `-Inf` (below `lloq`) or `Inf` (above `uloq`)
   throughout the package, and missing (`NA`) values are never treated as
@@ -21,6 +21,29 @@
     draw censored observations. Code that uses `is.na()` on the `vpcdb` data
     to find censored values should use `is.infinite()` instead.
   - the `log_y` floor no longer applies to censored values.
+
+# vpc 1.3.4
+- Continuous VPCs: the observed lower and upper percentile lines are now drawn
+  as separate lines instead of as the outline of one ribbon. Before, when one
+  observed percentile was censored (`NA`, e.g. below `lloq`) in a bin, the
+  other percentile was not drawn in that bin either (#122)
+
+# vpc 1.3.3
+- new `show = list(outlier_areas = TRUE)` for continuous VPCs: highlights
+  (in red) the areas where an observed percentile falls outside the
+  confidence interval of the corresponding simulated percentile, as in
+  Monolix VPCs. Also available in `vpc_cens()` (fraction below/above LOQ)
+  and `vpc_cat()` (fraction per category). Works with `smooth = TRUE/FALSE`,
+  stratification, and log axes. Color and transparency are set with the new
+  `outlier_fill` and `outlier_alpha` elements of `new_vpc_theme()` (#8)
+
+# vpc 1.3.2
+- Added visual regression tests (#9): `tests/testthat/test-plots.R` uses
+  `vdiffr` to snapshot the VPC plots (continuous, pcVPC, LLOQ/log-y,
+  stratified, censored, categorical, time-to-event) as SVGs in
+  `tests/testthat/_snaps/plots/`. Review intended changes side by side with
+  `testthat::snapshot_review("plots")`. `vdiffr` is a new suggested package;
+  the visual tests are skipped on CRAN or when it is not installed.
 
 # vpc 1.3.1
 - `auto_bin()` / `bins = "data"`: the lowest observations were not assigned to
