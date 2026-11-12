@@ -52,7 +52,7 @@ auto_bin.numeric <- function(dat, type = "kmeans", n_bins = 8, verbose = FALSE, 
       bws <- diff(range(dat)) * seq(from=0.01, to = .25, by=0.01)
       for (i in seq(bws)) {
         d <- density(dat, bw=bws[i])
-        all_bins[[i]] <- c(0, d$x[find_nadirs(d$y)], max(dat)*1.01)
+        all_bins[[i]] <- c(min(0, dat), d$x[find_nadirs(d$y)], upper_bin_separator(dat, 0.01))
         l_bins[i] <- length(all_bins[[i]])
       }
       return(all_bins[[order(abs(l_bins - n_bins))[1]]]) # return closest to requested bins
@@ -60,24 +60,18 @@ auto_bin.numeric <- function(dat, type = "kmeans", n_bins = 8, verbose = FALSE, 
     stop("Specified binning method not recognized!")
   } else {
     if (type == "time") {
-      tmp <- levels(cut(x = unique(dat), breaks = n_bins, right = TRUE))
-      tmp <- gsub("\\(", "", tmp)
-      tmp <- gsub("\\]", "", tmp)
-      tmp2 <- unlist(strsplit(tmp, ","))
-      sel <- 1:(length(tmp2)/2)*2 - 1
-      bins <- c(as.num(tmp2[sel]), max(dat)*1.001)
+      # n_bins equally sized intervals on the time scale. Computed directly
+      # (not parsed from cut() labels, which are rounded and can exclude data)
+      bins <- seq(min(dat), max(dat), length.out = n_bins)
+      bins[n_bins] <- upper_bin_separator(dat)
       return(bins)
     }
     if (type == "data") {
+      # n_bins intervals with (approximately) equal numbers of data points,
+      # making sure the lowest separator includes the smallest value
       sorted <- sort(dat)
-      tmp <- levels(cut(x = 1:length(sorted), breaks = n_bins, right = TRUE))
-      tmp <- gsub("\\(", "", tmp)
-      tmp <- gsub("\\]", "", tmp)
-      tmp2 <- unlist(strsplit(tmp, ","))
-      sel <- 1:(length(tmp2)/2)*2 - 1
-      idx <- as.num(tmp2[sel])
-      idx[idx < 0] <- 0
-      bins <- c(sorted[idx], max(dat)*1.001)
+      idx <- floor(seq(0, length(sorted), length.out = n_bins))[-n_bins] + 1
+      bins <- unique(c(sorted[idx], upper_bin_separator(dat)))
       return(bins)
     }
     if (type == "percentiles") {
@@ -92,6 +86,17 @@ auto_bin.numeric <- function(dat, type = "kmeans", n_bins = 8, verbose = FALSE, 
 #' @export
 auto_bin.data.frame <- function(dat, type = "kmeans", n_bins = 8, verbose = FALSE, ...) {
   auto_bin(dat=dat[["idv"]], type, n_bins, verbose, ...)
+}
+
+#' Upper bin separator that is guaranteed to include the maximum value
+#'
+#' Equal to `max(x) * (1 + margin)` for positive data, but also includes the
+#' maximum for negative data.
+#' @param x numeric vector
+#' @param margin relative margin to add above the maximum
+#' @noRd
+upper_bin_separator <- function(x, margin = 0.001) {
+  max(x) + abs(max(x)) * margin
 }
 
 find_nadirs <- function (x, thresh = 0) {
