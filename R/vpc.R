@@ -9,9 +9,49 @@
 #' @inheritParams calc_vpc_continuous
 #' @inheritParams as_vpcdb
 #' @inheritParams plot_vpc
-#' @param ref_corr_log for reference-correction (\code{sim_ref}): is the
-#'   dependent variable on log scale (e.g. log-transform-both-sides models)?
-#'   Default is FALSE.
+#' @inheritParams define_pred_corr_method
+#' @param pred_corr_method Form of the prediction-correction applied when
+#'   \code{pred_corr = TRUE}: \code{"multiplicative"} (default; Bergstrand et
+#'   al., AAPS J 2011, optionally using \code{pred_corr_lower_bnd}) or
+#'   \code{"additive"}. The additive form is intended for
+#'   log-transform-both-sides (LTBS) models, and computes \code{dv + (pred_bin -
+#'   pred)}, where \code{pred_bin} is the median prediction in the bin. It
+#'   assumes that \code{dv} and \code{pred} in both the observed and simulated
+#'   data are \emph{already on the log scale}; no transformation is performed
+#'   internally, so correction, quantiles and plot are all on the log scale.
+#'   Consequently, \code{log_y} cannot be used together with it, and
+#'   \code{pred_corr_lower_bnd} is ignored. Note that for many LTBS workflows,
+#'   the default multiplicative correction on linear-scale data combined with
+#'   \code{log_y = TRUE} is already adequate; use the additive form when the
+#'   correction specifically needs to be evaluated on the log scale.
+#'   For reference-correction (\code{sim_ref}), \code{"additive"} (or
+#'   \code{ltbs = TRUE}) likewise indicates that \code{dv} and \code{pred}
+#'   are on the log scale, and selects the log-scale equations (Eq. 3/4 of
+#'   Ibrahim et al. 2025).
+#' @section Prediction-correction with censored data: When \code{pred_corr =
+#'   TRUE} is combined with \code{lloq} or \code{uloq}, the following steps are
+#'   performed, identically for observed and simulated data:
+#'   \enumerate{
+#'     \item Values below \code{lloq} (or above \code{uloq}) are flagged as
+#'     censored based on the \emph{uncorrected} DV.
+#'     \item The median prediction per bin (\code{pred_bin}) is calculated
+#'     from the predictions of \emph{all} records in the bin, including
+#'     censored ones.
+#'     \item Only non-censored values are prediction-corrected.
+#'     \item Percentiles are calculated per bin (and per simulation) with the
+#'     censored values retained and ranked below (\code{lloq}) or above
+#'     (\code{uloq}) all non-censored values, i.e. they are not dropped. The
+#'     corrected values are not compared to the limit of quantification again.
+#'     Percentiles that fall within the censored part of the distribution are
+#'     returned as \code{NA} and not shown.
+#'   }
+#'   Since prediction-corrected values are no longer on the scale of the limit
+#'   of quantification, the LLOQ/ULOQ line is not drawn. Note that percentiles
+#'   are calculated using \code{stats::quantile()} with its default method
+#'   (\code{type = 7}), which may differ from other software (e.g. PsN).
+#'   Reference-correction (\code{sim_ref}) handles censored data the same
+#'   way, except that simulated values are censored after correction, so that
+#'   the variability correction is based on all simulated data.
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @param ... Other arguments sent to other methods (like xpose or nlmixr);  Note these arguments are not used in the default vpc and are ignored by the default method.
@@ -59,6 +99,8 @@ vpc_vpc <- function(sim = NULL,
                     stratify = NULL,
                     pred_corr = FALSE,
                     pred_corr_lower_bnd = 0,
+                    pred_corr_method = c("multiplicative", "additive"),
+                    ltbs = FALSE,
                     pi = c(0.05, 0.95),
                     ci = c(0.05, 0.95),
                     uloq = NULL,
@@ -76,7 +118,6 @@ vpc_vpc <- function(sim = NULL,
                     vpcdb = FALSE,
                     verbose = FALSE,
                     sim_ref = NULL,
-                    ref_corr_log = FALSE,
                     ...) {
   msg("Configuring and initializing...", verbose=verbose)
   vpc_data <-
@@ -105,6 +146,12 @@ vpc_vpc <- function(sim = NULL,
   pred_corr_lower_bnd <- loq_data$pred_corr_lower_bnd
   cens_type <- loq_data$cens_type
   cens_limit <- loq_data$cens_limit
+  pred_corr_method <-
+    define_pred_corr_method(
+      pred_corr_method=pred_corr_method, ltbs=ltbs,
+      pred_corr=pred_corr || !is.null(sim_ref), pred_corr_lower_bnd=pred_corr_lower_bnd,
+      log_y=log_y
+    )
 
   ## checking whether stratification columns are available
   msg("Stratifying data...", verbose=verbose)
@@ -133,7 +180,12 @@ vpc_vpc <- function(sim = NULL,
     msg("Parsing simulated data...", verbose=verbose)
     censor_sim <- (!is.null(lloq) || !is.null(uloq)) && any_corr
     if(censor_sim) {
-      warning("Be careful using pred- or reference-correction together with censored data (<LLOQ or >ULOQ). VPC plot will be shown for non-censored data only!")
+      warning(
+        "Prediction- or reference-correction is used together with censored data (<LLOQ or >ULOQ). ",
+        "Censoring is determined on the uncorrected observed and simulated DV, only non-censored values are corrected, ",
+        "and censored values are counted as censored (not dropped) when calculating percentiles. ",
+        "Percentiles that fall in the censored range are not shown. See ?vpc for details."
+      )
     }
     ## for reference-correction, simulated data is censored after correction,
     ## so that the variability correction uses all simulated data
@@ -167,7 +219,7 @@ vpc_vpc <- function(sim = NULL,
         sim=vpc_data$sim, obs=vpc_data$obs,
         sim_ref=sim_ref_dat,
         lower_bnd=pred_corr_lower_bnd,
-        log_dv=ref_corr_log,
+        log_dv=(pred_corr_method == "additive"),
         cols=cols,
         lloq=lloq, uloq=uloq,
         verbose=verbose
@@ -184,11 +236,6 @@ vpc_vpc <- function(sim = NULL,
   if(any_corr) {
     uloq <- NULL
     lloq <- NULL
-    ## censored values were set to NA before correction (obs) or after
-    ## correction (sim). Corrected values should not be compared to the
-    ## uncorrected limits again, so only NA is treated as censored.
-    if(loq_data$cens_type == "left") loq_data$cens_limit <- -Inf
-    if(loq_data$cens_type == "right") loq_data$cens_limit <- Inf
   }
 
   # Binning ####
@@ -204,6 +251,7 @@ vpc_vpc <- function(sim = NULL,
       sim=sim, obs=obs,
       pred_corr=pred_corr,
       pred_corr_lower_bnd=pred_corr_lower_bnd,
+      pred_corr_method=pred_corr_method,
       cols=cols,
       verbose=verbose
     )
@@ -216,7 +264,8 @@ vpc_vpc <- function(sim = NULL,
       stratify=stratify,
       bins=bins,
       bin_mid=bin_mid,
-      verbose=verbose
+      verbose=verbose,
+      pred_corr=any_corr
     )
   # Wrapup ####
   # data combined and handed off to separate plotting function

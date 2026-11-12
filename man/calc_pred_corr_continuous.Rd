@@ -10,7 +10,8 @@ calc_pred_corr_continuous(
   pred_corr,
   pred_corr_lower_bnd,
   cols,
-  verbose
+  verbose,
+  pred_corr_method = "multiplicative"
 )
 }
 \arguments{
@@ -27,6 +28,10 @@ named "sim", each containing a sub-list with elements for mapping columns
 names in the data to expected column names for use.}
 
 \item{verbose}{show debugging information (TRUE or FALSE)}
+
+\item{pred_corr_method}{Form of the prediction-correction, either
+\code{"multiplicative"} (default) or \code{"additive"}. See
+\code{\link{vpc}} for details.}
 }
 \value{
 A list with "sim" and "obs" (with \code{pred_corr} performed, if

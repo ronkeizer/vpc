@@ -97,13 +97,13 @@ test_that("vpc() with sim_ref matches Pharmpy end-to-end", {
   expect_s3_class(plot_vpc(obj), "ggplot")
 })
 
-test_that("vpc() with sim_ref and ref_corr_log matches Pharmpy", {
+test_that("vpc() with sim_ref and additive (LTBS) method matches Pharmpy", {
   fx <- refcorr_vpc_data()
   fx$obs$dv <- log(fx$obs$dv); fx$obs$PRED <- log(fx$obs$PRED)
   fx$sim$dv <- log(fx$sim$dv); fx$sim$PRED <- log(fx$sim$PRED)
   fx$ref$dv <- log(fx$ref$dv); fx$ref$PRED <- log(fx$ref$PRED)
   obj <- vpc(
-    sim = fx$sim, obs = fx$obs, sim_ref = fx$ref, ref_corr_log = TRUE,
+    sim = fx$sim, obs = fx$obs, sim_ref = fx$ref, pred_corr_method = "additive",
     obs_cols = fx$obs_cols, sim_cols = fx$sim_cols,
     software = "nonmem", vpcdb = TRUE
   )
@@ -260,8 +260,8 @@ test_that("corrected observations are not re-censored against raw LLOQ", {
 
 test_that("new vpc_vpc() arguments do not shift positional arguments", {
   f <- names(formals(vpc_vpc))
-  expect_equal(f[(length(f) - 2):length(f)], c("sim_ref", "ref_corr_log", "..."))
-  expect_equal(which(f == "pi"), 14)
+  expect_equal(f[(length(f) - 1):length(f)], c("sim_ref", "..."))
+  expect_equal(which(f == "pi"), 16)
 })
 
 test_that("obs PRED fallback warns on record mismatch (pcVPC)", {
@@ -329,4 +329,15 @@ test_that("vectorised row SD handles missing values (< 2 values gives NA)", {
   expect_true(all(is.na(res$sim[2:3, ])))
   expect_false(anyNA(res$sim[-(2:3), ]))
   expect_equal(nrow(res$sim), nrow(inp$sim_dv))
+})
+
+test_that("ltbs = TRUE selects log-scale rcVPC and rejects log_y", {
+  fx <- refcorr_vpc_data()
+  for(nm in c("obs", "sim", "ref")) {
+    fx[[nm]]$dv <- log(fx[[nm]]$dv); fx[[nm]]$PRED <- log(fx[[nm]]$PRED)
+  }
+  obj <- rc_vpc(fx, ltbs = TRUE)
+  exp <- expected_case(fx, "log")
+  expect_equal(obj$obs$dv[order(obj$obs$rec)], exp$obs, tolerance = 1e-8)
+  expect_error(rc_vpc(fx, ltbs = TRUE, log_y = TRUE), "log_y")
 })

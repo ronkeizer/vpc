@@ -24,6 +24,8 @@ vpc_vpc(
   stratify = NULL,
   pred_corr = FALSE,
   pred_corr_lower_bnd = 0,
+  pred_corr_method = c("multiplicative", "additive"),
+  ltbs = FALSE,
   pi = c(0.05, 0.95),
   ci = c(0.05, 0.95),
   uloq = NULL,
@@ -41,7 +43,6 @@ vpc_vpc(
   vpcdb = FALSE,
   verbose = FALSE,
   sim_ref = NULL,
-  ref_corr_log = FALSE,
   ...
 )
 }
@@ -76,6 +77,28 @@ aim for}
 \item{pred_corr}{perform prediction-correction?}
 
 \item{pred_corr_lower_bnd}{lower bound for the prediction-correction}
+
+\item{pred_corr_method}{Form of the prediction-correction applied when
+\code{pred_corr = TRUE}: \code{"multiplicative"} (default; Bergstrand et
+al., AAPS J 2011, optionally using \code{pred_corr_lower_bnd}) or
+\code{"additive"}. The additive form is intended for
+log-transform-both-sides (LTBS) models, and computes \code{dv + (pred_bin -
+pred)}, where \code{pred_bin} is the median prediction in the bin. It
+assumes that \code{dv} and \code{pred} in both the observed and simulated
+data are \emph{already on the log scale}; no transformation is performed
+internally, so correction, quantiles and plot are all on the log scale.
+Consequently, \code{log_y} cannot be used together with it, and
+\code{pred_corr_lower_bnd} is ignored. Note that for many LTBS workflows,
+the default multiplicative correction on linear-scale data combined with
+\code{log_y = TRUE} is already adequate; use the additive form when the
+correction specifically needs to be evaluated on the log scale.
+For reference-correction (\code{sim_ref}), \code{"additive"} (or
+\code{ltbs = TRUE}) likewise indicates that \code{dv} and \code{pred}
+are on the log scale, and selects the log-scale equations (Eq. 3/4 of
+Ibrahim et al. 2025).}
+
+\item{ltbs}{Convenience alias: \code{TRUE} is equivalent to
+\code{pred_corr_method = "additive"}.}
 
 \item{pi}{simulated prediction interval to plot. Default is c(0.05, 0.95),}
 
@@ -128,10 +151,6 @@ default bound of 0); such records are excluded with a warning, also when
 variability component (Eq. 1 only) can be done manually by multiplying DV
 in \code{obs} and \code{sim} by \code{PRED_REF / PRED} before calling
 \code{vpc()}.}
-
-\item{ref_corr_log}{for reference-correction (\code{sim_ref}): is the
-dependent variable on log scale (e.g. log-transform-both-sides models)?
-Default is FALSE.}
 }
 \value{
 a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)
@@ -139,6 +158,33 @@ a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 obj
 \description{
 Creates a VPC plot from observed and simulation data
 }
+\section{Prediction-correction with censored data}{
+ When \code{pred_corr =
+  TRUE} is combined with \code{lloq} or \code{uloq}, the following steps are
+  performed, identically for observed and simulated data:
+  \enumerate{
+    \item Values below \code{lloq} (or above \code{uloq}) are flagged as
+    censored based on the \emph{uncorrected} DV.
+    \item The median prediction per bin (\code{pred_bin}) is calculated
+    from the predictions of \emph{all} records in the bin, including
+    censored ones.
+    \item Only non-censored values are prediction-corrected.
+    \item Percentiles are calculated per bin (and per simulation) with the
+    censored values retained and ranked below (\code{lloq}) or above
+    (\code{uloq}) all non-censored values, i.e. they are not dropped. The
+    corrected values are not compared to the limit of quantification again.
+    Percentiles that fall within the censored part of the distribution are
+    returned as \code{NA} and not shown.
+  }
+  Since prediction-corrected values are no longer on the scale of the limit
+  of quantification, the LLOQ/ULOQ line is not drawn. Note that percentiles
+  are calculated using \code{stats::quantile()} with its default method
+  (\code{type = 7}), which may differ from other software (e.g. PsN).
+  Reference-correction (\code{sim_ref}) handles censored data the same
+  way, except that simulated values are censored after correction, so that
+  the variability correction is based on all simulated data.
+}
+
 \examples{
 
 ## See vpc.ronkeizer.com for more documentation and examples
