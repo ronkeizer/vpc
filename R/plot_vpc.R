@@ -353,15 +353,20 @@ geom_obs_cens_dat_tte <- function(data) {
 #' @describeIn vpc_ggplot Show confidence interval for observed, continuous data
 geom_obs_ci_continuous <- function(data, show, vpc_theme) {
   if (show & !is.null(data$obs) && !is.null(data$aggr_obs[["obs5"]])) {
-    ggplot2::geom_ribbon(
-      data=data$aggr_obs,
-      ggplot2::aes(x=bin_mid, ymin=obs5, ymax=obs95),
-      colour=vpc_theme$obs_ci_color,
-      fill=NA,
-      linetype=vpc_theme$obs_ci_linetype,
-      linewidth=vpc_theme$obs_ci_linewidth,
-      outline.type="both"
-    )
+    # Draw lower and upper percentiles as separate lines (not as a ribbon
+    # outline) so that a censored (NA) value in one percentile does not hide
+    # the other percentile in that bin (#122). `na.rm = TRUE` keeps interior
+    # NAs as gaps in the line without a warning.
+    lapply(c("obs5", "obs95"), function(col) {
+      ggplot2::geom_line(
+        data=data$aggr_obs,
+        ggplot2::aes(x=bin_mid, y=.data[[col]]),
+        colour=vpc_theme$obs_ci_color,
+        linetype=vpc_theme$obs_ci_linetype,
+        linewidth=vpc_theme$obs_ci_linewidth,
+        na.rm=TRUE
+      )
+    })
   } else {
     ggplot2::geom_blank()
   }
