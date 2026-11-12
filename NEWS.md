@@ -1,3 +1,27 @@
+# vpc 1.3.6
+- Bins can now be determined per stratum (#11). With `bin_by_strata = TRUE` in
+  `vpc()` and `vpc_cens()`, automatic binning methods are applied to the data
+  of each stratum separately. Manual bins can be specified per stratum by
+  passing a list to `bins` (named by stratum, or unnamed in the order of the
+  strata), e.g. `bins = list(A = c(0, 2, 6, 24), B = c(0, 4, 12, 48))`, which
+  can also mix binning methods and numeric separators. `n_bins` can likewise be
+  given per stratum. The bin separators shown in the plot are drawn per panel.
+  With per-stratum binning, `db$bins` in the vpcdb object is a named list.
+  Missing values of the stratification variable are binned as their own
+  stratum (with an `NA` name in `db$bins`; distinct from a stratum with the
+  literal value `"NA"`). Not available for `bins = "percentiles"`.
+- With two stratification variables, missing values are now labeled `"<NA>"`
+  in the combined stratum (e.g. `"<NA>, X"`), so they are no longer merged
+  with the literal value `"NA"` (`"NA, X"`) when calculating the VPC. Commas
+  and backslashes within values are escaped in the combined stratum, so e.g.
+  `("a, b", "c")` and `("a", "b, c")` are no longer merged.
+- `vpc_cens()` with `stratify_color`: the color stratification is now
+  implemented. The observed fraction and simulated CI are calculated per
+  color stratum and drawn in separate colors (with legend), while facets are
+  determined by `stratify` only. Previously the color variable was added only
+  after the data were stratified, so it was ignored (color only) or
+  mislabeled as a facet (facet and color).
+
 # vpc 1.3.5
 - Consistent handling of censored and missing data (#80). Censored values are
   now represented internally as `-Inf` (below `lloq`) or `Inf` (above `uloq`)

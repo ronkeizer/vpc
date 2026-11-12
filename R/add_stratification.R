@@ -3,7 +3,12 @@
 #' When two stratification variables are supplied, the combined `strat` column
 #' is a factor whose levels are ordered by the levels of the first variable,
 #' then by the levels of the second variable. Factor level order of the
-#' original columns is respected; non-factor columns are sorted.
+#' original columns is respected; non-factor columns are sorted. Missing
+#' values are labeled \code{"<NA>"} in the combined stratum, so that e.g.
+#' \code{(NA, "x")} (\code{"<NA>, x"}) remains distinct from
+#' \code{("NA", "x")} (\code{"NA, x"}). Commas and backslashes in values are
+#' escaped (\code{"\\,"} and \code{"\\\\"}), so that e.g. \code{("a, b", "c")}
+#' and \code{("a", "b, c")} remain distinct strata.
 #'
 #' @param dat An input data.frame or similar object
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
@@ -17,7 +22,7 @@ add_stratification <- function (dat, stratify, verbose = FALSE) {
         dat$strat <- data.frame(dat)[,stratify]
       } else {
         strat_cols <- lapply(stratify, function(x) as.factor(dat[[x]]))
-        strat_label <- do.call(paste, c(lapply(strat_cols, as.character), sep = ", "))
+        strat_label <- do.call(paste, c(lapply(strat_cols, strat_value_label), sep = ", "))
         # Order the combined levels by the first variable, then the second, etc.
         level_order <- do.call(order, lapply(strat_cols, as.integer))
         dat$strat <- factor(strat_label, levels = unique(strat_label[level_order]))
@@ -31,6 +36,31 @@ add_stratification <- function (dat, stratify, verbose = FALSE) {
     dat$strat <- as.factor(dat$strat)
   }
   dat
+}
+
+#' Label of the values of a stratification variable in a combined stratum
+#'
+#' The labels are combined with `", "` into the stratum, and are chosen such
+#' that distinct combinations of values always give distinct strata. They are
+#' independent of the data, so that observed and simulated data (which are
+#' stratified separately) are labeled consistently:
+#' - backslashes and commas in values are escaped (`\\` and `\,`), so the
+#'   separator is unambiguous, e.g. `("a, b", "c")` gives `"a\, b, c"` and
+#'   `("a", "b, c")` gives `"a, b\, c"`;
+#' - missing values are labeled `"<NA>"`, and literal values of the form
+#'   `"<NA>"`, `"<<NA>>"`, etc. are wrapped in one more pair of angle brackets.
+#' Other values are unchanged.
+#' @param x vector of values
+#' @return character vector of labels
+#' @noRd
+strat_value_label <- function(x) {
+  x <- as.character(x)
+  x <- gsub("\\", "\\\\", x, fixed = TRUE)
+  x <- gsub(",", "\\,", x, fixed = TRUE)
+  lit <- !is.na(x) & grepl("^<+NA>+$", x)
+  x[lit] <- paste0("<", x[lit], ">")
+  x[is.na(x)] <- "<NA>"
+  x
 }
 
 #' Add separate columns for each of two stratification variables
@@ -61,6 +91,23 @@ add_strat_columns <- function(dat, stratify, ...) {
   idx <- match(as.character(dat$strat), lookup$strat)
   for (i in seq_along(stratify)) {
     dat[[paste0("strat", i)]] <- lookup[[stratify[i]]][idx]
+  }
+  dat
+}
+
+#' Add a column for each stratification variable, named by the variable
+#'
+#' Like [add_strat_columns()], but names the columns after the stratification
+#' variables instead of `strat1`, `strat2`, ...
+#' @inheritParams add_strat_columns
+#' @param stratify character vector of stratification variables
+#' @keywords internal
+#' @noRd
+add_strat_value_columns <- function(dat, stratify, ...) {
+  if (is.null(dat)) return(dat)
+  dat <- add_strat_columns(dat, stratify, ...)
+  for (i in seq_along(stratify)) {
+    colnames(dat)[match(paste0("strat", i), colnames(dat))] <- stratify[i]
   }
   dat
 }

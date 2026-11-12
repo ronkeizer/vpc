@@ -2,10 +2,13 @@
 % Please edit documentation in R/define_bins.R
 \name{define_bins}
 \alias{define_bins}
+\alias{define_bins_by_strata}
 \alias{define_bins_tte}
 \title{Define bins for many types of data}
 \usage{
-define_bins(obs, sim, bins, n_bins, verbose = FALSE)
+define_bins(obs, sim, bins, n_bins, bin_by_strata = FALSE, verbose = FALSE)
+
+define_bins_by_strata(obs, sim, bins, n_bins, verbose = FALSE)
 
 define_bins_tte(obs, sim, bins, n_bins, kmmc, verbose = FALSE)
 }
@@ -16,17 +19,42 @@ define_bins_tte(obs, sim, bins, n_bins, kmmc, verbose = FALSE)
 
 \item{bins}{either "density", "time", or "data", "none", or one of the
 approaches available in classInterval() such as "jenks" (default) or
-"pretty", or a numeric vector specifying the bin separators.}
+"pretty", or a numeric vector specifying the bin separators. For \code{vpc()}
+and \code{vpc_cens()}, when binning
+by stratum (see \code{bin_by_strata}), \code{bins} can also be a list
+with one element (a binning method or numeric vector of bin separators)
+per stratum. The list should be named by stratum (the value of the
+stratification variable, or for two stratification variables the two
+values separated by a comma and a space, e.g. \code{"1, female"}, with
+missing values shown as \code{"<NA>"} and commas or backslashes within
+values escaped by a backslash), or
+be unnamed with one element per stratum in the order of the strata.}
 
 \item{n_bins}{when using the "auto" binning method, what number of bins to
-aim for}
+aim for. When binning by stratum (\code{vpc()} and \code{vpc_cens()}),
+this can also be a list or vector with
+one value per stratum (named or ordered as for \code{bins}).}
+
+\item{bin_by_strata}{Determine the bins separately for each stratum
+(\code{TRUE}), or use the same bins for all strata (\code{FALSE},
+default)? When \code{TRUE}, automatic binning methods are applied to the
+data of each stratum separately. Specifying \code{bins} as a list
+implies \code{bin_by_strata = TRUE}. Missing values of the
+stratification variable form their own stratum (with an \code{NA} name
+in the returned list of bins; for manual bins, use an \code{NA} name or,
+when no stratum has the literal value \code{"NA"}, the name
+\code{"NA"}).
+Binning by stratum is available for all automatic binning methods except
+\code{"percentiles"} (which labels the bins by their interval instead of
+plotting them on the numeric scale of the independent variable).}
 
 \item{verbose}{show debugging information (TRUE or FALSE)}
 
 \item{kmmc}{either NULL (for regular TTE vpc, default), or a variable name for a KMMC plot (e.g. "WT")}
 }
 \value{
-A list with named elements: "bins", the bin separator values;
+A list with named elements: "bins", the bin separator values (a
+  named list with one numeric vector per stratum when binning by stratum);
   "labeled", are the bins labeled?; "obs", binned observed data; "sim",
   binned simulated data.  Additionally, "tmp_bins" is added for tte data.
 }
@@ -35,6 +63,8 @@ Define bins for many types of data
 }
 \section{Functions}{
 \itemize{
+\item \code{define_bins_by_strata()}: Define bins separately for each stratum
+
 \item \code{define_bins_tte()}: Define bins for time-to-event data
 
 }}

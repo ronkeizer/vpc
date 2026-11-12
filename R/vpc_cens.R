@@ -8,7 +8,10 @@
 #' @inheritParams as_vpcdb
 #' @inheritParams define_bins
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
-#' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
+#' @param stratify_color variable to stratify by color: the observed
+#'   fraction (line) and simulated confidence interval (area) are calculated
+#'   and colored per value of this variable, while \code{stratify} determines
+#'   the facets. Only 1 stratification variable can be supplied.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param vpcdb boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
@@ -46,7 +49,8 @@ vpc_cens <- function(sim = NULL,
                      facet = "wrap",
                      labeller = NULL,
                      vpcdb = FALSE,
-                     verbose = FALSE) {
+                     verbose = FALSE,
+                     bin_by_strata = FALSE) {
   vpc_data <-
     read_vpc(
       sim=sim, obs=obs, psn_folder=psn_folder,
@@ -77,6 +81,22 @@ vpc_cens <- function(sim = NULL,
   check_stratification_columns_available(data=obs, stratify=stratify_color, type="observation")
   check_stratification_columns_available(data=vpc_data$sim, stratify=stratify_color, type="simulation")
 
+  ## the color stratification variable is part of the stratification used for
+  ## the calculations (and binning), so combine before formatting the data
+  stratify_original <- stratify
+  if(!is.null(stratify_color)) {
+    if (is.null(stratify)) {
+      stratify <- stratify_color
+    }
+    if (length(stratify_color) > 1) {
+      stop("Error: please specify only 1 stratification variable for color!")
+    }
+    if (!stratify_color %in% stratify) {
+      stratify_original <- stratify
+      stratify <- c(stratify, stratify_color)
+    }
+  }
+
   ## parse data into specific format
   if(!is.null(obs)) {
     obs <-
@@ -105,22 +125,8 @@ vpc_cens <- function(sim = NULL,
     vpc_data$sim$sim <- add_sim_index_number(vpc_data$sim)
   }
 
-  stratify_original <- stratify
-  if(!is.null(stratify_color)) {
-    if (is.null(stratify)) {
-      stratify <- stratify_color
-    }
-    if (length(stratify_color) > 1) {
-      stop("Error: please specify only 1 stratification variable for color!")
-    }
-    if (!stratify_color %in% stratify) {
-      stratify_original <- stratify
-      stratify <- c(stratify, stratify_color)
-    }
-  }
-
   # Binning ####
-  bins_data <- define_bins(obs=obs, sim=vpc_data$sim, bins=bins, n_bins=n_bins, verbose=verbose)
+  bins_data <- define_bins(obs=obs, sim=vpc_data$sim, bins=bins, n_bins=n_bins, bin_by_strata=bin_by_strata, verbose=verbose)
   bins <- bins_data$bins
   obs <- bins_data$obs
   sim <- bins_data$sim
@@ -138,8 +144,9 @@ vpc_cens <- function(sim = NULL,
                        q50.up = quantile(ploq, ci[2]),
                        bin_mid = mean(mn_idv)) %>%
       dplyr::ungroup()
-    vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
-    vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
+    bounds <- bin_boundaries(bins, vpc_dat$bin, vpc_dat$strat)
+    vpc_dat$bin_min <- bounds$bin_min
+    vpc_dat$bin_max <- bounds$bin_max
     if(bin_mid == "middle") {
       vpc_dat$bin_mid <- apply(dplyr::bind_cols(vpc_dat$bin_min, vpc_dat$bin_max), 1, mean)
     }
@@ -153,19 +160,25 @@ vpc_cens <- function(sim = NULL,
       dplyr::summarise(obs50 = loq_frac(dv, limit = cens_limit, cens = cens_type),
                        bin_mid = mean(idv)) %>%
       dplyr::ungroup()
-    aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
-    aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
+    bounds <- bin_boundaries(bins, aggr_obs$bin, aggr_obs$strat)
+    aggr_obs$bin_min <- bounds$bin_min
+    aggr_obs$bin_max <- bounds$bin_max
     if(bin_mid == "middle") {
       aggr_obs$bin_mid <- apply(dplyr::bind_cols(aggr_obs$bin_min, aggr_obs$bin_max), 1, mean)
     }
   } else {
     aggr_obs <- NULL
   }
-  if (!is.null(stratify_original)) {
-    if (length(stratify) == 2) {
-      vpc_dat <- add_strat_columns(vpc_dat, stratify, obs, sim)
-      aggr_obs <- add_strat_columns(aggr_obs, stratify, obs, sim)
-    }
+  if (!is.null(stratify_color)) {
+    ## stratification by color: add a column for each stratification variable
+    ## (named by the variable), facet only by the `stratify` variables, and
+    ## color by `stratify_color`
+    vpc_dat <- add_strat_value_columns(vpc_dat, stratify, obs, sim)
+    aggr_obs <- add_strat_value_columns(aggr_obs, stratify, obs, sim)
+    stratify <- stratify_original
+  } else if (length(stratify) == 2) {
+    vpc_dat <- add_strat_columns(vpc_dat, stratify, obs, sim)
+    aggr_obs <- add_strat_columns(aggr_obs, stratify, obs, sim)
   }
 
   ## plotting starts here

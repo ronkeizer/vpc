@@ -26,7 +26,7 @@
 \alias{scale_y_log10_vpc}
 \title{A collection of internal ggplot helpers for VPC plotting}
 \usage{
-geom_bin_sep(bins, show, vpc_theme)
+geom_bin_sep(bins, show, vpc_theme, color = NULL)
 
 geom_hline_loq(data, vpc_theme)
 
@@ -79,11 +79,14 @@ scale_y_log10_vpc(show)
 }
 \arguments{
 \item{bins}{Numeric vector of bin separators (if logical value, geom_blank is
-returned)}
+returned), or a data.frame with the bin separators in column \code{x} and
+the stratification columns (for bins that differ by stratum)}
 
 \item{show}{Should the geom be shown? (TRUE/FALSE)}
 
 \item{vpc_theme}{The theme to use}
+
+\item{color}{name of the color stratification variable (or \code{NULL})}
 
 \item{data}{The vpcdb object}
 

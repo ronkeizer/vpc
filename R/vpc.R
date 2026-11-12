@@ -118,7 +118,8 @@ vpc_vpc <- function(sim = NULL,
                     vpcdb = FALSE,
                     verbose = FALSE,
                     sim_ref = NULL,
-                    ...) {
+                    ...,
+                    bin_by_strata = FALSE) {
   msg("Configuring and initializing...", verbose=verbose)
   vpc_data <-
     read_vpc(
@@ -256,7 +257,7 @@ vpc_vpc <- function(sim = NULL,
   }
 
   # Binning ####
-  bins_data <- define_bins(obs=vpc_data$obs, sim=vpc_data$sim, bins=bins, n_bins=n_bins, verbose=verbose)
+  bins_data <- define_bins(obs=vpc_data$obs, sim=vpc_data$sim, bins=bins, n_bins=n_bins, bin_by_strata=bin_by_strata, verbose=verbose)
   bins <- bins_data$bins
   labeled_bins <- bins_data$labeled
   obs <- bins_data$obs
