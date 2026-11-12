@@ -268,35 +268,22 @@ vpc_tte <- function(sim = NULL,
 
   if (!is.null(stratify_original)) {
     if (length(stratify_pars) == 2) {
-      if(!is.null(sim_km)) {
-        sim_km$strat1 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)-1]
-        sim_km$strat2 <- unlist(strsplit(as.character(sim_km$strat), ", "))[(1:length(sim_km$strat)*2)]
-      }
-      if(!is.null(obs_km)) {
-        obs_km$strat1 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)-1]
-        obs_km$strat2 <- unlist(strsplit(as.character(obs_km$strat), ", "))[(1:length(obs_km$strat)*2)]
-      }
-      if(!is.null(cens_dat)) {
-        cens_dat$strat1 <- unlist(strsplit(as.character(cens_dat$strat), ", "))[(1:length(cens_dat$strat)*2)-1]
-        cens_dat$strat2 <- unlist(strsplit(as.character(cens_dat$strat), ", "))[(1:length(cens_dat$strat)*2)]
-      }
+      sim_km <- add_strat_columns(sim_km, stratify_pars, obs, sim)
+      obs_km <- add_strat_columns(obs_km, stratify_pars, obs, sim)
+      cens_dat <- add_strat_columns(cens_dat, stratify_pars, obs, sim)
     }
   }
 
   if (!is.null(obs)) {
     if(nrow(cens_dat)>0) {
       cens_dat$y <- 1
-      cens_dat$strat1 <- NA
-      cens_dat$strat2 <- NA
+      # strat1/strat2 were already added (with original factor levels) above
+      # when stratifying by 2 variables
+      if (!"strat1" %in% names(cens_dat)) cens_dat$strat1 <- NA
+      if (!"strat2" %in% names(cens_dat)) cens_dat$strat2 <- NA
       for (j in 1:nrow(cens_dat[,1])) {
         tmp <- obs_km[as.character(obs_km$strat) == as.character(cens_dat$strat[j]),]
         cens_dat$y[j] <- rev(tmp$surv[(cens_dat$time[j] - tmp$time) > 0])[1]
-        if ("strat1" %in% names(tmp)) {
-          cens_dat$strat1[j] <- rev(tmp$strat1[(cens_dat$time[j] - tmp$time) > 0])[1]
-        }
-        if ("strat2" %in% names(tmp)) {
-          cens_dat$strat2[j] <- rev(tmp$strat2[(cens_dat$time[j] - tmp$time) > 0])[1]
-        }
       }
       cens_dat <- cens_dat[!is.na(cens_dat$y),]
     }

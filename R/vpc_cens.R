@@ -163,10 +163,8 @@ vpc_cens <- function(sim = NULL,
   }
   if (!is.null(stratify_original)) {
     if (length(stratify) == 2) {
-      vpc_dat$strat1 <- unlist(strsplit(as.character(vpc_dat$strat), ", "))[(1:length(vpc_dat$strat)*2)-1]
-      vpc_dat$strat2 <- unlist(strsplit(as.character(vpc_dat$strat), ", "))[(1:length(vpc_dat$strat)*2)]
-      aggr_obs$strat1 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)-1]
-      aggr_obs$strat2 <- unlist(strsplit(as.character(aggr_obs$strat), ", "))[(1:length(aggr_obs$strat)*2)]
+      vpc_dat <- add_strat_columns(vpc_dat, stratify, obs, sim)
+      aggr_obs <- add_strat_columns(aggr_obs, stratify, obs, sim)
     }
   }
 

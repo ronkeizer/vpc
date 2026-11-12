@@ -1,7 +1,11 @@
-# vpc 1.2.6
+# vpc 1.2.7
 - added `ci_sim` argument to `vpc_tte()` to specify the confidence interval
   of the Kaplan-Meier curves from the simulated data, which was previously
   fixed at 90% (fix #102). The `ci` argument only applies to the observed data.
+
+# vpc 1.2.6
+- stratification by two variables now respects the factor level order of the
+  stratification variables (fix #101)
 
 # vpc 1.2.5
 - added `pred_corr_method = c("multiplicative", "additive")` argument to `vpc()`,
