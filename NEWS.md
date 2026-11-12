@@ -1,11 +1,19 @@
-# vpc 1.3.2
+# vpc 1.3.3
 - new `show = list(outlier_areas = TRUE)` for continuous VPCs: highlights
   (in red) the areas where an observed percentile falls outside the
   confidence interval of the corresponding simulated percentile, as in
   Monolix VPCs. Also available in `vpc_cens()` (fraction below/above LOQ)
   and `vpc_cat()` (fraction per category). Works with `smooth = TRUE/FALSE`,
-  stratification, and log axes. Color and transparency are set with the new `outlier_fill` and
-  `outlier_alpha` elements of `new_vpc_theme()` (#8)
+  stratification, and log axes. Color and transparency are set with the new
+  `outlier_fill` and `outlier_alpha` elements of `new_vpc_theme()` (#8)
+
+# vpc 1.3.2
+- Added visual regression tests (#9): `tests/testthat/test-plots.R` uses
+  `vdiffr` to snapshot the VPC plots (continuous, pcVPC, LLOQ/log-y,
+  stratified, censored, categorical, time-to-event) as SVGs in
+  `tests/testthat/_snaps/plots/`. Review intended changes side by side with
+  `testthat::snapshot_review("plots")`. `vdiffr` is a new suggested package;
+  the visual tests are skipped on CRAN or when it is not installed.
 
 # vpc 1.3.1
 - `auto_bin()` / `bins = "data"`: the lowest observations were not assigned to
