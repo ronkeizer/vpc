@@ -9,6 +9,9 @@
 #' @inheritParams calc_vpc_continuous
 #' @inheritParams as_vpcdb
 #' @inheritParams plot_vpc
+#' @param ref_corr_log for reference-correction (\code{sim_ref}): is the
+#'   dependent variable on log scale (e.g. log-transform-both-sides models)?
+#'   Default is FALSE.
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @param ... Other arguments sent to other methods (like xpose or nlmixr);  Note these arguments are not used in the default vpc and are ignored by the default method.
@@ -23,6 +26,13 @@
 #' # Basic commands:
 #' vpc(sim = simple_data$sim, obs = simple_data$obs)
 #' vpc(sim = simple_data$sim, obs = simple_data$obs, lloq = 20)
+#'
+#' # Reference-corrected VPC: `sim_ref` holds simulations of a reference
+#' # dataset (same records, with e.g. dose and covariates set to reference
+#' # values), including the population prediction in the `pred` column.
+#' \dontrun{
+#' vpc(sim = sim, obs = obs, sim_ref = sim_ref)
+#' }
 #'
 #'@export
 vpc <- function(sim, ...){
@@ -49,6 +59,8 @@ vpc_vpc <- function(sim = NULL,
                     stratify = NULL,
                     pred_corr = FALSE,
                     pred_corr_lower_bnd = 0,
+                    sim_ref = NULL,
+                    ref_corr_log = FALSE,
                     pi = c(0.05, 0.95),
                     ci = c(0.05, 0.95),
                     uloq = NULL,
@@ -70,9 +82,13 @@ vpc_vpc <- function(sim = NULL,
     read_vpc(
       sim=sim, obs=obs, psn_folder=psn_folder,
       software=software,
-      sim_cols=sim_cols, obs_cols=obs_cols
+      sim_cols=sim_cols, obs_cols=obs_cols,
+      sim_ref=sim_ref
     )
-  vpc_data$obs <- vpc_data$obs
+  ref_corr <- !is.null(vpc_data$sim_ref)
+  if(ref_corr && pred_corr) {
+    stop("Prediction-correction (`pred_corr`) and reference-correction (`sim_ref`) cannot be combined.")
+  }
   software_type <- vpc_data$software
   cols <- vpc_data$cols
 
@@ -109,10 +125,11 @@ vpc_vpc <- function(sim = NULL,
         pred_corr=pred_corr
       )
   }
+  any_corr <- pred_corr || ref_corr
   if(!is.null(vpc_data$sim)) {
     msg("Parsing simulated data...", verbose=verbose)
-    if((!is.null(lloq) || !is.null(uloq)) && pred_corr) {
-      warning("Be careful using pred-correction together with censored data (<LLOQ or >ULOQ). VPC plot will be shown for non-censored data only!")
+    if((!is.null(lloq) || !is.null(uloq)) && any_corr) {
+      warning("Be careful using pred- or reference-correction together with censored data (<LLOQ or >ULOQ). VPC plot will be shown for non-censored data only!")
       vpc_data$sim <-
         format_vpc_input_data(
           dat=vpc_data$sim,
@@ -138,7 +155,35 @@ vpc_vpc <- function(sim = NULL,
         )
     }
   }
-  if(pred_corr) {
+  if(ref_corr) {
+    msg("Parsing reference simulation data...", verbose=verbose)
+    sim_ref_dat <-
+      format_vpc_input_data(
+        dat=vpc_data$sim_ref,
+        cols=cols$sim,
+        lloq=NULL, uloq=NULL,
+        stratify=NULL,
+        log_y=FALSE,
+        what="reference simulation",
+        verbose=verbose
+      )
+    ref_corr_data <-
+      calc_ref_corr_continuous(
+        sim=vpc_data$sim, obs=vpc_data$obs,
+        sim_ref=sim_ref_dat,
+        lower_bnd=pred_corr_lower_bnd,
+        log_dv=ref_corr_log,
+        cols=cols,
+        verbose=verbose
+      )
+    vpc_data$sim <- ref_corr_data$sim
+    vpc_data$obs <- ref_corr_data$obs
+    if(log_y) {
+      vpc_data$sim$dv[vpc_data$sim$dv < log_y_min] <- log_y_min
+      if(!is.null(vpc_data$obs)) vpc_data$obs$dv[vpc_data$obs$dv < log_y_min] <- log_y_min
+    }
+  }
+  if(any_corr) {
     uloq <- NULL
     lloq <- NULL
   }

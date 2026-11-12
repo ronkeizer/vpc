@@ -4,12 +4,27 @@
 #' @param sim this is usually a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}.  However it can also be an object like a nlmixr or xpose object
 #' @param obs a data.frame with observed data, containing the independent and dependent variable, a column indicating the individual, and possibly covariates. E.g. load in from NONMEM using \link{read_table_nm}
 #' @param psn_folder instead of specifying "sim" and "obs", specify a PsN-generated VPC-folder
+#' @param sim_ref simulations of a reference dataset, for a reference-corrected
+#'   VPC (rcVPC). Same format, columns and record order as \code{sim}, but
+#'   simulated from a dataset in which selected independent variables (dose,
+#'   covariates, time, ...) were set to reference values. Providing
+#'   \code{sim_ref} enables reference-correction (Ibrahim et al., AAPS J 2025,
+#'   \doi{10.1208/s12248-025-01065-2}): observed and simulated DV are normalized
+#'   to the population prediction (\code{pred} column) and variability of the
+#'   reference dataset, per record and before binning. Records are matched by
+#'   position, so \code{obs} and every replicate in \code{sim} and
+#'   \code{sim_ref} must contain the same records in the same order. The lower
+#'   bound is taken from \code{pred_corr_lower_bnd}. A correction without the
+#'   variability component (Eq. 1 only) can be done manually by multiplying DV
+#'   in \code{obs} and \code{sim} by \code{PRED_REF / PRED} before calling
+#'   \code{vpc()}.
 #' @param software name of software platform using (e.g. nonmem, phoenix)
 #' @param verbose show debugging information (TRUE or FALSE)
-#' @return A list with names of "sim", "obs", "software", and "cols"
+#' @return A list with names of "sim", "obs", "sim_ref", "software", and "cols"
 read_vpc <- function(sim, obs, psn_folder,
                      software,
                      sim_cols, obs_cols,
+                     sim_ref = NULL,
                      verbose=FALSE) {
   if(!is.null(psn_folder)) {
     if (is.null(obs)) {
@@ -38,6 +53,10 @@ read_vpc <- function(sim, obs, psn_folder,
     class(sim) <- c(software, class(sim))
     sim <- filter_dv(sim, verbose)
   }
+  if (!is.null(sim_ref)) {
+    class(sim_ref) <- c(software, class(sim_ref))
+    sim_ref <- filter_dv(sim_ref, verbose)
+  }
 
   ## software specific parsing, if necessary
   if (software == "PKPDsim") {
@@ -53,6 +72,12 @@ read_vpc <- function(sim, obs, psn_folder,
       }
       sim <- data.frame(sim)
     }
+    if (!is.null(sim_ref)) {
+      if("obs" %in% sim_ref$comp) {
+        sim_ref <- sim_ref %>% dplyr::filter(comp == "obs")
+      }
+      sim_ref <- data.frame(sim_ref)
+    }
   }
   ## define column names
   cols <-
@@ -62,5 +87,5 @@ read_vpc <- function(sim, obs, psn_folder,
       software_type=software
     )
 
-  list(sim=sim, obs=obs, software=software, cols=cols)
+  list(sim=sim, obs=obs, sim_ref=sim_ref, software=software, cols=cols)
 }

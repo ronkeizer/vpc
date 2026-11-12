@@ -1,3 +1,9 @@
+# vpc 1.2.5
+- added reference-corrected VPC (rcVPC; Ibrahim et al., AAPS J 2025) via new
+  `sim_ref` argument to `vpc()`, with `ref_corr_log` for log-scale DV. The lower
+  bound is taken from `pred_corr_lower_bnd`. Validated against Pharmpy's PsN
+  implementation (#105)
+
 # vpc 1.2.4
 - replaced defunct dplyr functions (`group_by_()`, `arrange_()`, `do()`) with
   modern equivalents (`group_by()`, `arrange()`, `slice()`) using `.data` pronoun
