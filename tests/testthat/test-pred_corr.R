@@ -162,3 +162,34 @@ test_that("vpc with pred_corr and lloq uses the same censoring for obs and sim",
   expect_equal(db$vpc_dat$q50.med, db$aggr_obs$obs50)
   expect_equal(db$vpc_dat$q95.med, db$aggr_obs$obs95)
 })
+
+test_that("prediction-correction takes PRED from simulated data when absent in observed data", {
+  obs <- simple_data$obs[simple_data$obs$MDV == 0, ]
+  sim <- simple_data$sim[simple_data$sim$MDV == 0, ]
+  obs_with_pred <- obs
+  obs_with_pred$PRED <- sim$PRED[seq_len(nrow(obs))]
+  obs$PRED <- NULL
+  msgs <- capture_messages(
+    db <- vpc(sim = sim, obs = obs, pred_corr = TRUE, vpcdb = TRUE, verbose = TRUE)
+  )
+  expect_match(msgs, "trying to get from simulated dataset", all = FALSE)
+  db_ref <- vpc(sim = sim, obs = obs_with_pred, pred_corr = TRUE, vpcdb = TRUE)
+  expect_equal(db$obs$dv, db_ref$obs$dv)
+})
+
+test_that("prediction-correction errors when PRED is not available", {
+  obs <- simple_data$obs[simple_data$obs$MDV == 0, ]
+  sim <- simple_data$sim[simple_data$sim$MDV == 0, ]
+  sim_nopred <- sim
+  sim_nopred$PRED <- NULL
+  expect_error(
+    vpc(sim = sim_nopred, obs = obs, pred_corr = TRUE),
+    "not found in simulated dataset"
+  )
+  obs_nopred <- obs
+  obs_nopred$PRED <- NULL
+  expect_error(
+    vpc(sim = sim_nopred, obs = obs_nopred, pred_corr = TRUE),
+    "pred-variable for observed data \\(PRED\\) not found"
+  )
+})
