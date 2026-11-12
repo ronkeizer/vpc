@@ -254,24 +254,58 @@ test_that("bin_by_strata in vpc_cens() includes the color stratification", {
   d <- strat_test_data()
   d$obs$SEX <- ifelse(d$obs$ID %% 3 == 0, "M", "F")
   d$sim$SEX <- ifelse(d$sim$ID %% 3 == 0, "M", "F")
-  # color stratification only
+  # color stratification only: single panel, colored by GRP
   db <- vpc_cens(sim = d$sim, obs = d$obs, lloq = 30, stratify_color = "GRP",
                  bins = "time", n_bins = 4, bin_by_strata = TRUE, vpcdb = TRUE)
   expect_named(db$bins, c("A", "B"))
   expect_false(isTRUE(all.equal(db$bins$A, db$bins$B)))
-  expect_setequal(as.character(unique(db$vpc_dat$strat)), c("A", "B"))
-  expect_s3_class(ggplot2::ggplot_build(plot_vpc(db)), "ggplot_built")
-  # facet and color stratification
+  expect_null(db$stratify)
+  expect_equal(db$stratify_color, "GRP")
+  expect_setequal(db$vpc_dat$GRP, c("A", "B"))
+  expect_equal(db$vpc_dat$bin_max[db$vpc_dat$GRP == "B"],
+               db$bins$B[db$vpc_dat$bin[db$vpc_dat$GRP == "B"] + 1])
+  pl <- plot_vpc(db)
+  expect_s3_class(pl$facet, "FacetNull")
+  built <- ggplot2::ggplot_build(pl)
+  obs_layer <- which(vapply(pl$layers, function(l) inherits(l$geom, "GeomLine"), logical(1)))
+  expect_length(unique(built$data[[obs_layer]]$colour), 2)
+  ribbon_layer <- which(vapply(pl$layers, function(l) inherits(l$geom, "GeomRibbon"), logical(1)))
+  expect_length(unique(built$data[[ribbon_layer]]$fill), 2)
+  expect_equal(length(unique(built$data[[obs_layer]]$group)), 2)
+  # facet (SEX) and color (GRP) stratification
   db <- vpc_cens(sim = d$sim, obs = d$obs, lloq = 30, stratify = "SEX",
                  stratify_color = "GRP", bins = "time", n_bins = 4,
                  bin_by_strata = TRUE, vpcdb = TRUE)
   expect_named(db$bins, c("F, A", "F, B", "M, A", "M, B"))
   expect_equal(db$bins[["M, B"]][5], max(d$obs$TIME[d$obs$MDV == 0 & d$obs$SEX == "M" & d$obs$GRP == "B"]) * 1.001)
+  expect_equal(db$stratify, "SEX")
   v <- db$vpc_dat[db$vpc_dat$strat == "M, B", ]
-  expect_equal(unique(v$strat1), "M")
-  expect_equal(unique(v$strat2), "B")
+  expect_equal(unique(v$SEX), "M")
+  expect_equal(unique(v$GRP), "B")
   expect_equal(v$bin_max, db$bins[["M, B"]][v$bin + 1])
-  expect_s3_class(ggplot2::ggplot_build(plot_vpc(db)), "ggplot_built")
+  pl <- plot_vpc(db)
+  expect_s3_class(pl$facet, "FacetWrap")
+  expect_equal(names(pl$facet$params$facets), "SEX")
+  built <- ggplot2::ggplot_build(pl)
+  expect_equal(nrow(built$layout$layout), 2)
+  obs_layer <- which(vapply(pl$layers, function(l) inherits(l$geom, "GeomLine"), logical(1)))
+  expect_length(unique(built$data[[obs_layer]]$colour), 2)
+  # bin separators are drawn per facet and colored per color stratum
+  rug_layer <- which(vapply(pl$layers, function(l) inherits(l$geom, "GeomRug"), logical(1)))
+  rug <- built$data[[rug_layer]]
+  expect_equal(nrow(rug), length(unlist(db$bins)))
+  expect_length(unique(rug$colour), 2)
+})
+
+test_that("vpc_cens() color stratification without per-stratum binning", {
+  d <- strat_test_data()
+  db <- vpc_cens(sim = d$sim, obs = d$obs, lloq = 30, stratify_color = "GRP",
+                 bins = "time", n_bins = 4, vpcdb = TRUE)
+  expect_type(db$bins, "double")
+  expect_setequal(db$aggr_obs$GRP, c("A", "B"))
+  pl <- plot_vpc(db)
+  expect_s3_class(pl$facet, "FacetNull")
+  expect_s3_class(ggplot2::ggplot_build(pl), "ggplot_built")
 })
 
 test_that("missing values of the stratification variable are binned as their own stratum", {
@@ -280,7 +314,7 @@ test_that("missing values of the stratification variable are binned as their own
   d$sim$GRP[d$sim$ID %in% c(1, 2)] <- NA
   db <- vpc(sim = d$sim, obs = d$obs, stratify = "GRP", bins = "time",
             n_bins = 3, bin_by_strata = TRUE, vpcdb = TRUE)
-  expect_named(db$bins, c("A", "B", "NA"))
+  expect_equal(names(db$bins), c("A", "B", NA))
   expect_true(all(is.finite(unlist(db$bins))))
   expect_false(any(is.na(db$obs$bin)))
   expect_false(any(is.na(db$sim$bin)))
@@ -295,4 +329,33 @@ test_that("missing values of the stratification variable are binned as their own
              vpcdb = TRUE)
   expect_false(any(is.na(db2$obs$bin)))
   expect_equal(db2$aggr_obs$bin_max[is.na(db2$aggr_obs$strat)], 30)
+})
+
+test_that("missing strata do not collide with a stratum with the literal value \"NA\"", {
+  d <- strat_test_data()
+  d$obs$GRP[d$obs$ID %in% c(1, 2)] <- NA
+  d$sim$GRP[d$sim$ID %in% c(1, 2)] <- NA
+  d$obs$GRP[d$obs$ID %in% c(3, 4)] <- "NA"
+  d$sim$GRP[d$sim$ID %in% c(3, 4)] <- "NA"
+  # literal "NA" stratum has a 2x longer time range than the missing stratum
+  d$obs$TIME[d$obs$GRP %in% "NA"] <- d$obs$TIME[d$obs$GRP %in% "NA"] * 2
+  d$sim$TIME[d$sim$GRP %in% "NA"] <- d$sim$TIME[d$sim$GRP %in% "NA"] * 2
+  db <- vpc(sim = d$sim, obs = d$obs, stratify = "GRP", bins = "time",
+            n_bins = 3, bin_by_strata = TRUE, vpcdb = TRUE)
+  expect_length(db$bins, 4)
+  expect_true("NA" %in% names(db$bins))
+  expect_true(anyNA(names(db$bins)))
+  lit <- db$bins[[which(names(db$bins) %in% "NA")]]
+  mis <- db$bins[[which(is.na(names(db$bins)))]]
+  expect_equal(max(lit), max(d$obs$TIME[d$obs$MDV == 0 & d$obs$GRP %in% "NA"]) * 1.001)
+  expect_equal(max(mis), max(d$obs$TIME[d$obs$MDV == 0 & is.na(d$obs$GRP)]) * 1.001)
+  expect_false(any(is.na(db$obs$bin)))
+  # manual bins: separate definitions for the literal "NA" and missing strata
+  bins <- list(A = c(0, 30), B = c(0, 60), "NA" = c(0, 10, 50), c(0, 5, 30))
+  names(bins)[4] <- NA
+  db2 <- vpc(sim = d$sim, obs = d$obs, stratify = "GRP", bins = bins, vpcdb = TRUE)
+  expect_false(any(is.na(db2$obs$bin)))
+  expect_equal(db2$aggr_obs$bin_max[is.na(db2$aggr_obs$strat)], c(5, 30))
+  expect_equal(db2$aggr_obs$bin_max[db2$aggr_obs$strat %in% "NA"], c(10, 50))
+  expect_s3_class(ggplot2::ggplot_build(plot_vpc(db2)), "ggplot_built")
 })

@@ -149,7 +149,10 @@ columns (\code{"free_y"}), or both rows and columns (\code{"free"})?}
 default)? When \code{TRUE}, automatic binning methods are applied to the
 data of each stratum separately. Specifying \code{bins} as a list
 implies \code{bin_by_strata = TRUE}. Missing values of the
-stratification variable form their own stratum, named \code{"NA"}.
+stratification variable form their own stratum (with an \code{NA} name
+in the returned list of bins; for manual bins, use an \code{NA} name or,
+when no stratum has the literal value \code{"NA"}, the name
+\code{"NA"}).
 Binning by stratum is available for all automatic binning methods except
 \code{"percentiles"} (which labels the bins by their interval instead of
 plotting them on the numeric scale of the independent variable).}

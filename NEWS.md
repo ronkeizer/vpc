@@ -8,11 +8,14 @@
   given per stratum. The bin separators shown in the plot are drawn per panel.
   With per-stratum binning, `db$bins` in the vpcdb object is a named list.
   Missing values of the stratification variable are binned as their own
-  stratum (`"NA"`). Not available for `bins = "percentiles"`.
-- `vpc_cens()` with `stratify_color`: the color stratification variable is now
-  included in the stratification used for the calculations. Previously it was
-  added only after the data were stratified, so it was ignored (color only)
-  or mislabeled (facet and color).
+  stratum (with an `NA` name in `db$bins`; distinct from a stratum with the
+  literal value `"NA"`). Not available for `bins = "percentiles"`.
+- `vpc_cens()` with `stratify_color`: the color stratification is now
+  implemented. The observed fraction and simulated CI are calculated per
+  color stratum and drawn in separate colors (with legend), while facets are
+  determined by `stratify` only. Previously the color variable was added only
+  after the data were stratified, so it was ignored (color only) or
+  mislabeled as a facet (facet and color).
 
 # vpc 1.3.2
 - Added visual regression tests (#9): `tests/testthat/test-plots.R` uses

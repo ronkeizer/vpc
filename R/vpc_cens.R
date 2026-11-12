@@ -8,7 +8,10 @@
 #' @inheritParams as_vpcdb
 #' @inheritParams define_bins
 #' @param bin_mid either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.
-#' @param stratify_color variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.
+#' @param stratify_color variable to stratify by color: the observed
+#'   fraction (line) and simulated confidence interval (area) are calculated
+#'   and colored per value of this variable, while \code{stratify} determines
+#'   the facets. Only 1 stratification variable can be supplied.
 #' @param ci confidence interval to plot. Default is (0.05, 0.95)
 #' @param vpcdb boolean whether to return the underlying vpcdb rather than the plot
 #' @param verbose show debugging information (TRUE or FALSE)
@@ -166,11 +169,16 @@ vpc_cens <- function(sim = NULL,
   } else {
     aggr_obs <- NULL
   }
-  if (!is.null(stratify_original)) {
-    if (length(stratify) == 2) {
-      vpc_dat <- add_strat_columns(vpc_dat, stratify, obs, sim)
-      aggr_obs <- add_strat_columns(aggr_obs, stratify, obs, sim)
-    }
+  if (!is.null(stratify_color)) {
+    ## stratification by color: add a column for each stratification variable
+    ## (named by the variable), facet only by the `stratify` variables, and
+    ## color by `stratify_color`
+    vpc_dat <- add_strat_value_columns(vpc_dat, stratify, obs, sim)
+    aggr_obs <- add_strat_value_columns(aggr_obs, stratify, obs, sim)
+    stratify <- stratify_original
+  } else if (length(stratify) == 2) {
+    vpc_dat <- add_strat_columns(vpc_dat, stratify, obs, sim)
+    aggr_obs <- add_strat_columns(aggr_obs, stratify, obs, sim)
   }
 
   ## plotting starts here

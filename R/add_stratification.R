@@ -64,3 +64,20 @@ add_strat_columns <- function(dat, stratify, ...) {
   }
   dat
 }
+
+#' Add a column for each stratification variable, named by the variable
+#'
+#' Like [add_strat_columns()], but names the columns after the stratification
+#' variables instead of `strat1`, `strat2`, ...
+#' @inheritParams add_strat_columns
+#' @param stratify character vector of stratification variables
+#' @keywords internal
+#' @noRd
+add_strat_value_columns <- function(dat, stratify, ...) {
+  if (is.null(dat)) return(dat)
+  dat <- add_strat_columns(dat, stratify, ...)
+  for (i in seq_along(stratify)) {
+    colnames(dat)[match(paste0("strat", i), colnames(dat))] <- stratify[i]
+  }
+  dat
+}

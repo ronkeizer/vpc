@@ -94,18 +94,16 @@ plot_vpc_helper.vpcdb_continuous <- function(db, ...,
                                              verbose = FALSE) {
   if(!is.null(db$stratify)) {
     ## rename "strat" to original stratification variable names
+    ## (unless the data already have columns with these names, e.g. for
+    ## color stratification in `vpc_cens()`)
     if(length(db$stratify) == 1) {
-      if(!is.null(db$aggr_obs)) colnames(db$aggr_obs)[match("strat", colnames(db$aggr_obs))] <- db$stratify[1]
-      if(!is.null(db$vpc_dat)) colnames(db$vpc_dat)[match("strat", colnames(db$vpc_dat))] <- db$stratify[1]
+      db$aggr_obs <- rename_strat_column(db$aggr_obs, "strat", db$stratify[1])
+      db$vpc_dat <- rename_strat_column(db$vpc_dat, "strat", db$stratify[1])
     }
     if(length(db$stratify) == 2) {
-      if(!is.null(db$aggr_obs)) {
-        colnames(db$aggr_obs)[match("strat1", colnames(db$aggr_obs))] <- db$stratify[1]
-        colnames(db$aggr_obs)[match("strat2", colnames(db$aggr_obs))] <- db$stratify[2]
-      }
-      if(!is.null(db$vpc_dat)) {
-        colnames(db$vpc_dat)[match("strat1", colnames(db$vpc_dat))] <- db$stratify[1]
-        colnames(db$vpc_dat)[match("strat2", colnames(db$vpc_dat))] <- db$stratify[2]
+      for (i in 1:2) {
+        db$aggr_obs <- rename_strat_column(db$aggr_obs, paste0("strat", i), db$stratify[i])
+        db$vpc_dat <- rename_strat_column(db$vpc_dat, paste0("strat", i), db$stratify[i])
       }
     }
   }
@@ -149,7 +147,8 @@ plot_vpc_helper.vpcdb_continuous <- function(db, ...,
     geom_obs_median_continuous(data=db, show=show$obs_median, vpc_theme=vpc_theme) +
     geom_obs_ci_continuous(data=db, show=show$obs_ci, vpc_theme=vpc_theme) +
     geom_obs_dv_continuous(data=db, show=show$obs_dv, vpc_theme=vpc_theme) +
-    geom_bin_sep(bins=bin_sep, show=show$bin_sep, vpc_theme=vpc_theme) +
+    geom_bin_sep(bins=bin_sep, show=show$bin_sep, vpc_theme=vpc_theme, color=db$stratify_color[1]) +
+    guides_stratify_color(data=db) +
     ggplot2::labs(
       # While title is not always used, it defaults to NULL which causes no
       # title to display.
@@ -244,7 +243,11 @@ plot_vpc_helper.vpcdb_time_to_event <- function(db, ...,
 #' @export
 ggplot.vpcdb_continuous <- function(data = NULL, mapping = NULL, ..., environment = parent.frame()) {
   if (!is.null(data$sim)) {
-    pl <- ggplot2::ggplot(data$vpc_dat, ggplot2::aes(x=bin_mid, group=1))
+    if (is.null(data$stratify_color)) {
+      pl <- ggplot2::ggplot(data$vpc_dat, ggplot2::aes(x=bin_mid, group=1))
+    } else {
+      pl <- ggplot2::ggplot(data$vpc_dat, ggplot2::aes(x=bin_mid, group=.data[[data$stratify_color[1]]]))
+    }
   } else {
     pl <- ggplot2::ggplot(data$aggr_obs)
   }
@@ -295,7 +298,8 @@ NULL
 #' @param bins Numeric vector of bin separators (if logical value, geom_blank is
 #'   returned), or a data.frame with the bin separators in column \code{x} and
 #'   the stratification columns (for bins that differ by stratum)
-geom_bin_sep <- function(bins, show, vpc_theme) {
+#' @param color name of the color stratification variable (or \code{NULL})
+geom_bin_sep <- function(bins, show, vpc_theme, color = NULL) {
   ret <- ggplot2::geom_blank()
   if (show) {
     if(! (inherits(bins, "logical") && !bins) ) {
@@ -304,6 +308,16 @@ geom_bin_sep <- function(bins, show, vpc_theme) {
         bdat$y <- NA
       } else {
         bdat <- data.frame(cbind(x = bins, y = NA))
+      }
+      if (!is.null(color) && color %in% names(bdat)) {
+        # bins differ by color stratum: color the separators accordingly
+        return(
+          ggplot2::geom_rug(
+            data=bdat,
+            sides = "t",
+            ggplot2::aes(x = x, y = y, group=NA, colour = .data[[color]])
+          )
+        )
       }
       ret <-
         ggplot2::geom_rug(
@@ -328,21 +342,40 @@ bin_separators_data <- function(db) {
   if (!is.list(db$bins)) return(db$bins)
   strata <- names(db$bins)
   strat <- rep(strata, lengths(db$bins))
-  # missing values of the stratification variable are binned as stratum "NA"
-  has_na <- anyNA(db$obs$strat) || anyNA(db$sim$strat)
-  if (has_na) strat[strat == "NA"] <- NA
-  bdat <- data.frame(
-    strat = factor(strat, levels = setdiff(strata, if (has_na) "NA")),
-    x = unlist(db$bins, use.names = FALSE)
-  )
-  if (length(db$stratify) == 1) {
-    colnames(bdat)[1] <- db$stratify[1]
-  } else if (length(db$stratify) == 2) {
-    bdat <- add_strat_columns(bdat, db$stratify, db$obs, db$sim)
-    bdat$strat <- NULL
-    colnames(bdat)[match(c("strat1", "strat2"), colnames(bdat))] <- db$stratify
+  x <- unlist(db$bins, use.names = FALSE)
+  vars <- unique(c(db$stratify, db$stratify_color))
+  if (length(vars) == 0) {
+    return(data.frame(x = x))
   }
+  if (length(vars) == 1 && is.null(db$stratify_color)) {
+    # facet column is the (factor) `strat` column, renamed
+    bdat <- data.frame(strat = factor(strat, levels = strata[!is.na(strata)]), x = x)
+    colnames(bdat)[1] <- vars
+    return(bdat)
+  }
+  # look up the values of the stratification variables for each stratum
+  refs <- Filter(function(d) !is.null(d) && all(c("strat", vars) %in% names(d)), list(db$obs, db$sim))
+  if (length(refs) == 0) return(sort(unique(x)))
+  lookup <- do.call(rbind, lapply(refs, function(d) {
+    d <- as.data.frame(d)[, c("strat", vars), drop = FALSE]
+    d$key <- strat_key(d$strat)
+    d$strat <- NULL
+    unique(d)
+  }))
+  lookup <- lookup[!duplicated(lookup$key), , drop = FALSE]
+  idx <- match(strat_key(strat), lookup$key)
+  bdat <- data.frame(x = x)
+  for (v in vars) bdat[[v]] <- lookup[[v]][idx]
   bdat
+}
+
+#' Rename a stratification column, unless the target name already exists
+#' @noRd
+rename_strat_column <- function(dat, from, to) {
+  if (!is.null(dat) && from %in% colnames(dat) && !to %in% colnames(dat)) {
+    colnames(dat)[match(from, colnames(dat))] <- to
+  }
+  dat
 }
 
 #' @describeIn vpc_ggplot Generate hlines for the lloq/uloq
@@ -455,7 +488,15 @@ geom_obs_km <- function(data) {
 
 #' @describeIn vpc_ggplot Show observed median line for continuous data
 geom_obs_median_continuous <- function(data, show, vpc_theme) {
-  if (show & !is.null(data$aggr_obs)) {
+  if (show & !is.null(data$aggr_obs) & !is.null(data$stratify_color)) {
+    color <- data$stratify_color[1]
+    ggplot2::geom_line(
+      data=data$aggr_obs,
+      ggplot2::aes(x=bin_mid, y=obs50, colour=.data[[color]], group=.data[[color]]),
+      linetype=vpc_theme$obs_median_linetype,
+      linewidth=vpc_theme$obs_median_linewidth
+    )
+  } else if (show & !is.null(data$aggr_obs)) {
     ggplot2::geom_line(
       data=data$aggr_obs,
       ggplot2::aes(x=bin_mid, y=obs50),
@@ -516,7 +557,14 @@ geom_sim_median_tte <- function(data, show, smooth) {
 #' @describeIn vpc_ggplot Show simulated median confidence interval for
 #'   continuous data
 geom_sim_median_ci_continuous <- function(data, show, smooth, vpc_theme) {
-  if (show & !is.null(data$sim)) {
+  if (show & !is.null(data$sim) & !is.null(data$stratify_color)) {
+    color <- data$stratify_color[1]
+    if (smooth) {
+      ggplot2::geom_ribbon(ggplot2::aes(x=bin_mid, ymin=q50.low, ymax=q50.up, fill=.data[[color]]), alpha=vpc_theme$sim_median_alpha)
+    } else {
+      ggplot2::geom_rect(ggplot2::aes(xmin=bin_min, xmax=bin_max, ymin=q50.low, ymax=q50.up, fill=.data[[color]]), alpha=vpc_theme$sim_median_alpha)
+    }
+  } else if (show & !is.null(data$sim)) {
     if (smooth) {
       ggplot2::geom_ribbon(ggplot2::aes(x=bin_mid, ymin=q50.low, ymax=q50.up), alpha=vpc_theme$sim_median_alpha, fill = vpc_theme$sim_median_fill)
     } else {

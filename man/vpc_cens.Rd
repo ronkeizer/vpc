@@ -67,7 +67,10 @@ one value per stratum (named or ordered as for \code{bins}).}
 
 \item{stratify}{character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.}
 
-\item{stratify_color}{variable to stratify and color lines for observed data. Only 1 stratification variables can be supplied.}
+\item{stratify_color}{variable to stratify by color: the observed
+fraction (line) and simulated confidence interval (area) are calculated
+and colored per value of this variable, while \code{stratify} determines
+the facets. Only 1 stratification variable can be supplied.}
 
 \item{ci}{confidence interval to plot. Default is (0.05, 0.95)}
 
@@ -98,7 +101,10 @@ one value per stratum (named or ordered as for \code{bins}).}
 default)? When \code{TRUE}, automatic binning methods are applied to the
 data of each stratum separately. Specifying \code{bins} as a list
 implies \code{bin_by_strata = TRUE}. Missing values of the
-stratification variable form their own stratum, named \code{"NA"}.
+stratification variable form their own stratum (with an \code{NA} name
+in the returned list of bins; for manual bins, use an \code{NA} name or,
+when no stratum has the literal value \code{"NA"}, the name
+\code{"NA"}).
 Binning by stratum is available for all automatic binning methods except
 \code{"percentiles"} (which labels the bins by their interval instead of
 plotting them on the numeric scale of the independent variable).}
