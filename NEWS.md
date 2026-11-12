@@ -1,3 +1,8 @@
+# vpc 1.2.5
+- added `ci_sim` argument to `vpc_tte()` to specify the confidence interval
+  of the Kaplan-Meier curves from the simulated data, which was previously
+  fixed at 90% (fix #102). The `ci` argument only applies to the observed data.
+
 # vpc 1.2.4
 - replaced defunct dplyr functions (`group_by_()`, `arrange_()`, `do()`) with
   modern equivalents (`group_by()`, `arrange()`, `slice()`) using `.data` pronoun

@@ -14,7 +14,8 @@
 #' @param events numeric vector describing which events to show a VPC for when repeated TTE data, e.g. c(1:4). Default is NULL, which shows all events.
 #' @param reverse_prob reverse the probability scale (i.e. plot 1-probability)
 #' @param stratify_color character vector of stratification variables. Only 1 stratification variable can be supplied, cannot be used in conjunction with `stratify`.
-#' @param ci confidence interval to plot. Default is (0.05, 0.95)
+#' @param ci confidence interval for the Kaplan-Meier estimate of the observed data (shown when `show = list(obs_ci = TRUE)`). Default is (0.05, 0.95)
+#' @param ci_sim quantiles of the Kaplan-Meier curves from the simulated data that define the simulated confidence interval (shaded area). Default is (0.05, 0.95), i.e. a 90\% interval.
 #' @param as_percentage Show y-scale from 0-100 percent? TRUE by default, if FALSE then scale from 0-1.
 #' @param verbose show debugging information (TRUE or FALSE)
 #' @param vpcdb Boolean whether to return the underlying vpcdb rather than the plot
@@ -53,6 +54,7 @@ vpc_tte <- function(sim = NULL,
                     stratify = NULL,
                     stratify_color = NULL,
                     ci = c(0.05, 0.95),
+                    ci_sim = c(0.05, 0.95),
                     xlab = "Time",
                     ylab = "Survival (%)",
                     show = NULL,
@@ -64,6 +66,10 @@ vpc_tte <- function(sim = NULL,
                     labeller = NULL,
                     verbose = FALSE,
                     vpcdb = FALSE) {
+  if(!is.numeric(ci_sim) || length(ci_sim) != 2 || any(is.na(ci_sim)) ||
+     any(ci_sim < 0 | ci_sim > 1) || ci_sim[1] >= ci_sim[2]) {
+    stop("`ci_sim` should be a numeric vector of length 2 with increasing values between 0 and 1, e.g. c(0.05, 0.95).")
+  }
   vpc_data <- read_vpc(
     sim=sim, obs=obs, psn_folder=psn_folder,
     software=software,
@@ -213,8 +219,8 @@ vpc_tte <- function(sim = NULL,
       dplyr::summarise (bin_mid = head(bin_mid,1),
                  bin_min = head(bin_min,1),
                  bin_max = head(bin_max,1),
-                 qmin = quantile(surv, 0.05),
-                 qmax = quantile(surv, 0.95),
+                 qmin = quantile(surv, ci_sim[1]),
+                 qmax = quantile(surv, ci_sim[2]),
                  qmed = median(surv),
 #                         lower_med = median(lower, 0.05),
 #                         upper_med = median(upper, 0.05),

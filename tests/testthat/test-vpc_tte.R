@@ -48,3 +48,38 @@ test_that("vpc_tte()", {
     #vpc_tte without obs succeeded
   )
 })
+
+test_that("vpc_tte() ci_sim controls the simulated confidence interval", {
+  sim <- vpc::rtte_sim_nm[vpc::rtte_sim_nm$sim <= 20, ]
+  run <- function(...) {
+    suppressWarnings(
+      vpc_tte(sim = sim,
+              obs = vpc::rtte_obs_nm,
+              rtte = FALSE,
+              sim_cols = list(dv = "dv", idv = "t"),
+              obs_cols = list(idv = "t"),
+              vpcdb = TRUE,
+              ...)
+    )
+  }
+  db_default <- run()
+  db_90 <- run(ci_sim = c(0.05, 0.95))
+  db_95 <- run(ci_sim = c(0.025, 0.975))
+  expect_equal(db_default$sim_km$qmin, db_90$sim_km$qmin)
+  expect_equal(db_default$sim_km$qmax, db_90$sim_km$qmax)
+  # a wider interval must be at least as wide everywhere, and wider somewhere
+  expect_true(all(db_95$sim_km$qmin <= db_90$sim_km$qmin))
+  expect_true(all(db_95$sim_km$qmax >= db_90$sim_km$qmax))
+  expect_true(any(db_95$sim_km$qmin < db_90$sim_km$qmin | db_95$sim_km$qmax > db_90$sim_km$qmax))
+  # the ci argument (observed data) must not affect the simulated interval
+  db_ci <- run(ci = c(0.025, 0.975))
+  expect_equal(db_ci$sim_km$qmin, db_90$sim_km$qmin)
+  expect_equal(db_ci$sim_km$qmax, db_90$sim_km$qmax)
+})
+
+test_that("vpc_tte() validates ci_sim", {
+  expect_error(vpc_tte(sim = vpc::rtte_sim_nm, ci_sim = 0.9), "ci_sim")
+  expect_error(vpc_tte(sim = vpc::rtte_sim_nm, ci_sim = c(0.95, 0.05)), "ci_sim")
+  expect_error(vpc_tte(sim = vpc::rtte_sim_nm, ci_sim = c(-0.1, 0.9)), "ci_sim")
+  expect_error(vpc_tte(sim = vpc::rtte_sim_nm, ci_sim = c("a", "b")), "ci_sim")
+})
