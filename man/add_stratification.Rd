@@ -17,5 +17,8 @@ add_stratification(dat, stratify, verbose = FALSE)
 When two stratification variables are supplied, the combined `strat` column
 is a factor whose levels are ordered by the levels of the first variable,
 then by the levels of the second variable. Factor level order of the
-original columns is respected; non-factor columns are sorted.
+original columns is respected; non-factor columns are sorted. Missing
+values are labeled \code{"<NA>"} in the combined stratum, so that e.g.
+\code{(NA, "x")} (\code{"<NA>, x"}) remains distinct from
+\code{("NA", "x")} (\code{"NA, x"}); see \code{strat_value_label()}.
 }

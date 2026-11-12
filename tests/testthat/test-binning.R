@@ -382,3 +382,28 @@ test_that("outlier areas work with per-stratum bins and color stratification", {
     expect_s3_class(ggplot2::ggplot_build(pl), "ggplot_built")
   }
 })
+
+test_that("bin_by_strata keeps missing and literal \"NA\" values distinct with two stratification variables", {
+  d <- strat_test_data()
+  d$obs$SEX <- "X"
+  d$sim$SEX <- "X"
+  d$obs$GRP[d$obs$ID %in% c(1, 2)] <- NA
+  d$sim$GRP[d$sim$ID %in% c(1, 2)] <- NA
+  d$obs$GRP[d$obs$ID %in% c(3, 4)] <- "NA"
+  d$sim$GRP[d$sim$ID %in% c(3, 4)] <- "NA"
+  d$obs$TIME[d$obs$GRP %in% "NA"] <- d$obs$TIME[d$obs$GRP %in% "NA"] * 2
+  d$sim$TIME[d$sim$GRP %in% "NA"] <- d$sim$TIME[d$sim$GRP %in% "NA"] * 2
+  db <- vpc(sim = d$sim, obs = d$obs, stratify = c("GRP", "SEX"), bins = "time",
+            n_bins = 3, bin_by_strata = TRUE, vpcdb = TRUE)
+  expect_setequal(names(db$bins), c("A, X", "B, X", "NA, X", "<NA>, X"))
+  expect_equal(max(db$bins[["NA, X"]]), max(d$obs$TIME[d$obs$MDV == 0 & d$obs$GRP %in% "NA"]) * 1.001)
+  expect_equal(max(db$bins[["<NA>, X"]]), max(d$obs$TIME[d$obs$MDV == 0 & is.na(d$obs$GRP)]) * 1.001)
+  # aggregated per stratum, with the original values recovered
+  mis <- db$aggr_obs[db$aggr_obs$strat == "<NA>, X", ]
+  lit <- db$aggr_obs[db$aggr_obs$strat == "NA, X", ]
+  expect_true(all(is.na(mis$strat1)))
+  expect_true(all(lit$strat1 == "NA"))
+  expect_equal(nrow(db$obs[db$obs$strat == "<NA>, X", ]), sum(d$obs$MDV == 0 & is.na(d$obs$GRP)))
+  expect_false(any(is.na(db$obs$bin)))
+  expect_s3_class(ggplot2::ggplot_build(plot_vpc(db)), "ggplot_built")
+})

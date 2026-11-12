@@ -3,7 +3,10 @@
 #' When two stratification variables are supplied, the combined `strat` column
 #' is a factor whose levels are ordered by the levels of the first variable,
 #' then by the levels of the second variable. Factor level order of the
-#' original columns is respected; non-factor columns are sorted.
+#' original columns is respected; non-factor columns are sorted. Missing
+#' values are labeled \code{"<NA>"} in the combined stratum, so that e.g.
+#' \code{(NA, "x")} (\code{"<NA>, x"}) remains distinct from
+#' \code{("NA", "x")} (\code{"NA, x"}); see \code{strat_value_label()}.
 #'
 #' @param dat An input data.frame or similar object
 #' @param stratify character vector of stratification variables. Only 1 or 2 stratification variables can be supplied.
@@ -17,7 +20,7 @@ add_stratification <- function (dat, stratify, verbose = FALSE) {
         dat$strat <- data.frame(dat)[,stratify]
       } else {
         strat_cols <- lapply(stratify, function(x) as.factor(dat[[x]]))
-        strat_label <- do.call(paste, c(lapply(strat_cols, as.character), sep = ", "))
+        strat_label <- do.call(paste, c(lapply(strat_cols, strat_value_label), sep = ", "))
         # Order the combined levels by the first variable, then the second, etc.
         level_order <- do.call(order, lapply(strat_cols, as.integer))
         dat$strat <- factor(strat_label, levels = unique(strat_label[level_order]))
@@ -31,6 +34,23 @@ add_stratification <- function (dat, stratify, verbose = FALSE) {
     dat$strat <- as.factor(dat$strat)
   }
   dat
+}
+
+#' Label of the values of a stratification variable in a combined stratum
+#'
+#' Missing values are labeled `"<NA>"`. To keep the labels unique (and
+#' independent of the data, so that observed and simulated data are labeled
+#' consistently), literal values of the form `"<NA>"`, `"<<NA>>"`, etc. are
+#' wrapped in one more pair of angle brackets. Other values are unchanged.
+#' @param x vector of values
+#' @return character vector of labels
+#' @noRd
+strat_value_label <- function(x) {
+  x <- as.character(x)
+  lit <- !is.na(x) & grepl("^<+NA>+$", x)
+  x[lit] <- paste0("<", x[lit], ">")
+  x[is.na(x)] <- "<NA>"
+  x
 }
 
 #' Add separate columns for each of two stratification variables

@@ -10,6 +10,9 @@
   Missing values of the stratification variable are binned as their own
   stratum (with an `NA` name in `db$bins`; distinct from a stratum with the
   literal value `"NA"`). Not available for `bins = "percentiles"`.
+- With two stratification variables, missing values are now labeled `"<NA>"`
+  in the combined stratum (e.g. `"<NA>, X"`), so they are no longer merged
+  with the literal value `"NA"` (`"NA, X"`) when calculating the VPC.
 - `vpc_cens()` with `stratify_color`: the color stratification is now
   implemented. The observed fraction and simulated CI are calculated per
   color stratum and drawn in separate colors (with legend), while facets are

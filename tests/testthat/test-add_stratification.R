@@ -51,3 +51,20 @@ test_that("vpc with 2 stratification variables respects factor order (#101)", {
   expect_equal(levels(built$layout$layout$xfac), c("b", "a", "c"))
   expect_equal(levels(built$layout$layout$yfac), c("e", "d", "f"))
 })
+
+test_that("add_stratification keeps missing values distinct from literal \"NA\" in combined strata", {
+  dat <- data.frame(
+    x = c(NA, "NA", "<NA>", NA, "a"),
+    y = c("X", "X", "X", NA, "X")
+  )
+  out <- add_stratification(dat, c("x", "y"))
+  expect_equal(as.character(out$strat), c("<NA>, X", "NA, X", "<<NA>>, X", "<NA>, <NA>", "a, X"))
+  expect_equal(nlevels(out$strat), 5)
+  # labels do not depend on the other values in the data (obs vs sim)
+  expect_equal(as.character(add_stratification(dat[1, ], c("x", "y"))$strat), "<NA>, X")
+  # original values are recovered per stratum
+  summ <- data.frame(strat = out$strat)
+  cols <- add_strat_columns(summ, c("x", "y"), out)
+  expect_equal(cols$strat1, dat$x)
+  expect_equal(cols$strat2, dat$y)
+})
