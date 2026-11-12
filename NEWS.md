@@ -1,3 +1,13 @@
+# vpc 1.3.3
+- Bins can now be determined per stratum (#11). With `bin_by_strata = TRUE` in
+  `vpc()` and `vpc_cens()`, automatic binning methods are applied to the data
+  of each stratum separately. Manual bins can be specified per stratum by
+  passing a list to `bins` (named by stratum, or unnamed in the order of the
+  strata), e.g. `bins = list(A = c(0, 2, 6, 24), B = c(0, 4, 12, 48))`, which
+  can also mix binning methods and numeric separators. `n_bins` can likewise be
+  given per stratum. The bin separators shown in the plot are drawn per panel.
+  With per-stratum binning, `db$bins` in the vpcdb object is a named list.
+
 # vpc 1.3.2
 - Added visual regression tests (#9): `tests/testthat/test-plots.R` uses
   `vdiffr` to snapshot the VPC plots (continuous, pcVPC, LLOQ/log-y,

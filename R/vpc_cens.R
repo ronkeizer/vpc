@@ -46,7 +46,8 @@ vpc_cens <- function(sim = NULL,
                      facet = "wrap",
                      labeller = NULL,
                      vpcdb = FALSE,
-                     verbose = FALSE) {
+                     verbose = FALSE,
+                     bin_by_strata = FALSE) {
   vpc_data <-
     read_vpc(
       sim=sim, obs=obs, psn_folder=psn_folder,
@@ -120,7 +121,7 @@ vpc_cens <- function(sim = NULL,
   }
 
   # Binning ####
-  bins_data <- define_bins(obs=obs, sim=vpc_data$sim, bins=bins, n_bins=n_bins, verbose=verbose)
+  bins_data <- define_bins(obs=obs, sim=vpc_data$sim, bins=bins, n_bins=n_bins, bin_by_strata=bin_by_strata, verbose=verbose)
   bins <- bins_data$bins
   obs <- bins_data$obs
   sim <- bins_data$sim
@@ -138,8 +139,9 @@ vpc_cens <- function(sim = NULL,
                        q50.up = quantile(ploq, ci[2]),
                        bin_mid = mean(mn_idv)) %>%
       dplyr::ungroup()
-    vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
-    vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
+    bounds <- bin_boundaries(bins, vpc_dat$bin, vpc_dat$strat)
+    vpc_dat$bin_min <- bounds$bin_min
+    vpc_dat$bin_max <- bounds$bin_max
     if(bin_mid == "middle") {
       vpc_dat$bin_mid <- apply(dplyr::bind_cols(vpc_dat$bin_min, vpc_dat$bin_max), 1, mean)
     }
@@ -153,8 +155,9 @@ vpc_cens <- function(sim = NULL,
       dplyr::summarise(obs50 = loq_frac(dv, limit = cens_limit, cens = cens_type),
                        bin_mid = mean(idv)) %>%
       dplyr::ungroup()
-    aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
-    aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
+    bounds <- bin_boundaries(bins, aggr_obs$bin, aggr_obs$strat)
+    aggr_obs$bin_min <- bounds$bin_min
+    aggr_obs$bin_max <- bounds$bin_max
     if(bin_mid == "middle") {
       aggr_obs$bin_mid <- apply(dplyr::bind_cols(aggr_obs$bin_min, aggr_obs$bin_max), 1, mean)
     }

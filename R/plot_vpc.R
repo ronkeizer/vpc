@@ -109,6 +109,7 @@ plot_vpc_helper.vpcdb_continuous <- function(db, ...,
       }
     }
   }
+  bin_sep <- bin_separators_data(db)
   if (!is.null(db$sim) && is.factor(db$vpc_dat$bin)) {
     db$vpc_dat$bin_mid <- db$vpc_dat$bin
   }
@@ -148,7 +149,7 @@ plot_vpc_helper.vpcdb_continuous <- function(db, ...,
     geom_obs_median_continuous(data=db, show=show$obs_median, vpc_theme=vpc_theme) +
     geom_obs_ci_continuous(data=db, show=show$obs_ci, vpc_theme=vpc_theme) +
     geom_obs_dv_continuous(data=db, show=show$obs_dv, vpc_theme=vpc_theme) +
-    geom_bin_sep(bins=db$bins, show=show$bin_sep, vpc_theme=vpc_theme) +
+    geom_bin_sep(bins=bin_sep, show=show$bin_sep, vpc_theme=vpc_theme) +
     ggplot2::labs(
       # While title is not always used, it defaults to NULL which causes no
       # title to display.
@@ -292,12 +293,18 @@ NULL
 
 #' @describeIn vpc_ggplot Show rug plot of bin separators
 #' @param bins Numeric vector of bin separators (if logical value, geom_blank is
-#'   returned)
+#'   returned), or a data.frame with the bin separators in column \code{x} and
+#'   the stratification columns (for bins that differ by stratum)
 geom_bin_sep <- function(bins, show, vpc_theme) {
   ret <- ggplot2::geom_blank()
   if (show) {
     if(! (inherits(bins, "logical") && !bins) ) {
-      bdat <- data.frame(cbind(x = bins, y = NA))
+      if (is.data.frame(bins)) {
+        bdat <- bins
+        bdat$y <- NA
+      } else {
+        bdat <- data.frame(cbind(x = bins, y = NA))
+      }
       ret <-
         ggplot2::geom_rug(
           data=bdat,
@@ -308,6 +315,30 @@ geom_bin_sep <- function(bins, show, vpc_theme) {
     }
   }
   ret
+}
+
+#' Bin separators for plotting
+#'
+#' When bins are defined per stratum (\code{db$bins} is a list), returns a
+#' data.frame with the bin separators (\code{x}) and the stratification
+#' columns named as used for faceting. Otherwise returns \code{db$bins}.
+#' @param db vpcdb object
+#' @noRd
+bin_separators_data <- function(db) {
+  if (!is.list(db$bins)) return(db$bins)
+  strata <- names(db$bins)
+  bdat <- data.frame(
+    strat = factor(rep(strata, lengths(db$bins)), levels = strata),
+    x = unlist(db$bins, use.names = FALSE)
+  )
+  if (length(db$stratify) == 1) {
+    colnames(bdat)[1] <- db$stratify[1]
+  } else if (length(db$stratify) == 2) {
+    bdat <- add_strat_columns(bdat, db$stratify, db$obs, db$sim)
+    bdat$strat <- NULL
+    colnames(bdat)[match(c("strat1", "strat2"), colnames(bdat))] <- db$stratify
+  }
+  bdat
 }
 
 #' @describeIn vpc_ggplot Generate hlines for the lloq/uloq

@@ -28,7 +28,8 @@ vpc_cens(
   facet = "wrap",
   labeller = NULL,
   vpcdb = FALSE,
-  verbose = FALSE
+  verbose = FALSE,
+  bin_by_strata = FALSE
 )
 }
 \arguments{
@@ -40,10 +41,19 @@ vpc_cens(
 
 \item{bins}{either "density", "time", or "data", "none", or one of the
 approaches available in classInterval() such as "jenks" (default) or
-"pretty", or a numeric vector specifying the bin separators.}
+"pretty", or a numeric vector specifying the bin separators. For \code{vpc()}
+and \code{vpc_cens()}, when binning
+by stratum (see \code{bin_by_strata}), \code{bins} can also be a list
+with one element (a binning method or numeric vector of bin separators)
+per stratum. The list should be named by stratum (the value of the
+stratification variable, or for two stratification variables the two
+values separated by a comma and a space, e.g. \code{"1, female"}), or
+be unnamed with one element per stratum in the order of the strata.}
 
 \item{n_bins}{when using the "auto" binning method, what number of bins to
-aim for}
+aim for. When binning by stratum (\code{vpc()} and \code{vpc_cens()}),
+this can also be a list or vector with
+one value per stratum (named or ordered as for \code{bins}).}
 
 \item{bin_mid}{either "mean" for the mean of all timepoints (default) or "middle" to use the average of the bin boundaries.}
 
@@ -82,6 +92,12 @@ aim for}
 \item{vpcdb}{boolean whether to return the underlying vpcdb rather than the plot}
 
 \item{verbose}{show debugging information (TRUE or FALSE)}
+
+\item{bin_by_strata}{Determine the bins separately for each stratum
+(\code{TRUE}), or use the same bins for all strata (\code{FALSE},
+default)? When \code{TRUE}, automatic binning methods are applied to the
+data of each stratum separately. Specifying \code{bins} as a list
+implies \code{bin_by_strata = TRUE}.}
 }
 \value{
 a list containing calculated VPC information (when vpcdb=TRUE), or a ggplot2 object (default)

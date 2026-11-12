@@ -69,7 +69,8 @@ scale_y_log10_vpc(show)
 }
 \arguments{
 \item{bins}{Numeric vector of bin separators (if logical value, geom_blank is
-returned)}
+returned), or a data.frame with the bin separators in column \code{x} and
+the stratification columns (for bins that differ by stratum)}
 
 \item{show}{Should the geom be shown? (TRUE/FALSE)}
 

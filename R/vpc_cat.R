@@ -100,6 +100,9 @@ vpc_cat  <- function(sim = NULL,
   }
 
   # Binning ####
+  if (is.list(bins)) {
+    stop("Per-stratum bins (a list for `bins`) are not supported for `vpc_cat()`.")
+  }
   bins_data <- define_bins(obs=vpc_data$obs, sim=vpc_data$sim, bins=bins, n_bins=n_bins, verbose=verbose)
   bins <- bins_data$bins
   obs <- bins_data$obs
@@ -140,8 +143,9 @@ vpc_cat  <- function(sim = NULL,
                        q50.up = quantile(value, ci[2]),
                        bin_mid = mean(mn_idv)) %>%
       dplyr::ungroup()
-    vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
-    vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
+    bounds <- bin_boundaries(bins, vpc_dat$bin, NULL)
+    vpc_dat$bin_min <- bounds$bin_min
+    vpc_dat$bin_max <- bounds$bin_max
     if(bin_mid == "middle") {
       vpc_dat$bin_mid <- apply(cbind(vpc_dat$bin_min, vpc_dat$bin_max), 1, mean)
     }
@@ -169,8 +173,9 @@ vpc_cat  <- function(sim = NULL,
     tmp2 <- tidyr::pivot_longer(tmp1, names_to = "strat", cols = paste0("fact_", lev)) %>%
       dplyr::arrange(strat, bin) %>%
       dplyr::mutate(strat = stringr::str_replace(strat, "fact_", ""))
-    tmp2$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(tmp2$strat)) )[tmp2$bin]
-    tmp2$bin_max <- rep(bins[2:length(bins)], length(unique(tmp2$strat)) )[tmp2$bin]
+    bounds <- bin_boundaries(bins, tmp2$bin, NULL)
+    tmp2$bin_min <- bounds$bin_min
+    tmp2$bin_max <- bounds$bin_max
     if(bin_mid == "middle") {
       tmp2$bin_mid <- apply(dplyr::bind_cols(tmp2$bin_min, tmp2$bin_max), 1, mean)
     }

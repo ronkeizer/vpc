@@ -68,8 +68,9 @@ calc_vpc_continuous <- function(sim, obs, loq, pi, ci, stratify, bins, bin_mid, 
         bin_mid = mean(.data$mean_idv, na.rm = TRUE)
       )
 
-    vpc_dat$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
-    vpc_dat$bin_max <- rep(bins[2:length(bins)], length(unique(vpc_dat$strat)))[vpc_dat$bin]
+    bounds <- bin_boundaries(bins, vpc_dat$bin, vpc_dat$strat)
+    vpc_dat$bin_min <- bounds$bin_min
+    vpc_dat$bin_max <- bounds$bin_max
     if(bin_mid == "middle") {
       vpc_dat$bin_mid <- (vpc_dat$bin_min + vpc_dat$bin_max)/2
     }
@@ -87,8 +88,9 @@ calc_vpc_continuous <- function(sim, obs, loq, pi, ci, stratify, bins, bin_mid, 
         obs95 = quantile_cens(x=dv, probs=pi[2], limit = cens_limit, cens = cens_type),
         bin_mid = mean(idv)
       )
-    aggr_obs$bin_min <- rep(bins[1:(length(bins)-1)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
-    aggr_obs$bin_max <- rep(bins[2:length(bins)], length(unique(aggr_obs$strat)) )[aggr_obs$bin]
+    bounds <- bin_boundaries(bins, aggr_obs$bin, aggr_obs$strat)
+    aggr_obs$bin_min <- bounds$bin_min
+    aggr_obs$bin_max <- bounds$bin_max
     if(bin_mid == "middle") {
       aggr_obs$bin_mid <- (aggr_obs$bin_min + aggr_obs$bin_max)/2
     }

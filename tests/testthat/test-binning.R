@@ -133,3 +133,119 @@ test_that("vpc() with bins = 'data' keeps all observations in the VPC", {
   expect_false(any(is.na(db$obs$bin)))
   expect_equal(length(unique(db$obs$bin)), 5)
 })
+
+# Binning by stratum (#11) ####
+
+strat_test_data <- function() {
+  obs <- simple_data$obs
+  sim <- simple_data$sim
+  obs$GRP <- ifelse(obs$ID %% 2 == 0, "A", "B")
+  sim$GRP <- ifelse(sim$ID %% 2 == 0, "A", "B")
+  # stratum B has twice the time range of stratum A
+  obs$TIME[obs$GRP == "B"] <- obs$TIME[obs$GRP == "B"] * 2
+  sim$TIME[sim$GRP == "B"] <- sim$TIME[sim$GRP == "B"] * 2
+  list(obs = obs, sim = sim)
+}
+
+test_that("bin_by_strata = TRUE determines automatic bins per stratum", {
+  d <- strat_test_data()
+  db <- vpc(sim = d$sim, obs = d$obs, stratify = "GRP", bins = "time",
+            n_bins = 4, bin_by_strata = TRUE, vpcdb = TRUE)
+  expect_type(db$bins, "list")
+  expect_named(db$bins, c("A", "B"))
+  obs_a <- d$obs$TIME[d$obs$GRP == "A" & d$obs$MDV == 0]
+  obs_b <- d$obs$TIME[d$obs$GRP == "B" & d$obs$MDV == 0]
+  expect_equal(db$bins$A, auto_bin(obs_a, type = "time", n_bins = 4))
+  expect_equal(db$bins$B, auto_bin(obs_b, type = "time", n_bins = 4))
+  # all data binned, bin boundaries taken from the stratum's own bins
+  expect_false(any(is.na(db$obs$bin)))
+  expect_false(any(is.na(db$sim$bin)))
+  for (s in c("A", "B")) {
+    v <- db$vpc_dat[db$vpc_dat$strat == s, ]
+    expect_equal(v$bin_min, db$bins[[s]][v$bin])
+    expect_equal(v$bin_max, db$bins[[s]][v$bin + 1])
+    o <- db$aggr_obs[db$aggr_obs$strat == s, ]
+    expect_equal(o$bin_min, db$bins[[s]][o$bin])
+  }
+  # row order of the data is retained
+  expect_equal(db$obs$idv, d$obs$TIME[d$obs$MDV == 0])
+})
+
+test_that("default (bin_by_strata = FALSE) uses the same bins for all strata", {
+  d <- strat_test_data()
+  db <- vpc(sim = d$sim, obs = d$obs, stratify = "GRP", bins = "time",
+            n_bins = 4, vpcdb = TRUE)
+  expect_type(db$bins, "double")
+  expect_length(db$bins, 5)
+})
+
+test_that("manual bins can be specified per stratum as a list", {
+  d <- strat_test_data()
+  bins <- list(A = c(0, 2, 5, 10, 30), B = c(0, 4, 10, 60))
+  db <- vpc(sim = d$sim, obs = d$obs, stratify = "GRP", bins = bins, vpcdb = TRUE)
+  expect_equal(db$bins, bins)
+  expect_equal(sort(unique(db$obs$bin[db$obs$strat == "A"])), 1:4)
+  expect_equal(sort(unique(db$obs$bin[db$obs$strat == "B"])), 1:3)
+  expect_equal(db$aggr_obs$bin_max[db$aggr_obs$strat == "B"], c(4, 10, 60))
+  # unnamed list, in order of the strata
+  db2 <- vpc(sim = d$sim, obs = d$obs, stratify = "GRP", bins = unname(bins), vpcdb = TRUE)
+  expect_equal(db2$aggr_obs, db$aggr_obs)
+  # mixing methods and separators, and per-stratum n_bins
+  db3 <- vpc(sim = d$sim, obs = d$obs, stratify = "GRP",
+             bins = list(A = "time", B = c(0, 4, 10, 60)),
+             n_bins = list(A = 3, B = 8), vpcdb = TRUE)
+  expect_length(db3$bins$A, 4)
+  expect_equal(db3$bins$B, c(0, 4, 10, 60))
+})
+
+test_that("per-stratum bins give informative errors", {
+  d <- strat_test_data()
+  expect_error(
+    vpc(sim = d$sim, obs = d$obs, stratify = "GRP", bins = list(A = c(0, 10, 30)), vpcdb = TRUE),
+    "No `bins` specified for stratum `B`"
+  )
+  expect_error(
+    vpc(sim = d$sim, obs = d$obs, stratify = "GRP", bins = list(c(0, 10, 30)), vpcdb = TRUE),
+    "one element per stratum"
+  )
+  expect_error(
+    vpc(sim = d$sim, obs = d$obs, stratify = "GRP", bins = "percentiles",
+        bin_by_strata = TRUE, vpcdb = TRUE),
+    "not supported when binning by stratum"
+  )
+})
+
+test_that("bin_by_strata works with two stratification variables, pred_corr and plotting", {
+  d <- strat_test_data()
+  d$obs$SEX <- ifelse(d$obs$ID %% 3 == 0, "M", "F")
+  d$sim$SEX <- ifelse(d$sim$ID %% 3 == 0, "M", "F")
+  db <- vpc(sim = d$sim, obs = d$obs, stratify = c("GRP", "SEX"),
+            bin_by_strata = TRUE, pred_corr = TRUE, vpcdb = TRUE)
+  expect_named(db$bins, c("A, F", "A, M", "B, F", "B, M"))
+  expect_false(any(is.na(db$vpc_dat$bin_min)))
+  bsep <- bin_separators_data(db)
+  expect_true(all(c("x", "GRP", "SEX") %in% names(bsep)))
+  expect_equal(nrow(bsep), length(unlist(db$bins)))
+  pl <- plot_vpc(db)
+  expect_s3_class(pl, "ggplot")
+  expect_silent(ggplot2::ggplot_build(pl))
+})
+
+test_that("bin_by_strata works for vpc_cens()", {
+  d <- strat_test_data()
+  db <- vpc_cens(sim = d$sim, obs = d$obs, lloq = 30, stratify = "GRP",
+                 bins = "time", n_bins = 5, bin_by_strata = TRUE, vpcdb = TRUE)
+  expect_named(db$bins, c("A", "B"))
+  expect_false(isTRUE(all.equal(db$bins$A, db$bins$B)))
+  v <- db$vpc_dat[db$vpc_dat$strat == "B", ]
+  expect_equal(v$bin_max, db$bins$B[v$bin + 1])
+  expect_s3_class(plot_vpc(db), "ggplot")
+})
+
+test_that("vpc_cat() does not accept per-stratum bins", {
+  tmp <- simple_data
+  tmp$obs$DV <- as.integer(tmp$obs$DV > 40)
+  tmp$sim$DV <- as.integer(tmp$sim$DV > 40)
+  expect_error(vpc_cat(sim = tmp$sim, obs = tmp$obs, bins = list(c(0, 3, 30)), vpcdb = TRUE),
+               "not supported")
+})
