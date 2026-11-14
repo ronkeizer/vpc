@@ -1,3 +1,10 @@
+# vpc 1.3.7
+- `vpc_tte()` with `rtte = TRUE` and `rtte_calc_diff = FALSE` or
+  `rtte_conditional = FALSE` no longer fails with "`time` must be a vector,
+  not a function" when the data have no column named `t` (#128). Censoring
+  marks are now placed at the original (absolute) time, stored internally
+  before any conversion to relative times.
+
 # vpc 1.3.6
 - Bins can now be determined per stratum (#11). With `bin_by_strata = TRUE` in
   `vpc()` and `vpc_cens()`, automatic binning methods are applied to the data

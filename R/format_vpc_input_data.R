@@ -149,6 +149,11 @@ format_vpc_input_data_tte <- function(dat, cols, stratify, rtte, rtte_calc_diff,
     dat[dat$cens == 1,]$dv <- 0
   }
   dat$time <- as.num(dat$idv)
+  if (rtte) {
+    # keep the original (absolute) time, used e.g. for plotting censoring
+    # marks when times are recalculated to relative times between events
+    dat$time_abs <- dat$time
+  }
   if (what == "observed") {
     # set sim to simplify code below
     dat$sim <- 1
