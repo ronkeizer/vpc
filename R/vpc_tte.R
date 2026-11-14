@@ -265,7 +265,7 @@ vpc_tte <- function(sim = NULL,
     if(rtte) {
       if(!rtte_conditional || !rtte_calc_diff) {
         cens_dat <- cens_dat %>%
-          dplyr::mutate(time = t)
+          dplyr::mutate(time = .data$time_abs)
       }
     }
     cens_dat <- cens_dat %>%
