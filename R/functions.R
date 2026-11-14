@@ -27,17 +27,3 @@ as.num <- function(x) {
     as.numeric(as.character(x))
   }
 }
-
-relative_times <- function (dat, simulation = FALSE) {
-  if (simulation) {
-    tmp <- dat %>% dplyr::group_by(sim, id)
-  } else {
-    tmp <- dat %>% dplyr::group_by(id)
-  }
-  tmp2 <- tmp %>% dplyr::arrange(time) %>% dplyr::mutate(time = c(time[1], diff(time)))
-  if (simulation) {
-    return(tmp2 %>% dplyr::arrange(sim, id, time))
-  } else {
-    return(tmp2 %>% dplyr::arrange(id, time))
-  }
-}

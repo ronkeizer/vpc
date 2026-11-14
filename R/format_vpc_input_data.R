@@ -170,13 +170,17 @@ format_vpc_input_data_tte <- function(dat, cols, stratify, rtte, rtte_calc_diff,
   }
 
   if(rtte) {
-    if(rtte_calc_diff) {
-      dat <- relative_times(dat)
-    }
+    # Number events in time order per subject first, then (optionally) convert
+    # to gap times. No re-sort afterwards, so `rtte = k` is the k-th event and
+    # not the k-th shortest gap (#127).
     dat <- dat %>%
       dplyr::group_by(.data$sim, .data$id) %>%
-      dplyr::arrange(.data$sim, .data$id, .data$time) %>%
+      dplyr::arrange(.data$time, .by_group = TRUE) %>%
       dplyr::mutate(rtte = 1:length(dv))
+    if(rtte_calc_diff) {
+      dat <- dat %>%
+        dplyr::mutate(time = c(.data$time[1], diff(.data$time)))
+    }
     stratify <- c(stratify, "rtte")
   } else {
     dat <-
