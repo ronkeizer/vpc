@@ -1,3 +1,12 @@
+# vpc 1.3.8
+- `vpc_tte(rtte = TRUE, rtte_calc_diff = TRUE)`: the event number (`rtte`) is
+  now assigned in event-time order before gap times are calculated, and the data
+  is no longer re-sorted by gap time afterwards (#127). Previously, "event k"
+  was the k-th *shortest* gap of a subject instead of the k-th event, so the
+  per-event panels mixed different events. Gap times in simulated data are now
+  also computed within each simulation and subject. The internal helper
+  `relative_times()` was removed.
+
 # vpc 1.3.7
 - `vpc_tte()` with `rtte = TRUE` and `rtte_calc_diff = FALSE` or
   `rtte_conditional = FALSE` no longer fails with "`time` must be a vector,

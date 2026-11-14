@@ -104,6 +104,42 @@ test_that("vpc_tte() keeps positional argument order (ci_sim appended last)", {
   expect_equal(pl$labels$x, "Positional time label")
 })
 
+test_that("rtte event order follows event time, not gap length (#127)", {
+  # One subject: events at 3, 10, 12, censored at 20 -> gaps 3, 7, 2, 8
+  obs <- data.frame(id = 1, time = c(12, 3, 20, 10), dv = c(1, 1, 0, 1))
+  f <- format_vpc_input_data_tte(
+    obs, cols = list(id = "id", dv = "dv", idv = "time"),
+    stratify = NULL, rtte = TRUE, rtte_calc_diff = TRUE
+  )
+  d <- as.data.frame(f$dat)
+  expect_equal(d$rtte, 1:4)
+  expect_equal(d$time, c(3, 7, 2, 8))
+  expect_equal(d$dv, c(1, 1, 1, 0))
+
+  # Without gap calculation, absolute times keep event order
+  f2 <- format_vpc_input_data_tte(
+    obs, cols = list(id = "id", dv = "dv", idv = "time"),
+    stratify = NULL, rtte = TRUE, rtte_calc_diff = FALSE
+  )
+  d2 <- as.data.frame(f2$dat)
+  expect_equal(d2$rtte, 1:4)
+  expect_equal(d2$time, c(3, 10, 12, 20))
+
+  # Simulated data: gaps computed within each sim & id separately
+  sim <- data.frame(
+    sim = rep(1:2, each = 4), id = 1,
+    time = c(3, 10, 12, 20, 5, 6, 15, 20), dv = c(1, 1, 1, 0, 1, 1, 1, 0)
+  )
+  fs <- format_vpc_input_data_tte(
+    sim, cols = list(id = "id", dv = "dv", idv = "time", sim = "sim"),
+    stratify = NULL, rtte = TRUE, rtte_calc_diff = TRUE, what = "simulated"
+  )
+  ds <- as.data.frame(fs$dat)
+  ds <- ds[order(ds$sim, ds$rtte), ]
+  expect_equal(ds$rtte, rep(1:4, 2))
+  expect_equal(ds$time, c(3, 7, 2, 8, 5, 1, 9, 5))
+})
+
 test_that("vpc_tte(rtte = TRUE) works without a `t` column (#128)", {
   obs <- data.frame(id = rep(1:2, each = 2), time = c(3, 10, 4, 8), dv = c(1, 0, 1, 0))
   sim <- rbind(cbind(obs, sim = 1), cbind(obs, sim = 2))
