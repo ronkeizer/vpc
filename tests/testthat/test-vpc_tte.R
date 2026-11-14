@@ -139,3 +139,29 @@ test_that("rtte event order follows event time, not gap length (#127)", {
   expect_equal(ds$rtte, rep(1:4, 2))
   expect_equal(ds$time, c(3, 7, 2, 8, 5, 1, 9, 5))
 })
+
+test_that("vpc_tte(rtte = TRUE) works without a `t` column (#128)", {
+  obs <- data.frame(id = rep(1:2, each = 2), time = c(3, 10, 4, 8), dv = c(1, 0, 1, 0))
+  sim <- rbind(cbind(obs, sim = 1), cbind(obs, sim = 2))
+  for (args in list(
+    list(rtte_calc_diff = FALSE, rtte_conditional = TRUE),
+    list(rtte_calc_diff = TRUE, rtte_conditional = FALSE),
+    list(rtte_calc_diff = FALSE, rtte_conditional = FALSE)
+  )) {
+    db <- suppressWarnings(
+      vpc_tte(sim = sim, obs = obs, rtte = TRUE,
+              rtte_calc_diff = args$rtte_calc_diff,
+              rtte_conditional = args$rtte_conditional,
+              sim_cols = list(sim = "sim"), vpcdb = TRUE)
+    )
+    # censoring marks at the original (absolute) times
+    expect_equal(sort(db$cens_dat$time), c(8, 10))
+    pl <- suppressWarnings(
+      vpc_tte(sim = sim, obs = obs, rtte = TRUE,
+              rtte_calc_diff = args$rtte_calc_diff,
+              rtte_conditional = args$rtte_conditional,
+              sim_cols = list(sim = "sim"))
+    )
+    expect_s3_class(pl, "ggplot")
+  }
+})
