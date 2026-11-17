@@ -4,7 +4,7 @@ This file provides guidance to AI coding agents when working with code in this r
 
 ## Overview
 
-`vpc` is a CRAN R package that builds visual predictive checks (VPCs) for pharmacometric models. It handles continuous data (`vpc()`), censored data (`vpc_cens()`), categorical data (`vpc_cat()`), and (repeated) time-to-event data (`vpc_tte()`), and it supports prediction correction (pcVPC) and reference correction (rcVPC). Docs live at vpc.ronkeizer.com, built from the `docs/` folder (gitbook, deployed with GitHub Pages).
+`vpc` is a CRAN R package that builds visual predictive checks (VPCs) for pharmacometric models. It handles continuous data (`vpc()`), censored data (`vpc_cens()`), categorical data (`vpc_cat()`), and (repeated) time-to-event data (`vpc_tte()`), and it supports prediction correction (pcVPC) and reference correction (rcVPC). Docs live at vpc.ronkeizer.com, deployed from the `docs/` folder with GitHub Pages (see "Documentation site" below).
 
 ## Commands
 
@@ -27,6 +27,19 @@ CI (`.github/workflows/R-CMD-check.yaml`) runs R CMD check on macOS, Windows, an
 - Bump `Version` (and `Date`) in `DESCRIPTION` for every code change, and add an entry to `NEWS.md`.
 - `man/` and `NAMESPACE` are generated. Edit the roxygen comments in `R/` and then run `devtools::document()`. Many functions share docs via `@inheritParams`, so changing a parameter's doc in one place, such as `read_vpc`, changes it in `vpc`, `vpc_cens`, and the others.
 - `misc/`, `docs/`, and `.github/` are excluded from the package build (`.Rbuildignore`).
+
+## Documentation site
+
+The `docs/` folder holds the **built** HTML of the documentation site (vpc.ronkeizer.com). `.github/workflows/static.yml` deploys it to GitHub Pages on every push to `master`. Never edit `docs/` by hand: the markdown sources live in a separate repo, `ronkeizer/vpc-docs` (GitBook 3.2.3).
+
+To update the docs:
+
+1. Clone `ronkeizer/vpc-docs` and edit its markdown (`SUMMARY.md` holds the navigation).
+2. Build with `./build.sh` there (runs GitBook in Docker; see that repo's `AGENTS.md` for the build gotchas).
+3. Copy the build here: `rsync -a --delete --exclude .gitignore <path-to-vpc-docs>/public/ docs/`.
+4. Open PRs in both repos.
+
+When a user-facing feature is added (new argument, new `show`/theme element, changed behaviour), update the docs as well. Docs for features that are not yet on `master` should merge together with (or after) those features, since `master` deploys immediately.
 
 ## Architecture
 

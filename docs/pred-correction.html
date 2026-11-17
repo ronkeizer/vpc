@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <title>Prediction correction · GitBook</title>
+        <title>Prediction / reference correction · GitBook</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="description" content="">
         <meta name="generator" content="GitBook 3.2.3">
@@ -38,17 +38,17 @@
 
     
         
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
         <link rel="stylesheet" href="styles/website.css">
-        
-    
-        
-    
-        
-    
-        
-    
-        
-    
         
     
 
@@ -233,7 +233,7 @@
                 <a href="pred-correction.html">
             
                     
-                    Prediction correction
+                    Prediction / reference correction
             
                 </a>
             
@@ -284,7 +284,7 @@
     <!-- Title -->
     <h1>
         <i class="fa fa-circle-o-notch fa-spin"></i>
-        <a href="." >Prediction correction</a>
+        <a href="." >Prediction / reference correction</a>
     </h1>
 </div>
 
@@ -299,10 +299,39 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="prediction-correction">Prediction-correction</h1>
-<p>An explanation of prediction-correction and why it is (sometimes) necessary is provided in <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3085712" target="_blank">this article by Bergstrand et al.</a>. Prediction correction is implemented in this package using the <code>pred_corr</code> argument to the <code>vpc()</code> function. For example, the following command will perform the prediciton-correction and also plot the observed data:</p>
+                                <h1 id="prediction--reference-correction">Prediction / reference correction</h1>
+<h2 id="prediction-corrected-vpc-pcvpc">Prediction-corrected VPC (pcVPC)</h2>
+<p>An explanation of prediction-correction and why it is (sometimes) necessary is provided in <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3085712" target="_blank">this article by Bergstrand et al.</a>. Prediction correction is implemented in this package using the <code>pred_corr</code> argument to the <code>vpc()</code> function. For example, the following command will perform the prediction-correction and also plot the observed data:</p>
 <pre><code>vpc (sim = sim, obs = obs, pred_corr = TRUE, show=list(obs_dv = TRUE, obs_ci = TRUE))
 </code></pre><p><em>Note: if there is a lower limit to the observations, this needs to be specified too using the <code>pred_corr_lower_bnd=</code> argument.</em></p>
+<p>The population prediction is read from the <code>pred</code> column (<code>PRED</code> for NONMEM data). When PRED is taken from the simulated data, the first replicate is used, so its records (<code>id</code>, <code>idv</code>) should be in the same order as the observed data.</p>
+<h3 id="additive-ltbs-correction">Additive (LTBS) correction</h3>
+<p>The default is the multiplicative correction of Bergstrand et al. For log-transform-both-sides (LTBS) models, an additive correction can be used with <code>pred_corr_method = &quot;additive&quot;</code> (or the shortcut <code>ltbs = TRUE</code>). This computes <code>dv + (pred_bin - pred)</code>, where <code>pred_bin</code> is the median prediction in the bin:</p>
+<pre><code>vpc(sim = sim, obs = obs, pred_corr = TRUE, pred_corr_method = &quot;additive&quot;)
+</code></pre><p>The additive form assumes that <code>dv</code> and <code>pred</code> are <em>already on the log scale</em> in both the observed and simulated data. No transformation is done internally, so <code>log_y</code> cannot be combined with it, and <code>pred_corr_lower_bnd</code> is ignored. For many LTBS workflows, the default multiplicative correction on linear-scale data combined with <code>log_y = TRUE</code> is already adequate.</p>
+<h3 id="pcvpc-with-censored-data">pcVPC with censored data</h3>
+<p>When <code>pred_corr = TRUE</code> is combined with <code>lloq</code> or <code>uloq</code>, observed and simulated data are handled identically:</p>
+<ol>
+<li>Censoring is determined on the <em>uncorrected</em> DV.</li>
+<li>The median prediction per bin is calculated from all records in the bin, including censored ones.</li>
+<li>Only non-censored values are prediction-corrected.</li>
+<li>Censored values are kept (ranked below <code>lloq</code> or above <code>uloq</code>) when calculating percentiles. Percentiles that fall within the censored part of the distribution are not shown.</li>
+</ol>
+<p>Since corrected values are no longer on the scale of the limit of quantification, they are not compared to the limit again, and the LLOQ/ULOQ line is not drawn.</p>
+<h2 id="reference-corrected-vpc-rcvpc">Reference-corrected VPC (rcVPC)</h2>
+<p>A reference-corrected VPC (<a href="https://doi.org/10.1208/s12248-025-01065-2" target="_blank">Ibrahim et al., AAPS J 2025</a>) normalizes observed and simulated data to a <em>reference</em> dataset, in which selected independent variables (e.g. dose, covariates, time) are set to reference values. Compared to a pcVPC, it also corrects for the variability, and the corrected data stay on the scale of the reference dataset.</p>
+<p>To create an rcVPC, supply simulations of the reference dataset with the <code>sim_ref</code> argument. <code>sim_ref</code> must have the same format and columns as <code>sim</code>, including the population prediction in the <code>pred</code> column:</p>
+<pre><code>vpc(sim = sim, obs = obs, sim_ref = sim_ref)
+</code></pre><p>Some notes:</p>
+<ul>
+<li>Records are matched <strong>by position</strong>, so <code>obs</code> and every replicate in <code>sim</code> and <code>sim_ref</code> must contain the same records in the same order.</li>
+<li>The correction is done per record, before binning.</li>
+<li>For data on the normal scale (default), the lower bound is taken from <code>pred_corr_lower_bnd</code> (default 0). Records with DV at or below the lower bound are excluded with a warning.</li>
+<li>For data on the log scale, use <code>pred_corr_method = &quot;additive&quot;</code> (or <code>ltbs = TRUE</code>) to select the log-scale equations. <code>pred_corr_lower_bnd</code> is then ignored, and negative (log-scale) DV values are valid.</li>
+<li>Censored data are handled as for the pcVPC, except that simulated values are censored <em>after</em> correction, so that the variability correction is based on all simulated data.</li>
+<li><code>pred_corr</code> and <code>sim_ref</code> cannot be combined.</li>
+</ul>
+<p>The implementation was validated against Pharmpy&apos;s implementation of the PsN rcVPC.</p>
 
                                 
                                 </section>
@@ -346,7 +375,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"Prediction correction","level":"3.3","depth":1,"next":{"title":"Appearance","level":"3.4","depth":1,"path":"appearance.md","ref":"appearance.md","articles":[]},"previous":{"title":"Binning","level":"3.2","depth":1,"path":"binning.md","ref":"binning.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["mathjax","expandable-chapters","toc"],"pluginsConfig":{"toc":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false},"expandable-chapters":{}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"}},"file":{"path":"pred-correction.md","mtime":"2017-09-25T18:32:25.000Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2017-11-14T22:26:04.796Z"},"basePath":".","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"Prediction / reference correction","level":"3.3","depth":1,"next":{"title":"Appearance","level":"3.4","depth":1,"path":"appearance.md","ref":"appearance.md","articles":[]},"previous":{"title":"Binning","level":"3.2","depth":1,"path":"binning.md","ref":"binning.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["mathjax","expandable-chapters","toc"],"pluginsConfig":{"toc":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"fontsettings":{"theme":"white","family":"sans","size":2},"highlight":{},"mathjax":{"forceSVG":false,"version":"2.6-latest"},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false},"expandable-chapters":{}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"}},"file":{"path":"pred-correction.md","mtime":"2026-11-12T23:15:20.414Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2026-11-12T23:16:59.695Z"},"basePath":".","book":{"language":""}});
         });
     </script>
 </div>
